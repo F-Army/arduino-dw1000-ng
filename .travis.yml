@@ -20,8 +20,6 @@ env:
     - PLATFORMIO_CI_SRC=examples/BasicConnectivityTest/BasicConnectivityTest.ino TESTBOARD=arduino_avr,arduino_arm
     - PLATFORMIO_CI_SRC=examples/BasicReceiver/BasicReceiver.ino TESTBOARD=arduino_avr,arduino_arm
     - PLATFORMIO_CI_SRC=examples/BasicSender/BasicSender.ino TESTBOARD=arduino_avr,arduino_arm
-    - PLATFORMIO_CI_SRC=examples/DW1000Ranging_ANCHOR/DW1000Ranging_ANCHOR.ino TESTBOARD=arduino_avr,arduino_arm
-    - PLATFORMIO_CI_SRC=examples/DW1000Ranging_TAG/DW1000Ranging_TAG.ino TESTBOARD=arduino_avr,arduino_arm
     - PLATFORMIO_CI_SRC=examples/MessagePingPong/MessagePingPong.ino TESTBOARD=arduino_avr,arduino_arm
     - PLATFORMIO_CI_SRC=examples/RangingAnchor/RangingAnchor.ino TESTBOARD=arduino_avr,arduino_arm
     - PLATFORMIO_CI_SRC=examples/RangingTag/RangingTag.ino TESTBOARD=arduino_avr,arduino_arm
