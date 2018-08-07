@@ -21,4 +21,4 @@ install:
     - pip install -U platformio
 
 script:
-    - platformio ci --lib="." --board=uno --board=pro8MHzatmega328 --board=pro16MHzatmega328 --board=bluepill_f103c8
+    - platformio ci --lib="." --board=uno --board=pro8MHzatmega328 --board=pro16MHzatmega328 --board=bluepill_f103c8 --project-option='framework=arduino'
