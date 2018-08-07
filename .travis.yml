@@ -1,0 +1,24 @@
+language: python
+python:
+    - "2.7"
+
+# Cache PlatformIO packages using Travis CI container-based infrastructure
+sudo: false
+cache:
+    directories:
+        - "~/.platformio"
+
+env:
+    - PLATFORMIO_CI_SRC=examples/BasicConnectivityTest/BasicConnectivityTest.ino TESTBOARD=arduino_avr,arduino_arm
+    - PLATFORMIO_CI_SRC=examples/BasicReceiver/BasicReceiver.ino TESTBOARD=arduino_avr,arduino_arm
+    - PLATFORMIO_CI_SRC=examples/BasicSender/BasicSender.ino TESTBOARD=arduino_avr,arduino_arm
+    - PLATFORMIO_CI_SRC=examples/MessagePingPong/MessagePingPong.ino TESTBOARD=arduino_avr,arduino_arm
+    - PLATFORMIO_CI_SRC=examples/RangingAnchor/RangingAnchor.ino TESTBOARD=arduino_avr,arduino_arm
+    - PLATFORMIO_CI_SRC=examples/RangingTag/RangingTag.ino TESTBOARD=arduino_avr,arduino_arm
+    - PLATFORMIO_CI_SRC=examples/TimestampUsageTest/TimestampUsageTest.ino TESTBOARD=arduino_avr,arduino_arm
+
+install:
+    - pip install -U platformio
+
+script:
+    - platformio ci --lib="." --board=TYPE_1 --board=TYPE_2 --board=TYPE_N
