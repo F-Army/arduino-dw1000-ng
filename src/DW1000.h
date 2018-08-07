@@ -255,7 +255,7 @@ public:
 	static void         getReceiveTimestamp(byte data[]);
 	static void         getSystemTimestamp(byte data[]);
 	
-	/* receive quality information. */
+	/* receive quality information. (RX_FSQUAL) - reg:0x12 */
 	static float getReceivePower();
 	static float getFirstPathPower();
 	static float getReceiveQuality();
@@ -337,31 +337,31 @@ public:
 	*/
 	static void enableMode(const byte mode[]);
 	
-	// use RX/TX specific and general default settings
+	/* use RX/TX specific and general default settings */
 	static void setDefaults();
 	
 	/* debug pretty print registers. */
 	static void getPrettyBytes(byte cmd, uint16_t offset, char msgBuffer[], uint16_t n);
 	static void getPrettyBytes(byte data[], char msgBuffer[], uint16_t n);
 	
-	//convert from char to 4 bits (hexadecimal)
+	/* convert from char to 4 bits (hexadecimal) */
 	static uint8_t nibbleFromChar(char c);
 	static void convertToByte(char string[], byte* eui_byte);
 	
-	// host-initiated reading of temperature and battery voltage
+	/* host-initiated reading of temperature and battery voltage */
 	static void getTempAndVbat(float& temp, float& vbat);
 	
-	// transmission/reception bit rate
+	/* transmission/reception bit rate (TXBR) - reg:0x08, bits:14,13 */
 	static constexpr byte TRX_RATE_110KBPS  = 0x00;
 	static constexpr byte TRX_RATE_850KBPS  = 0x01;
 	static constexpr byte TRX_RATE_6800KBPS = 0x02;
 	
-	// transmission pulse frequency
-	// 0x00 is 4MHZ, but receiver in DW1000 does not support it (!??)
+	/* transmission pulse frequency (TXPRF) - reg:0x08, bits:17,16
+	 * 0x00 is 4MHZ, but receiver in DW1000 does not support it (!??) */
 	static constexpr byte TX_PULSE_FREQ_16MHZ = 0x01;
 	static constexpr byte TX_PULSE_FREQ_64MHZ = 0x02;
 	
-	// preamble length (PE + TXPSR bits)
+	/* preamble length (PE + TXPSR) - reg:0x08, bits:21,20,19,18 - table 16 */
 	static constexpr byte TX_PREAMBLE_LEN_64   = 0x01;
 	static constexpr byte TX_PREAMBLE_LEN_128  = 0x05;
 	static constexpr byte TX_PREAMBLE_LEN_256  = 0x09;
@@ -371,13 +371,14 @@ public:
 	static constexpr byte TX_PREAMBLE_LEN_2048 = 0x0A;
 	static constexpr byte TX_PREAMBLE_LEN_4096 = 0x03;
 	
-	// PAC size. */
+	/* PAC size (DRX_TUNE2) - reg:0x08, sub-reg:0x27, bits:26,25 - table 33
+	 * The value to program the sub-register changes in based of RXPRF */
 	static constexpr byte PAC_SIZE_8  = 8;
 	static constexpr byte PAC_SIZE_16 = 16;
 	static constexpr byte PAC_SIZE_32 = 32;
 	static constexpr byte PAC_SIZE_64 = 64;
 	
-	/* channel of operation. */
+	/* channel of operation (CHAN_CTRL - TX & RX _CHAN) - reg:0x1F, bits:3-0,7-4 */
 	static constexpr byte CHANNEL_1 = 1;
 	static constexpr byte CHANNEL_2 = 2;
 	static constexpr byte CHANNEL_3 = 3;
@@ -385,7 +386,7 @@ public:
 	static constexpr byte CHANNEL_5 = 5;
 	static constexpr byte CHANNEL_7 = 7;
 	
-	/* preamble codes. */
+	/* preamble codes (CHAN_CTRL - RX & TX _CODE) - reg:0x1F, bits:31-27,26-22 */
 	static constexpr byte PREAMBLE_CODE_16MHZ_1  = 1;
 	static constexpr byte PREAMBLE_CODE_16MHZ_2  = 2;
 	static constexpr byte PREAMBLE_CODE_16MHZ_3  = 3;
@@ -486,16 +487,16 @@ public:
 	static boolean _permanentReceive;
 	static boolean _frameCheck;
 	
-	// whether RX or TX is active
+	/* whether RX or TX is active */
 	static uint8_t _deviceMode;
 
-	// whether debounce clock is active
+	/* whether debounce clock is active */
 	static boolean _debounceClockEnabled;
 
 	/* Arduino interrupt handler */
 	static void handleInterrupt();
 	
-	/* Allow MAC frame filtering . */
+	/* Allow MAC frame filtering */
 	// TODO auto-acknowledge
 	static void setFrameFilter(boolean val);
 	static void setFrameFilterBehaveCoordinator(boolean val);
@@ -514,7 +515,7 @@ public:
 	// TODO is implemented, but needs testing
 	static void waitForResponse(boolean val);
 	
-	/* tuning according to mode. */
+	/* tuning according to mode.(Very important) */
 	static void tune();
 	
 	/* device status flags */
@@ -591,7 +592,7 @@ public:
 	static const byte BIAS_900_16_ZERO = 7;
 	static const byte BIAS_900_64_ZERO = 7;
 	
-	// range bias tables (500 MHz in [mm] and 900 MHz in [2mm] - to fit into bytes)
+	/* range bias tables (500 MHz in [mm] and 900 MHz in [2mm] - to fit into bytes) */
 	static constexpr byte BIAS_500_16[] = {198, 187, 179, 163, 143, 127, 109, 84, 59, 31, 0, 36, 65, 84, 97, 106, 110, 112};
 	static constexpr byte BIAS_500_64[] = {110, 105, 100, 93, 82, 69, 51, 27, 0, 21, 35, 42, 49, 62, 71, 76, 81, 86};
 	static constexpr byte BIAS_900_16[] = {137, 122, 105, 88, 69, 47, 25, 0, 21, 48, 79, 105, 127, 147, 160, 169, 178, 197};
