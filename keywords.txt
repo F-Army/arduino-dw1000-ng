@@ -6,8 +6,8 @@
 # Library (KEYWORD1)
 #######################################
 
-DW1000	KEYWORD1
-DW1000Time	KEYWORD1
+DWM1000	KEYWORD1
+DWM1000Time	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
