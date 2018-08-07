@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2016 by Ludwig Grill (www.rotzbua.de)
- * Decawave DW1000 library for arduino.
+ * Decawave DWM1000 library for arduino.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,20 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @file DW1000CompileOptions.h
+ * @file DWM1000CompileOptions.h
  * Here are some options to optimize code and save some ram and rom
  * 
  */
 
-#ifndef DW1000COMPILEOPTIONS_H
-#define DW1000COMPILEOPTIONS_H
+#ifndef DWM1000COMPILEOPTIONS_H
+#define DWM1000COMPILEOPTIONS_H
 
 /**
- * Printable DW1000Time object costs about: rom: 490 byte ; ram: 58 byte
+ * Printable DWM1000Time object costs about: rom: 490 byte ; ram: 58 byte
  * This option is needed because compiler can not optimize unused codes from inheritanced methods 
  * Some examples or debug code use this
  * Set false if you do not need it and have to save some space
  */
-#define DW1000TIME_H_PRINTABLE true
+#define DWM1000TIME_H_PRINTABLE true
 
-#endif // DW1000COMPILEOPTIONS_H
+#endif // DWM1000COMPILEOPTIONS_H

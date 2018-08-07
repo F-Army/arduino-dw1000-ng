@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2015 by Thomas Trojer <thomas@trojer.net>
  * Copyright (c) 2016 by Ludwig Grill (www.rotzbua.de); refactored class
- * Decawave DW1000 library for arduino.
+ * Decawave DWM1000 library for arduino.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,9 +15,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @file DW1000Time.h
+ * @file DWM1000Time.h
  * Arduino driver library timestamp wrapper (header file) for the Decawave 
- * DW1000 UWB transceiver IC.
+ * DWM1000 UWB transceiver module.
  * 
  * @TODO
  * - avoid/remove floating operations, expensive on most microprocessors
@@ -27,28 +27,28 @@
  * available methods and variables.
  */
 
-#ifndef DW1000TIME_H
-#define DW1000TIME_H
+#ifndef DWM1000TIME_H
+#define DWM1000TIME_H
 
 #include <Arduino.h>
 #include <stdint.h>
 #include <inttypes.h>
-#include "DW1000CompileOptions.h"
+#include "DWM1000CompileOptions.h"
 #include "deprecated.h"
 #include "require_cpp11.h"
 
-#if DW1000TIME_H_PRINTABLE
-class DW1000Time : public Printable {
+#if DWM1000TIME_H_PRINTABLE
+class DWM1000Time : public Printable {
 #else
-class DW1000Time {
-#endif // DW1000Time_H_PRINTABLE
+class DWM1000Time {
+#endif // DWM1000Time_H_PRINTABLE
 public:
 	// Time resolution in micro-seconds of time based registers/values.
 	// Each bit in a timestamp counts for a period of approx. 15.65ps
 	static constexpr float TIME_RES     = 0.000015650040064103f;
 	static constexpr float TIME_RES_INV = 63897.6f;
 	
-	// Speed of radio waves [m/s] * timestamp resolution [~15.65ps] of DW1000
+	// Speed of radio waves [m/s] * timestamp resolution [~15.65ps] of DWM1000
 	static constexpr float DISTANCE_OF_RADIO     = 0.0046917639786159f;
 	static constexpr float DISTANCE_OF_RADIO_INV = 213.139451293f;
 	
@@ -67,19 +67,19 @@ public:
 	static constexpr float NANOSECONDS  = 1e-3;
 	
 	// constructor
-	DW1000Time();
-	DW1000Time(int64_t time);
-	DW1000Time(byte data[]);
-	DW1000Time(const DW1000Time& copy);
-	DW1000Time(float timeUs);
-	DW1000Time(int32_t value, float factorUs);
-	~DW1000Time();
+	DWM1000Time();
+	DWM1000Time(int64_t time);
+	DWM1000Time(byte data[]);
+	DWM1000Time(const DWM1000Time& copy);
+	DWM1000Time(float timeUs);
+	DWM1000Time(int32_t value, float factorUs);
+	~DWM1000Time();
 	
 	// setter
-	// dw1000 timestamp, increase of +1 approx approx. 15.65ps real time
+	// DWM1000 timestamp, increase of +1 approx approx. 15.65ps real time
 	void setTimestamp(int64_t value);
 	void setTimestamp(byte data[]);
-	void setTimestamp(const DW1000Time& copy);
+	void setTimestamp(const DWM1000Time& copy);
 	
 	// real time in us
 	void setTime(float timeUs);
@@ -96,49 +96,49 @@ public:
 	//void getAsBytes(byte data[]) const; // TODO check why it is here, is it old version of getTimestamp(byte) ?
 	float getAsMeters() const;
 	
-	DW1000Time& wrap();
+	DWM1000Time& wrap();
 	
 	// self test
 	bool isValidTimestamp();
 	
 	// assign
-	DW1000Time& operator=(const DW1000Time& assign);
+	DWM1000Time& operator=(const DWM1000Time& assign);
 	// add
-	DW1000Time& operator+=(const DW1000Time& add);
-	DW1000Time operator+(const DW1000Time& add) const;
+	DWM1000Time& operator+=(const DWM1000Time& add);
+	DWM1000Time operator+(const DWM1000Time& add) const;
 	// subtract
-	DW1000Time& operator-=(const DW1000Time& sub);
-	DW1000Time operator-(const DW1000Time& sub) const;
+	DWM1000Time& operator-=(const DWM1000Time& sub);
+	DWM1000Time operator-(const DWM1000Time& sub) const;
 	// multiply
 	// multiply with float cause lost in accuracy, because float calculates only with 23bit matise
-	DW1000Time& operator*=(float factor);
-	DW1000Time operator*(float factor) const;
+	DWM1000Time& operator*=(float factor);
+	DWM1000Time operator*(float factor) const;
 	// no accuracy lost
-	DW1000Time& operator*=(const DW1000Time& factor);
-	DW1000Time operator*(const DW1000Time& factor) const;
+	DWM1000Time& operator*=(const DWM1000Time& factor);
+	DWM1000Time operator*(const DWM1000Time& factor) const;
 	// divide
 	// divide with float cause lost in accuracy, because float calculates only with 23bit matise
-	DW1000Time& operator/=(float factor);
-	DW1000Time operator/(float factor) const;
+	DWM1000Time& operator/=(float factor);
+	DWM1000Time operator/(float factor) const;
 	// no accuracy lost
-	DW1000Time& operator/=(const DW1000Time& factor);
-	DW1000Time operator/(const DW1000Time& factor) const;
+	DWM1000Time& operator/=(const DWM1000Time& factor);
+	DWM1000Time operator/(const DWM1000Time& factor) const;
 	// compare
-	boolean operator==(const DW1000Time& cmp) const;
-	boolean operator!=(const DW1000Time& cmp) const;
+	boolean operator==(const DWM1000Time& cmp) const;
+	boolean operator!=(const DWM1000Time& cmp) const;
 
-#ifdef DW1000TIME_H_PRINTABLE
+#ifdef DWM1000TIME_H_PRINTABLE
 	// print to serial for debug
 	DEPRECATED_MSG("use Serial.print(object)")
 	void print();
 	// for usage with e.g. Serial.print()
 	size_t printTo(Print& p) const;
-#endif // DW1000Time_H_PRINTABLE
+#endif // DWM1000Time_H_PRINTABLE
 	
 private:
-	// timestamp size from dw1000 is 40bit, maximum number 1099511627775
-	// signed because you can calculate with DW1000Time; negative values are possible errors
+	// timestamp size from DWM1000 is 40bit, maximum number 1099511627775
+	// signed because you can calculate with DWM1000Time; negative values are possible errors
 	int64_t _timestamp = 0;
 };
 
-#endif // DW1000Time_H
+#endif // DWM1000Time_H

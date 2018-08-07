@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015 by Thomas Trojer <thomas@trojer.net>
- * Decawave DW1000 library for arduino.
+ * Decawave DWM1000 library for arduino.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,16 @@
  * limitations under the License.
  *
  * @file BasicConnectivityTest.ino
- * Use this to test connectivity with your DW1000 from Arduino.
+ * Use this to test connectivity with your DWM1000 from Arduino.
  * It performs an arbitrary setup of the chip and prints some information.
  * 
  * @todo
  *  - move strings to flash (less RAM consumption)
- *  - make real check of connection (e.g. change some values on DW1000 and verify)
+ *  - make real check of connection (e.g. change some values on DWM1000 and verify)
  */
 
 #include <SPI.h>
-#include <DW1000.h>
+#include <DWM1000.h>
 
 // connection pins
 const uint8_t PIN_RST = 9; // reset pin
@@ -35,14 +35,14 @@ void setup() {
   // DEBUG monitoring
   Serial.begin(9600);
   // initialize the driver
-  DW1000.begin(PIN_IRQ, PIN_RST);
-  DW1000.select(PIN_SS);
-  Serial.println(F("DW1000 initialized ..."));
+  DWM1000.begin(PIN_IRQ, PIN_RST);
+  DWM1000.select(PIN_SS);
+  Serial.println(F("DWM1000 initialized ..."));
   // general configuration
-  DW1000.newConfiguration();
-  DW1000.setDeviceAddress(5);
-  DW1000.setNetworkId(10);
-  DW1000.commitConfiguration();
+  DWM1000.newConfiguration();
+  DWM1000.setDeviceAddress(5);
+  DWM1000.setNetworkId(10);
+  DWM1000.commitConfiguration();
   Serial.println(F("Committed configuration ..."));
   // wait a bit
   delay(1000);
@@ -51,13 +51,13 @@ void setup() {
 void loop() {
   // DEBUG chip info and registers pretty printed
   char msg[128];
-  DW1000.getPrintableDeviceIdentifier(msg);
+  DWM1000.getPrintableDeviceIdentifier(msg);
   Serial.print("Device ID: "); Serial.println(msg);
-  DW1000.getPrintableExtendedUniqueIdentifier(msg);
+  DWM1000.getPrintableExtendedUniqueIdentifier(msg);
   Serial.print("Unique ID: "); Serial.println(msg);
-  DW1000.getPrintableNetworkIdAndShortAddress(msg);
+  DWM1000.getPrintableNetworkIdAndShortAddress(msg);
   Serial.print("Network ID & Device Address: "); Serial.println(msg);
-  DW1000.getPrintableDeviceMode(msg);
+  DWM1000.getPrintableDeviceMode(msg);
   Serial.print("Device mode: "); Serial.println(msg);
   // wait a bit
   delay(10000);

@@ -1,6 +1,7 @@
 /*
- * Copyright (c) 2015 by Thomas Trojer <thomas@trojer.net>
- * Decawave DW1000 library for arduino.
+ * Copyright (c) 2018 by Michele Biondi <michelebiondi01@gmail.com>, Andrea Salvatori <andrea.salvatori92@gmail.com>
+ * Copyright (c) 2015 by Thomas Trojer <thomas@trojer.net>; Arduino-DW1000
+ * Decawave DWM1000 library for arduino.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,33 +15,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @file DW1000.h
- * Arduino driver library (header file) for the Decawave DW1000 UWB transceiver IC.
- * 
- * @todo
- * - impl: later:
- * - TXBOFFS in TX_FCTRL for offset buffer transmit
- * - TR in TX_FCTRL for flagging for ranging messages
- * - CANSFCS in SYS_CTRL to cancel frame check suppression
- * - HSRBP in SYS_CTRL to determine in double buffered mode from which buffer to read
+ * @file DWM1000.h
+ * Arduino driver library (header file) for the Decawave DWM1000 UWB transceiver Module.
  */
 
-#ifndef _DW1000_H_INCLUDED
-#define _DW1000_H_INCLUDED
+#ifndef _DWM1000_H_INCLUDED
+#define _DWM1000_H_INCLUDED
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <Arduino.h>
 #include <SPI.h>
-#include "DW1000Constants.h"
-#include "DW1000Time.h"
+#include "DWM1000Constants.h"
+#include "DWM1000Time.h"
 
-class DW1000Class {
+class DWM1000Class {
 public:
 	/* ##### Init ################################################################ */
 	/** 
-	Initiates and starts a sessions with one or more DW1000. If rst is not set or value 0xff, a soft resets (i.e. command
+	Initiates and starts a sessions with one or more DWM1000. If rst is not set or value 0xff, a soft resets (i.e. command
 	triggered) are used and it is assumed that no reset line is wired.
 	 
 	@param[in] irq The interrupt line/pin that connects the Arduino.
@@ -49,7 +43,7 @@ public:
 	static void begin(uint8_t irq, uint8_t rst = 0xff);
 	
 	/** 
-	Selects a specific DW1000 chip for communication. In case of a single DW1000 chip in use
+	Selects a specific DWM1000 chip for communication. In case of a single DWM1000 chip in use
 	this call only needs to be done once at start up, but is still mandatory. Other than a call
 	to `reselect()` this function performs an initial setup of the now-selected chip.
 
@@ -59,7 +53,7 @@ public:
 	static void select(uint8_t ss);
 	
 	/** 
-	(Re-)selects a specific DW1000 chip for communication. In case of a single DW1000 chip in use
+	(Re-)selects a specific DWM1000 chip for communication. In case of a single DWM1000 chip in use
 	this call is not needed; only a call to `select()` has to be performed once at start up. Other 
 	than a call to `select()` this function does not perform an initial setup of the (again-)selected 
 	chips and assumes it to have a valid configuration loaded.
@@ -70,7 +64,7 @@ public:
 	static void reselect(uint8_t ss);
 	
 	/** 
-	Tells the driver library that no communication to a DW1000 will be required anymore.
+	Tells the driver library that no communication to a DWM1000 will be required anymore.
 	This basically just frees SPI and the previously used pins.
 	*/
 	static void end();
@@ -101,14 +95,14 @@ public:
         static void spiWakeup();
 
 	/**
-	Resets all connected or the currently selected DW1000 chip. A hard reset of all chips
+	Resets all connected or the currently selected DWM1000 chip. A hard reset of all chips
 	is preferred, although a soft reset of the currently selected one is executed if no 
 	reset pin has been specified (when using `begin(int)`, instead of `begin(int, int)`).
 	*/
 	static void reset();
 	
 	/** 
-	Resets the currently selected DW1000 chip programmatically (via corresponding commands).
+	Resets the currently selected DWM1000 chip programmatically (via corresponding commands).
 	*/
 	static void softReset();
 	
@@ -173,7 +167,7 @@ public:
 	
 	/* ##### General device configuration ######################################## */
 	/** 
-	Specifies whether the DW1000 chip should, again, turn on its receiver in case that the
+	Specifies whether the DWM1000 chip should, again, turn on its receiver in case that the
 	last reception failed. 
 
 	This setting is enabled as part of `setDefaults()` if the device is
@@ -184,7 +178,7 @@ public:
 	static void setReceiverAutoReenable(boolean val);
 	
 	/** 
-	Specifies the interrupt polarity of the DW1000 chip. 
+	Specifies the interrupt polarity of the DWM1000 chip. 
 
 	As part of `setDefaults()` if the device is in idle mode, interrupt polarity is set to 
 	active high.
@@ -207,7 +201,7 @@ public:
 	static void suppressFrameCheck(boolean val);
 	
 	/** 
-	Specifies the data transmission rate of the DW1000 chip. One of the values
+	Specifies the data transmission rate of the DWM1000 chip. One of the values
 	- `TRX_RATE_110KBPS` (i.e. 110 kb/s)
 	- `TRX_RATE_850KBPS` (i.e. 850 kb/s)
 	- `TRX_RATE_6800KBPS` (i.e. 6.8 Mb/s)
@@ -220,7 +214,7 @@ public:
 	static void setDataRate(byte rate);
 	
 	/** 
-	Specifies the pulse repetition frequency (PRF) of data transmissions with the DW1000. Either
+	Specifies the pulse repetition frequency (PRF) of data transmissions with the DWM1000. Either
 	- `TX_PULSE_FREQ_16MHZ` (i.e. 16 MHz)
 	- `TX_PULSE_FREQ_64MHZ` (i.e. 64 MHz)
 	has to be chosen.
@@ -241,16 +235,16 @@ public:
 	static void useSmartPower(boolean smartPower);
 	
 	/* transmit and receive configuration. */
-	static DW1000Time   setDelay(const DW1000Time& delay);
+	static DWM1000Time   setDelay(const DWM1000Time& delay);
 	static void         receivePermanently(boolean val);
 	static void         setData(byte data[], uint16_t n);
 	static void         setData(const String& data);
 	static void         getData(byte data[], uint16_t n);
 	static void         getData(String& data);
 	static uint16_t     getDataLength();
-	static void         getTransmitTimestamp(DW1000Time& time);
-	static void         getReceiveTimestamp(DW1000Time& time);
-	static void         getSystemTimestamp(DW1000Time& time);
+	static void         getTransmitTimestamp(DWM1000Time& time);
+	static void         getReceiveTimestamp(DWM1000Time& time);
+	static void         getSystemTimestamp(DWM1000Time& time);
 	static void         getTransmitTimestamp(byte data[]);
 	static void         getReceiveTimestamp(byte data[]);
 	static void         getSystemTimestamp(byte data[]);
@@ -315,7 +309,7 @@ public:
 	
 	/* ##### Operation mode selection ############################################ */
 	/** 
-	Specifies the mode of operation for the DW1000. Modes of operation are pre-defined
+	Specifies the mode of operation for the DWM1000. Modes of operation are pre-defined
 	combinations of data rate, pulse repetition frequency, preamble and channel settings
 	that properly go together. If you simply want the chips to work, choosing a mode is 
 	preferred over manual configuration.
@@ -357,7 +351,7 @@ public:
 	static constexpr byte TRX_RATE_6800KBPS = 0x02;
 	
 	/* transmission pulse frequency (TXPRF) - reg:0x08, bits:17,16
-	 * 0x00 is 4MHZ, but receiver in DW1000 does not support it (!??) */
+	 * 0x00 is 4MHZ, but receiver in DWM1000 does not support it (!??) */
 	static constexpr byte TX_PULSE_FREQ_16MHZ = 0x01;
 	static constexpr byte TX_PULSE_FREQ_64MHZ = 0x02;
 	
@@ -408,7 +402,7 @@ public:
 	static constexpr byte FRAME_LENGTH_NORMAL   = 0x00;
 	static constexpr byte FRAME_LENGTH_EXTENDED = 0x03;
 	
-	/* operation modes based on chapter 9.3 of DW1000 user manual
+	/* operation modes based on chapter 9.3 of DWM1000 user manual
 	The modes are SHORTRANGE, MEDIUMRANGE, LONGRANGE in both LOWPRF and HIGHPRF, the length name reference of the preamble is
 	relative to the mode*/
 	static constexpr byte MODE_SHORTRANGE_LOWPRF_SHORTPREAMBLE[] = {TRX_RATE_6800KBPS, TX_PULSE_FREQ_16MHZ, TX_PREAMBLE_LEN_64};
@@ -480,7 +474,7 @@ public:
 	static byte       _pulseFrequency;
 	static byte       _dataRate;
 	static byte       _pacSize;
-	static DW1000Time _antennaDelay;
+	static DWM1000Time _antennaDelay;
 	static boolean    _antennaCalibrated;
 	
 	/* internal helper to remember how to properly act. */
@@ -553,9 +547,9 @@ public:
 	static void manageLDE();
 	
 	/* timestamp correction. */
-	static void correctTimestamp(DW1000Time& timestamp);
+	static void correctTimestamp(DWM1000Time& timestamp);
 	
-	/* reading and writing bytes from and to DW1000 module. */
+	/* reading and writing bytes from and to DWM1000 module. */
 	static void readBytes(byte cmd, uint16_t offset, byte data[], uint16_t n);
 	static void readBytesOTP(uint16_t address, byte data[]);
 	static void writeByte(byte cmd, uint16_t offset, byte data);
@@ -600,6 +594,6 @@ public:
 	
 };
 
-extern DW1000Class DW1000;
+extern DWM1000Class DWM1000;
 
 #endif

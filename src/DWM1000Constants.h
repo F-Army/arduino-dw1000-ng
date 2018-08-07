@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015 by Thomas Trojer <thomas@trojer.net>
- * Decawave DW1000 library for arduino.
+ * Decawave DWM1000 library for arduino.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @file DW1000Constants.h
- * Arduino driver library (header file) for the Decawave DW1000 UWB transceiver IC.
+ * @file DWM1000Constants.h
+ * Arduino driver library (header file) for the Decawave DWM1000 UWB transceiver module.
  */
 
-#ifndef _DW1000CONSTANTS_H_INCLUDED
-#define _DW1000CONSTANTS_H_INCLUDED
+#ifndef _DWM1000CONSTANTS_H_INCLUDED
+#define _DWM1000CONSTANTS_H_INCLUDED
 
 // time stamp byte length
 #define LEN_STAMP 5

@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2015 by Thomas Trojer <thomas@trojer.net>
- * Decawave DW1000 library for arduino.
+ * Decawave DWM1000 library for arduino.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
  *
  * @file RangingAnchor.ino
  * Use this to test two-way ranging functionality with two
- * DW1000. This is the anchor component's code which computes range after
+ * DWM1000. This is the anchor component's code which computes range after
  * exchanging some messages. Addressing and frame filtering is currently done
  * in a custom way, as no MAC features are implemented yet.
  *
@@ -29,7 +29,7 @@
  */
 
 #include <SPI.h>
-#include <DW1000.h>
+#include <DWM1000.h>
 
 // connection pins
 const uint8_t PIN_RST = 9; // reset pin
@@ -51,14 +51,14 @@ volatile boolean receivedAck = false;
 // protocol error state
 boolean protocolFailed = false;
 // timestamps to remember
-DW1000Time timePollSent;
-DW1000Time timePollReceived;
-DW1000Time timePollAckSent;
-DW1000Time timePollAckReceived;
-DW1000Time timeRangeSent;
-DW1000Time timeRangeReceived;
+DWM1000Time timePollSent;
+DWM1000Time timePollReceived;
+DWM1000Time timePollAckSent;
+DWM1000Time timePollAckReceived;
+DWM1000Time timeRangeSent;
+DWM1000Time timeRangeReceived;
 // last computed range/time
-DW1000Time timeComputedRange;
+DWM1000Time timeComputedRange;
 // data buffer
 #define LEN_DATA 16
 byte data[LEN_DATA];
@@ -76,32 +76,32 @@ void setup() {
     // DEBUG monitoring
     Serial.begin(115200);
     delay(1000);
-    Serial.println(F("### DW1000-arduino-ranging-anchor ###"));
+    Serial.println(F("### DWM1000-arduino-ranging-anchor ###"));
     // initialize the driver
-    DW1000.begin(PIN_IRQ, PIN_RST);
-    DW1000.select(PIN_SS);
-    Serial.println(F("DW1000 initialized ..."));
+    DWM1000.begin(PIN_IRQ, PIN_RST);
+    DWM1000.select(PIN_SS);
+    Serial.println(F("DWM1000 initialized ..."));
     // general configuration
-    DW1000.newConfiguration();
-    DW1000.setDefaults();
-    DW1000.setDeviceAddress(1);
-    DW1000.setNetworkId(10);
-    DW1000.enableMode(DW1000.MODE_LONGDATA_RANGE_LOWPOWER);
-    DW1000.commitConfiguration();
+    DWM1000.newConfiguration();
+    DWM1000.setDefaults();
+    DWM1000.setDeviceAddress(1);
+    DWM1000.setNetworkId(10);
+    DWM1000.enableMode(DWM1000.MODE_LONGDATA_RANGE_LOWPOWER);
+    DWM1000.commitConfiguration();
     Serial.println(F("Committed configuration ..."));
     // DEBUG chip info and registers pretty printed
     char msg[128];
-    DW1000.getPrintableDeviceIdentifier(msg);
+    DWM1000.getPrintableDeviceIdentifier(msg);
     Serial.print("Device ID: "); Serial.println(msg);
-    DW1000.getPrintableExtendedUniqueIdentifier(msg);
+    DWM1000.getPrintableExtendedUniqueIdentifier(msg);
     Serial.print("Unique ID: "); Serial.println(msg);
-    DW1000.getPrintableNetworkIdAndShortAddress(msg);
+    DWM1000.getPrintableNetworkIdAndShortAddress(msg);
     Serial.print("Network ID & Device Address: "); Serial.println(msg);
-    DW1000.getPrintableDeviceMode(msg);
+    DWM1000.getPrintableDeviceMode(msg);
     Serial.print("Device mode: "); Serial.println(msg);
     // attach callback for (successfully) sent and received messages
-    DW1000.attachSentHandler(handleSent);
-    DW1000.attachReceivedHandler(handleReceived);
+    DWM1000.attachSentHandler(handleSent);
+    DWM1000.attachReceivedHandler(handleReceived);
     // anchor starts in receiving mode, awaiting a ranging poll message
     receiver();
     noteActivity();
@@ -132,40 +132,40 @@ void handleReceived() {
 }
 
 void transmitPollAck() {
-    DW1000.newTransmit();
-    DW1000.setDefaults();
+    DWM1000.newTransmit();
+    DWM1000.setDefaults();
     data[0] = POLL_ACK;
     // delay the same amount as ranging tag
-    DW1000Time deltaTime = DW1000Time(replyDelayTimeUS, DW1000Time::MICROSECONDS);
-    DW1000.setDelay(deltaTime);
-    DW1000.setData(data, LEN_DATA);
-    DW1000.startTransmit();
+    DWM1000Time deltaTime = DWM1000Time(replyDelayTimeUS, DWM1000Time::MICROSECONDS);
+    DWM1000.setDelay(deltaTime);
+    DWM1000.setData(data, LEN_DATA);
+    DWM1000.startTransmit();
 }
 
 void transmitRangeReport(float curRange) {
-    DW1000.newTransmit();
-    DW1000.setDefaults();
+    DWM1000.newTransmit();
+    DWM1000.setDefaults();
     data[0] = RANGE_REPORT;
     // write final ranging result
     memcpy(data + 1, &curRange, 4);
-    DW1000.setData(data, LEN_DATA);
-    DW1000.startTransmit();
+    DWM1000.setData(data, LEN_DATA);
+    DWM1000.startTransmit();
 }
 
 void transmitRangeFailed() {
-    DW1000.newTransmit();
-    DW1000.setDefaults();
+    DWM1000.newTransmit();
+    DWM1000.setDefaults();
     data[0] = RANGE_FAILED;
-    DW1000.setData(data, LEN_DATA);
-    DW1000.startTransmit();
+    DWM1000.setData(data, LEN_DATA);
+    DWM1000.startTransmit();
 }
 
 void receiver() {
-    DW1000.newReceive();
-    DW1000.setDefaults();
+    DWM1000.newReceive();
+    DWM1000.setDefaults();
     // so we don't need to restart the receiver manually
-    DW1000.receivePermanently(true);
-    DW1000.startReceive();
+    DWM1000.receivePermanently(true);
+    DWM1000.startReceive();
 }
 
 /*
@@ -182,18 +182,18 @@ void receiver() {
 
 void computeRangeAsymmetric() {
     // asymmetric two-way ranging (more computation intense, less error prone)
-    DW1000Time round1 = (timePollAckReceived - timePollSent).wrap();
-    DW1000Time reply1 = (timePollAckSent - timePollReceived).wrap();
-    DW1000Time round2 = (timeRangeReceived - timePollAckSent).wrap();
-    DW1000Time reply2 = (timeRangeSent - timePollAckReceived).wrap();
-    DW1000Time tof = (round1 * round2 - reply1 * reply2) / (round1 + round2 + reply1 + reply2);
+    DWM1000Time round1 = (timePollAckReceived - timePollSent).wrap();
+    DWM1000Time reply1 = (timePollAckSent - timePollReceived).wrap();
+    DWM1000Time round2 = (timeRangeReceived - timePollAckSent).wrap();
+    DWM1000Time reply2 = (timeRangeSent - timePollAckReceived).wrap();
+    DWM1000Time tof = (round1 * round2 - reply1 * reply2) / (round1 + round2 + reply1 + reply2);
     // set tof timestamp
     timeComputedRange.setTimestamp(tof);
 }
 
 void computeRangeSymmetric() {
     // symmetric two-way ranging (less computation intense, more error prone on clock drift)
-    DW1000Time tof = ((timePollAckReceived - timePollSent) - (timePollAckSent - timePollReceived) +
+    DWM1000Time tof = ((timePollAckReceived - timePollSent) - (timePollAckSent - timePollReceived) +
                       (timeRangeReceived - timePollAckSent) - (timeRangeSent - timePollAckReceived)) * 0.25f;
     // set tof timestamp
     timeComputedRange.setTimestamp(tof);
@@ -218,14 +218,14 @@ void loop() {
         sentAck = false;
         byte msgId = data[0];
         if (msgId == POLL_ACK) {
-            DW1000.getTransmitTimestamp(timePollAckSent);
+            DWM1000.getTransmitTimestamp(timePollAckSent);
             noteActivity();
         }
     }
     if (receivedAck) {
         receivedAck = false;
         // get message and parse
-        DW1000.getData(data, LEN_DATA);
+        DWM1000.getData(data, LEN_DATA);
         byte msgId = data[0];
         if (msgId != expectedMsgId) {
             // unexpected message, start over again (except if already POLL)
@@ -234,13 +234,13 @@ void loop() {
         if (msgId == POLL) {
             // on POLL we (re-)start, so no protocol failure
             protocolFailed = false;
-            DW1000.getReceiveTimestamp(timePollReceived);
+            DWM1000.getReceiveTimestamp(timePollReceived);
             expectedMsgId = RANGE;
             transmitPollAck();
             noteActivity();
         }
         else if (msgId == RANGE) {
-            DW1000.getReceiveTimestamp(timeRangeReceived);
+            DWM1000.getReceiveTimestamp(timeRangeReceived);
             expectedMsgId = POLL;
             if (!protocolFailed) {
                 timePollSent.setTimestamp(data + 1);
@@ -251,11 +251,11 @@ void loop() {
                 transmitRangeReport(timeComputedRange.getAsMicroSeconds());
                 float distance = timeComputedRange.getAsMeters();
                 Serial.print("Range: "); Serial.print(distance); Serial.print(" m");
-                Serial.print("\t RX power: "); Serial.print(DW1000.getReceivePower()); Serial.print(" dBm");
+                Serial.print("\t RX power: "); Serial.print(DWM1000.getReceivePower()); Serial.print(" dBm");
                 Serial.print("\t Sampling: "); Serial.print(samplingRate); Serial.println(" Hz");
-                //Serial.print("FP power is [dBm]: "); Serial.print(DW1000.getFirstPathPower());
-                //Serial.print("RX power is [dBm]: "); Serial.println(DW1000.getReceivePower());
-                //Serial.print("Receive quality: "); Serial.println(DW1000.getReceiveQuality());
+                //Serial.print("FP power is [dBm]: "); Serial.print(DWM1000.getFirstPathPower());
+                //Serial.print("RX power is [dBm]: "); Serial.println(DWM1000.getReceivePower());
+                //Serial.print("Receive quality: "); Serial.println(DWM1000.getReceiveQuality());
                 // update sampling rate (each second)
                 successRangingCount++;
                 if (curMillis - rangingCountPeriod > 1000) {
