@@ -106,4 +106,3 @@ namespace DWM1000Utils {
 		memcpy(bytes, eui_byte, LEN_EUI);
 	}
 }
-

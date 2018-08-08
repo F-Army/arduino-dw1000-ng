@@ -31,4 +31,3 @@ namespace DWM1000Utils {
 	uint8_t nibbleFromChar(char c);
 	void convertToByte(char string[], byte* eui_byte);
 }
-
