@@ -83,15 +83,15 @@ public:
 	*/
 	static void setGPIOMode(uint8_t msgp, uint8_t mode);
 
-        /**
-        Enable deep sleep mode
-        */
-        static void deepSleep();
+	/**
+	Enable deep sleep mode
+	*/
+	static void deepSleep();
 
-        /**
-        Wake-up from deep sleep by toggle chip select pin
-        */
-        static void spiWakeup();
+	/**
+	Wake-up from deep sleep by toggle chip select pin
+	*/
+	static void spiWakeup();
 
 	/**
 	Resets all connected or the currently selected DWM1000 chip. A hard reset of all chips
@@ -484,7 +484,6 @@ public:
 	static constexpr byte BIAS_500_64[] = {110, 105, 100, 93, 82, 69, 51, 27, 0, 21, 35, 42, 49, 62, 71, 76, 81, 86};
 	static constexpr byte BIAS_900_16[] = {137, 122, 105, 88, 69, 47, 25, 0, 21, 48, 79, 105, 127, 147, 160, 169, 178, 197};
 	static constexpr byte BIAS_900_64[] = {147, 133, 117, 99, 75, 50, 29, 0, 24, 45, 63, 76, 87, 98, 116, 122, 132, 142};
-	
 };
 
 extern DWM1000Class DWM1000;
