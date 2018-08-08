@@ -333,10 +333,6 @@ public:
 	/* use RX/TX specific and general default settings */
 	static void setDefaults();
 	
-	/* debug pretty print registers. */
-	static void getPrettyBytes(byte cmd, uint16_t offset, char msgBuffer[], uint16_t n);
-	static void getPrettyBytes(byte data[], char msgBuffer[], uint16_t n);
-	
 	/* host-initiated reading of temperature and battery voltage */
 	static void getTempAndVbat(float& temp, float& vbat);
 
