@@ -1,5 +1,6 @@
-/**
- * Copyright (c) 2016 by Ludwig Grill (www.rotzbua.de)
+/*
+ * Copyright (c) 2018 by Michele Biondi <michelebiondi01@gmail.com>, Andrea Salvatori <andrea.salvatori92@gmail.com>
+ * Copyright (c) 2015 by Thomas Trojer <thomas@trojer.net>; Arduino-DW1000
  * Decawave DWM1000 library for arduino.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,17 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @file DWM1000CompileOptions.h
- * Here are some options to optimize code and save some ram and rom
- * 
+ * @file DWM1000Utils.h
+ * Helper functions.
  */
 
 #pragma once
 
-/**
- * Printable DWM1000Time object costs about: rom: 490 byte ; ram: 58 byte
- * This option is needed because compiler can not optimize unused codes from inheritanced methods 
- * Some examples or debug code use this
- * Set false if you do not need it and have to save some space
- */
-#define DWM1000TIME_H_PRINTABLE true
+#include "Arduino.h"
+
+namespace DWM1000Utils {
+    boolean getBit(byte data[], uint16_t n, uint16_t bit);
+    void setBit(byte data[], uint16_t n, uint16_t bit, boolean val);
+    void writeValueToBytes(byte data[], int32_t val, uint16_t n);
+}
+

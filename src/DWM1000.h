@@ -19,8 +19,7 @@
  * Arduino driver library (header file) for the Decawave DWM1000 UWB transceiver Module.
  */
 
-#ifndef _DWM1000_H_INCLUDED
-#define _DWM1000_H_INCLUDED
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -555,13 +554,6 @@ public:
 	static void writeByte(byte cmd, uint16_t offset, byte data);
 	static void writeBytes(byte cmd, uint16_t offset, byte data[], uint16_t n);
 	
-	/* writing numeric values to bytes. */
-	static void writeValueToBytes(byte data[], int32_t val, uint16_t n);
-	
-	/* internal helper for bit operations on multi-bytes. */
-	static boolean getBit(byte data[], uint16_t n, uint16_t bit);
-	static void    setBit(byte data[], uint16_t n, uint16_t bit, boolean val);
-	
 	/* Register is 6 bit, 7 = write, 6 = sub-adressing, 5-0 = register value
 	 * Total header with sub-adressing can be 15 bit. */
 	static const byte WRITE      = 0x80; // regular write
@@ -595,5 +587,3 @@ public:
 };
 
 extern DWM1000Class DWM1000;
-
-#endif

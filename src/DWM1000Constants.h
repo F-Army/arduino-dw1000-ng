@@ -18,8 +18,7 @@
  * Arduino driver library (header file) for the Decawave DWM1000 UWB transceiver module.
  */
 
-#ifndef _DWM1000CONSTANTS_H_INCLUDED
-#define _DWM1000CONSTANTS_H_INCLUDED
+#pragma once
 
 // time stamp byte length
 #define LEN_STAMP 5
@@ -292,5 +291,3 @@
 
 #define GPIO_MODE 0
 #define LED_MODE 1
-
-#endif

@@ -21,6 +21,7 @@
  */
 
 #include "DWM1000Time.h"
+#include "Arduino.h"
 
 /**
  * Initiates DWM1000Time with 0

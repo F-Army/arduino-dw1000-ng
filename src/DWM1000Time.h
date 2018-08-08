@@ -27,8 +27,7 @@
  * available methods and variables.
  */
 
-#ifndef DWM1000TIME_H
-#define DWM1000TIME_H
+#pragma once
 
 #include <Arduino.h>
 #include <stdint.h>
@@ -140,5 +139,3 @@ private:
 	// signed because you can calculate with DWM1000Time; negative values are possible errors
 	int64_t _timestamp = 0;
 };
-
-#endif // DWM1000Time_H

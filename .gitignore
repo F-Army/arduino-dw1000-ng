@@ -9,3 +9,4 @@ CMakeLists.txt
 cmake-build-debug
 #exclude OSX stuff
 .DS_STORE
+.vscode
