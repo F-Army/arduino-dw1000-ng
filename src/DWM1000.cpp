@@ -20,6 +20,7 @@
  */
 
 #include "DWM1000Utils.h"
+#include "DWM1000Constants.h"
 #include "DWM1000.h"
 
 DWM1000Class DWM1000;
@@ -75,38 +76,6 @@ boolean    DWM1000Class::_debounceClockEnabled = false;
 // modes of operation
 // TODO use enum external, not config array
 // this declaration is needed to make variables accessible while runtime from external code
-
-/* Based on chapter 9.3 of DWM1000 Manual */
-constexpr byte DWM1000Class::MODE_SHORTRANGE_LOWPRF_SHORTPREAMBLE[];
-constexpr byte DWM1000Class::MODE_SHORTRANGE_HIGHPRF_SHORTPREAMBLE[];
-constexpr byte DWM1000Class::MODE_SHORTRANGE_LOWPRF_MEDIUMPREAMBLE[];
-constexpr byte DWM1000Class::MODE_SHORTRANGE_HIGHPRF_MEDIUMPREAMBLE[];
-constexpr byte DWM1000Class::MODE_SHORTRANGE_LOWPRF_LONGPREAMBLE[];
-constexpr byte DWM1000Class::MODE_SHORTRANGE_HIGHPRF_LONGPREAMBLE[];
-
-constexpr byte DWM1000Class::MODE_MEDIUMRANGE_LOWPRF_SHORTPREAMBLE[];
-constexpr byte DWM1000Class::MODE_MEDIUMRANGE_HIGHPRF_SHORTPREAMBLE[];
-constexpr byte DWM1000Class::MODE_MEDIUMRANGE_LOWPRF_MEDIUMPREAMBLE[];
-constexpr byte DWM1000Class::MODE_MEDIUMRANGE_HIGHPRF_MEDIUMPREAMBLE[];
-constexpr byte DWM1000Class::MODE_MEDIUMRANGE_LOWPRF_LONGPREAMBLE[];
-constexpr byte DWM1000Class::MODE_MEDIUMRANGE_HIGHPRF_LONGPREAMBLE[];
-
-constexpr byte DWM1000Class::MODE_LONGRANGE_LOWPRF_SHORTPREAMBLE[];
-constexpr byte DWM1000Class::MODE_LONGRANGE_HIGHPRF_SHORTPREAMBLE[];
-
-/* WARNING: They do not work on some tests */
-//constexpr byte DWM1000Class::MODE_LONGRANGE_LOWPRF_LONGPREAMBLE[];
-//constexpr byte DWM1000Class::MODE_LONGRANGE_HIGHPRF_LONGPREAMBLE[];
-
-
-/* Pre-defined by author */
-constexpr byte DWM1000Class::MODE_LONGDATA_RANGE_LOWPOWER[];
-constexpr byte DWM1000Class::MODE_SHORTDATA_FAST_LOWPOWER[];
-constexpr byte DWM1000Class::MODE_SHORTDATA_FAST_ACCURACY[];
-constexpr byte DWM1000Class::MODE_LONGDATA_RANGE_ACCURACY[];
-// Not recommended
-constexpr byte DWM1000Class::MODE_LONGDATA_FAST_LOWPOWER[];
-constexpr byte DWM1000Class::MODE_LONGDATA_FAST_ACCURACY[];
 
 /*
 const byte DWM1000Class::MODE_LONGDATA_RANGE_LOWPOWER[] = {TRX_RATE_110KBPS, TX_PULSE_FREQ_16MHZ, TX_PREAMBLE_LEN_2048};
@@ -916,28 +885,6 @@ void DWM1000Class::setDeviceAddress(uint16_t val) {
 	_networkAndAddress[1] = (byte)((val >> 8) & 0xFF);
 }
 
-uint8_t DWM1000Class::nibbleFromChar(char c) {
-	if(c >= '0' && c <= '9') {
-		return c-'0';
-	}
-	if(c >= 'a' && c <= 'f') {
-		return c-'a'+10;
-	}
-	if(c >= 'A' && c <= 'F') {
-		return c-'A'+10;
-	}
-	return 255;
-}
-
-void DWM1000Class::convertToByte(char string[], byte* bytes) {
-	byte    eui_byte[LEN_EUI];
-	// we fill it with the char array under the form of "AA:FF:1C:...."
-	for(uint16_t i = 0; i < LEN_EUI; i++) {
-		eui_byte[i] = (nibbleFromChar(string[i*3]) << 4)+nibbleFromChar(string[i*3+1]);
-	}
-	memcpy(bytes, eui_byte, LEN_EUI);
-}
-
 void DWM1000Class::getTempAndVbat(float& temp, float& vbat) {
 	// follow the procedure from section 6.4 of the User Manual
 	byte step1 = 0x80; writeBytes(RF_CONF, 0x11, &step1, 1);
@@ -955,7 +902,7 @@ void DWM1000Class::getTempAndVbat(float& temp, float& vbat) {
 
 void DWM1000Class::setEUI(char eui[]) {
 	byte eui_byte[LEN_EUI];
-	convertToByte(eui, eui_byte);
+	DWM1000Utils::convertToByte(eui, eui_byte);
 	setEUI(eui_byte);
 }
 
@@ -1316,7 +1263,7 @@ void DWM1000Class::setDefaults() {
 		setReceiverAutoReenable(true);
 		// default mode when powering up the chip
 		// still explicitly selected for later tuning
-		enableMode(MODE_LONGDATA_RANGE_LOWPOWER);
+		enableMode(MODE_LONGRANGE_LOWPRF_SHORTPREAMBLE);
 		
 		// TODO add channel and code to mode tuples
 	    // TODO add channel and code settings with checks (see DWM1000 user manual 10.5 table 61)/

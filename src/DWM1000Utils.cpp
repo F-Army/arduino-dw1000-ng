@@ -21,6 +21,7 @@
 
 #include <Arduino.h>
 #include "DWM1000Utils.h"
+#include "DWM1000Constants.h"
 
 namespace DWM1000Utils {
 	/*
@@ -81,6 +82,28 @@ namespace DWM1000Utils {
 		for(i = 0; i < n; i++) {
 			data[i] = ((val >> (i*8)) & 0xFF); // TODO bad types - signed unsigned problem
 		}
+	}
+
+	uint8_t nibbleFromChar(char c) {
+		if(c >= '0' && c <= '9') {
+			return c-'0';
+		}
+		if(c >= 'a' && c <= 'f') {
+			return c-'a'+10;
+		}
+		if(c >= 'A' && c <= 'F') {
+			return c-'A'+10;
+		}
+		return 255;
+	}
+
+	void convertToByte(char string[], byte* bytes) {
+		byte    eui_byte[LEN_EUI];
+		// we fill it with the char array under the form of "AA:FF:1C:...."
+		for(uint16_t i = 0; i < LEN_EUI; i++) {
+			eui_byte[i] = (nibbleFromChar(string[i*3]) << 4)+nibbleFromChar(string[i*3+1]);
+		}
+		memcpy(bytes, eui_byte, LEN_EUI);
 	}
 }
 
