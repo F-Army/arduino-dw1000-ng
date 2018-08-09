@@ -229,6 +229,20 @@ public:
 	static void setPulseFrequency(byte freq);
 	static byte getPulseFrequency();
 	static void setPreambleLength(byte prealen);
+	
+	/*
+	Specifies the channel for transmitting and receiving to and from a DWM1000 module. Once of this values
+	- `CHANNEL_1` (i.e. 3494.4 MHz, bandwidth ~500 MHz)
+	- `CHANNEL_2` (i.e. 3494.4 MHz, bandwidth ~500 MHz)
+	- `CHANNEL_3` (i.e. 3494.4 MHz, bandwidth ~500 MHz)
+	- `CHANNEL_4` (i.e. 3494.4 MHz, bandwidth ~1332 MHz)
+	- `CHANNEL_5` (i.e. 3494.4 MHz, bandwidth ~500 MHz)
+	- `CHANNEL_7` (i.e. 3494.4 MHz, bandwidth ~1082 MHz)
+	has to be chosen.
+	
+	Channels 4 and 7 have a wider bandwidth. Operating at a wider bandwidth increases range but also increases power consumption.
+	Channels 4 and 7 in reception has a maximum receive bandwidth of 900 MHz.
+	 */
 	static void setChannel(byte channel);
 	static void setPreambleCode(byte preacode);
 	static void useSmartPower(boolean smartPower);
@@ -314,17 +328,27 @@ public:
 	preferred over manual configuration.
 
 	The following modes are pre-configured and one of them needs to be chosen:
-	- `MODE_LONGDATA_RANGE_LOWPOWER` (basically this is 110 kb/s data rate, 16 MHz PRF and long preambles)
-	- `MODE_SHORTDATA_FAST_LOWPOWER` (basically this is 6.8 Mb/s data rate, 16 MHz PRF and short preambles)
-	- `MODE_LONGDATA_FAST_LOWPOWER` (basically this is 6.8 Mb/s data rate, 16 MHz PRF and long preambles)
-	- `MODE_SHORTDATA_FAST_ACCURACY` (basically this is 6.8 Mb/s data rate, 64 MHz PRF and short preambles)
-	- `MODE_LONGDATA_FAST_ACCURACY` (basically this is 6.8 Mb/s data rate, 64 MHz PRF and long preambles)
-	- `MODE_LONGDATA_RANGE_ACCURACY` (basically this is 110 kb/s data rate, 64 MHz PRF and long preambles)
+	- `MODE_SHORTRANGE_LOWPRF_SHORTPREAMBLE` (basically this is 6,8 Mb/s data rate, 16 MHz PRF and short preambles)
+	- `MODE_SHORTRANGE_HIGHPRF_SHORTPREAMBLE` (basically this is 6,8 Mb/s data rate, 64 MHz PRF and short preambles)
+	- `MODE_SHORTRANGE_LOWPRF_MEDIUMPREAMBLE` (basically this is 6,8 Mb/s data rate, 16 MHz PRF and medium preambles)
+	- `MODE_SHORTRANGE_HIGHPRF_MEDIUMPREAMBLE` (basically this is 6,8 Mb/s data rate, 64 MHz PRF and medium preambles)
+	- `MODE_SHORTRANGE_LOWPRF_LONGPREAMBLE` (basically this is 6,8 Mb/s data rate, 16 MHz PRF and long preambles)
+	- `MODE_SHORTRANGE_HIGHPRF_LONGPREAMBLE` (basically this is 6,8 Mb/s data rate, 64 MHz PRF and long preambles)
 
-	Note that LOWPOWER and ACCURACY refers to the better power efficiency and improved transmission performance
+	- `MODE_MEDIUMRANGE_LOWPRF_SHORTPREAMBLE` (basically this is 850 kb/s data rate, 16 MHz PRF and short preambles)
+	- `MODE_MEDIUMRANGE_HIGHPRF_SHORTPREAMBLE` (basically this is 850 kb/s data rate, 64 MHz PRF and short preambles)
+	- `MODE_MEDIUMRANGE_LOWPRF_MEDIUMPREAMBLE` (basically this is 850 kb/s data rate, 16 MHz PRF and medium preambles)
+	- `MODE_MEDIUMRANGE_HIGHPRF_MEDIUMPREAMBLE` (basically this is 850 kb/s data rate, 64 MHz PRF and medium preambles)
+	- `MODE_MEDIUMRANGE_LOWPRF_LONGPREAMBLE` (basically this is 850 kb/s data rate, 16 MHz PRF and long preambles)
+	- `MODE_MEDIUMRANGE_HIGHPRF_LONGPREAMBLE` (basically this is 850 kb/s data rate, 64 MHz PRF and long preambles)
+
+	- `MODE_LONGRANGE_LOWPRF_SHORTPREAMBLE` (basically this is 110 kb/s data rate, 16 MHz PRF and short preambles)
+	- `MODE_LONGRANGE_HIGHPRF_SHORTPREAMBLE` (basically this is 110 kb/s data rate, 64 MHz PRF and short preambles)
+
+	Note that SHORTRANGE and SHORTPREAMBLE refers to the better power efficiency and improved transmission performance
 	of 16 MHZ and 64 MHZ PRF respectively (see `setPulseFrequency()`).
 
-	The default setting that is selected by `setDefaults()` is MODE_LONGDATA_RANGE_LOWPOWER.
+	The default setting that is selected by `setDefaults()` is MODE_LONGRANGE_LOWPRF_SHORTPREAMBLE.
 
 	@param[in] mode The mode of operation, encoded by the above defined constants.
 	*/
