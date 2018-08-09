@@ -73,29 +73,6 @@ uint8_t    DWM1000Class::_deviceMode          = IDLE_MODE; // TODO replace by en
 
 boolean    DWM1000Class::_debounceClockEnabled = false;
 
-// modes of operation
-// TODO use enum external, not config array
-// this declaration is needed to make variables accessible while runtime from external code
-
-/*
-const byte DWM1000Class::MODE_LONGDATA_RANGE_LOWPOWER[] = {TRX_RATE_110KBPS, TX_PULSE_FREQ_16MHZ, TX_PREAMBLE_LEN_2048};
-const byte DWM1000Class::MODE_SHORTDATA_FAST_LOWPOWER[] = {TRX_RATE_6800KBPS, TX_PULSE_FREQ_16MHZ, TX_PREAMBLE_LEN_128};
-const byte DWM1000Class::MODE_LONGDATA_FAST_LOWPOWER[]  = {TRX_RATE_6800KBPS, TX_PULSE_FREQ_16MHZ, TX_PREAMBLE_LEN_1024};
-const byte DWM1000Class::MODE_SHORTDATA_FAST_ACCURACY[] = {TRX_RATE_6800KBPS, TX_PULSE_FREQ_64MHZ, TX_PREAMBLE_LEN_128};
-const byte DWM1000Class::MODE_LONGDATA_FAST_ACCURACY[]  = {TRX_RATE_6800KBPS, TX_PULSE_FREQ_64MHZ, TX_PREAMBLE_LEN_1024};
-const byte DWM1000Class::MODE_LONGDATA_RANGE_ACCURACY[] = {TRX_RATE_110KBPS, TX_PULSE_FREQ_64MHZ, TX_PREAMBLE_LEN_2048};
-*/
-// range bias tables (500 MHz in [mm] and 900 MHz in [2mm] - to fit into bytes)
-constexpr byte DWM1000Class::BIAS_500_16[];
-constexpr byte DWM1000Class::BIAS_500_64[];
-constexpr byte DWM1000Class::BIAS_900_16[];
-constexpr byte DWM1000Class::BIAS_900_64[];
-/*
-const byte DWM1000Class::BIAS_500_16[] = {198, 187, 179, 163, 143, 127, 109, 84, 59, 31, 0, 36, 65, 84, 97, 106, 110, 112};
-const byte DWM1000Class::BIAS_500_64[] = {110, 105, 100, 93, 82, 69, 51, 27, 0, 21, 35, 42, 49, 62, 71, 76, 81, 86};
-const byte DWM1000Class::BIAS_900_16[] = {137, 122, 105, 88, 69, 47, 25, 0, 21, 48, 79, 105, 127, 147, 160, 169, 178, 197};
-const byte DWM1000Class::BIAS_900_64[] = {147, 133, 117, 99, 75, 50, 29, 0, 24, 45, 63, 76, 87, 98, 116, 122, 132, 142};
-*/
 // SPI settings
 #ifdef ESP8266
 	// default ESP8266 frequency is 80 Mhz, thus divide by 4 is 20 MHz
