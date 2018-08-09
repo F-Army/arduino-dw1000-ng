@@ -233,11 +233,11 @@ public:
 	/*
 	Specifies the channel for transmitting and receiving to and from a DWM1000 module. Once of this values
 	- `CHANNEL_1` (i.e. 3494.4 MHz, bandwidth ~500 MHz)
-	- `CHANNEL_2` (i.e. 3494.4 MHz, bandwidth ~500 MHz)
-	- `CHANNEL_3` (i.e. 3494.4 MHz, bandwidth ~500 MHz)
-	- `CHANNEL_4` (i.e. 3494.4 MHz, bandwidth ~1332 MHz)
-	- `CHANNEL_5` (i.e. 3494.4 MHz, bandwidth ~500 MHz)
-	- `CHANNEL_7` (i.e. 3494.4 MHz, bandwidth ~1082 MHz)
+	- `CHANNEL_2` (i.e. 3993.6 MHz, bandwidth ~500 MHz)
+	- `CHANNEL_3` (i.e. 4492.8 MHz, bandwidth ~500 MHz)
+	- `CHANNEL_4` (i.e. 3993.6 MHz, bandwidth ~1332 MHz)
+	- `CHANNEL_5` (i.e. 6489.6 MHz, bandwidth ~500 MHz)
+	- `CHANNEL_7` (i.e. 6489.6 MHz, bandwidth ~1082 MHz)
 	has to be chosen.
 	
 	Channels 4 and 7 have a wider bandwidth. Operating at a wider bandwidth increases range but also increases power consumption.
