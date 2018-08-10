@@ -206,6 +206,8 @@ public:
 	- `TRX_RATE_6800KBPS` (i.e. 6.8 Mb/s)
 	has to be provided.
 
+	(see chapters 9.1/2/3/4 DW1000 user manual)
+
 	See `setDefaults()` and `enableMode()` for additional information on data rate settings.
 
 	@param[in] rate The data transmission rate, encoded by the above defined constants.
@@ -220,7 +222,8 @@ public:
 
 	Note that the 16 MHz setting is more power efficient, while the 64 MHz setting requires more
 	power, but also delivers slightly better transmission performance (i.e. on communication range and 
-	timestamp accuracy) (see DWM1000 User Manual, section 9.3). 
+	timestamp accuracy) 
+	(see chapters 9.1/2/3/4 DW1000 user manual).
 
 	See `setDefaults()` and `enableMode()` for additional information on PRF settings.
 
@@ -241,7 +244,11 @@ public:
 	has to be chosen.
 	
 	Channels 4 and 7 have a wider bandwidth. Operating at a wider bandwidth increases range but also increases power consumption.
-	Channels 4 and 7 in reception has a maximum receive bandwidth of 900 MHz.
+	Channels 4 and 7 in reception have a maximum receive bandwidth of 900 MHz.
+	The Operating range also varies depending on the channel centre frequency and channel bandwidth selected 
+	(see chapters 9.1/2/3/4 DW1000 user manual)
+
+	@param[in] channel The Number of channel, encoded by the above defined constants.
 	 */
 	static void setChannel(byte channel);
 	static void setPreambleCode(byte preacode);
