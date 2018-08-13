@@ -1,18 +1,15 @@
 <br/>
 <div align="center">
-  <img width="380px" src="https://drive.google.com/open?id=1Y7PUmOzlUpDRZuM4zSEY7W6y-3DXo5B9">
+  <img width="380px" src="https://www.dropbox.com/s/tnpnbkkrs8fhudf/Unicorn%20%28Conflitto%20di%20maiuscole%20o%20minuscole%29.png?dl=0">
 </div>
 <br/>
 <div align="center">
 
-Arduino driver for Decawave's [DWM1000](http://www.decawave.com/products/dwm1000-module) module.
+###### Arduino driver for Decawave's [DWM1000](http://www.decawave.com/products/dwm1000-module) module.
 
 ![c++11](https://img.shields.io/badge/C%2B%2B-11-brightgreen.svg)
 </div>
 <br/>
-
-
-# arduino-dwm1000
 
 
 Installation
