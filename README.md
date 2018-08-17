@@ -1,11 +1,11 @@
 <br/>
 <div align="center">
-  <img width="380px" src="img/logo.jpeg">
+  <img src="img/logo.png">
 </div>
 <br/>
 <div align="center">
 
-#### Arduino driver for Decawave's [DWM1000](http://www.decawave.com/products/dwm1000-module) module.
+### Arduino driver for Decawave's [DWM1000](http://www.decawave.com/products/dwm1000-module) module.
 
 ![c++11](https://img.shields.io/badge/C%2B%2B-11-brightgreen.svg)
 </div>
