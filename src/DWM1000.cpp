@@ -19,9 +19,14 @@
  * Arduino driver library (source file) for the Decawave DWM1000 UWB transceiver Module.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <SPI.h>
+#include <string.h>
 #include "DWM1000Utils.h"
 #include "DWM1000Constants.h"
 #include "DWM1000.h"
+#include "DWM1000Time.h"
 
 DWM1000Class DWM1000;
 
