@@ -40,12 +40,12 @@ uint8_t DWM1000Class::_irq;
 
 
 // IRQ callbacks
-void (* DWM1000Class::_handleSent)(void)                      = 0;
-void (* DWM1000Class::_handleError)(void)                     = 0;
-void (* DWM1000Class::_handleReceived)(void)                  = 0;
-void (* DWM1000Class::_handleReceiveFailed)(void)             = 0;
-void (* DWM1000Class::_handleReceiveTimeout)(void)            = 0;
-void (* DWM1000Class::_handleReceiveTimestampAvailable)(void) = 0;
+void (* DWM1000Class::_handleSent)(void)                      = nullptr;
+void (* DWM1000Class::_handleError)(void)                     = nullptr;
+void (* DWM1000Class::_handleReceived)(void)                  = nullptr;
+void (* DWM1000Class::_handleReceiveFailed)(void)             = nullptr;
+void (* DWM1000Class::_handleReceiveTimeout)(void)            = nullptr;
+void (* DWM1000Class::_handleReceiveTimestampAvailable)(void) = nullptr;
 
 // registers
 byte       DWM1000Class::_syscfg[LEN_SYS_CFG];
