@@ -451,6 +451,7 @@ public:
 	static void ldecfg1();
 	static void ldecfg2();
 	static void lderepc();
+	static void txpower();
 	/* tuning according to mode.(Very important) */
 	static void tune();
 	
