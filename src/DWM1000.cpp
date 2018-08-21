@@ -936,33 +936,30 @@ void DWM1000Class::setDeviceAddress(uint16_t val) {
 	_networkAndAddress[1] = (byte)((val >> 8) & 0xFF);
 }
 
+static void vbatAndTempSteps() {
+	byte step1 = 0x80; DWM1000.writeBytes(RF_CONF, 0x11, &step1, 1);
+	byte step2 = 0x0A; DWM1000.writeBytes(RF_CONF, 0x12, &step2, 1);
+	byte step3 = 0x0F; DWM1000.writeBytes(RF_CONF, 0x12, &step3, 1);
+	byte step4 = 0x01; DWM1000.writeBytes(TX_CAL, NO_SUB, &step4, 1);
+	byte step5 = 0x00; DWM1000.writeBytes(TX_CAL, NO_SUB, &step5, 1);
+}
+
 void DWM1000Class::getTemp(float& temp) {
-	byte step1 = 0x80; writeBytes(RF_CONF, 0x11, &step1, 1);
-	byte step2 = 0x0A; writeBytes(RF_CONF, 0x12, &step2, 1);
-	byte step3 = 0x0F; writeBytes(RF_CONF, 0x12, &step3, 1);
-	byte step4 = 0x01; writeBytes(TX_CAL, NO_SUB, &step4, 1);
-	byte step5 = 0x00; writeBytes(TX_CAL, NO_SUB, &step5, 1);
+	vbatAndTempSteps();
 	byte sar_ltemp = 0; readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
 	temp = (sar_ltemp - _tmeas23C) * 1.14f + 23.0f;
 }
 
+
 void DWM1000Class::getVbat(float& vbat) {
-	byte step1 = 0x80; writeBytes(RF_CONF, 0x11, &step1, 1);
-	byte step2 = 0x0A; writeBytes(RF_CONF, 0x12, &step2, 1);
-	byte step3 = 0x0F; writeBytes(RF_CONF, 0x12, &step3, 1);
-	byte step4 = 0x01; writeBytes(TX_CAL, NO_SUB, &step4, 1);
-	byte step5 = 0x00; writeBytes(TX_CAL, NO_SUB, &step5, 1);
+	vbatAndTempSteps();
 	byte sar_lvbat = 0; readBytes(TX_CAL, 0x03, &sar_lvbat, 1);
 	vbat = (sar_lvbat - _vmeas3v3) / 173.0f + 3.3f;
 }
 
 void DWM1000Class::getTempAndVbat(float& temp, float& vbat) {
 	// follow the procedure from section 6.4 of the User Manual
-	byte step1 = 0x80; writeBytes(RF_CONF, 0x11, &step1, 1);
-	byte step2 = 0x0A; writeBytes(RF_CONF, 0x12, &step2, 1);
-	byte step3 = 0x0F; writeBytes(RF_CONF, 0x12, &step3, 1);
-	byte step4 = 0x01; writeBytes(TX_CAL, NO_SUB, &step4, 1);
-	byte step5 = 0x00; writeBytes(TX_CAL, NO_SUB, &step5, 1);
+	vbatAndTempSteps();
 	byte sar_lvbat = 0; readBytes(TX_CAL, 0x03, &sar_lvbat, 1);
 	byte sar_ltemp = 0; readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
 	
