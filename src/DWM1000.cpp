@@ -695,6 +695,46 @@ void DWM1000Class::tcpgdelay() {
 	writeBytes(TX_CAL, TC_PGDELAY_SUB, tcpgdelay, LEN_TC_PGDELAY);
 }
 
+// FS_PLLCFG and FS_PLLTUNE - reg:0x2B, sub-reg:0x07-0x0B, tables 43-44
+void DWM1000Class::fspll() {
+	byte fspllcfg[LEN_FS_PLLCFG];
+	byte fsplltune[LEN_FS_PLLTUNE];
+	if(_channel == CHANNEL_1) {
+		DWM1000Utils::writeValueToBytes(fspllcfg, 0x09000407L, LEN_FS_PLLCFG);
+		DWM1000Utils::writeValueToBytes(fsplltune, 0x1E, LEN_FS_PLLTUNE);
+	} else if(_channel == CHANNEL_2 || _channel == CHANNEL_4) {
+		DWM1000Utils::writeValueToBytes(fspllcfg, 0x08400508L, LEN_FS_PLLCFG);
+		DWM1000Utils::writeValueToBytes(fsplltune, 0x26, LEN_FS_PLLTUNE);
+	} else if(_channel == CHANNEL_3) {
+		DWM1000Utils::writeValueToBytes(fspllcfg, 0x08401009L, LEN_FS_PLLCFG);
+		DWM1000Utils::writeValueToBytes(fsplltune, 0x56, LEN_FS_PLLTUNE);
+	} else if(_channel == CHANNEL_5 || _channel == CHANNEL_7) {
+		DWM1000Utils::writeValueToBytes(fspllcfg, 0x0800041DL, LEN_FS_PLLCFG);
+		DWM1000Utils::writeValueToBytes(fsplltune, 0xBE, LEN_FS_PLLTUNE);
+	} else {
+		// TODO proper error/warning handling
+	}
+	writeBytes(FS_CTRL, FS_PLLTUNE_SUB, fsplltune, LEN_FS_PLLTUNE);
+	writeBytes(FS_CTRL, FS_PLLCFG_SUB, fspllcfg, LEN_FS_PLLCFG);
+}
+
+/* Crystal calibration from OTP (if available)
+ * FS_XTALT - reg:0x2B, sub-reg:0x0E
+ * OTP(one-time-programmable) memory map - table 10 */
+void DWM1000Class::fsxtalt() {
+	byte fsxtalt[LEN_FS_XTALT];
+	byte buf_otp[4];
+	readBytesOTP(0x01E, buf_otp); //0x01E -> byte[0]=XTAL_Trim
+	if (buf_otp[0] == 0) {
+		// No trim value available from OTP, use midrange value of 0x10
+		DWM1000Utils::writeValueToBytes(fsxtalt, ((0x10 & 0x1F) | 0x60), LEN_FS_XTALT);
+	} else {
+		DWM1000Utils::writeValueToBytes(fsxtalt, ((buf_otp[0] & 0x1F) | 0x60), LEN_FS_XTALT);
+	}
+	// write configuration back to chip
+	writeBytes(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
+}
+
 void DWM1000Class::tune() {
 	// these registers are going to be tuned/configured
 	agctune1();
@@ -712,43 +752,8 @@ void DWM1000Class::tune() {
 	rfrxctrlh();
 	rftxctrl();
 	tcpgdelay();
-	
-	byte fspllcfg[LEN_FS_PLLCFG];
-	byte fsplltune[LEN_FS_PLLTUNE];
-	byte fsxtalt[LEN_FS_XTALT];
-	
-	// FS_PLLCFG and FS_PLLTUNE - reg:0x2B, sub-reg:0x07-0x0B, tables 43-44
-	if(_channel == CHANNEL_1) {
-		DWM1000Utils::writeValueToBytes(fspllcfg, 0x09000407L, LEN_FS_PLLCFG);
-		DWM1000Utils::writeValueToBytes(fsplltune, 0x1E, LEN_FS_PLLTUNE);
-	} else if(_channel == CHANNEL_2 || _channel == CHANNEL_4) {
-		DWM1000Utils::writeValueToBytes(fspllcfg, 0x08400508L, LEN_FS_PLLCFG);
-		DWM1000Utils::writeValueToBytes(fsplltune, 0x26, LEN_FS_PLLTUNE);
-	} else if(_channel == CHANNEL_3) {
-		DWM1000Utils::writeValueToBytes(fspllcfg, 0x08401009L, LEN_FS_PLLCFG);
-		DWM1000Utils::writeValueToBytes(fsplltune, 0x56, LEN_FS_PLLTUNE);
-	} else if(_channel == CHANNEL_5 || _channel == CHANNEL_7) {
-		DWM1000Utils::writeValueToBytes(fspllcfg, 0x0800041DL, LEN_FS_PLLCFG);
-		DWM1000Utils::writeValueToBytes(fsplltune, 0xBE, LEN_FS_PLLTUNE);
-	} else {
-		// TODO proper error/warning handling
-	}
-	
-	/* Crystal calibration from OTP (if available)
-	 * FS_XTALT - reg:0x2B, sub-reg:0x0E
-	 * OTP(one-time-programmable) memory map - table 10 */
-	byte buf_otp[4];
-	readBytesOTP(0x01E, buf_otp); //0x01E -> byte[0]=XTAL_Trim
-	if (buf_otp[0] == 0) {
-		// No trim value available from OTP, use midrange value of 0x10
-		DWM1000Utils::writeValueToBytes(fsxtalt, ((0x10 & 0x1F) | 0x60), LEN_FS_XTALT);
-	} else {
-		DWM1000Utils::writeValueToBytes(fsxtalt, ((buf_otp[0] & 0x1F) | 0x60), LEN_FS_XTALT);
-	}
-	// write configuration back to chip
-	writeBytes(FS_CTRL, FS_PLLTUNE_SUB, fsplltune, LEN_FS_PLLTUNE);
-	writeBytes(FS_CTRL, FS_PLLCFG_SUB, fspllcfg, LEN_FS_PLLCFG);
-	writeBytes(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
+	fspll();
+	fsxtalt();
 }
 
 /* ###########################################################################
