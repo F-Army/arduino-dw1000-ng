@@ -642,35 +642,20 @@ void DWM1000Class::txpower() {
 	writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
 }
 
-void DWM1000Class::tune() {
-	// these registers are going to be tuned/configured
-	agctune1();
-	agctune2();
-	agctune3();
-	drxtune0b();
-	drxtune1a();
-	drxtune1b();
-	drxtune2();
-	drxtune4H();
-	ldecfg1();
-	ldecfg2();
-	lderepc();
-	txpower();
+/* RF_RXCTRLH - reg:0x28, sub-reg:0x0B, table 37 */
+void DWM1000Class::rfrxctrlh() {
 	byte rfrxctrlh[LEN_RF_RXCTRLH];
-	byte rftxctrl[LEN_RF_TXCTRL];
-	byte tcpgdelay[LEN_TC_PGDELAY];
-	byte fspllcfg[LEN_FS_PLLCFG];
-	byte fsplltune[LEN_FS_PLLTUNE];
-	byte fsxtalt[LEN_FS_XTALT];
-	
-	
-	// RF_RXCTRLH - reg:0x28, sub-reg:0x0B, table 37
 	if(_channel != CHANNEL_4 && _channel != CHANNEL_7) {
 		DWM1000Utils::writeValueToBytes(rfrxctrlh, 0xD8, LEN_RF_RXCTRLH);
 	} else {
 		DWM1000Utils::writeValueToBytes(rfrxctrlh, 0xBC, LEN_RF_RXCTRLH);
 	}
-	// RX_TXCTRL - reg:0x28, sub-reg:0x0C
+	writeBytes(RF_CONF, RF_RXCTRLH_SUB, rfrxctrlh, LEN_RF_RXCTRLH);
+}
+
+/* RX_TXCTRL - reg:0x28, sub-reg:0x0C */
+void DWM1000Class::rftxctrl() {
+	byte rftxctrl[LEN_RF_TXCTRL];
 	if(_channel == CHANNEL_1) {
 		DWM1000Utils::writeValueToBytes(rftxctrl, 0x00005C40L, LEN_RF_TXCTRL);
 	} else if(_channel == CHANNEL_2) {
@@ -686,6 +671,30 @@ void DWM1000Class::tune() {
 	} else {
 		// TODO proper error/warning handling
 	}
+	writeBytes(RF_CONF, RF_TXCTRL_SUB, rftxctrl, LEN_RF_TXCTRL);
+}
+
+void DWM1000Class::tune() {
+	// these registers are going to be tuned/configured
+	agctune1();
+	agctune2();
+	agctune3();
+	drxtune0b();
+	drxtune1a();
+	drxtune1b();
+	drxtune2();
+	drxtune4H();
+	ldecfg1();
+	ldecfg2();
+	lderepc();
+	txpower();
+	rfrxctrlh();
+	rftxctrl();
+	byte tcpgdelay[LEN_TC_PGDELAY];
+	byte fspllcfg[LEN_FS_PLLCFG];
+	byte fsplltune[LEN_FS_PLLTUNE];
+	byte fsxtalt[LEN_FS_XTALT];
+	
 	// TC_PGDELAY - reg:0x2A, sub-reg:0x0B, table 40
 	if(_channel == CHANNEL_1) {
 		DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC9, LEN_TC_PGDELAY);
@@ -731,8 +740,6 @@ void DWM1000Class::tune() {
 		DWM1000Utils::writeValueToBytes(fsxtalt, ((buf_otp[0] & 0x1F) | 0x60), LEN_FS_XTALT);
 	}
 	// write configuration back to chip
-	writeBytes(RF_CONF, RF_RXCTRLH_SUB, rfrxctrlh, LEN_RF_RXCTRLH);
-	writeBytes(RF_CONF, RF_TXCTRL_SUB, rftxctrl, LEN_RF_TXCTRL);
 	writeBytes(TX_CAL, TC_PGDELAY_SUB, tcpgdelay, LEN_TC_PGDELAY);
 	writeBytes(FS_CTRL, FS_PLLTUNE_SUB, fsplltune, LEN_FS_PLLTUNE);
 	writeBytes(FS_CTRL, FS_PLLCFG_SUB, fspllcfg, LEN_FS_PLLCFG);
