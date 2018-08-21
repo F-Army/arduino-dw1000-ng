@@ -448,6 +448,9 @@ public:
 	static void drxtune1b();
 	static void drxtune2();
 	static void drxtune4H();
+	static void ldecfg1();
+	static void ldecfg2();
+	static void lderepc();
 	/* tuning according to mode.(Very important) */
 	static void tune();
 	
