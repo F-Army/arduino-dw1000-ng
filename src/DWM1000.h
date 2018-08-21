@@ -438,7 +438,11 @@ public:
 	static void useExtendedFrameLength(boolean val);
 	// TODO is implemented, but needs testing
 	static void waitForResponse(boolean val);
-	
+
+	// Helper functions for tune
+	static void agctune1();
+	static void agctune2();
+	static void agctune3();
 	/* tuning according to mode.(Very important) */
 	static void tune();
 	

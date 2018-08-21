@@ -317,11 +317,38 @@ void DWM1000Class::enableMode(const byte mode[]) {
 	setPreambleLength(mode[2]);
 }
 
+/* AGC_TUNE1 - reg:0x23, sub-reg:0x04, table 24 */
+void DWM1000Class::agctune1() {
+	byte agctune1[LEN_AGC_TUNE1];
+	if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+		DWM1000Utils::writeValueToBytes(agctune1, 0x8870, LEN_AGC_TUNE1);
+	} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+		DWM1000Utils::writeValueToBytes(agctune1, 0x889B, LEN_AGC_TUNE1);
+	} else {
+		// TODO proper error/warning handling
+	}
+	writeBytes(AGC_TUNE, AGC_TUNE1_SUB, agctune1, LEN_AGC_TUNE1);
+}
+
+/* AGC_TUNE2 - reg:0x23, sub-reg:0x0C, table 25 */
+void DWM1000Class::agctune2() {
+	byte agctune2[LEN_AGC_TUNE2];
+	DWM1000Utils::writeValueToBytes(agctune2, 0x2502A907L, LEN_AGC_TUNE2);
+	writeBytes(AGC_TUNE, AGC_TUNE2_SUB, agctune2, LEN_AGC_TUNE2);
+}
+
+/* AGC_TUNE3 - reg:0x23, sub-reg:0x12, table 26 */
+void DWM1000Class::agctune3() {
+	byte agctune3[LEN_AGC_TUNE3];
+	DWM1000Utils::writeValueToBytes(agctune3, 0x0035, LEN_AGC_TUNE3);
+	writeBytes(AGC_TUNE, AGC_TUNE3_SUB, agctune3, LEN_AGC_TUNE3);
+}
+
 void DWM1000Class::tune() {
 	// these registers are going to be tuned/configured
-	byte agctune1[LEN_AGC_TUNE1];
-	byte agctune2[LEN_AGC_TUNE2];
-	byte agctune3[LEN_AGC_TUNE3];
+	agctune1();
+	agctune2();
+	agctune3();
 	byte drxtune0b[LEN_DRX_TUNE0b];
 	byte drxtune1a[LEN_DRX_TUNE1a];
 	byte drxtune1b[LEN_DRX_TUNE1b];
@@ -337,18 +364,9 @@ void DWM1000Class::tune() {
 	byte fspllcfg[LEN_FS_PLLCFG];
 	byte fsplltune[LEN_FS_PLLTUNE];
 	byte fsxtalt[LEN_FS_XTALT];
-	// AGC_TUNE1 - reg:0x23, sub-reg:0x04, table 24
-	if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-		DWM1000Utils::writeValueToBytes(agctune1, 0x8870, LEN_AGC_TUNE1);
-	} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
-		DWM1000Utils::writeValueToBytes(agctune1, 0x889B, LEN_AGC_TUNE1);
-	} else {
-		// TODO proper error/warning handling
-	}
-	// AGC_TUNE2 - reg:0x23, sub-reg:0x0C, table 25
-	DWM1000Utils::writeValueToBytes(agctune2, 0x2502A907L, LEN_AGC_TUNE2);
-	// AGC_TUNE3 - reg:0x23, sub-reg:0x12, table 26
-	DWM1000Utils::writeValueToBytes(agctune3, 0x0035, LEN_AGC_TUNE3);
+	
+	
+	
 	// DRX_TUNE0b - reg:0x27, sub-reg:0x02 (already optimized according to Table 30 of user manual)
 	if(_dataRate == TRX_RATE_110KBPS) {
 		DWM1000Utils::writeValueToBytes(drxtune0b, 0x0016, LEN_DRX_TUNE0b);
@@ -667,9 +685,6 @@ void DWM1000Class::tune() {
 		DWM1000Utils::writeValueToBytes(fsxtalt, ((buf_otp[0] & 0x1F) | 0x60), LEN_FS_XTALT);
 	}
 	// write configuration back to chip
-	writeBytes(AGC_TUNE, AGC_TUNE1_SUB, agctune1, LEN_AGC_TUNE1);
-	writeBytes(AGC_TUNE, AGC_TUNE2_SUB, agctune2, LEN_AGC_TUNE2);
-	writeBytes(AGC_TUNE, AGC_TUNE3_SUB, agctune3, LEN_AGC_TUNE3);
 	writeBytes(DRX_TUNE, DRX_TUNE0b_SUB, drxtune0b, LEN_DRX_TUNE0b);
 	writeBytes(DRX_TUNE, DRX_TUNE1a_SUB, drxtune1a, LEN_DRX_TUNE1a);
 	writeBytes(DRX_TUNE, DRX_TUNE1b_SUB, drxtune1b, LEN_DRX_TUNE1b);
