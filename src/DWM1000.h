@@ -454,6 +454,8 @@ public:
 	static void txpower();
 	static void rfrxctrlh();
 	static void rftxctrl();
+	static void tcpgdelay();
+	
 	/* tuning according to mode.(Very important) */
 	static void tune();
 	

@@ -674,6 +674,27 @@ void DWM1000Class::rftxctrl() {
 	writeBytes(RF_CONF, RF_TXCTRL_SUB, rftxctrl, LEN_RF_TXCTRL);
 }
 
+/* TC_PGDELAY - reg:0x2A, sub-reg:0x0B, table 40 */
+void DWM1000Class::tcpgdelay() {
+	byte tcpgdelay[LEN_TC_PGDELAY];	
+	if(_channel == CHANNEL_1) {
+		DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC9, LEN_TC_PGDELAY);
+	} else if(_channel == CHANNEL_2) {
+		DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC2, LEN_TC_PGDELAY);
+	} else if(_channel == CHANNEL_3) {
+		DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC5, LEN_TC_PGDELAY);
+	} else if(_channel == CHANNEL_4) {
+		DWM1000Utils::writeValueToBytes(tcpgdelay, 0x95, LEN_TC_PGDELAY);
+	} else if(_channel == CHANNEL_5) {
+		DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC0, LEN_TC_PGDELAY);
+	} else if(_channel == CHANNEL_7) {
+		DWM1000Utils::writeValueToBytes(tcpgdelay, 0x93, LEN_TC_PGDELAY);
+	} else {
+		// TODO proper error/warning handling
+	}
+	writeBytes(TX_CAL, TC_PGDELAY_SUB, tcpgdelay, LEN_TC_PGDELAY);
+}
+
 void DWM1000Class::tune() {
 	// these registers are going to be tuned/configured
 	agctune1();
@@ -690,27 +711,12 @@ void DWM1000Class::tune() {
 	txpower();
 	rfrxctrlh();
 	rftxctrl();
-	byte tcpgdelay[LEN_TC_PGDELAY];
+	tcpgdelay();
+	
 	byte fspllcfg[LEN_FS_PLLCFG];
 	byte fsplltune[LEN_FS_PLLTUNE];
 	byte fsxtalt[LEN_FS_XTALT];
 	
-	// TC_PGDELAY - reg:0x2A, sub-reg:0x0B, table 40
-	if(_channel == CHANNEL_1) {
-		DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC9, LEN_TC_PGDELAY);
-	} else if(_channel == CHANNEL_2) {
-		DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC2, LEN_TC_PGDELAY);
-	} else if(_channel == CHANNEL_3) {
-		DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC5, LEN_TC_PGDELAY);
-	} else if(_channel == CHANNEL_4) {
-		DWM1000Utils::writeValueToBytes(tcpgdelay, 0x95, LEN_TC_PGDELAY);
-	} else if(_channel == CHANNEL_5) {
-		DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC0, LEN_TC_PGDELAY);
-	} else if(_channel == CHANNEL_7) {
-		DWM1000Utils::writeValueToBytes(tcpgdelay, 0x93, LEN_TC_PGDELAY);
-	} else {
-		// TODO proper error/warning handling
-	}
 	// FS_PLLCFG and FS_PLLTUNE - reg:0x2B, sub-reg:0x07-0x0B, tables 43-44
 	if(_channel == CHANNEL_1) {
 		DWM1000Utils::writeValueToBytes(fspllcfg, 0x09000407L, LEN_FS_PLLCFG);
@@ -740,7 +746,6 @@ void DWM1000Class::tune() {
 		DWM1000Utils::writeValueToBytes(fsxtalt, ((buf_otp[0] & 0x1F) | 0x60), LEN_FS_XTALT);
 	}
 	// write configuration back to chip
-	writeBytes(TX_CAL, TC_PGDELAY_SUB, tcpgdelay, LEN_TC_PGDELAY);
 	writeBytes(FS_CTRL, FS_PLLTUNE_SUB, fsplltune, LEN_FS_PLLTUNE);
 	writeBytes(FS_CTRL, FS_PLLCFG_SUB, fspllcfg, LEN_FS_PLLCFG);
 	writeBytes(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
