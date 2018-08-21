@@ -443,6 +443,11 @@ public:
 	static void agctune1();
 	static void agctune2();
 	static void agctune3();
+	static void drxtune0b();
+	static void drxtune1a();
+	static void drxtune1b();
+	static void drxtune2();
+	static void drxtune4H();
 	/* tuning according to mode.(Very important) */
 	static void tune();
 	
