@@ -364,6 +364,8 @@ public:
 	static void setDefaults();
 	
 	/* host-initiated reading of temperature and battery voltage */
+	static void getTemp(float& temp);
+	static void getVbat(float& vbat);
 	static void getTempAndVbat(float& temp, float& vbat);
 
 //private:
