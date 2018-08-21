@@ -19,9 +19,14 @@
  * Arduino driver library (source file) for the Decawave DWM1000 UWB transceiver Module.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <SPI.h>
+#include <string.h>
 #include "DWM1000Utils.h"
 #include "DWM1000Constants.h"
 #include "DWM1000.h"
+#include "DWM1000Time.h"
 
 DWM1000Class DWM1000;
 
@@ -35,12 +40,12 @@ uint8_t DWM1000Class::_irq;
 
 
 // IRQ callbacks
-void (* DWM1000Class::_handleSent)(void)                      = 0;
-void (* DWM1000Class::_handleError)(void)                     = 0;
-void (* DWM1000Class::_handleReceived)(void)                  = 0;
-void (* DWM1000Class::_handleReceiveFailed)(void)             = 0;
-void (* DWM1000Class::_handleReceiveTimeout)(void)            = 0;
-void (* DWM1000Class::_handleReceiveTimestampAvailable)(void) = 0;
+void (* DWM1000Class::_handleSent)(void)                      = nullptr;
+void (* DWM1000Class::_handleError)(void)                     = nullptr;
+void (* DWM1000Class::_handleReceived)(void)                  = nullptr;
+void (* DWM1000Class::_handleReceiveFailed)(void)             = nullptr;
+void (* DWM1000Class::_handleReceiveTimeout)(void)            = nullptr;
+void (* DWM1000Class::_handleReceiveTimestampAvailable)(void) = nullptr;
 
 // registers
 byte       DWM1000Class::_syscfg[LEN_SYS_CFG];
@@ -312,27 +317,9 @@ void DWM1000Class::enableMode(const byte mode[]) {
 	setPreambleLength(mode[2]);
 }
 
-void DWM1000Class::tune() {
-	// these registers are going to be tuned/configured
+/* AGC_TUNE1 - reg:0x23, sub-reg:0x04, table 24 */
+void DWM1000Class::agctune1() {
 	byte agctune1[LEN_AGC_TUNE1];
-	byte agctune2[LEN_AGC_TUNE2];
-	byte agctune3[LEN_AGC_TUNE3];
-	byte drxtune0b[LEN_DRX_TUNE0b];
-	byte drxtune1a[LEN_DRX_TUNE1a];
-	byte drxtune1b[LEN_DRX_TUNE1b];
-	byte drxtune2[LEN_DRX_TUNE2];
-	byte drxtune4H[LEN_DRX_TUNE4H];
-	byte ldecfg1[LEN_LDE_CFG1];
-	byte ldecfg2[LEN_LDE_CFG2];
-	byte lderepc[LEN_LDE_REPC];
-	byte txpower[LEN_TX_POWER];
-	byte rfrxctrlh[LEN_RF_RXCTRLH];
-	byte rftxctrl[LEN_RF_TXCTRL];
-	byte tcpgdelay[LEN_TC_PGDELAY];
-	byte fspllcfg[LEN_FS_PLLCFG];
-	byte fsplltune[LEN_FS_PLLTUNE];
-	byte fsxtalt[LEN_FS_XTALT];
-	// AGC_TUNE1 - reg:0x23, sub-reg:0x04, table 24
 	if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 		DWM1000Utils::writeValueToBytes(agctune1, 0x8870, LEN_AGC_TUNE1);
 	} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
@@ -340,11 +327,26 @@ void DWM1000Class::tune() {
 	} else {
 		// TODO proper error/warning handling
 	}
-	// AGC_TUNE2 - reg:0x23, sub-reg:0x0C, table 25
+	writeBytes(AGC_TUNE, AGC_TUNE1_SUB, agctune1, LEN_AGC_TUNE1);
+}
+
+/* AGC_TUNE2 - reg:0x23, sub-reg:0x0C, table 25 */
+void DWM1000Class::agctune2() {
+	byte agctune2[LEN_AGC_TUNE2];
 	DWM1000Utils::writeValueToBytes(agctune2, 0x2502A907L, LEN_AGC_TUNE2);
-	// AGC_TUNE3 - reg:0x23, sub-reg:0x12, table 26
+	writeBytes(AGC_TUNE, AGC_TUNE2_SUB, agctune2, LEN_AGC_TUNE2);
+}
+
+/* AGC_TUNE3 - reg:0x23, sub-reg:0x12, table 26 */
+void DWM1000Class::agctune3() {
+	byte agctune3[LEN_AGC_TUNE3];
 	DWM1000Utils::writeValueToBytes(agctune3, 0x0035, LEN_AGC_TUNE3);
-	// DRX_TUNE0b - reg:0x27, sub-reg:0x02 (already optimized according to Table 30 of user manual)
+	writeBytes(AGC_TUNE, AGC_TUNE3_SUB, agctune3, LEN_AGC_TUNE3);
+}
+
+/* DRX_TUNE0b - reg:0x27, sub-reg:0x02 (already optimized according to Table 30 of user manual) */
+void DWM1000Class::drxtune0b() {
+	byte drxtune0b[LEN_DRX_TUNE0b];	
 	if(_dataRate == TRX_RATE_110KBPS) {
 		DWM1000Utils::writeValueToBytes(drxtune0b, 0x0016, LEN_DRX_TUNE0b);
 	} else if(_dataRate == TRX_RATE_850KBPS) {
@@ -354,7 +356,12 @@ void DWM1000Class::tune() {
 	} else {
 		// TODO proper error/warning handling
 	}
-	// DRX_TUNE1a - reg:0x27, sub-reg:0x04, table 31
+	writeBytes(DRX_TUNE, DRX_TUNE0b_SUB, drxtune0b, LEN_DRX_TUNE0b);
+}
+
+/* DRX_TUNE1a - reg:0x27, sub-reg:0x04, table 31 */
+void DWM1000Class::drxtune1a() {
+	byte drxtune1a[LEN_DRX_TUNE1a];
 	if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 		DWM1000Utils::writeValueToBytes(drxtune1a, 0x0087, LEN_DRX_TUNE1a);
 	} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
@@ -362,7 +369,12 @@ void DWM1000Class::tune() {
 	} else {
 		// TODO proper error/warning handling
 	}
-	// DRX_TUNE1b - reg:0x27, sub-reg:0x06, table 32
+	writeBytes(DRX_TUNE, DRX_TUNE1a_SUB, drxtune1a, LEN_DRX_TUNE1a);
+}
+
+/* DRX_TUNE1b - reg:0x27, sub-reg:0x06, table 32 */
+void DWM1000Class::drxtune1b() {
+	byte drxtune1b[LEN_DRX_TUNE1b];
 	if(_preambleLength == TX_PREAMBLE_LEN_1536 || _preambleLength == TX_PREAMBLE_LEN_2048 ||
 		 _preambleLength == TX_PREAMBLE_LEN_4096) {
 		if(_dataRate == TRX_RATE_110KBPS) {
@@ -383,7 +395,12 @@ void DWM1000Class::tune() {
 			// TODO proper error/warning handling
 		}
 	}
-	// DRX_TUNE2 - reg:0x27, sub-reg:0x08, table 33
+	writeBytes(DRX_TUNE, DRX_TUNE1b_SUB, drxtune1b, LEN_DRX_TUNE1b);
+}
+
+/* DRX_TUNE2 - reg:0x27, sub-reg:0x08, table 33 */
+void DWM1000Class::drxtune2() {
+	byte drxtune2[LEN_DRX_TUNE2];	
 	if(_pacSize == PAC_SIZE_8) {
 		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 			DWM1000Utils::writeValueToBytes(drxtune2, 0x311A002DL, LEN_DRX_TUNE2);
@@ -419,69 +436,30 @@ void DWM1000Class::tune() {
 	} else {
 		// TODO proper error/warning handling
 	}
-	// DRX_TUNE4H - reg:0x27, sub-reg:0x26, table 34
+	writeBytes(DRX_TUNE, DRX_TUNE2_SUB, drxtune2, LEN_DRX_TUNE2);
+}
+
+/* DRX_TUNE4H - reg:0x27, sub-reg:0x26, table 34 */
+void DWM1000Class::drxtune4H() {
+	byte drxtune4H[LEN_DRX_TUNE4H];
 	if(_preambleLength == TX_PREAMBLE_LEN_64) {
 		DWM1000Utils::writeValueToBytes(drxtune4H, 0x0010, LEN_DRX_TUNE4H);
 	} else {
 		DWM1000Utils::writeValueToBytes(drxtune4H, 0x0028, LEN_DRX_TUNE4H);
 	}
-	// RF_RXCTRLH - reg:0x28, sub-reg:0x0B, table 37
-	if(_channel != CHANNEL_4 && _channel != CHANNEL_7) {
-		DWM1000Utils::writeValueToBytes(rfrxctrlh, 0xD8, LEN_RF_RXCTRLH);
-	} else {
-		DWM1000Utils::writeValueToBytes(rfrxctrlh, 0xBC, LEN_RF_RXCTRLH);
-	}
-	// RX_TXCTRL - reg:0x28, sub-reg:0x0C
-	if(_channel == CHANNEL_1) {
-		DWM1000Utils::writeValueToBytes(rftxctrl, 0x00005C40L, LEN_RF_TXCTRL);
-	} else if(_channel == CHANNEL_2) {
-		DWM1000Utils::writeValueToBytes(rftxctrl, 0x00045CA0L, LEN_RF_TXCTRL);
-	} else if(_channel == CHANNEL_3) {
-		DWM1000Utils::writeValueToBytes(rftxctrl, 0x00086CC0L, LEN_RF_TXCTRL);
-	} else if(_channel == CHANNEL_4) {
-		DWM1000Utils::writeValueToBytes(rftxctrl, 0x00045C80L, LEN_RF_TXCTRL);
-	} else if(_channel == CHANNEL_5) {
-		DWM1000Utils::writeValueToBytes(rftxctrl, 0x001E3FE0L, LEN_RF_TXCTRL);
-	} else if(_channel == CHANNEL_7) {
-		DWM1000Utils::writeValueToBytes(rftxctrl, 0x001E7DE0L, LEN_RF_TXCTRL);
-	} else {
-		// TODO proper error/warning handling
-	}
-	// TC_PGDELAY - reg:0x2A, sub-reg:0x0B, table 40
-	if(_channel == CHANNEL_1) {
-		DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC9, LEN_TC_PGDELAY);
-	} else if(_channel == CHANNEL_2) {
-		DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC2, LEN_TC_PGDELAY);
-	} else if(_channel == CHANNEL_3) {
-		DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC5, LEN_TC_PGDELAY);
-	} else if(_channel == CHANNEL_4) {
-		DWM1000Utils::writeValueToBytes(tcpgdelay, 0x95, LEN_TC_PGDELAY);
-	} else if(_channel == CHANNEL_5) {
-		DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC0, LEN_TC_PGDELAY);
-	} else if(_channel == CHANNEL_7) {
-		DWM1000Utils::writeValueToBytes(tcpgdelay, 0x93, LEN_TC_PGDELAY);
-	} else {
-		// TODO proper error/warning handling
-	}
-	// FS_PLLCFG and FS_PLLTUNE - reg:0x2B, sub-reg:0x07-0x0B, tables 43-44
-	if(_channel == CHANNEL_1) {
-		DWM1000Utils::writeValueToBytes(fspllcfg, 0x09000407L, LEN_FS_PLLCFG);
-		DWM1000Utils::writeValueToBytes(fsplltune, 0x1E, LEN_FS_PLLTUNE);
-	} else if(_channel == CHANNEL_2 || _channel == CHANNEL_4) {
-		DWM1000Utils::writeValueToBytes(fspllcfg, 0x08400508L, LEN_FS_PLLCFG);
-		DWM1000Utils::writeValueToBytes(fsplltune, 0x26, LEN_FS_PLLTUNE);
-	} else if(_channel == CHANNEL_3) {
-		DWM1000Utils::writeValueToBytes(fspllcfg, 0x08401009L, LEN_FS_PLLCFG);
-		DWM1000Utils::writeValueToBytes(fsplltune, 0x56, LEN_FS_PLLTUNE);
-	} else if(_channel == CHANNEL_5 || _channel == CHANNEL_7) {
-		DWM1000Utils::writeValueToBytes(fspllcfg, 0x0800041DL, LEN_FS_PLLCFG);
-		DWM1000Utils::writeValueToBytes(fsplltune, 0xBE, LEN_FS_PLLTUNE);
-	} else {
-		// TODO proper error/warning handling
-	}
-	// LDE_CFG1 - reg 0x2E, sub-reg:0x0806
+	writeBytes(DRX_TUNE, DRX_TUNE4H_SUB, drxtune4H, LEN_DRX_TUNE4H);
+}
+
+/* LDE_CFG1 - reg 0x2E, sub-reg:0x0806 */
+void DWM1000Class::ldecfg1() {
+	byte ldecfg1[LEN_LDE_CFG1];
 	DWM1000Utils::writeValueToBytes(ldecfg1, 0xD, LEN_LDE_CFG1);
-	// LDE_CFG2 - reg 0x2E, sub-reg:0x1806, table 50
+	writeBytes(LDE_IF, LDE_CFG1_SUB, ldecfg1, LEN_LDE_CFG1);
+}
+
+/* LDE_CFG2 - reg 0x2E, sub-reg:0x1806, table 50 */
+void DWM1000Class::ldecfg2() {
+	byte ldecfg2[LEN_LDE_CFG2];	
 	if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 		DWM1000Utils::writeValueToBytes(ldecfg2, 0x1607, LEN_LDE_CFG2);
 	} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
@@ -489,7 +467,12 @@ void DWM1000Class::tune() {
 	} else {
 		// TODO proper error/warning handling
 	}
-	// LDE_REPC - reg 0x2E, sub-reg:0x2804, table 51
+	writeBytes(LDE_IF, LDE_CFG2_SUB, ldecfg2, LEN_LDE_CFG2);
+}
+
+/* LDE_REPC - reg 0x2E, sub-reg:0x2804, table 51 */
+void DWM1000Class::lderepc() {
+	byte lderepc[LEN_LDE_REPC];
 	if(_preambleCode == PREAMBLE_CODE_16MHZ_1 || _preambleCode == PREAMBLE_CODE_16MHZ_2) {
 		if(_dataRate == TRX_RATE_110KBPS) {
 			DWM1000Utils::writeValueToBytes(lderepc, ((0x5998 >> 3) & 0xFFFF), LEN_LDE_REPC);
@@ -565,8 +548,14 @@ void DWM1000Class::tune() {
 	} else {
 		// TODO proper error/warning handling
 	}
-	/* TX_POWER (enabled smart transmit power control) - reg:0x1E, tables 19-20
-	 * These values are based on a typical IC and an assumed IC to antenna loss of 1.5 dB with a 0 dBi antenna */
+	
+	writeBytes(LDE_IF, LDE_REPC_SUB, lderepc, LEN_LDE_REPC);
+}
+
+/* TX_POWER (enabled smart transmit power control) - reg:0x1E, tables 19-20
+* These values are based on a typical IC and an assumed IC to antenna loss of 1.5 dB with a 0 dBi antenna */
+void DWM1000Class::txpower() {
+	byte txpower[LEN_TX_POWER];
 	if(_channel == CHANNEL_1 || _channel == CHANNEL_2) {
 		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 			if(_smartPower) {
@@ -650,9 +639,90 @@ void DWM1000Class::tune() {
 	} else {
 		// TODO proper error/warning handling
 	}
-	/* Crystal calibration from OTP (if available)
-	 * FS_XTALT - reg:0x2B, sub-reg:0x0E
-	 * OTP(one-time-programmable) memory map - table 10 */
+	writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
+}
+
+/* RF_RXCTRLH - reg:0x28, sub-reg:0x0B, table 37 */
+void DWM1000Class::rfrxctrlh() {
+	byte rfrxctrlh[LEN_RF_RXCTRLH];
+	if(_channel != CHANNEL_4 && _channel != CHANNEL_7) {
+		DWM1000Utils::writeValueToBytes(rfrxctrlh, 0xD8, LEN_RF_RXCTRLH);
+	} else {
+		DWM1000Utils::writeValueToBytes(rfrxctrlh, 0xBC, LEN_RF_RXCTRLH);
+	}
+	writeBytes(RF_CONF, RF_RXCTRLH_SUB, rfrxctrlh, LEN_RF_RXCTRLH);
+}
+
+/* RX_TXCTRL - reg:0x28, sub-reg:0x0C */
+void DWM1000Class::rftxctrl() {
+	byte rftxctrl[LEN_RF_TXCTRL];
+	if(_channel == CHANNEL_1) {
+		DWM1000Utils::writeValueToBytes(rftxctrl, 0x00005C40L, LEN_RF_TXCTRL);
+	} else if(_channel == CHANNEL_2) {
+		DWM1000Utils::writeValueToBytes(rftxctrl, 0x00045CA0L, LEN_RF_TXCTRL);
+	} else if(_channel == CHANNEL_3) {
+		DWM1000Utils::writeValueToBytes(rftxctrl, 0x00086CC0L, LEN_RF_TXCTRL);
+	} else if(_channel == CHANNEL_4) {
+		DWM1000Utils::writeValueToBytes(rftxctrl, 0x00045C80L, LEN_RF_TXCTRL);
+	} else if(_channel == CHANNEL_5) {
+		DWM1000Utils::writeValueToBytes(rftxctrl, 0x001E3FE0L, LEN_RF_TXCTRL);
+	} else if(_channel == CHANNEL_7) {
+		DWM1000Utils::writeValueToBytes(rftxctrl, 0x001E7DE0L, LEN_RF_TXCTRL);
+	} else {
+		// TODO proper error/warning handling
+	}
+	writeBytes(RF_CONF, RF_TXCTRL_SUB, rftxctrl, LEN_RF_TXCTRL);
+}
+
+/* TC_PGDELAY - reg:0x2A, sub-reg:0x0B, table 40 */
+void DWM1000Class::tcpgdelay() {
+	byte tcpgdelay[LEN_TC_PGDELAY];	
+	if(_channel == CHANNEL_1) {
+		DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC9, LEN_TC_PGDELAY);
+	} else if(_channel == CHANNEL_2) {
+		DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC2, LEN_TC_PGDELAY);
+	} else if(_channel == CHANNEL_3) {
+		DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC5, LEN_TC_PGDELAY);
+	} else if(_channel == CHANNEL_4) {
+		DWM1000Utils::writeValueToBytes(tcpgdelay, 0x95, LEN_TC_PGDELAY);
+	} else if(_channel == CHANNEL_5) {
+		DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC0, LEN_TC_PGDELAY);
+	} else if(_channel == CHANNEL_7) {
+		DWM1000Utils::writeValueToBytes(tcpgdelay, 0x93, LEN_TC_PGDELAY);
+	} else {
+		// TODO proper error/warning handling
+	}
+	writeBytes(TX_CAL, TC_PGDELAY_SUB, tcpgdelay, LEN_TC_PGDELAY);
+}
+
+// FS_PLLCFG and FS_PLLTUNE - reg:0x2B, sub-reg:0x07-0x0B, tables 43-44
+void DWM1000Class::fspll() {
+	byte fspllcfg[LEN_FS_PLLCFG];
+	byte fsplltune[LEN_FS_PLLTUNE];
+	if(_channel == CHANNEL_1) {
+		DWM1000Utils::writeValueToBytes(fspllcfg, 0x09000407L, LEN_FS_PLLCFG);
+		DWM1000Utils::writeValueToBytes(fsplltune, 0x1E, LEN_FS_PLLTUNE);
+	} else if(_channel == CHANNEL_2 || _channel == CHANNEL_4) {
+		DWM1000Utils::writeValueToBytes(fspllcfg, 0x08400508L, LEN_FS_PLLCFG);
+		DWM1000Utils::writeValueToBytes(fsplltune, 0x26, LEN_FS_PLLTUNE);
+	} else if(_channel == CHANNEL_3) {
+		DWM1000Utils::writeValueToBytes(fspllcfg, 0x08401009L, LEN_FS_PLLCFG);
+		DWM1000Utils::writeValueToBytes(fsplltune, 0x56, LEN_FS_PLLTUNE);
+	} else if(_channel == CHANNEL_5 || _channel == CHANNEL_7) {
+		DWM1000Utils::writeValueToBytes(fspllcfg, 0x0800041DL, LEN_FS_PLLCFG);
+		DWM1000Utils::writeValueToBytes(fsplltune, 0xBE, LEN_FS_PLLTUNE);
+	} else {
+		// TODO proper error/warning handling
+	}
+	writeBytes(FS_CTRL, FS_PLLTUNE_SUB, fsplltune, LEN_FS_PLLTUNE);
+	writeBytes(FS_CTRL, FS_PLLCFG_SUB, fspllcfg, LEN_FS_PLLCFG);
+}
+
+/* Crystal calibration from OTP (if available)
+ * FS_XTALT - reg:0x2B, sub-reg:0x0E
+ * OTP(one-time-programmable) memory map - table 10 */
+void DWM1000Class::fsxtalt() {
+	byte fsxtalt[LEN_FS_XTALT];
 	byte buf_otp[4];
 	readBytesOTP(0x01E, buf_otp); //0x01E -> byte[0]=XTAL_Trim
 	if (buf_otp[0] == 0) {
@@ -662,24 +732,28 @@ void DWM1000Class::tune() {
 		DWM1000Utils::writeValueToBytes(fsxtalt, ((buf_otp[0] & 0x1F) | 0x60), LEN_FS_XTALT);
 	}
 	// write configuration back to chip
-	writeBytes(AGC_TUNE, AGC_TUNE1_SUB, agctune1, LEN_AGC_TUNE1);
-	writeBytes(AGC_TUNE, AGC_TUNE2_SUB, agctune2, LEN_AGC_TUNE2);
-	writeBytes(AGC_TUNE, AGC_TUNE3_SUB, agctune3, LEN_AGC_TUNE3);
-	writeBytes(DRX_TUNE, DRX_TUNE0b_SUB, drxtune0b, LEN_DRX_TUNE0b);
-	writeBytes(DRX_TUNE, DRX_TUNE1a_SUB, drxtune1a, LEN_DRX_TUNE1a);
-	writeBytes(DRX_TUNE, DRX_TUNE1b_SUB, drxtune1b, LEN_DRX_TUNE1b);
-	writeBytes(DRX_TUNE, DRX_TUNE2_SUB, drxtune2, LEN_DRX_TUNE2);
-	writeBytes(DRX_TUNE, DRX_TUNE4H_SUB, drxtune4H, LEN_DRX_TUNE4H);
-	writeBytes(LDE_IF, LDE_CFG1_SUB, ldecfg1, LEN_LDE_CFG1);
-	writeBytes(LDE_IF, LDE_CFG2_SUB, ldecfg2, LEN_LDE_CFG2);
-	writeBytes(LDE_IF, LDE_REPC_SUB, lderepc, LEN_LDE_REPC);
-	writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
-	writeBytes(RF_CONF, RF_RXCTRLH_SUB, rfrxctrlh, LEN_RF_RXCTRLH);
-	writeBytes(RF_CONF, RF_TXCTRL_SUB, rftxctrl, LEN_RF_TXCTRL);
-	writeBytes(TX_CAL, TC_PGDELAY_SUB, tcpgdelay, LEN_TC_PGDELAY);
-	writeBytes(FS_CTRL, FS_PLLTUNE_SUB, fsplltune, LEN_FS_PLLTUNE);
-	writeBytes(FS_CTRL, FS_PLLCFG_SUB, fspllcfg, LEN_FS_PLLCFG);
 	writeBytes(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
+}
+
+void DWM1000Class::tune() {
+	// these registers are going to be tuned/configured
+	agctune1();
+	agctune2();
+	agctune3();
+	drxtune0b();
+	drxtune1a();
+	drxtune1b();
+	drxtune2();
+	drxtune4H();
+	ldecfg1();
+	ldecfg2();
+	lderepc();
+	txpower();
+	rfrxctrlh();
+	rftxctrl();
+	tcpgdelay();
+	fspll();
+	fsxtalt();
 }
 
 /* ###########################################################################

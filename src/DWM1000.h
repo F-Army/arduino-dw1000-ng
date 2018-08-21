@@ -21,7 +21,6 @@
 
 #pragma once
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <Arduino.h>
@@ -439,6 +438,25 @@ public:
 	static void useExtendedFrameLength(boolean val);
 	// TODO is implemented, but needs testing
 	static void waitForResponse(boolean val);
+
+	// Helper functions for tune
+	static void agctune1();
+	static void agctune2();
+	static void agctune3();
+	static void drxtune0b();
+	static void drxtune1a();
+	static void drxtune1b();
+	static void drxtune2();
+	static void drxtune4H();
+	static void ldecfg1();
+	static void ldecfg2();
+	static void lderepc();
+	static void txpower();
+	static void rfrxctrlh();
+	static void rftxctrl();
+	static void tcpgdelay();
+	static void fspll();
+	static void fsxtalt();
 	
 	/* tuning according to mode.(Very important) */
 	static void tune();
