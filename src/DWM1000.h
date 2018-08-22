@@ -407,7 +407,6 @@ public:
 	static byte       _dataRate;
 	static byte       _pacSize;
 	static DWM1000Time _antennaDelay;
-	static boolean    _antennaCalibrated;
 	
 	/* internal helper to remember how to properly act. */
 	static boolean _permanentReceive;
