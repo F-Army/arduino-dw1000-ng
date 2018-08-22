@@ -68,8 +68,7 @@ byte       DWM1000Class::_dataRate            = TRX_RATE_6800KBPS;
 byte       DWM1000Class::_preambleLength      = TX_PREAMBLE_LEN_128;
 byte       DWM1000Class::_preambleCode        = PREAMBLE_CODE_16MHZ_4;
 byte       DWM1000Class::_channel             = CHANNEL_5;
-DWM1000Time DWM1000Class::_antennaDelay;
-boolean	   DWM1000Class::_antennaCalibrated	 = false;
+DWM1000Time DWM1000Class::_antennaDelay( (int64_t)16384 );
 boolean    DWM1000Class::_smartPower          = false;
 
 boolean    DWM1000Class::_frameCheck          = true;
@@ -1057,7 +1056,6 @@ void DWM1000Class::interruptOnAutomaticAcknowledgeTrigger(boolean val) {
 
 void DWM1000Class::setAntennaDelay(const uint16_t value) {
 	_antennaDelay.setTimestamp(value);
-	_antennaCalibrated = true;
 }
 
 uint16_t DWM1000Class::getAntennaDelay() {
@@ -1129,10 +1127,6 @@ void DWM1000Class::commitConfiguration() {
 	tune();
 	// TODO check not larger two bytes integer
 	byte antennaDelayBytes[DWM1000Time::LENGTH_TIMESTAMP];
-	if( _antennaDelay.getTimestamp() == 0 && _antennaCalibrated == false) {
-		_antennaDelay.setTimestamp(16384);
-		_antennaCalibrated = true;
-	} // Compatibility with old versions.
 	_antennaDelay.getTimestamp(antennaDelayBytes);
 	writeBytes(TX_ANTD, NO_SUB, antennaDelayBytes, LEN_TX_ANTD);
 	writeBytes(LDE_IF, LDE_RXANTD_SUB, antennaDelayBytes, LEN_LDE_RXANTD);
