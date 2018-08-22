@@ -47,7 +47,7 @@ public:
 	static constexpr float TIME_RES     = 0.000015650040064103f;
 	static constexpr float TIME_RES_INV = 63897.6f;
 	
-	// Speed of radio waves [m/s] * timestamp resolution [~15.65ps] of DWM1000
+	/* Speed of radio waves (light) [m/s] * timestamp resolution [~15.65ps] of DWM1000 */
 	static constexpr float DISTANCE_OF_RADIO     = 0.0046917639786159f;
 	static constexpr float DISTANCE_OF_RADIO_INV = 213.139451293f;
 	
