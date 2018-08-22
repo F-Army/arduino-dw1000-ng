@@ -61,29 +61,22 @@ byte DWM1000Class::_vmeas3v3 = 0;
 byte DWM1000Class::_tmeas23C = 0;
 
 // driver internal state
-byte       DWM1000Class::_extendedFrameLength = FRAME_LENGTH_NORMAL;
-byte       DWM1000Class::_pacSize             = PAC_SIZE_8;
-byte       DWM1000Class::_pulseFrequency      = TX_PULSE_FREQ_16MHZ;
-byte       DWM1000Class::_dataRate            = TRX_RATE_6800KBPS;
-byte       DWM1000Class::_preambleLength      = TX_PREAMBLE_LEN_128;
-byte       DWM1000Class::_preambleCode        = PREAMBLE_CODE_16MHZ_4;
-byte       DWM1000Class::_channel             = CHANNEL_5;
-DWM1000Time DWM1000Class::_antennaDelay( (int64_t)16384 );
-boolean    DWM1000Class::_smartPower          = false;
-
-boolean    DWM1000Class::_frameCheck          = true;
+byte       DWM1000Class::_extendedFrameLength;
+byte       DWM1000Class::_pacSize;
+byte       DWM1000Class::_pulseFrequency;
+byte       DWM1000Class::_dataRate;
+byte       DWM1000Class::_preambleLength;
+byte       DWM1000Class::_preambleCode;
+byte       DWM1000Class::_channel;
+boolean    DWM1000Class::_smartPower;
+boolean    DWM1000Class::_frameCheck;
+uint8_t    DWM1000Class::_deviceMode;
 boolean    DWM1000Class::_permanentReceive    = false;
-uint8_t    DWM1000Class::_deviceMode          = IDLE_MODE; // TODO replace by enum
-
 boolean    DWM1000Class::_debounceClockEnabled = false;
+DWM1000Time DWM1000Class::_antennaDelay((int64_t) 16384);
 
 // SPI settings
-#ifdef ESP8266
-	// default ESP8266 frequency is 80 Mhz, thus divide by 4 is 20 MHz
-	const SPISettings DWM1000Class::_fastSPI = SPISettings(20000000L, MSBFIRST, SPI_MODE0);
-#else
-	const SPISettings DWM1000Class::_fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
-#endif
+const SPISettings DWM1000Class::_fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
 const SPISettings DWM1000Class::_slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
 const SPISettings* DWM1000Class::_currentSPI = &_fastSPI;
 
@@ -144,21 +137,17 @@ void DWM1000Class::reselect(uint8_t ss) {
 void DWM1000Class::begin(uint8_t irq, uint8_t rst) {
 	// generous initial init/wake-up-idle delay
 	delay(5);
-	// Configure the IRQ pin as INPUT. Required for correct interrupt setting for ESP8266
-    	pinMode(irq, INPUT);
 	// start SPI
 	SPI.begin();
-#ifndef ESP8266
-	SPI.usingInterrupt(digitalPinToInterrupt(irq)); // not every board support this, e.g. ESP8266
-#endif
+	SPI.usingInterrupt(digitalPinToInterrupt(irq));
 	// pin and basic member setup
 	_rst        = rst;
 	_irq        = irq;
 	_deviceMode = IDLE_MODE;
 	// attach interrupt
-	//attachInterrupt(_irq, DWM1000Class::handleInterrupt, CHANGE); // todo interrupt for ESP8266
+	//attachInterrupt(_irq, DWM1000Class::handleInterrupt, CHANGE);
 	// TODO throw error if pin is not a interrupt pin
-	attachInterrupt(digitalPinToInterrupt(_irq), DWM1000Class::handleInterrupt, RISING); // todo interrupt for ESP8266
+	attachInterrupt(digitalPinToInterrupt(_irq), DWM1000Class::handleInterrupt, RISING);
 }
 
 void DWM1000Class::manageLDE() {
