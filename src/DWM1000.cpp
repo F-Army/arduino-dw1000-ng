@@ -1314,11 +1314,11 @@ void DWM1000Class::setDefaults() {
 		setReceiverAutoReenable(true);
 		// default mode when powering up the chip
 		// still explicitly selected for later tuning
-		enableMode(MODE_LONGRANGE_LOWPRF_SHORTPREAMBLE);
+		enableMode(MODE_MEDIUMRANGE_HIGHPRF_LONGPREAMBLE);
 		
 		// TODO add channel and code to mode tuples
 	    // TODO add channel and code settings with checks (see DWM1000 user manual 10.5 table 61)/
-	    setChannel(CHANNEL_5);
+	    setChannel(CHANNEL_2);
 	}
 }
 
