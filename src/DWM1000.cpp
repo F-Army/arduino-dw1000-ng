@@ -1583,7 +1583,7 @@ float DWM1000Class::getFirstPathPower() {
 	readBytes(DRX_TUNE, RXPACC_NOSAT_SUB, rxpacc_nosat, LEN_RXPACC_NOSAT);
 	N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
 	
-	if(N == N_Nosat) {
+	if(N == N_nosat) {
 		/* Needs correction */
 		byte sfdLength;
 		readBytes(USR_SFD, SFD_LENGTH_SUB, &sfdLength, LEN_SFD_LENGTH);
@@ -1631,8 +1631,8 @@ float DWM1000Class::getReceivePower() {
 	uint16_t N_nosat;
 	readBytes(DRX_TUNE, RXPACC_NOSAT_SUB, rxpacc_nosat, LEN_RXPACC_NOSAT);
 	N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
-		
-	if(N == N_Nosat) {
+
+	if(N == N_nosat) {
 		/* Needs correction */
 		byte sfdLength;
 		readBytes(USR_SFD, SFD_LENGTH_SUB, &sfdLength, LEN_SFD_LENGTH);
