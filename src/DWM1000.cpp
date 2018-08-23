@@ -1589,11 +1589,11 @@ float DWM1000Class::getFirstPathPower() {
 		readBytes(USR_SFD, SFD_LENGTH_SUB, &sfdLength, LEN_SFD_LENGTH);
 		switch(sfdLength) {
 			case 0x08:
-				N -= 10; break;
+				N += 10; break;
 			case 0x10:
-				N -= 18; break;
+				N += 18; break;
 			case 0x40:
-				N -= 82; break;
+				N += 82; break;
 			default:
 				break;
 		}
@@ -1638,11 +1638,11 @@ float DWM1000Class::getReceivePower() {
 		readBytes(USR_SFD, SFD_LENGTH_SUB, &sfdLength, LEN_SFD_LENGTH);
 		switch(sfdLength) {
 			case 0x08:
-				N -= 10; break;
+				N += 10; break;
 			case 0x10:
-				N -= 18; break;
+				N += 18; break;
 			case 0x40:
-				N -= 82; break;
+				N += 82; break;
 			default:
 				break;
 		}
