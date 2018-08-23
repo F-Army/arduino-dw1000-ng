@@ -1635,6 +1635,10 @@ float DWM1000Class::getReceivePower() {
 	byte rxpacc_nosat[LEN_RXPACC_NOSAT];
 	uint16_t N_nosat;
 	readBytes(DRX_TUNE, RXPACC_NOSAT_SUB, rxpacc_nosat, LEN_RXPACC_NOSAT);
+	Serial.print("Nosat ");
+	Serial.print((uint16_t)rxpacc_nosat[0]);
+	Serial.print(" ");
+	Serial.println((uint16_t)rxpacc_nosat[1]);
 	N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
 	Serial.print("N: ");
 	Serial.print(N);
