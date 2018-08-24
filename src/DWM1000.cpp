@@ -1582,10 +1582,6 @@ float DWM1000Class::getFirstPathPower() {
 	uint16_t N_nosat;
 	readBytes(DRX_TUNE, RXPACC_NOSAT_SUB, rxpacc_nosat, LEN_RXPACC_NOSAT);
 	N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
-	Serial.print("N: ");
-	Serial.print(N);
-	Serial.print(" , N_nosat: ");
-	Serial.println(N_nosat);
 	if(N == N_nosat) {
 		/* Needs correction */
 		byte sfdLength;
@@ -1600,8 +1596,6 @@ float DWM1000Class::getFirstPathPower() {
 			default:
 				break;
 		}
-		Serial.print("New N: ");
-		Serial.println(N);
 	}
 
 	if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
@@ -1635,15 +1629,8 @@ float DWM1000Class::getReceivePower() {
 	byte rxpacc_nosat[LEN_RXPACC_NOSAT];
 	uint16_t N_nosat;
 	readBytes(DRX_TUNE, RXPACC_NOSAT_SUB, rxpacc_nosat, LEN_RXPACC_NOSAT);
-	Serial.print("Nosat ");
-	Serial.print((uint16_t)rxpacc_nosat[0]);
-	Serial.print(" ");
-	Serial.println((uint16_t)rxpacc_nosat[1]);
 	N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
-	Serial.print("N: ");
-	Serial.print(N);
-	Serial.print(" , N_nosat: ");
-	Serial.println(N_nosat);	if(N == N_nosat) {
+	if(N == N_nosat) {
 		/* Needs correction */
 		byte sfdLength;
 		readBytes(USR_SFD, SFD_LENGTH_SUB, &sfdLength, LEN_SFD_LENGTH);
@@ -1657,8 +1644,6 @@ float DWM1000Class::getReceivePower() {
 			default:
 				break;
 		}
-		Serial.print("New N: ");
-		Serial.println(N);
 	}
 
 	if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
