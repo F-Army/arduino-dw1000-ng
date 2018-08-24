@@ -193,11 +193,13 @@
 #define DRX_TUNE1b_SUB 0x06
 #define DRX_TUNE2_SUB 0x08
 #define DRX_TUNE4H_SUB 0x26
+#define RXPACC_NOSAT_SUB 0x2C
 #define LEN_DRX_TUNE0b 2
 #define LEN_DRX_TUNE1a 2
 #define LEN_DRX_TUNE1b 2
 #define LEN_DRX_TUNE2 4
 #define LEN_DRX_TUNE4H 2
+#define LEN_RXPACC_NOSAT 2
 
 // LDE_CFG1 (for re-tuning only)
 #define LDE_IF 0x2E
