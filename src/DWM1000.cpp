@@ -73,6 +73,7 @@ boolean    DWM1000Class::_frameCheck;
 uint8_t    DWM1000Class::_deviceMode;
 boolean    DWM1000Class::_permanentReceive    = false;
 boolean    DWM1000Class::_debounceClockEnabled = false;
+boolean    DWM1000Class::_nlos = false;
 DWM1000Time DWM1000Class::_antennaDelay((int64_t) 16384);
 
 // SPI settings
@@ -441,7 +442,7 @@ void DWM1000Class::drxtune4H() {
 /* LDE_CFG1 - reg 0x2E, sub-reg:0x0806 */
 void DWM1000Class::ldecfg1() {
 	byte ldecfg1[LEN_LDE_CFG1];
-	DWM1000Utils::writeValueToBytes(ldecfg1, 0xD, LEN_LDE_CFG1);
+	_nlos == true ? DWM1000Utils::writeValueToBytes(ldecfg1, 0x7, LEN_LDE_CFG1) : DWM1000Utils::writeValueToBytes(ldecfg1, 0xD, LEN_LDE_CFG1);
 	writeBytes(LDE_IF, LDE_CFG1_SUB, ldecfg1, LEN_LDE_CFG1);
 }
 
@@ -449,7 +450,7 @@ void DWM1000Class::ldecfg1() {
 void DWM1000Class::ldecfg2() {
 	byte ldecfg2[LEN_LDE_CFG2];	
 	if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-		DWM1000Utils::writeValueToBytes(ldecfg2, 0x1607, LEN_LDE_CFG2);
+		_nlos == true ? DWM1000Utils::writeValueToBytes(ldecfg2, 0x0003, LEN_LDE_CFG2) : DWM1000Utils::writeValueToBytes(ldecfg2, 0x1607, LEN_LDE_CFG2);
 	} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
 		DWM1000Utils::writeValueToBytes(ldecfg2, 0x0607, LEN_LDE_CFG2);
 	} else {
@@ -1127,6 +1128,10 @@ void DWM1000Class::waitForResponse(boolean val) {
 
 void DWM1000Class::suppressFrameCheck(boolean val) {
 	_frameCheck = !val;
+}
+
+void DWM1000Class::setNLOS(boolean val) {
+	_nlos = val;
 }
 
 void DWM1000Class::useSmartPower(boolean smartPower) {

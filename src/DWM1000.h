@@ -197,6 +197,17 @@ public:
 	@param[in] val `true` to suppress frame check on sender and receiver side, `false` otherwise.
 	*/
 	static void suppressFrameCheck(boolean val);
+
+	/* 
+	Set internal helper for better tuning of values in NLOS applications 
+	You should use PRF at 16 Mhz and preamble code length of 1024 or greater as stated by application notes.
+	   
+	With NLOS optimized values you have a higher chance of incorrect readings (~5%)
+	For further information consult DW1000 Application notes APS006 - Part 2
+
+	@param[in] val `true` to set nlos optimizations, `false` otherwise.
+	*/
+	static void setNLOS(boolean val);
 	
 	/** 
 	Specifies the data transmission rate of the DWM1000 chip. One of the values
@@ -411,6 +422,7 @@ public:
 	/* internal helper to remember how to properly act. */
 	static boolean _permanentReceive;
 	static boolean _frameCheck;
+	static boolean _nlos;
 	
 	/* whether RX or TX is active */
 	static uint8_t _deviceMode;
