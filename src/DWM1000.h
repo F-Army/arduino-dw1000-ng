@@ -472,7 +472,7 @@ public:
 	static void fsxtalt();
 	
 	/* function to write configurations to registers */
-	static void writeConfiguration(); 
+	static void writeConfiguration();
 
 	/* tuning according to mode.(Very important) */
 	static void tune();

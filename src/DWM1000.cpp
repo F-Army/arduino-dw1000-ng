@@ -724,7 +724,7 @@ void DWM1000Class::fsxtalt() {
 	writeBytes(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
 }
 
-void DWM1000::writeConfiguration() {
+void DWM1000Class::writeConfiguration() {
 	// write all configurations back to device
 	writeNetworkIdAndDeviceAddress();
 	writeSystemConfigurationRegister();
