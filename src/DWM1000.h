@@ -471,6 +471,9 @@ public:
 	static void fspll();
 	static void fsxtalt();
 	
+	/* function to write configurations to registers */
+	static void writeConfiguration(); 
+
 	/* tuning according to mode.(Very important) */
 	static void tune();
 	
@@ -501,6 +504,7 @@ public:
 	static void writeChannelControlRegister();
 	static void readTransmitFrameControlRegister();
 	static void writeTransmitFrameControlRegister();
+	static void writeAntennaDelayRegisters();
 	
 	/* clock management. */
 	static void enableClock(byte clock);

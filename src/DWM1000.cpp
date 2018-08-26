@@ -724,6 +724,16 @@ void DWM1000Class::fsxtalt() {
 	writeBytes(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
 }
 
+void DWM1000::writeConfiguration() {
+	// write all configurations back to device
+	writeNetworkIdAndDeviceAddress();
+	writeSystemConfigurationRegister();
+	writeChannelControlRegister();
+	writeTransmitFrameControlRegister();
+	writeSystemEventMaskRegister();
+	writeAntennaDelayRegisters();
+}
+
 void DWM1000Class::tune() {
 	// these registers are going to be tuned/configured
 	agctune1();
@@ -909,6 +919,13 @@ void DWM1000Class::readTransmitFrameControlRegister() {
 
 void DWM1000Class::writeTransmitFrameControlRegister() {
 	writeBytes(TX_FCTRL, NO_SUB, _txfctrl, LEN_TX_FCTRL);
+}
+
+void DWM1000Class::writeAntennaDelayRegisters() {
+	byte antennaDelayBytes[DWM1000Time::LENGTH_TIMESTAMP];
+	_antennaDelay.getTimestamp(antennaDelayBytes);
+	writeBytes(TX_ANTD, NO_SUB, antennaDelayBytes, LEN_TX_ANTD);
+	writeBytes(LDE_IF, LDE_RXANTD_SUB, antennaDelayBytes, LEN_LDE_RXANTD);
 }
 
 /* ###########################################################################
@@ -1107,19 +1124,10 @@ void DWM1000Class::newConfiguration() {
 }
 
 void DWM1000Class::commitConfiguration() {
-	// write all configurations back to device
-	writeNetworkIdAndDeviceAddress();
-	writeSystemConfigurationRegister();
-	writeChannelControlRegister();
-	writeTransmitFrameControlRegister();
-	writeSystemEventMaskRegister();
+	// writes configuration to registers
+	writeConfiguration();
 	// tune according to configuration
 	tune();
-	// TODO check not larger two bytes integer
-	byte antennaDelayBytes[DWM1000Time::LENGTH_TIMESTAMP];
-	_antennaDelay.getTimestamp(antennaDelayBytes);
-	writeBytes(TX_ANTD, NO_SUB, antennaDelayBytes, LEN_TX_ANTD);
-	writeBytes(LDE_IF, LDE_RXANTD_SUB, antennaDelayBytes, LEN_LDE_RXANTD);
 }
 
 void DWM1000Class::waitForResponse(boolean val) {
