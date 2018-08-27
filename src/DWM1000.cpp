@@ -1134,6 +1134,12 @@ void DWM1000Class::useSmartPower(boolean smartPower) {
 	DWM1000Utils::setBit(_syscfg, LEN_SYS_CFG, DIS_STXP_BIT, !smartPower);
 }
 
+void DWM1000Class::setTXPower(int32_t power) {
+	byte txpower[LEN_TX_POWER];
+	DWM1000Utils::writeValueToBytes(txpower, power, LEN_TX_POWER);
+	writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
+}
+
 DWM1000Time DWM1000Class::setDelay(const DWM1000Time& delay) {
 	if(_deviceMode == TX_MODE) {
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXDLYS_BIT, true);

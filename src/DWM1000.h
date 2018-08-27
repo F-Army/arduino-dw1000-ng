@@ -229,6 +229,7 @@ public:
 	@param[in] freq The PRF, encoded by the above defined constants.
 	*/
 	static void setPulseFrequency(byte freq);
+
 	static byte getPulseFrequency();
 	static void setPreambleLength(byte prealen);
 	
@@ -250,8 +251,12 @@ public:
 	@param[in] channel The Number of channel, encoded by the above defined constants.
 	 */
 	static void setChannel(byte channel);
+
 	static void setPreambleCode(byte preacode);
 	static void useSmartPower(boolean smartPower);
+
+	static void setTXPower(int32_t power);
+	
 	
 	/* transmit and receive configuration. */
 	static DWM1000Time   setDelay(const DWM1000Time& delay);
