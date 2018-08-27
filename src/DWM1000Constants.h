@@ -400,7 +400,7 @@ constexpr byte BIAS_500_64[] = {110, 105, 100, 93, 82, 69, 51, 27, 0, 21, 35, 42
 constexpr byte BIAS_900_16[] = {137, 122, 105, 88, 69, 47, 25, 0, 21, 48, 79, 105, 127, 147, 160, 169, 178, 197};
 constexpr byte BIAS_900_64[] = {147, 133, 117, 99, 75, 50, 29, 0, 24, 45, 63, 76, 87, 98, 116, 122, 132, 142};
 
-enum class DriverAmplifierValues : int8_t {
+enum class DriverAmplifierValues : uint8_t {
     dB_18,
     dB_15,
     dB_12,
@@ -408,10 +408,10 @@ enum class DriverAmplifierValues : int8_t {
     dB_6,
     dB_3,
     dB_0,
-    off
+    OFF
 };
 
-enum class TransmitMixerValues : int8_t {
+enum class TransmitMixerValues : uint8_t {
     dB_0, 
     dB_0_5, 
     dB_1, 

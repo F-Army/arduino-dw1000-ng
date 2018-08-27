@@ -1141,11 +1141,11 @@ void DWM1000Class::setTXPower(int32_t power) {
 }
 
 void DWM1000Class::setTXPower(DriverAmplifierValues driver_amplifier, TransmitMixerValues mixer) {
-	int8_t pwr = 0x0; 
+	uint8_t pwr = 0x0;
 	int32_t txpower = 0x0;
 
-	pwr |= ((int8_t) driver_amplifier << 5);
-	pwr |= (int8_t) mixer;
+	pwr |= ((uint8_t) driver_amplifier << 5);
+	pwr |= (uint8_t) mixer;
 
 	for(auto i = 0; i < 4; i++) {
 		txpower << i * 8; 
