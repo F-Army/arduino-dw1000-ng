@@ -1127,11 +1127,11 @@ void DWM1000Class::newConfiguration() {
 	readSystemEventMaskRegister();
 }
 
-void DWM1000Class::commitConfiguration(TXPowerMode option) {
+void DWM1000Class::commitConfiguration(TXPowerMode mode) {
 	// writes configuration to registers
 	writeConfiguration();
 	// tune according to configuration
-	tune(option);
+	tune(mode);
 }
 
 void DWM1000Class::waitForResponse(boolean val) {
