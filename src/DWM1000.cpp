@@ -1144,8 +1144,8 @@ void DWM1000Class::setTXPower(DriverAmplifierValue driver_amplifier, TransmitMix
 	byte txpower[LEN_TX_POWER];
 	byte pwr = 0x00;
 
-	pwr |= ((uint8_t) driver_amplifier << 5);
-	pwr |= (uint8_t) mixer;
+	pwr |= ((byte) driver_amplifier << 5);
+	pwr |= (byte) mixer;
 
 	for(auto i = 0; i < LEN_TX_POWER; i++) {
 		txpower[i] = pwr;
