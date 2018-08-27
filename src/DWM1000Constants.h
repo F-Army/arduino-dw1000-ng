@@ -445,3 +445,5 @@ enum class TransmitMixerValue : byte {
     dB_15,
     dB_15_5
 };
+
+enum class TXPowerMode { AUTO_POWER, MANUAL_POWER };

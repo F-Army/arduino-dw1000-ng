@@ -333,7 +333,8 @@ public:
 	
 	// general configuration state
 	static void newConfiguration();
-	static void commitConfiguration();
+
+	static void commitConfiguration(TXPowerMode mode = TXPowerMode::AUTO_POWER);
 	
 	// reception state
 	static void newReceive();
@@ -485,7 +486,7 @@ public:
 	static void writeConfiguration();
 
 	/* tuning according to mode.(Very important) */
-	static void tune();
+	static void tune(TXPowerMode mode);
 	
 	/* device status flags */
 	static boolean isReceiveTimestampAvailable();

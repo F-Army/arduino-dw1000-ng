@@ -734,7 +734,7 @@ void DWM1000Class::writeConfiguration() {
 	writeAntennaDelayRegisters();
 }
 
-void DWM1000Class::tune() {
+void DWM1000Class::tune(TXPowerMode mode) {
 	// these registers are going to be tuned/configured
 	agctune1();
 	agctune2();
@@ -747,7 +747,11 @@ void DWM1000Class::tune() {
 	ldecfg1();
 	ldecfg2();
 	lderepc();
-	txpower();
+
+	if(mode == TXPowerMode::AUTO_POWER) { 
+		txpower(); 
+	}
+
 	rfrxctrlh();
 	rftxctrl();
 	tcpgdelay();
@@ -1123,11 +1127,11 @@ void DWM1000Class::newConfiguration() {
 	readSystemEventMaskRegister();
 }
 
-void DWM1000Class::commitConfiguration() {
+void DWM1000Class::commitConfiguration(TXPowerMode mode) {
 	// writes configuration to registers
 	writeConfiguration();
 	// tune according to configuration
-	tune();
+	tune(mode);
 }
 
 void DWM1000Class::waitForResponse(boolean val) {
