@@ -1147,6 +1147,26 @@ void DWM1000Class::useSmartPower(boolean smartPower) {
 	DWM1000Utils::setBit(_syscfg, LEN_SYS_CFG, DIS_STXP_BIT, !smartPower);
 }
 
+void DWM1000Class::setTXPower(int32_t power) {
+	byte txpower[LEN_TX_POWER];
+	DWM1000Utils::writeValueToBytes(txpower, power, LEN_TX_POWER);
+	writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
+}
+
+void DWM1000Class::setTXPower(DriverAmplifierValue driver_amplifier, TransmitMixerValue mixer) {
+	byte txpower[LEN_TX_POWER];
+	byte pwr = 0x00;
+
+	pwr |= ((byte) driver_amplifier << 5);
+	pwr |= (byte) mixer;
+
+	for(auto i = 0; i < LEN_TX_POWER; i++) {
+		txpower[i] = pwr;
+	}
+
+	writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
+}
+
 DWM1000Time DWM1000Class::setDelay(const DWM1000Time& delay) {
 	if(_deviceMode == TX_MODE) {
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXDLYS_BIT, true);
@@ -1792,4 +1812,53 @@ void DWM1000Class::writeBytes(byte cmd, uint16_t offset, byte data[], uint16_t d
 	delayMicroseconds(5);
 	digitalWrite(_ss, HIGH);
 	SPI.endTransaction();
+}
+
+void DWM1000Class::getPrettyBytes(byte data[], char msgBuffer[], uint16_t n) {
+	uint16_t i, j, b;
+	b     = sprintf(msgBuffer, "Data, bytes: %d\nB: 7 6 5 4 3 2 1 0\n", n); // TODO - type
+	for(i = 0; i < n; i++) {
+		byte curByte = data[i];
+		snprintf(&msgBuffer[b++], 2, "%d", (i+1));
+		msgBuffer[b++] = (char)((i+1) & 0xFF);
+		msgBuffer[b++] = ':';
+		msgBuffer[b++] = ' ';
+		for(j = 0; j < 8; j++) {
+			msgBuffer[b++] = ((curByte >> (7-j)) & 0x01) ? '1' : '0';
+			if(j < 7) {
+				msgBuffer[b++] = ' ';
+			} else if(i < n-1) {
+				msgBuffer[b++] = '\n';
+			} else {
+				msgBuffer[b++] = '\0';
+			}
+		}
+	}
+	msgBuffer[b++] = '\0';
+}
+
+void DWM1000Class::getPrettyBytes(byte cmd, uint16_t offset, char msgBuffer[], uint16_t n) {
+	uint16_t i, j, b;
+	byte* readBuf = (byte*)malloc(n);
+	readBytes(cmd, offset, readBuf, n);
+	b     = sprintf(msgBuffer, "Reg: 0x%02x, bytes: %d\nB: 7 6 5 4 3 2 1 0\n", cmd, n);  // TODO - tpye
+	for(i = 0; i < n; i++) {
+		byte curByte = readBuf[i];
+		snprintf(&msgBuffer[b++], 2, "%d", (i+1));
+		msgBuffer[b++] = (char)((i+1) & 0xFF);
+		msgBuffer[b++] = ':';
+		msgBuffer[b++] = ' ';
+		for(j = 0; j < 8; j++) {
+			msgBuffer[b++] = ((curByte >> (7-j)) & 0x01) ? '1' : '0';
+			if(j < 7) {
+				msgBuffer[b++] = ' ';
+			} else if(i < n-1) {
+				msgBuffer[b++] = '\n';
+			} else {
+				msgBuffer[b++] = '\0';
+			}
+		}
+	}
+	msgBuffer[b++] = '\0';
+	free(readBuf);
 }

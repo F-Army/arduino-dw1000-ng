@@ -240,6 +240,7 @@ public:
 	@param[in] freq The PRF, encoded by the above defined constants.
 	*/
 	static void setPulseFrequency(byte freq);
+
 	static byte getPulseFrequency();
 	static void setPreambleLength(byte prealen);
 	
@@ -261,8 +262,13 @@ public:
 	@param[in] channel The Number of channel, encoded by the above defined constants.
 	 */
 	static void setChannel(byte channel);
+
 	static void setPreambleCode(byte preacode);
 	static void useSmartPower(boolean smartPower);
+
+	static void setTXPower(int32_t power);
+	static void setTXPower(DriverAmplifierValue driver_amplifier, TransmitMixerValue mixer);
+	
 	
 	/* transmit and receive configuration. */
 	static DWM1000Time   setDelay(const DWM1000Time& delay);
@@ -378,6 +384,10 @@ public:
 	static void getTemp(float& temp);
 	static void getVbat(float& vbat);
 	static void getTempAndVbat(float& temp, float& vbat);
+
+	/* Debug helpers */
+	static void getPrettyBytes(byte data[], char msgBuffer[], uint16_t n);
+	static void getPrettyBytes(byte cmd, uint16_t offset, char msgBuffer[], uint16_t n);
 
 //private:
 	/* chip select, reset and interrupt pins. */
