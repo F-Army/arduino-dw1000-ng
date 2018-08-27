@@ -375,8 +375,8 @@ public:
 	static void getTempAndVbat(float& temp, float& vbat);
 
 	/* Debug helpers */
-	static void DWM1000Class::getPrettyBytes(byte data[], char msgBuffer[], uint16_t n);
-	static void DWM1000Class::getPrettyBytes(byte cmd, uint16_t offset, char msgBuffer[], uint16_t n);
+	static void getPrettyBytes(byte data[], char msgBuffer[], uint16_t n);
+	static void getPrettyBytes(byte cmd, uint16_t offset, char msgBuffer[], uint16_t n);
 
 //private:
 	/* chip select, reset and interrupt pins. */
