@@ -256,6 +256,7 @@ public:
 	static void useSmartPower(boolean smartPower);
 
 	static void setTXPower(int32_t power);
+	static void setTXPower(DriverAmplifierValues driver_amplifier, TransmitMixerValues mixer);
 	
 	
 	/* transmit and receive configuration. */

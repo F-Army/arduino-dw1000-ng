@@ -1140,6 +1140,21 @@ void DWM1000Class::setTXPower(int32_t power) {
 	writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
 }
 
+void DWM1000Class::setTXPower(DriverAmplifierValues driver_amplifier, TransmitMixerValues mixer) {
+	int8_t pwr = 0x0; 
+	int32_t txpower = 0x0;
+
+	pwr |= ((int8_t) driver_amplifier << 5);
+	pwr |= (int8_t) mixer;
+
+	for(auto i = 0; i < 4; i++) {
+		txpower << i * 8; 
+		txpower |= pwr;
+	}
+
+	setTXPower(txpower);
+}
+
 DWM1000Time DWM1000Class::setDelay(const DWM1000Time& delay) {
 	if(_deviceMode == TX_MODE) {
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXDLYS_BIT, true);
