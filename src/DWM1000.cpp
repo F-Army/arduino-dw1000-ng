@@ -1621,17 +1621,24 @@ float DWM1000Class::getFirstPathPower() {
 	N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
 	if(N == N_nosat) {
 		/* Needs correction */
+		byte chanCtrl;
 		byte sfdLength;
+		readBytes(CHAN_CTRL, NO_SUB, &chanCtrl, LEN_CHAN_CTRL);
 		readBytes(USR_SFD, SFD_LENGTH_SUB, &sfdLength, LEN_SFD_LENGTH);
-		switch(sfdLength) {
-			case 0x08:
-				N -= 10; break;
-			case 0x10:
-				N -= 18; break;
-			case 0x40:
-				N -= 82; break;
-			default:
-				break;
+		boolean SFD_is_proprietary = DWM1000Utils::getBit(&chanCtrl, LEN_CHAN_CTRL, DWSFD_BIT);
+		if(SFD_is_proprietary) {
+			switch(sfdLength) {
+				case 0x08:
+					N -= 10; break;
+				case 0x10:
+					N -= 18; break;
+				case 0x40:
+					N -= 82; break;
+				default:
+					break;
+			}
+		} else {
+			N -= (sfdLength == 0x08 ? 5 : 64);
 		}
 	}
 
@@ -1662,6 +1669,7 @@ float DWM1000Class::getReceivePower() {
 	readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
 	C = (uint16_t)cirPwrBytes[0] | ((uint16_t)cirPwrBytes[1] << 8);
 	N = (((uint16_t)rxFrameInfo[2] >> 4) & 0xFF) | ((uint16_t)rxFrameInfo[3] << 4);
+	
 	/* Correction of N */
 	byte rxpacc_nosat[LEN_RXPACC_NOSAT];
 	uint16_t N_nosat;
@@ -1669,17 +1677,24 @@ float DWM1000Class::getReceivePower() {
 	N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
 	if(N == N_nosat) {
 		/* Needs correction */
+		byte chanCtrl;
 		byte sfdLength;
+		readBytes(CHAN_CTRL, NO_SUB, &chanCtrl, LEN_CHAN_CTRL);
 		readBytes(USR_SFD, SFD_LENGTH_SUB, &sfdLength, LEN_SFD_LENGTH);
-		switch(sfdLength) {
-			case 0x08:
-				N -= 10; break;
-			case 0x10:
-				N -= 18; break;
-			case 0x40:
-				N -= 82; break;
-			default:
-				break;
+		boolean SFD_is_proprietary = DWM1000Utils::getBit(&chanCtrl, LEN_CHAN_CTRL, DWSFD_BIT);
+		if(SFD_is_proprietary) {
+			switch(sfdLength) {
+				case 0x08:
+					N -= 10; break;
+				case 0x10:
+					N -= 18; break;
+				case 0x40:
+					N -= 82; break;
+				default:
+					break;
+			}
+		} else {
+			N -= (sfdLength == 0x08 ? 5 : 64);
 		}
 	}
 
