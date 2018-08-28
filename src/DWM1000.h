@@ -220,6 +220,8 @@ public:
 
 	See `setDefaults()` and `enableMode()` for additional information on data rate settings.
 
+	WARNING: It resets SFD configuration to recommended in table 21 of DW1000 User manual.
+
 	@param[in] rate The data transmission rate, encoded by the above defined constants.
 	*/
 	static void setDataRate(byte rate);
@@ -248,7 +250,7 @@ public:
 	static void useDecawaveSFD(DecawaveSFDMode mode = DecawaveSFDMode::DEFAULT_MODE);
 
 	static void useStandardSFD();
-	
+
 	static void useRecommendedSFD();
 	
 	/*
