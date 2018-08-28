@@ -249,6 +249,8 @@ public:
 
 	static void useStandardSFD();
 	
+	static void useRecommendedSFD();
+	
 	/*
 	Specifies the channel for transmitting and receiving to and from a DWM1000 module. Once of this values
 	- `CHANNEL_1` (i.e. 3494.4 MHz, bandwidth ~500 MHz)

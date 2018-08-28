@@ -1205,51 +1205,7 @@ void DWM1000Class::setDataRate(byte rate) {
 	} else {
 		DWM1000Utils::setBit(_syscfg, LEN_SYS_CFG, RXM110K_BIT, false);
 	}
-	/* SFD mode and types recommended by DW1000 User manual for optimal performance */
-	if(rate == TRX_RATE_6800KBPS) {
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
-	} else if (rate == TRX_RATE_850KBPS) {
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
-	} else {
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
-	}
-	byte sfdLength;
-	if(rate == TRX_RATE_6800KBPS) {
-		sfdLength = 0x08;
-	} else if(rate == TRX_RATE_850KBPS) {
-		sfdLength = 0x10;
-	} else {
-		sfdLength = 0x40;
-	}
-	writeBytes(USR_SFD, SFD_LENGTH_SUB, &sfdLength, LEN_SFD_LENGTH);
 	_dataRate = rate;
-}
-
-void DWM1000Class::useDecawaveSFD(DecawaveSFDMode mode) {
-	if(_dataRate != TRX_RATE_6800KBPS) { /* Decawave uses standard SFD symbol for 6800 datarate */
-		if(_dataRate == TRX_RATE_110KBPS || mode == DecawaveSFDMode::DEFAULT_MODE) {
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
-		} else { /* 850Kpbs with performance mode */
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
-			writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10); /* Sets 16-symbol SFD rather than 8-symbol */
-		}
-	}
-}
-
-void DWM1000Class::useStandardSFD() {
-	DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
-	DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-	DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
 }
 
 void DWM1000Class::setPulseFrequency(byte freq) {
@@ -1291,6 +1247,52 @@ void DWM1000Class::setPreambleLength(byte prealen) {
 	}
 	
 	_preambleLength = prealen;
+}
+
+void DWM1000Class::useDecawaveSFD(DecawaveSFDMode mode) {
+	if(_dataRate == TRX_RATE_6800KBPS) {
+		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
+		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
+		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+	} else if(_dataRate == TRX_RATE_110KBPS || mode == DecawaveSFDMode::DEFAULT_MODE) {
+		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
+		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
+		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+	} else { /* 850Kpbs with performance mode */
+		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
+		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
+		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
+		writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10); /* Sets 16-symbol SFD rather than 8-symbol */
+	}
+}
+
+void DWM1000Class::useStandardSFD() {
+	DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
+	DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
+	DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+}
+
+void DWM1000Class::useRecommendedSFD() {
+	/* SFD mode and types recommended by DW1000 User manual for optimal performance */
+	switch(_dataRate) {
+		case TRX_RATE_6800KBPS:
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+			break;
+		case TRX_RATE_850KBPS:
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
+			writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10);
+			break;
+		case TRX_RATE_110KBPS:
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+		default:
+			return; //TODO Error handling
+	}
 }
 
 void DWM1000Class::useExtendedFrameLength(boolean val) {
@@ -1373,6 +1375,7 @@ void DWM1000Class::setDefaults() {
 		// default mode when powering up the chip
 		// still explicitly selected for later tuning
 		enableMode(MODE_SHORTRANGE_LOWPRF_MEDIUMPREAMBLE);
+		useRecommendedSFD();
 		
 		// TODO add channel and code to mode tuples
 	    // TODO add channel and code settings with checks (see DWM1000 user manual 10.5 table 61)/
