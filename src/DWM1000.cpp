@@ -1206,6 +1206,7 @@ void DWM1000Class::setDataRate(byte rate) {
 		DWM1000Utils::setBit(_syscfg, LEN_SYS_CFG, RXM110K_BIT, false);
 	}
 	_dataRate = rate;
+	useRecommendedSFD();
 }
 
 void DWM1000Class::setPulseFrequency(byte freq) {
@@ -1375,8 +1376,6 @@ void DWM1000Class::setDefaults() {
 		// default mode when powering up the chip
 		// still explicitly selected for later tuning
 		enableMode(MODE_SHORTRANGE_LOWPRF_MEDIUMPREAMBLE);
-		useRecommendedSFD();
-		
 		// TODO add channel and code to mode tuples
 	    // TODO add channel and code settings with checks (see DWM1000 user manual 10.5 table 61)/
 	    setChannel(CHANNEL_5);
