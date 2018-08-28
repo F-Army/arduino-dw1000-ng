@@ -1231,6 +1231,21 @@ void DWM1000Class::setDataRate(byte rate) {
 	_dataRate = rate;
 }
 
+void DWM1000Class::useDecawaveSFD(DecawaveSFDMode mode) {
+	if(_dataRate != TRX_RATE_6800KBPS) { /* Decawave uses standard SFD symbol for 6800 datarate */
+		if(_dataRate == TRX_RATE_110KBPS || mode == DecawaveSFDMode::DEFAULT_MODE) {
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+		} else { /* 850Kpbs with performance mode */
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
+			writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10); /* Sets 16-symbol SFD rather than 8-symbol */
+		}
+	}
+}
+
 void DWM1000Class::setPulseFrequency(byte freq) {
 	freq &= 0x03;
 	_txfctrl[2] &= 0xFC;
