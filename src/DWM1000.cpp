@@ -1246,6 +1246,12 @@ void DWM1000Class::useDecawaveSFD(DecawaveSFDMode mode) {
 	}
 }
 
+void DWM1000Class::useStandardSFD() {
+	DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
+	DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
+	DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+}
+
 void DWM1000Class::setPulseFrequency(byte freq) {
 	freq &= 0x03;
 	_txfctrl[2] &= 0xFC;

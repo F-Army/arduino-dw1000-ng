@@ -246,6 +246,8 @@ public:
 
 	/* 16-symbol length is recommended for 850Kbps */
 	static void useDecawaveSFD(DecawaveSFDMode mode = DecawaveSFDMode::DEFAULT_MODE);
+
+	static void useStandardSFD();
 	
 	/*
 	Specifies the channel for transmitting and receiving to and from a DWM1000 module. Once of this values
