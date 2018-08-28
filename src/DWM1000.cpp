@@ -1205,7 +1205,7 @@ void DWM1000Class::setDataRate(byte rate) {
 	} else {
 		DWM1000Utils::setBit(_syscfg, LEN_SYS_CFG, RXM110K_BIT, false);
 	}
-	// SFD mode and type (non-configurable, as in Table )
+	/* SFD mode and types recommended by DW1000 User manual for optimal performance */
 	if(rate == TRX_RATE_6800KBPS) {
 		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
 		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
