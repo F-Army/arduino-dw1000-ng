@@ -308,6 +308,7 @@ void DWM1000Class::enableMode(const byte mode[]) {
 	setDataRate(mode[0]);
 	setPulseFrequency(mode[1]);
 	setPreambleLength(mode[2]);
+	setPreambleCode();
 }
 
 /* AGC_TUNE1 - reg:0x23, sub-reg:0x04, table 24 */
@@ -1355,33 +1356,36 @@ void DWM1000Class::setChannel(byte channel) {
 	channel &= 0xF;
 	_chanctrl[0] = ((channel | (channel << 4)) & 0xFF);
 	_channel = channel;
+	setPreambleCode();
+}
+
+void DWM1000Class::setPreambleCode() {
+	byte preacode;
 	// Set preambleCode in based of CHANNEL. see chapter 10.5, table 61, DWM1000 user manual
 	if(_channel == CHANNEL_1) {
 		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-			setPreambleCode(PREAMBLE_CODE_16MHZ_2);
+			preacode = PREAMBLE_CODE_16MHZ_2;
 		} else {
-			setPreambleCode(PREAMBLE_CODE_64MHZ_10);
+			preacode = PREAMBLE_CODE_64MHZ_10;
 		}
 	} else if(_channel == CHANNEL_3) {
 		if (_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-			setPreambleCode(PREAMBLE_CODE_16MHZ_6);
+			preacode = PREAMBLE_CODE_16MHZ_6;
 		} else {
-			setPreambleCode(PREAMBLE_CODE_64MHZ_10);
+			preacode = PREAMBLE_CODE_64MHZ_10;
 		}
 	} else if(_channel == CHANNEL_4 || _channel == CHANNEL_7) {
 		if (_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-			setPreambleCode(PREAMBLE_CODE_16MHZ_8);
+			preacode = PREAMBLE_CODE_16MHZ_8;
 		} else {
-			setPreambleCode(PREAMBLE_CODE_64MHZ_18);
+			preacode = PREAMBLE_CODE_64MHZ_18;
 		}
 	} else if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-		setPreambleCode(PREAMBLE_CODE_16MHZ_4);
+		preacode = PREAMBLE_CODE_16MHZ_4;
 	} else {
-		setPreambleCode(PREAMBLE_CODE_64MHZ_10);
+		preacode = PREAMBLE_CODE_64MHZ_10;
 	}
-}
 
-void DWM1000Class::setPreambleCode(byte preacode) {
 	preacode &= 0x1F;
 	_chanctrl[2] &= 0x3F;
 	_chanctrl[2] |= ((preacode << 6) & 0xFF);
