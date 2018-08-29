@@ -267,7 +267,7 @@ public:
 	 */
 	static void setChannel(byte channel);
 
-	static void setPreambleCode(byte preacode);
+	static void setPreambleCode();
 	static void useSmartPower(boolean smartPower);
 
 	static void setTXPower(int32_t power);
