@@ -47,6 +47,10 @@ void (* DWM1000Class::_handleReceiveFailed)(void)             = nullptr;
 void (* DWM1000Class::_handleReceiveTimeout)(void)            = nullptr;
 void (* DWM1000Class::_handleReceiveTimestampAvailable)(void) = nullptr;
 
+// SFD Mode
+
+void (* DWM1000Class::_currentSFDMode)(void) = useRecommendedSFD;
+
 // registers
 byte       DWM1000Class::_syscfg[LEN_SYS_CFG];
 byte       DWM1000Class::_sysctrl[LEN_SYS_CTRL];
@@ -1206,7 +1210,7 @@ void DWM1000Class::setDataRate(byte rate) {
 		DWM1000Utils::setBit(_syscfg, LEN_SYS_CFG, RXM110K_BIT, false);
 	}
 	_dataRate = rate;
-	useRecommendedSFD();
+	(*_currentSFDMode)();
 }
 
 void DWM1000Class::setPulseFrequency(byte freq) {
@@ -1304,13 +1308,32 @@ void DWM1000Class::useRecommendedSFD() {
 			writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10);
 			break;
 		case TRX_RATE_110KBPS:
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+			DWM1000Utils::setBit(DWM1000Class::_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
+			DWM1000Utils::setBit(DWM1000Class::_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
+			DWM1000Utils::setBit(DWM1000Class::_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
 			writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
 		default:
 			return; //TODO Error handling
 	}
+}
+
+void DWM1000Class::setSFDMode(SFDMode mode) {
+	switch(mode) {
+		case SFDMode::STANDARD_SFD:
+			_currentSFDMode = useStandardSFD;
+			break;
+		case SFDMode::DECAWAVE_SFD:
+			_currentSFDMode = useDecawaveSFD;
+			break;
+		case SFDMode::RECOMMENDED_SFD:
+			_currentSFDMode = useRecommendedSFD;
+			break;
+		default:
+			return; //TODO Proper error handling
+	}
+
+	/* Sets new SFD parameters by calling the relative function */
+	(*_currentSFDMode)();
 }
 
 void DWM1000Class::useExtendedFrameLength(boolean val) {

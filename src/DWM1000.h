@@ -246,12 +246,7 @@ public:
 	static byte getPulseFrequency();
 	static void setPreambleLength(byte prealen);
 
-	/* 16-symbol length is recommended for 850Kbps */
-	static void useDecawaveSFD();
-
-	static void useStandardSFD();
-
-	static void useRecommendedSFD();
+	static void setSFDMode(SFDMode mode);
 	
 	/*
 	Specifies the channel for transmitting and receiving to and from a DWM1000 module. Once of this values
@@ -412,6 +407,9 @@ public:
 	static void (* _handleReceiveFailed)(void);
 	static void (* _handleReceiveTimeout)(void);
 	static void (* _handleReceiveTimestampAvailable)(void);
+
+	/* sfd mode */
+	static void (* _currentSFDMode)(void); 
 	
 	/* register caches. */
 	static byte _syscfg[LEN_SYS_CFG];
@@ -540,6 +538,11 @@ public:
 	static void readBytesOTP(uint16_t address, byte data[]);
 	static void writeByte(byte cmd, uint16_t offset, byte data);
 	static void writeBytes(byte cmd, uint16_t offset, byte data[], uint16_t n);
+
+	/* SFDMode functions */
+	static void useDecawaveSFD();
+	static void useStandardSFD();
+	static void useRecommendedSFD();
 
 	/* SPI configs. */
 	static const SPISettings _fastSPI;
