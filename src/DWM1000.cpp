@@ -308,7 +308,6 @@ void DWM1000Class::enableMode(const byte mode[]) {
 	setDataRate(mode[0]);
 	setPulseFrequency(mode[1]);
 	setPreambleLength(mode[2]);
-	setPreambleCode();
 }
 
 /* AGC_TUNE1 - reg:0x23, sub-reg:0x04, table 24 */
@@ -1221,6 +1220,7 @@ void DWM1000Class::setPulseFrequency(byte freq) {
 	_chanctrl[2] &= 0xF3;
 	_chanctrl[2] |= (byte)((freq << 2) & 0xFF);
 	_pulseFrequency = freq;
+	setPreambleCode();
 }
 
 byte DWM1000Class::getPulseFrequency() {
@@ -1361,29 +1361,24 @@ void DWM1000Class::setChannel(byte channel) {
 
 void DWM1000Class::setPreambleCode() {
 	byte preacode;
-	// Set preambleCode in based of CHANNEL. see chapter 10.5, table 61, DWM1000 user manual
-	if(_channel == CHANNEL_1) {
-		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-			preacode = PREAMBLE_CODE_16MHZ_2;
-		} else {
-			preacode = PREAMBLE_CODE_64MHZ_10;
-		}
-	} else if(_channel == CHANNEL_3) {
-		if (_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-			preacode = PREAMBLE_CODE_16MHZ_6;
-		} else {
-			preacode = PREAMBLE_CODE_64MHZ_10;
-		}
-	} else if(_channel == CHANNEL_4 || _channel == CHANNEL_7) {
-		if (_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-			preacode = PREAMBLE_CODE_16MHZ_8;
-		} else {
-			preacode = PREAMBLE_CODE_64MHZ_18;
-		}
-	} else if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-		preacode = PREAMBLE_CODE_16MHZ_4;
-	} else {
-		preacode = PREAMBLE_CODE_64MHZ_10;
+
+	switch(_channel) {
+		case CHANNEL_1:
+			preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_2 : PREAMBLE_CODE_64MHZ_10;
+			break;
+		case CHANNEL_3:
+			preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_6 : PREAMBLE_CODE_64MHZ_10;
+			break;
+		case CHANNEL_4:
+		case CHANNEL_7:
+			preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_8 : PREAMBLE_CODE_64MHZ_18;
+			break;
+		case CHANNEL_2:
+		case CHANNEL_5:
+			preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_4 : PREAMBLE_CODE_64MHZ_10;
+			break;
+		default:
+			return; //TODO Proper Error Handling
 	}
 
 	preacode &= 0x1F;
