@@ -220,6 +220,8 @@ public:
 
 	See `setDefaults()` and `enableMode()` for additional information on data rate settings.
 
+	WARNING: It resets SFD configuration to recommended in table 21 of DW1000 User manual.
+
 	@param[in] rate The data transmission rate, encoded by the above defined constants.
 	*/
 	static void setDataRate(byte rate);
@@ -243,6 +245,13 @@ public:
 
 	static byte getPulseFrequency();
 	static void setPreambleLength(byte prealen);
+
+	/* 16-symbol length is recommended for 850Kbps */
+	static void useDecawaveSFD();
+
+	static void useStandardSFD();
+
+	static void useRecommendedSFD();
 	
 	/*
 	Specifies the channel for transmitting and receiving to and from a DWM1000 module. Once of this values
