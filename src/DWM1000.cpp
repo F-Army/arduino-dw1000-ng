@@ -1638,7 +1638,7 @@ float DWM1000Class::getReceiveQuality() {
 	return (float)f2/noise;
 }
 
-static uint16_t correctN(uint16_t N) {
+static void correctN(uint16_t& N) {
 	/* Needs correction */
 	byte chanCtrl;
 	byte sfdLength;
@@ -1659,8 +1659,6 @@ static uint16_t correctN(uint16_t N) {
 	} else {
 		N -= (sfdLength == 0x08 ? 5 : 64);
 	}
-
-	return N;
 }
 
 float DWM1000Class::getFirstPathPower() {
@@ -1685,7 +1683,7 @@ float DWM1000Class::getFirstPathPower() {
 	readBytes(DRX_TUNE, RXPACC_NOSAT_SUB, rxpacc_nosat, LEN_RXPACC_NOSAT);
 	N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
 	if(N == N_nosat) {
-		N = correctN(N);
+		correctN(N);
 	}
 
 	if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
@@ -1722,7 +1720,7 @@ float DWM1000Class::getReceivePower() {
 	readBytes(DRX_TUNE, RXPACC_NOSAT_SUB, rxpacc_nosat, LEN_RXPACC_NOSAT);
 	N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
 	if(N == N_nosat) {
-		N = correctN(N);
+		correctN(N);
 	}
 
 	if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
