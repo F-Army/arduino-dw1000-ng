@@ -1638,6 +1638,31 @@ float DWM1000Class::getReceiveQuality() {
 	return (float)f2/noise;
 }
 
+static uint16_t correctN(uint16_t N) {
+	/* Needs correction */
+	byte chanCtrl;
+	byte sfdLength;
+	DWM1000Class::readBytes(CHAN_CTRL, NO_SUB, &chanCtrl, LEN_CHAN_CTRL);
+	DWM1000Class::readBytes(USR_SFD, SFD_LENGTH_SUB, &sfdLength, LEN_SFD_LENGTH);
+	boolean SFD_is_proprietary = DWM1000Utils::getBit(&chanCtrl, LEN_CHAN_CTRL, DWSFD_BIT);
+	if(SFD_is_proprietary) {
+		switch(sfdLength) {
+			case 0x08:
+				N -= 10; break;
+			case 0x10:
+				N -= 18; break;
+			case 0x40:
+				N -= 82; break;
+			default:
+				break;
+		}
+	} else {
+		N -= (sfdLength == 0x08 ? 5 : 64);
+	}
+
+	return N;
+}
+
 float DWM1000Class::getFirstPathPower() {
 	byte         fpAmpl1Bytes[LEN_FP_AMPL1];
 	byte         fpAmpl2Bytes[LEN_FP_AMPL2];
@@ -1660,26 +1685,7 @@ float DWM1000Class::getFirstPathPower() {
 	readBytes(DRX_TUNE, RXPACC_NOSAT_SUB, rxpacc_nosat, LEN_RXPACC_NOSAT);
 	N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
 	if(N == N_nosat) {
-		/* Needs correction */
-		byte chanCtrl;
-		byte sfdLength;
-		readBytes(CHAN_CTRL, NO_SUB, &chanCtrl, LEN_CHAN_CTRL);
-		readBytes(USR_SFD, SFD_LENGTH_SUB, &sfdLength, LEN_SFD_LENGTH);
-		boolean SFD_is_proprietary = DWM1000Utils::getBit(&chanCtrl, LEN_CHAN_CTRL, DWSFD_BIT);
-		if(SFD_is_proprietary) {
-			switch(sfdLength) {
-				case 0x08:
-					N -= 10; break;
-				case 0x10:
-					N -= 18; break;
-				case 0x40:
-					N -= 82; break;
-				default:
-					break;
-			}
-		} else {
-			N -= (sfdLength == 0x08 ? 5 : 64);
-		}
+		N = correctN(N);
 	}
 
 	if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
@@ -1716,26 +1722,7 @@ float DWM1000Class::getReceivePower() {
 	readBytes(DRX_TUNE, RXPACC_NOSAT_SUB, rxpacc_nosat, LEN_RXPACC_NOSAT);
 	N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
 	if(N == N_nosat) {
-		/* Needs correction */
-		byte chanCtrl;
-		byte sfdLength;
-		readBytes(CHAN_CTRL, NO_SUB, &chanCtrl, LEN_CHAN_CTRL);
-		readBytes(USR_SFD, SFD_LENGTH_SUB, &sfdLength, LEN_SFD_LENGTH);
-		boolean SFD_is_proprietary = DWM1000Utils::getBit(&chanCtrl, LEN_CHAN_CTRL, DWSFD_BIT);
-		if(SFD_is_proprietary) {
-			switch(sfdLength) {
-				case 0x08:
-					N -= 10; break;
-				case 0x10:
-					N -= 18; break;
-				case 0x40:
-					N -= 82; break;
-				default:
-					break;
-			}
-		} else {
-			N -= (sfdLength == 0x08 ? 5 : 64);
-		}
+		N = correctN(N);
 	}
 
 	if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
