@@ -1273,6 +1273,19 @@ void DWM1000Class::useStandardSFD() {
 	DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
 	DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
 	DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+	switch(_dataRate) {
+		case TRX_RATE_6800KBPS:
+			writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
+			break;
+		case TRX_RATE_850KBPS:
+			writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
+			break;
+		case TRX_RATE_110KBPS:
+			writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
+			break;
+		default:
+			return; //TODO Proper error handling
+	}
 }
 
 void DWM1000Class::useRecommendedSFD() {
