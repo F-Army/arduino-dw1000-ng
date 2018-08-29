@@ -247,7 +247,7 @@ public:
 	static void setPreambleLength(byte prealen);
 
 	/* 16-symbol length is recommended for 850Kbps */
-	static void useDecawaveSFD(DecawaveSFDMode mode = DecawaveSFDMode::DEFAULT_MODE);
+	static void useDecawaveSFD();
 
 	static void useStandardSFD();
 

@@ -447,5 +447,3 @@ enum class TransmitMixerValue : byte {
 };
 
 enum class TXPowerMode { AUTO_POWER, MANUAL_POWER };
-
-enum class DecawaveSFDMode { DEFAULT_MODE, PERFORMANCE_MODE };

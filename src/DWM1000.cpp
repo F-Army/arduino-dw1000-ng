@@ -1250,20 +1250,22 @@ void DWM1000Class::setPreambleLength(byte prealen) {
 	_preambleLength = prealen;
 }
 
-void DWM1000Class::useDecawaveSFD(DecawaveSFDMode mode) {
-	if(_dataRate == TRX_RATE_6800KBPS) {
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
-	} else if(_dataRate == TRX_RATE_110KBPS || mode == DecawaveSFDMode::DEFAULT_MODE) {
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
-	} else { /* 850Kpbs with performance mode */
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
-		writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10); /* Sets 16-symbol SFD rather than 8-symbol */
+void DWM1000Class::useDecawaveSFD() {
+	DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
+	DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
+	DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
+	switch(_dataRate) {
+		case TRX_RATE_6800KBPS:
+			writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
+			break;
+		case TRX_RATE_850KBPS:
+			writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10);
+			break;
+		case TRX_RATE_110KBPS:
+			writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
+			break;
+		default:
+			return; //TODO Proper error handling
 	}
 }
 
@@ -1280,6 +1282,7 @@ void DWM1000Class::useRecommendedSFD() {
 			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
 			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
 			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+			writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
 			break;
 		case TRX_RATE_850KBPS:
 			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
@@ -1291,6 +1294,7 @@ void DWM1000Class::useRecommendedSFD() {
 			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
 			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
 			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+			writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
 		default:
 			return; //TODO Error handling
 	}
