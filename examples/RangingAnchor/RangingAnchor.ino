@@ -16,7 +16,7 @@
  *
  * @file RangingAnchor.ino
  * Use this to test two-way ranging functionality with two
- * DWM1000. This is the anchor component's code which computes range after
+ * DWM1000:: This is the anchor component's code which computes range after
  * exchanging some messages. Addressing and frame filtering is currently done
  * in a custom way, as no MAC features are implemented yet.
  *
@@ -78,29 +78,29 @@ void setup() {
     delay(1000);
     Serial.println(F("### DWM1000-arduino-ranging-anchor ###"));
     // initialize the driver
-    DWM1000.begin(PIN_IRQ, PIN_RST);
-    DWM1000.select(PIN_SS);
+    DWM1000::begin(PIN_IRQ, PIN_RST);
+    DWM1000::select(PIN_SS);
     Serial.println(F("DWM1000 initialized ..."));
     // general configuration
-    DWM1000.newConfiguration();
-    DWM1000.setDefaults();
-    DWM1000.setDeviceAddress(1);
-    DWM1000.setNetworkId(10);
-    DWM1000.commitConfiguration();
+    DWM1000::newConfiguration();
+    DWM1000::setDefaults();
+    DWM1000::setDeviceAddress(1);
+    DWM1000::setNetworkId(10);
+    DWM1000::commitConfiguration();
     Serial.println(F("Committed configuration ..."));
     // DEBUG chip info and registers pretty printed
     char msg[128];
-    DWM1000.getPrintableDeviceIdentifier(msg);
+    DWM1000::getPrintableDeviceIdentifier(msg);
     Serial.print("Device ID: "); Serial.println(msg);
-    DWM1000.getPrintableExtendedUniqueIdentifier(msg);
+    DWM1000::getPrintableExtendedUniqueIdentifier(msg);
     Serial.print("Unique ID: "); Serial.println(msg);
-    DWM1000.getPrintableNetworkIdAndShortAddress(msg);
+    DWM1000::getPrintableNetworkIdAndShortAddress(msg);
     Serial.print("Network ID & Device Address: "); Serial.println(msg);
-    DWM1000.getPrintableDeviceMode(msg);
+    DWM1000::getPrintableDeviceMode(msg);
     Serial.print("Device mode: "); Serial.println(msg);
     // attach callback for (successfully) sent and received messages
-    DWM1000.attachSentHandler(handleSent);
-    DWM1000.attachReceivedHandler(handleReceived);
+    DWM1000::attachSentHandler(handleSent);
+    DWM1000::attachReceivedHandler(handleReceived);
     // anchor starts in receiving mode, awaiting a ranging poll message
     receiver();
     noteActivity();
@@ -131,40 +131,40 @@ void handleReceived() {
 }
 
 void transmitPollAck() {
-    DWM1000.newTransmit();
-    DWM1000.setDefaults();
+    DWM1000::newTransmit();
+    DWM1000::setDefaults();
     data[0] = POLL_ACK;
     // delay the same amount as ranging tag
     DWM1000Time deltaTime = DWM1000Time(replyDelayTimeUS, DWM1000Time::MICROSECONDS);
-    DWM1000.setDelay(deltaTime);
-    DWM1000.setData(data, LEN_DATA);
-    DWM1000.startTransmit();
+    DWM1000::setDelay(deltaTime);
+    DWM1000::setData(data, LEN_DATA);
+    DWM1000::startTransmit();
 }
 
 void transmitRangeReport(float curRange) {
-    DWM1000.newTransmit();
-    DWM1000.setDefaults();
+    DWM1000::newTransmit();
+    DWM1000::setDefaults();
     data[0] = RANGE_REPORT;
     // write final ranging result
     memcpy(data + 1, &curRange, 4);
-    DWM1000.setData(data, LEN_DATA);
-    DWM1000.startTransmit();
+    DWM1000::setData(data, LEN_DATA);
+    DWM1000::startTransmit();
 }
 
 void transmitRangeFailed() {
-    DWM1000.newTransmit();
-    DWM1000.setDefaults();
+    DWM1000::newTransmit();
+    DWM1000::setDefaults();
     data[0] = RANGE_FAILED;
-    DWM1000.setData(data, LEN_DATA);
-    DWM1000.startTransmit();
+    DWM1000::setData(data, LEN_DATA);
+    DWM1000::startTransmit();
 }
 
 void receiver() {
-    DWM1000.newReceive();
-    DWM1000.setDefaults();
+    DWM1000::newReceive();
+    DWM1000::setDefaults();
     // so we don't need to restart the receiver manually
-    DWM1000.receivePermanently(true);
-    DWM1000.startReceive();
+    DWM1000::receivePermanently(true);
+    DWM1000::startReceive();
 }
 
 /*
@@ -217,14 +217,14 @@ void loop() {
         sentAck = false;
         byte msgId = data[0];
         if (msgId == POLL_ACK) {
-            DWM1000.getTransmitTimestamp(timePollAckSent);
+            DWM1000::getTransmitTimestamp(timePollAckSent);
             noteActivity();
         }
     }
     if (receivedAck) {
         receivedAck = false;
         // get message and parse
-        DWM1000.getData(data, LEN_DATA);
+        DWM1000::getData(data, LEN_DATA);
         byte msgId = data[0];
         if (msgId != expectedMsgId) {
             // unexpected message, start over again (except if already POLL)
@@ -233,13 +233,13 @@ void loop() {
         if (msgId == POLL) {
             // on POLL we (re-)start, so no protocol failure
             protocolFailed = false;
-            DWM1000.getReceiveTimestamp(timePollReceived);
+            DWM1000::getReceiveTimestamp(timePollReceived);
             expectedMsgId = RANGE;
             transmitPollAck();
             noteActivity();
         }
         else if (msgId == RANGE) {
-            DWM1000.getReceiveTimestamp(timeRangeReceived);
+            DWM1000::getReceiveTimestamp(timeRangeReceived);
             expectedMsgId = POLL;
             if (!protocolFailed) {
                 timePollSent.setTimestamp(data + 1);
@@ -250,11 +250,11 @@ void loop() {
                 transmitRangeReport(timeComputedRange.getAsMicroSeconds());
                 float distance = timeComputedRange.getAsMeters();
                 Serial.print("Range: "); Serial.print(distance); Serial.print(" m");
-                Serial.print("\t RX power: "); Serial.print(DWM1000.getReceivePower()); Serial.print(" dBm");
+                Serial.print("\t RX power: "); Serial.print(DWM1000::getReceivePower()); Serial.print(" dBm");
                 Serial.print("\t Sampling: "); Serial.print(samplingRate); Serial.println(" Hz");
-                //Serial.print("FP power is [dBm]: "); Serial.print(DWM1000.getFirstPathPower());
-                //Serial.print("RX power is [dBm]: "); Serial.println(DWM1000.getReceivePower());
-                //Serial.print("Receive quality: "); Serial.println(DWM1000.getReceiveQuality());
+                //Serial.print("FP power is [dBm]: "); Serial.print(DWM1000::getFirstPathPower());
+                //Serial.print("RX power is [dBm]: "); Serial.println(DWM1000::getReceivePower());
+                //Serial.print("Receive quality: "); Serial.println(DWM1000::getReceiveQuality());
                 // update sampling rate (each second)
                 successRangingCount++;
                 if (curMillis - rangingCountPeriod > 1000) {

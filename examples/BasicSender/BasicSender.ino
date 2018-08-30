@@ -16,7 +16,7 @@
  *
  * @file BasicSender.ino
  * Use this to test simple sender/receiver functionality with two
- * DWM1000. Complements the "BasicReceiver" example sketch. 
+ * DWM1000:: Complements the "BasicReceiver" example sketch. 
  * 
  * @todo
  *  - move strings to flash (less RAM consumption)
@@ -42,28 +42,28 @@ void setup() {
   Serial.begin(9600);
   Serial.println(F("### DWM1000-arduino-sender-test ###"));
   // initialize the driver
-  DWM1000.begin(PIN_IRQ, PIN_RST);
-  DWM1000.select(PIN_SS);
+  DWM1000::begin(PIN_IRQ, PIN_RST);
+  DWM1000::select(PIN_SS);
   Serial.println(F("DWM1000 initialized ..."));
   // general configuration
-  DWM1000.newConfiguration();
-  DWM1000.setDefaults();
-  DWM1000.setDeviceAddress(5);
-  DWM1000.setNetworkId(10);
-  DWM1000.commitConfiguration();
+  DWM1000::newConfiguration();
+  DWM1000::setDefaults();
+  DWM1000::setDeviceAddress(5);
+  DWM1000::setNetworkId(10);
+  DWM1000::commitConfiguration();
   Serial.println(F("Committed configuration ..."));
   // DEBUG chip info and registers pretty printed
   char msg[128];
-  DWM1000.getPrintableDeviceIdentifier(msg);
+  DWM1000::getPrintableDeviceIdentifier(msg);
   Serial.print("Device ID: "); Serial.println(msg);
-  DWM1000.getPrintableExtendedUniqueIdentifier(msg);
+  DWM1000::getPrintableExtendedUniqueIdentifier(msg);
   Serial.print("Unique ID: "); Serial.println(msg);
-  DWM1000.getPrintableNetworkIdAndShortAddress(msg);
+  DWM1000::getPrintableNetworkIdAndShortAddress(msg);
   Serial.print("Network ID & Device Address: "); Serial.println(msg);
-  DWM1000.getPrintableDeviceMode(msg);
+  DWM1000::getPrintableDeviceMode(msg);
   Serial.print("Device mode: "); Serial.println(msg);
   // attach callback for (successfully) sent messages
-  DWM1000.attachSentHandler(handleSent);
+  DWM1000::attachSentHandler(handleSent);
   // start a transmission
   transmitter();
 }
@@ -76,14 +76,14 @@ void handleSent() {
 void transmitter() {
   // transmit some data
   Serial.print("Transmitting packet ... #"); Serial.println(sentNum);
-  DWM1000.newTransmit();
-  DWM1000.setDefaults();
+  DWM1000::newTransmit();
+  DWM1000::setDefaults();
   String msg = "Hello DWM1000, it's #"; msg += sentNum;
-  DWM1000.setData(msg);
+  DWM1000::setData(msg);
   // delay sending the message for the given amount
   DWM1000Time deltaTime = DWM1000Time(10, DWM1000Time::MILLISECONDS);
-  DWM1000.setDelay(deltaTime);
-  DWM1000.startTransmit();
+  DWM1000::setDelay(deltaTime);
+  DWM1000::startTransmit();
   delaySent = millis();
 }
 
@@ -97,7 +97,7 @@ void loop() {
   // update and print some information about the sent message
   Serial.print("ARDUINO delay sent [ms] ... "); Serial.println(millis() - delaySent);
   DWM1000Time newSentTime;
-  DWM1000.getTransmitTimestamp(newSentTime);
+  DWM1000::getTransmitTimestamp(newSentTime);
   Serial.print("Processed packet ... #"); Serial.println(sentNum);
   Serial.print("Sent timestamp ... "); Serial.println(newSentTime.getAsMicroSeconds());
   // note: delta is just for simple demo as not correct on system time counter wrap-around
