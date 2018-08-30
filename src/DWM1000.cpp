@@ -1078,7 +1078,7 @@ namespace DWM1000 {
 		/* Channel from 0x1F bits:0-4(tx_chan) */
 		ch = (uint8_t)(chan_ctrl[0] & 0xF);
 		/* Preamble Code from 0x1F bits:24-31(chan_ctrl) */
-		pcode = (uint8_t)(chan_ctrl[3] >> 4 & 0x1F);
+		pcode = (uint8_t)(chan_ctrl[3] >> 3 & 0x1F);
 		sprintf(msgBuffer, "Data rate: %u kb/s, PRF: %u MHz, Preamble: %u symbols, Channel: #%u, Pcode #%u" , dr, prf, plen, ch, pcode);
 	}
 
