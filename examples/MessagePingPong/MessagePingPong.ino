@@ -16,7 +16,7 @@
  *
  * @file MessagePingPong.ino
  * Use this to test two-way communication functionality with two
- * DWM1000. Both Arduinos use this sketch, but one node configured
+ * DWM1000:: Both Arduinos use this sketch, but one node configured
  * as initiator/sender of the (first) ping message and the other 
  * being configured as receiver/answerer of the (first) ping message.
  *
@@ -54,30 +54,30 @@ void setup() {
   Serial.begin(9600);
   Serial.println(F("### DWM1000-arduino-ping-pong-test ###"));
   // initialize the driver
-  DWM1000.begin(PIN_IRQ, PIN_RST);
-  DWM1000.select(PIN_SS);
+  DWM1000::begin(PIN_IRQ, PIN_RST);
+  DWM1000::select(PIN_SS);
   Serial.println(F("DWM1000 initialized ..."));
   // general configuration
-  DWM1000.newConfiguration();
-  DWM1000.setDefaults();
-  DWM1000.setDeviceAddress(1);
-  DWM1000.setNetworkId(10);
-  DWM1000.commitConfiguration();
+  DWM1000::newConfiguration();
+  DWM1000::setDefaults();
+  DWM1000::setDeviceAddress(1);
+  DWM1000::setNetworkId(10);
+  DWM1000::commitConfiguration();
   Serial.println(F("Committed configuration ..."));
   // DEBUG chip info and registers pretty printed
   char msgInfo[128];
-  DWM1000.getPrintableDeviceIdentifier(msgInfo);
+  DWM1000::getPrintableDeviceIdentifier(msgInfo);
   Serial.print(F("Device ID: ")); Serial.println(msgInfo);
-  DWM1000.getPrintableExtendedUniqueIdentifier(msgInfo);
+  DWM1000::getPrintableExtendedUniqueIdentifier(msgInfo);
   Serial.print(F("Unique ID: ")); Serial.println(msgInfo);
-  DWM1000.getPrintableNetworkIdAndShortAddress(msgInfo);
+  DWM1000::getPrintableNetworkIdAndShortAddress(msgInfo);
   Serial.print(F("Network ID & Device Address: ")); Serial.println(msgInfo);
-  DWM1000.getPrintableDeviceMode(msgInfo);
+  DWM1000::getPrintableDeviceMode(msgInfo);
   Serial.print(F("Device mode: ")); Serial.println(msgInfo);
   // attach callback for (successfully) sent and received messages
-  DWM1000.attachSentHandler(handleSent);
-  DWM1000.attachReceivedHandler(handleReceived);
-  DWM1000.attachReceiveFailedHandler(handleReceiveFailed);
+  DWM1000::attachSentHandler(handleSent);
+  DWM1000::attachReceivedHandler(handleReceived);
+  DWM1000::attachReceiveFailedHandler(handleReceiveFailed);
   // sender starts by sending a PING message, receiver starts listening
   if (trxToggle == TransmissionState::SENDER) {
     msg = "Ping ...";
@@ -105,18 +105,18 @@ void handleReceiveFailed() {
 }
 
 void transmit() {
-  DWM1000.newTransmit();
-  DWM1000.setDefaults();
-  DWM1000.setData(msg);
-  DWM1000.startTransmit();
+  DWM1000::newTransmit();
+  DWM1000::setDefaults();
+  DWM1000::setData(msg);
+  DWM1000::startTransmit();
 }
 
 void receiver() {
-  DWM1000.newReceive();
-  DWM1000.setDefaults();
+  DWM1000::newReceive();
+  DWM1000::setDefaults();
   // so we don't need to restart the receiver manually
-  DWM1000.receivePermanently(true);
-  DWM1000.startReceive();
+  DWM1000::receivePermanently(true);
+  DWM1000::startReceive();
 }
 
 void loop() {
@@ -135,7 +135,7 @@ void loop() {
   if (trxToggle == TransmissionState::SENDER) {
     // formerly a receiver
     String rxMsg;
-    DWM1000.getData(rxMsg);
+    DWM1000::getData(rxMsg);
     Serial.print(F("Received: ")); Serial.println(rxMsg);
     transmit();
   } else {

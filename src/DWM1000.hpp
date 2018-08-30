@@ -28,8 +28,7 @@
 #include "DWM1000Constants.hpp"
 #include "DWM1000Time.hpp"
 
-class DWM1000Class {
-public:
+namespace DWM1000 {
 	/* ##### Init ################################################################ */
 	/** 
 	Initiates and starts a sessions with one or more DWM1000. If rst is not set or value 0xff, a soft resets (i.e. command
@@ -38,7 +37,7 @@ public:
 	@param[in] irq The interrupt line/pin that connects the Arduino.
 	@param[in] rst The reset line/pin for hard resets of ICs that connect to the Arduino. Value 0xff means soft reset.
 	*/
-	static void begin(uint8_t irq, uint8_t rst = 0xff);
+	void begin(uint8_t irq, uint8_t rst = 0xff);
 	
 	/** 
 	Selects a specific DWM1000 chip for communication. In case of a single DWM1000 chip in use
@@ -48,7 +47,7 @@ public:
 	@param[in] ss The chip select line/pin that connects the to-be-selected chip with the
 	Arduino.
 	*/
-	static void select(uint8_t ss);
+	void select(uint8_t ss);
 	
 	/** 
 	(Re-)selects a specific DWM1000 chip for communication. In case of a single DWM1000 chip in use
@@ -59,50 +58,50 @@ public:
 	@param[in] ss The chip select line/pin that connects the to-be-selected chip with the
 	Arduino.
 	*/
-	static void reselect(uint8_t ss);
+	void reselect(uint8_t ss);
 	
 	/** 
 	Tells the driver library that no communication to a DWM1000 will be required anymore.
 	This basically just frees SPI and the previously used pins.
 	*/
-	static void end();
+	void end();
 	
 	/** 
 	Enable debounce Clock, used to clock the LED blinking
 	*/
-	static void enableDebounceClock();
+	void enableDebounceClock();
 
 	/**
 	Enable led blinking feature
 	*/
-	static void enableLedBlinking();
+	void enableLedBlinking();
 
 	/**
 	Set GPIO mode
 	*/
-	static void setGPIOMode(uint8_t msgp, uint8_t mode);
+	void setGPIOMode(uint8_t msgp, uint8_t mode);
 
 	/**
 	Enable deep sleep mode
 	*/
-	static void deepSleep();
+	void deepSleep();
 
 	/**
 	Wake-up from deep sleep by toggle chip select pin
 	*/
-	static void spiWakeup();
+	void spiWakeup();
 
 	/**
 	Resets all connected or the currently selected DWM1000 chip. A hard reset of all chips
 	is preferred, although a soft reset of the currently selected one is executed if no 
 	reset pin has been specified (when using `begin(int)`, instead of `begin(int, int)`).
 	*/
-	static void reset();
+	void reset();
 	
 	/** 
 	Resets the currently selected DWM1000 chip programmatically (via corresponding commands).
 	*/
-	static void softReset();
+	void softReset();
 	
 	/* ##### Print device id, address, etc. ###################################### */
 	/** 
@@ -112,7 +111,7 @@ public:
 	@param[out] msgBuffer The String buffer to be filled with printable device information.
 		Provide 128 bytes, this should be sufficient.
 	*/
-	static void getPrintableDeviceIdentifier(char msgBuffer[]);
+	void getPrintableDeviceIdentifier(char msgBuffer[]);
 	
 	/** 
 	Generates a String representation of the extended unique identifier (EUI) of the chip.
@@ -120,7 +119,7 @@ public:
 	@param[out] msgBuffer The String buffer to be filled with printable device information.
 		Provide 128 bytes, this should be sufficient.
 	*/
-	static void getPrintableExtendedUniqueIdentifier(char msgBuffer[]);
+	void getPrintableExtendedUniqueIdentifier(char msgBuffer[]);
 	
 	/** 
 	Generates a String representation of the short address and network identifier currently
@@ -129,7 +128,7 @@ public:
 	@param[out] msgBuffer The String buffer to be filled with printable device information.
 		Provide 128 bytes, this should be sufficient.
 	*/
-	static void getPrintableNetworkIdAndShortAddress(char msgBuffer[]);
+	void getPrintableNetworkIdAndShortAddress(char msgBuffer[]);
 	
 	/** 
 	Generates a String representation of the main operational settings of the chip. This
@@ -138,7 +137,7 @@ public:
 	@param[out] msgBuffer The String buffer to be filled with printable device information.
 		Provide 128 bytes, this should be sufficient.
 	*/
-	static void getPrintableDeviceMode(char msgBuffer[]);
+	void getPrintableDeviceMode(char msgBuffer[]);
 	
 	/* ##### Device address management, filters ################################## */
 	/** 
@@ -149,7 +148,7 @@ public:
 	*/
 	
 	
-	static void setNetworkId(uint16_t val);
+	void setNetworkId(uint16_t val);
 	
 	/** 
 	(Re-)set the device address (i.e. short address) for the currently selected chip. This
@@ -157,11 +156,11 @@ public:
 
 	@param[in] val An arbitrary numeric device address.
 	*/
-	static void setDeviceAddress(uint16_t val);
+	void setDeviceAddress(uint16_t val);
 	// TODO MAC and filters
 	
-	static void setEUI(char eui[]);
-	static void setEUI(byte eui[]);
+	void setEUI(char eui[]);
+	void setEUI(byte eui[]);
 	
 	/* ##### General device configuration ######################################## */
 	/** 
@@ -173,7 +172,7 @@ public:
 
 	@param[in] val `true` to enable, `false` to disable receiver auto-reenable.
 	*/
-	static void setReceiverAutoReenable(boolean val);
+	void setReceiverAutoReenable(boolean val);
 	
 	/** 
 	Specifies the interrupt polarity of the DWM1000 chip. 
@@ -183,7 +182,7 @@ public:
 
 	@param[in] val `true` for active high interrupts, `false` for active low interrupts.
 	*/
-	static void setInterruptPolarity(boolean val);
+	void setInterruptPolarity(boolean val);
 	
 	/** 
 	Specifies whether to suppress any frame check measures while sending or receiving messages.
@@ -196,7 +195,7 @@ public:
 
 	@param[in] val `true` to suppress frame check on sender and receiver side, `false` otherwise.
 	*/
-	static void suppressFrameCheck(boolean val);
+	void suppressFrameCheck(boolean val);
 
 	/* 
 	Set internal helper for better tuning of values in NLOS applications 
@@ -207,7 +206,7 @@ public:
 
 	@param[in] val `true` to set nlos optimizations, `false` otherwise.
 	*/
-	static void setNLOS(boolean val);
+	void setNLOS(boolean val);
 	
 	/** 
 	Specifies the data transmission rate of the DWM1000 chip. One of the values
@@ -224,7 +223,7 @@ public:
 
 	@param[in] rate The data transmission rate, encoded by the above defined constants.
 	*/
-	static void setDataRate(byte rate);
+	void setDataRate(byte rate);
 	
 	/** 
 	Specifies the pulse repetition frequency (PRF) of data transmissions with the DWM1000. Either
@@ -241,12 +240,12 @@ public:
 
 	@param[in] freq The PRF, encoded by the above defined constants.
 	*/
-	static void setPulseFrequency(byte freq);
+	void setPulseFrequency(byte freq);
 
-	static byte getPulseFrequency();
-	static void setPreambleLength(byte prealen);
+	byte getPulseFrequency();
+	void setPreambleLength(byte prealen);
 
-	static void setSFDMode(SFDMode mode);
+	void setSFDMode(SFDMode mode);
 	
 	/*
 	Specifies the channel for transmitting and receiving to and from a DWM1000 module. Once of this values
@@ -265,89 +264,77 @@ public:
 
 	@param[in] channel The Number of channel, encoded by the above defined constants.
 	 */
-	static void setChannel(byte channel);
+	void setChannel(byte channel);
 
-	static void setPreambleCode();
-	static void setPreambleCode(byte preamble_code);
-	static void useSmartPower(boolean smartPower);
+	void setPreambleCode();
+	void setPreambleCode(byte preamble_code);
+	void useSmartPower(boolean smartPower);
 
-	static void setTXPower(int32_t power);
-	static void setTXPower(DriverAmplifierValue driver_amplifier, TransmitMixerValue mixer);
+	void setTXPower(int32_t power);
+	void setTXPower(DriverAmplifierValue driver_amplifier, TransmitMixerValue mixer);
 	
 	
 	/* transmit and receive configuration. */
-	static DWM1000Time   setDelay(const DWM1000Time& delay);
-	static void         receivePermanently(boolean val);
-	static void         setData(byte data[], uint16_t n);
-	static void         setData(const String& data);
-	static void         getData(byte data[], uint16_t n);
-	static void         getData(String& data);
-	static uint16_t     getDataLength();
-	static void         getTransmitTimestamp(DWM1000Time& time);
-	static void         getReceiveTimestamp(DWM1000Time& time);
-	static void         getSystemTimestamp(DWM1000Time& time);
-	static void         getTransmitTimestamp(byte data[]);
-	static void         getReceiveTimestamp(byte data[]);
-	static void         getSystemTimestamp(byte data[]);
+	DWM1000Time  setDelay(const DWM1000Time& delay);
+	void         receivePermanently(boolean val);
+	void         setData(byte data[], uint16_t n);
+	void         setData(const String& data);
+	void         getData(byte data[], uint16_t n);
+	void         getData(String& data);
+	uint16_t     getDataLength();
+	void         getTransmitTimestamp(DWM1000Time& time);
+	void         getReceiveTimestamp(DWM1000Time& time);
+	void         getSystemTimestamp(DWM1000Time& time);
+	void         getTransmitTimestamp(byte data[]);
+	void         getReceiveTimestamp(byte data[]);
+	void         getSystemTimestamp(byte data[]);
 	
 	/* receive quality information. (RX_FSQUAL) - reg:0x12 */
-	static float getReceivePower();
-	static float getFirstPathPower();
-	static float getReceiveQuality();
+	float getReceivePower();
+	float getFirstPathPower();
+	float getReceiveQuality();
 	
 	/* interrupt management. */
-	static void interruptOnSent(boolean val);
-	static void interruptOnReceived(boolean val);
-	static void interruptOnReceiveFailed(boolean val);
-	static void interruptOnReceiveTimeout(boolean val);
-	static void interruptOnReceiveTimestampAvailable(boolean val);
-	static void interruptOnAutomaticAcknowledgeTrigger(boolean val);
+	void interruptOnSent(boolean val);
+	void interruptOnReceived(boolean val);
+	void interruptOnReceiveFailed(boolean val);
+	void interruptOnReceiveTimeout(boolean val);
+	void interruptOnReceiveTimestampAvailable(boolean val);
+	void interruptOnAutomaticAcknowledgeTrigger(boolean val);
 
 	/* Antenna delay calibration */
-	static void setAntennaDelay(const uint16_t value);
-	static uint16_t getAntennaDelay();
+	void setAntennaDelay(const uint16_t value);
+	uint16_t getAntennaDelay();
 
 	/* callback handler management. */
-	static void attachErrorHandler(void (* handleError)(void)) {
-		_handleError = handleError;
-	}
+	void attachErrorHandler(void (* handleError)(void));
 	
-	static void attachSentHandler(void (* handleSent)(void)) {
-		_handleSent = handleSent;
-	}
+	void attachSentHandler(void (* handleSent)(void));
 	
-	static void attachReceivedHandler(void (* handleReceived)(void)) {
-		_handleReceived = handleReceived;
-	}
+	void attachReceivedHandler(void (* handleReceived)(void));
 	
-	static void attachReceiveFailedHandler(void (* handleReceiveFailed)(void)) {
-		_handleReceiveFailed = handleReceiveFailed;
-	}
+	void attachReceiveFailedHandler(void (* handleReceiveFailed)(void));
 	
-	static void attachReceiveTimeoutHandler(void (* handleReceiveTimeout)(void)) {
-		_handleReceiveTimeout = handleReceiveTimeout;
-	}
+	void attachReceiveTimeoutHandler(void (* handleReceiveTimeout)(void));
 	
-	static void attachReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void)) {
-		_handleReceiveTimestampAvailable = handleReceiveTimestampAvailable;
-	}
+	void attachReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void));
 	
 	/* device state management. */
 	// idle state
-	static void idle();
+	void idle();
 	
 	// general configuration state
-	static void newConfiguration();
+	void newConfiguration();
 
-	static void commitConfiguration(TXPowerMode mode = TXPowerMode::AUTO_POWER);
+	void commitConfiguration(TXPowerMode mode = TXPowerMode::AUTO_POWER);
 	
 	// reception state
-	static void newReceive();
-	static void startReceive();
+	void newReceive();
+	void startReceive();
 	
 	// transmission state
-	static void newTransmit();
-	static void startTransmit();
+	void newTransmit();
+	void startTransmit();
 	
 	/* ##### Operation mode selection ############################################ */
 	/** 
@@ -381,170 +368,109 @@ public:
 
 	@param[in] mode The mode of operation, encoded by the above defined constants.
 	*/
-	static void enableMode(const byte mode[]);
+	void enableMode(const byte mode[]);
 	
 	/* use RX/TX specific and general default settings */
-	static void setDefaults();
+	void setDefaults();
 	
 	/* host-initiated reading of temperature and battery voltage */
-	static void getTemp(float& temp);
-	static void getVbat(float& vbat);
-	static void getTempAndVbat(float& temp, float& vbat);
-
-//private:
-	/* chip select, reset and interrupt pins. */
-	static uint8_t _ss;
-	static uint8_t _rst;
-	static uint8_t _irq;
-	
-	/* callbacks. */
-	static void (* _handleError)(void);
-	static void (* _handleSent)(void);
-	static void (* _handleReceived)(void);
-	static void (* _handleReceiveFailed)(void);
-	static void (* _handleReceiveTimeout)(void);
-	static void (* _handleReceiveTimestampAvailable)(void);
-
-	/* sfd mode */
-	static void (* _currentSFDMode)(void); 
-	
-	/* register caches. */
-	static byte _syscfg[LEN_SYS_CFG];
-	static byte _sysctrl[LEN_SYS_CTRL];
-	static byte _sysstatus[LEN_SYS_STATUS];
-	static byte _txfctrl[LEN_TX_FCTRL];
-	static byte _sysmask[LEN_SYS_MASK];
-	static byte _chanctrl[LEN_CHAN_CTRL];
-	
-	/* device status monitoring */
-	static byte _vmeas3v3;
-	static byte _tmeas23C;
-
-	/* PAN and short address. */
-	static byte _networkAndAddress[LEN_PANADR];
-	
-	/* internal helper that guide tuning the chip. */
-	static boolean    _smartPower;
-	static byte       _extendedFrameLength;
-	static byte       _preambleCode;
-	static byte       _channel;
-	static byte       _preambleLength;
-	static byte       _pulseFrequency;
-	static byte       _dataRate;
-	static byte       _pacSize;
-	static DWM1000Time _antennaDelay;
-	
-	/* internal helper to remember how to properly act. */
-	static boolean _permanentReceive;
-	static boolean _frameCheck;
-	static boolean _nlos;
-	
-	/* whether RX or TX is active */
-	static uint8_t _deviceMode;
-
-	/* whether debounce clock is active */
-	static boolean _debounceClockEnabled;
+	void getTemp(float& temp);
+	void getVbat(float& vbat);
+	void getTempAndVbat(float& temp, float& vbat);
 
 	/* Arduino interrupt handler */
-	static void handleInterrupt();
+	void handleInterrupt();
 	
 	/* Allow MAC frame filtering */
 	// TODO auto-acknowledge
-	static void setFrameFilter(boolean val);
-	static void setFrameFilterBehaveCoordinator(boolean val);
-	static void setFrameFilterAllowBeacon(boolean val);
+	void setFrameFilter(boolean val);
+	void setFrameFilterBehaveCoordinator(boolean val);
+	void setFrameFilterAllowBeacon(boolean val);
 	//data type is used in the FC_1 0x41
-	static void setFrameFilterAllowData(boolean val);
-	static void setFrameFilterAllowAcknowledgement(boolean val);
-	static void setFrameFilterAllowMAC(boolean val);
+	void setFrameFilterAllowData(boolean val);
+	void setFrameFilterAllowAcknowledgement(boolean val);
+	void setFrameFilterAllowMAC(boolean val);
 	//Reserved is used for the Blink message
-	static void setFrameFilterAllowReserved(boolean val);
+	void setFrameFilterAllowReserved(boolean val);
 	
 	// note: not sure if going to be implemented for now
-	static void setDoubleBuffering(boolean val);
+	void setDoubleBuffering(boolean val);
 	// TODO is implemented, but needs testing
-	static void useExtendedFrameLength(boolean val);
+	void useExtendedFrameLength(boolean val);
 	// TODO is implemented, but needs testing
-	static void waitForResponse(boolean val);
+	void waitForResponse(boolean val);
 
 	// Helper functions for tune
-	static void agctune1();
-	static void agctune2();
-	static void agctune3();
-	static void drxtune0b();
-	static void drxtune1a();
-	static void drxtune1b();
-	static void drxtune2();
-	static void drxtune4H();
-	static void ldecfg1();
-	static void ldecfg2();
-	static void lderepc();
-	static void txpower();
-	static void rfrxctrlh();
-	static void rftxctrl();
-	static void tcpgdelay();
-	static void fspll();
-	static void fsxtalt();
+	void agctune1();
+	void agctune2();
+	void agctune3();
+	void drxtune0b();
+	void drxtune1a();
+	void drxtune1b();
+	void drxtune2();
+	void drxtune4H();
+	void ldecfg1();
+	void ldecfg2();
+	void lderepc();
+	void txpower();
+	void rfrxctrlh();
+	void rftxctrl();
+	void tcpgdelay();
+	void fspll();
+	void fsxtalt();
 	
 	/* function to write configurations to registers */
-	static void writeConfiguration();
+	void writeConfiguration();
 
 	/* tuning according to mode.(Very important) */
-	static void tune(TXPowerMode mode);
+	void tune(TXPowerMode mode);
 	
 	/* device status flags */
-	static boolean isReceiveTimestampAvailable();
-	static boolean isTransmitDone();
-	static boolean isReceiveDone();
-	static boolean isReceiveFailed();
-	static boolean isReceiveTimeout();
-	static boolean isClockProblem();
+	boolean isReceiveTimestampAvailable();
+	boolean isTransmitDone();
+	boolean isReceiveDone();
+	boolean isReceiveFailed();
+	boolean isReceiveTimeout();
+	boolean isClockProblem();
 	
 	/* interrupt state handling */
-	static void clearInterrupts();
-	static void clearAllStatus();
-	static void clearReceiveStatus();
-	static void clearReceiveTimestampAvailableStatus();
-	static void clearTransmitStatus();
+	void clearInterrupts();
+	void clearAllStatus();
+	void clearReceiveStatus();
+	void clearReceiveTimestampAvailableStatus();
+	void clearTransmitStatus();
 	
 	/* internal helper to read/write system registers. */
-	static void readSystemEventStatusRegister();
-	static void readSystemConfigurationRegister();
-	static void writeSystemConfigurationRegister();
-	static void readNetworkIdAndDeviceAddress();
-	static void writeNetworkIdAndDeviceAddress();
-	static void readSystemEventMaskRegister();
-	static void writeSystemEventMaskRegister();
-	static void readChannelControlRegister();
-	static void writeChannelControlRegister();
-	static void readTransmitFrameControlRegister();
-	static void writeTransmitFrameControlRegister();
-	static void writeAntennaDelayRegisters();
+	void readSystemEventStatusRegister();
+	void readSystemConfigurationRegister();
+	void writeSystemConfigurationRegister();
+	void readNetworkIdAndDeviceAddress();
+	void writeNetworkIdAndDeviceAddress();
+	void readSystemEventMaskRegister();
+	void writeSystemEventMaskRegister();
+	void readChannelControlRegister();
+	void writeChannelControlRegister();
+	void readTransmitFrameControlRegister();
+	void writeTransmitFrameControlRegister();
+	void writeAntennaDelayRegisters();
 	
 	/* clock management. */
-	static void enableClock(byte clock);
+	void enableClock(byte clock);
 	
 	/* LDE micro-code management. */
-	static void manageLDE();
+	void manageLDE();
 	
 	/* timestamp correction. */
-	static void correctTimestamp(DWM1000Time& timestamp);
+	void correctTimestamp(DWM1000Time& timestamp);
 	
 	/* reading and writing bytes from and to DWM1000 module. */
-	static void readBytes(byte cmd, uint16_t offset, byte data[], uint16_t n);
-	static void readBytesOTP(uint16_t address, byte data[]);
-	static void writeByte(byte cmd, uint16_t offset, byte data);
-	static void writeBytes(byte cmd, uint16_t offset, byte data[], uint16_t n);
+	void readBytes(byte cmd, uint16_t offset, byte data[], uint16_t n);
+	void readBytesOTP(uint16_t address, byte data[]);
+	void writeByte(byte cmd, uint16_t offset, byte data);
+	void writeBytes(byte cmd, uint16_t offset, byte data[], uint16_t n);
 
 	/* SFDMode functions */
-	static void useDecawaveSFD();
-	static void useStandardSFD();
-	static void useRecommendedSFD();
-
-	/* SPI configs. */
-	static const SPISettings _fastSPI;
-	static const SPISettings _slowSPI;
-	static const SPISettings* _currentSPI;
+	void useDecawaveSFD();
+	void useStandardSFD();
+	void useRecommendedSFD();
 };
-
-extern DWM1000Class DWM1000;
