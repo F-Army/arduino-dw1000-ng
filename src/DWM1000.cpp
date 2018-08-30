@@ -1025,51 +1025,61 @@ namespace DWM1000 {
 	}
 
 	void getPrintableDeviceMode(char msgBuffer[]) {
-		// data not read from device! data is from class
-		// TODO
+		uint16_t dr;
 		uint8_t prf;
 		uint16_t plen;
-		uint16_t dr;
-		uint8_t ch;
 		uint8_t pcode;
-		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-			prf = 16;
-		} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
-			prf = 64;
+		uint8_t ch;
+		byte chan_ctrl[LEN_CHAN_CTRL];
+		byte tx_fctrl[LEN_TX_FCTRL];
+		readBytes(CHAN_CTRL, NO_SUB, chan_ctrl, LEN_CHAN_CTRL);
+		readBytes(TX_FCTRL, NO_SUB, tx_fctrl, LEN_TX_FCTRL);
+		/* Data Rate from 0x08 bits:13-14(tx_fctrl) */
+		dr = (uint16_t)(tx_fctrl[1] >> 5 & 0x3);
+		if(dr == TRX_RATE_110KBPS) {
+			dr = 110;
+		} else if(dr == TRX_RATE_850KBPS) {
+			dr = 850;
+		} else if(dr == TRX_RATE_6800KBPS){
+			dr = 6800;
 		} else {
-			prf = 0; // error
+			dr = 1;	//TODO Error handling
 		}
-		if(_preambleLength == TX_PREAMBLE_LEN_64) {
+		/* PRF(16 or 64) from 0x1F bits:18-19(chan_ctrl) */
+		prf = (uint8_t)(chan_ctrl[2] >> 2 & 0x03);
+		if(prf == TX_PULSE_FREQ_16MHZ){
+			prf = 16;
+		} else if(prf = TX_PULSE_FREQ_64MHZ){
+			prf = 64;
+		} else{
+			return; //TODO Error handling
+		}
+		/* PreambleLength from 0x08 bits:18-21(tx_fctrl) */
+		plen = (uint16_t)(tx_fctrl[2] >> 2 & 0xF);
+		if(plen == TX_PREAMBLE_LEN_64) {
 			plen = 64;
-		} else if(_preambleLength == TX_PREAMBLE_LEN_128) {
+		} else if(plen == TX_PREAMBLE_LEN_128) {
 			plen = 128;
-		} else if(_preambleLength == TX_PREAMBLE_LEN_256) {
+		} else if(plen == TX_PREAMBLE_LEN_256) {
 			plen = 256;
-		} else if(_preambleLength == TX_PREAMBLE_LEN_512) {
+		} else if(plen == TX_PREAMBLE_LEN_512) {
 			plen = 512;
-		} else if(_preambleLength == TX_PREAMBLE_LEN_1024) {
+		} else if(plen == TX_PREAMBLE_LEN_1024) {
 			plen = 1024;
-		} else if(_preambleLength == TX_PREAMBLE_LEN_1536) {
+		} else if(plen == TX_PREAMBLE_LEN_1536) {
 			plen = 1536;
-		} else if(_preambleLength == TX_PREAMBLE_LEN_2048) {
+		} else if(plen == TX_PREAMBLE_LEN_2048) {
 			plen = 2048;
-		} else if(_preambleLength == TX_PREAMBLE_LEN_4096) {
+		} else if(plen == TX_PREAMBLE_LEN_4096) {
 			plen = 4096;
 		} else {
 			plen = 0; // error
 		}
-		if(_dataRate == TRX_RATE_110KBPS) {
-			dr = 110;
-		} else if(_dataRate == TRX_RATE_850KBPS) {
-			dr = 850;
-		} else if(_dataRate == TRX_RATE_6800KBPS) {
-			dr = 6800;
-		} else {
-			dr = 0; // error
-		}
-		ch    = (uint8_t)_channel;
-		pcode = (uint8_t)_preambleCode;
-		sprintf(msgBuffer, "Data rate: %u kb/s, PRF: %u MHz, Preamble: %u symbols (code #%u), Channel: #%u", dr, prf, plen, pcode, ch);
+		/* Channel from 0x1F bits:0-4(tx_chan) */
+		ch = (uint8_t)(chan_ctrl[0] & 0xF);
+		/* Preamble Code from 0x1F bits:24-31(chan_ctrl) */
+		pcode = (uint8_t)(chan_ctrl[3] >> 4 & 0x1F);
+		sprintf(msgBuffer, "Data rate: %u kb/s, PRF: %u MHz, Preamble: %u symbols, Channel: #%u, Pcode #%u" , dr, prf, plen, ch, pcode);
 	}
 
 	/* ###########################################################################
