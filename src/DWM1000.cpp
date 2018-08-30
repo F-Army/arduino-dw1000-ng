@@ -34,7 +34,7 @@ namespace DWM1000 {
 	namespace {
 
 		/* ########################### VARIABLES ################################# */
-		
+
 		/* pins */
 		uint8_t _ss;
 		uint8_t _rst;
@@ -49,6 +49,9 @@ namespace DWM1000 {
 		void (* _handleReceiveTimestampAvailable)(void) = nullptr;
 
 		/* SFD Mode */
+		void useDecawaveSFD();
+		void useStandardSFD();
+		void useRecommendedSFD();
 		void (* _currentSFDMode)(void) = useRecommendedSFD;
 
 		/* registers */
@@ -85,14 +88,711 @@ namespace DWM1000 {
 		const SPISettings  _slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
 		const SPISettings* _currentSPI = &_fastSPI;
 
-		/* ############################# HELPERS ################################### */
+		/* ############################# METHODS ################################### */
 
+		/* Steps used to get Temp and Voltage */
 		void vbatAndTempSteps() {
 			byte step1 = 0x80; writeBytes(RF_CONF, 0x11, &step1, 1);
 			byte step2 = 0x0A; writeBytes(RF_CONF, 0x12, &step2, 1);
 			byte step3 = 0x0F; writeBytes(RF_CONF, 0x12, &step3, 1);
 			byte step4 = 0x01; writeBytes(TX_CAL, NO_SUB, &step4, 1);
 			byte step5 = 0x00; writeBytes(TX_CAL, NO_SUB, &step5, 1);
+		}
+
+		/* AGC_TUNE1 - reg:0x23, sub-reg:0x04, table 24 */
+		void agctune1() {
+			byte agctune1[LEN_AGC_TUNE1];
+			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+				DWM1000Utils::writeValueToBytes(agctune1, 0x8870, LEN_AGC_TUNE1);
+			} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+				DWM1000Utils::writeValueToBytes(agctune1, 0x889B, LEN_AGC_TUNE1);
+			} else {
+				// TODO proper error/warning handling
+			}
+			writeBytes(AGC_TUNE, AGC_TUNE1_SUB, agctune1, LEN_AGC_TUNE1);
+		}
+
+		/* AGC_TUNE2 - reg:0x23, sub-reg:0x0C, table 25 */
+		void agctune2() {
+			byte agctune2[LEN_AGC_TUNE2];
+			DWM1000Utils::writeValueToBytes(agctune2, 0x2502A907L, LEN_AGC_TUNE2);
+			writeBytes(AGC_TUNE, AGC_TUNE2_SUB, agctune2, LEN_AGC_TUNE2);
+		}
+
+		/* AGC_TUNE3 - reg:0x23, sub-reg:0x12, table 26 */
+		void agctune3() {
+			byte agctune3[LEN_AGC_TUNE3];
+			DWM1000Utils::writeValueToBytes(agctune3, 0x0035, LEN_AGC_TUNE3);
+			writeBytes(AGC_TUNE, AGC_TUNE3_SUB, agctune3, LEN_AGC_TUNE3);
+		}
+
+		/* DRX_TUNE0b - reg:0x27, sub-reg:0x02 (already optimized according to Table 30 of user manual) */
+		void drxtune0b() {
+			byte drxtune0b[LEN_DRX_TUNE0b];	
+			if(_dataRate == TRX_RATE_110KBPS) {
+				DWM1000Utils::writeValueToBytes(drxtune0b, 0x0016, LEN_DRX_TUNE0b);
+			} else if(_dataRate == TRX_RATE_850KBPS) {
+				DWM1000Utils::writeValueToBytes(drxtune0b, 0x0006, LEN_DRX_TUNE0b);
+			} else if(_dataRate == TRX_RATE_6800KBPS) {
+				DWM1000Utils::writeValueToBytes(drxtune0b, 0x0001, LEN_DRX_TUNE0b);
+			} else {
+				// TODO proper error/warning handling
+			}
+			writeBytes(DRX_TUNE, DRX_TUNE0b_SUB, drxtune0b, LEN_DRX_TUNE0b);
+		}
+
+		/* DRX_TUNE1a - reg:0x27, sub-reg:0x04, table 31 */
+		void drxtune1a() {
+			byte drxtune1a[LEN_DRX_TUNE1a];
+			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+				DWM1000Utils::writeValueToBytes(drxtune1a, 0x0087, LEN_DRX_TUNE1a);
+			} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+				DWM1000Utils::writeValueToBytes(drxtune1a, 0x008D, LEN_DRX_TUNE1a);
+			} else {
+				// TODO proper error/warning handling
+			}
+			writeBytes(DRX_TUNE, DRX_TUNE1a_SUB, drxtune1a, LEN_DRX_TUNE1a);
+		}
+
+		/* DRX_TUNE1b - reg:0x27, sub-reg:0x06, table 32 */
+		void drxtune1b() {
+			byte drxtune1b[LEN_DRX_TUNE1b];
+			if(_preambleLength == TX_PREAMBLE_LEN_1536 || _preambleLength == TX_PREAMBLE_LEN_2048 ||
+				_preambleLength == TX_PREAMBLE_LEN_4096) {
+				if(_dataRate == TRX_RATE_110KBPS) {
+					DWM1000Utils::writeValueToBytes(drxtune1b, 0x0064, LEN_DRX_TUNE1b);
+				} else {
+					// TODO proper error/warning handling
+				}
+			} else if(_preambleLength != TX_PREAMBLE_LEN_64) {
+				if(_dataRate == TRX_RATE_850KBPS || _dataRate == TRX_RATE_6800KBPS) {
+					DWM1000Utils::writeValueToBytes(drxtune1b, 0x0020, LEN_DRX_TUNE1b);
+				} else {
+					// TODO proper error/warning handling
+				}
+			} else {
+				if(_dataRate == TRX_RATE_6800KBPS) {
+					DWM1000Utils::writeValueToBytes(drxtune1b, 0x0010, LEN_DRX_TUNE1b);
+				} else {
+					// TODO proper error/warning handling
+				}
+			}
+			writeBytes(DRX_TUNE, DRX_TUNE1b_SUB, drxtune1b, LEN_DRX_TUNE1b);
+		}
+
+		/* DRX_TUNE2 - reg:0x27, sub-reg:0x08, table 33 */
+		void drxtune2() {
+			byte drxtune2[LEN_DRX_TUNE2];	
+			if(_pacSize == PAC_SIZE_8) {
+				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+					DWM1000Utils::writeValueToBytes(drxtune2, 0x311A002DL, LEN_DRX_TUNE2);
+				} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+					DWM1000Utils::writeValueToBytes(drxtune2, 0x313B006BL, LEN_DRX_TUNE2);
+				} else {
+					// TODO proper error/warning handling
+				}
+			} else if(_pacSize == PAC_SIZE_16) {
+				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+					DWM1000Utils::writeValueToBytes(drxtune2, 0x331A0052L, LEN_DRX_TUNE2);
+				} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+					DWM1000Utils::writeValueToBytes(drxtune2, 0x333B00BEL, LEN_DRX_TUNE2);
+				} else {
+					// TODO proper error/warning handling
+				}
+			} else if(_pacSize == PAC_SIZE_32) {
+				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+					DWM1000Utils::writeValueToBytes(drxtune2, 0x351A009AL, LEN_DRX_TUNE2);
+				} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+					DWM1000Utils::writeValueToBytes(drxtune2, 0x353B015EL, LEN_DRX_TUNE2);
+				} else {
+					// TODO proper error/warning handling
+				}
+			} else if(_pacSize == PAC_SIZE_64) {
+				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+					DWM1000Utils::writeValueToBytes(drxtune2, 0x371A011DL, LEN_DRX_TUNE2);
+				} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+					DWM1000Utils::writeValueToBytes(drxtune2, 0x373B0296L, LEN_DRX_TUNE2);
+				} else {
+					// TODO proper error/warning handling
+				}
+			} else {
+				// TODO proper error/warning handling
+			}
+			writeBytes(DRX_TUNE, DRX_TUNE2_SUB, drxtune2, LEN_DRX_TUNE2);
+		}
+
+		/* DRX_TUNE4H - reg:0x27, sub-reg:0x26, table 34 */
+		void drxtune4H() {
+			byte drxtune4H[LEN_DRX_TUNE4H];
+			if(_preambleLength == TX_PREAMBLE_LEN_64) {
+				DWM1000Utils::writeValueToBytes(drxtune4H, 0x0010, LEN_DRX_TUNE4H);
+			} else {
+				DWM1000Utils::writeValueToBytes(drxtune4H, 0x0028, LEN_DRX_TUNE4H);
+			}
+			writeBytes(DRX_TUNE, DRX_TUNE4H_SUB, drxtune4H, LEN_DRX_TUNE4H);
+		}
+
+		/* LDE_CFG1 - reg 0x2E, sub-reg:0x0806 */
+		void ldecfg1() {
+			byte ldecfg1[LEN_LDE_CFG1];
+			_nlos == true ? DWM1000Utils::writeValueToBytes(ldecfg1, 0x7, LEN_LDE_CFG1) : DWM1000Utils::writeValueToBytes(ldecfg1, 0xD, LEN_LDE_CFG1);
+			writeBytes(LDE_IF, LDE_CFG1_SUB, ldecfg1, LEN_LDE_CFG1);
+		}
+
+		/* LDE_CFG2 - reg 0x2E, sub-reg:0x1806, table 50 */
+		void ldecfg2() {
+			byte ldecfg2[LEN_LDE_CFG2];	
+			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+				_nlos == true ? DWM1000Utils::writeValueToBytes(ldecfg2, 0x0003, LEN_LDE_CFG2) : DWM1000Utils::writeValueToBytes(ldecfg2, 0x1607, LEN_LDE_CFG2);
+			} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+				DWM1000Utils::writeValueToBytes(ldecfg2, 0x0607, LEN_LDE_CFG2);
+			} else {
+				// TODO proper error/warning handling
+			}
+			writeBytes(LDE_IF, LDE_CFG2_SUB, ldecfg2, LEN_LDE_CFG2);
+		}
+
+		/* LDE_REPC - reg 0x2E, sub-reg:0x2804, table 51 */
+		void lderepc() {
+			byte lderepc[LEN_LDE_REPC];
+			if(_preambleCode == PREAMBLE_CODE_16MHZ_1 || _preambleCode == PREAMBLE_CODE_16MHZ_2) {
+				if(_dataRate == TRX_RATE_110KBPS) {
+					DWM1000Utils::writeValueToBytes(lderepc, ((0x5998 >> 3) & 0xFFFF), LEN_LDE_REPC);
+				} else {
+					DWM1000Utils::writeValueToBytes(lderepc, 0x5998, LEN_LDE_REPC);
+				}
+			} else if(_preambleCode == PREAMBLE_CODE_16MHZ_3 || _preambleCode == PREAMBLE_CODE_16MHZ_8) {
+				if(_dataRate == TRX_RATE_110KBPS) {
+					DWM1000Utils::writeValueToBytes(lderepc, ((0x51EA >> 3) & 0xFFFF), LEN_LDE_REPC);
+				} else {
+					DWM1000Utils::writeValueToBytes(lderepc, 0x51EA, LEN_LDE_REPC);
+				}
+			} else if(_preambleCode == PREAMBLE_CODE_16MHZ_4) {
+				if(_dataRate == TRX_RATE_110KBPS) {
+					DWM1000Utils::writeValueToBytes(lderepc, ((0x428E >> 3) & 0xFFFF), LEN_LDE_REPC);
+				} else {
+					DWM1000Utils::writeValueToBytes(lderepc, 0x428E, LEN_LDE_REPC);
+				}
+			} else if(_preambleCode == PREAMBLE_CODE_16MHZ_5) {
+				if(_dataRate == TRX_RATE_110KBPS) {
+					DWM1000Utils::writeValueToBytes(lderepc, ((0x451E >> 3) & 0xFFFF), LEN_LDE_REPC);
+				} else {
+					DWM1000Utils::writeValueToBytes(lderepc, 0x451E, LEN_LDE_REPC);
+				}
+			} else if(_preambleCode == PREAMBLE_CODE_16MHZ_6) {
+				if(_dataRate == TRX_RATE_110KBPS) {
+					DWM1000Utils::writeValueToBytes(lderepc, ((0x2E14 >> 3) & 0xFFFF), LEN_LDE_REPC);
+				} else {
+					DWM1000Utils::writeValueToBytes(lderepc, 0x2E14, LEN_LDE_REPC);
+				}
+			} else if(_preambleCode == PREAMBLE_CODE_16MHZ_7) {
+				if(_dataRate == TRX_RATE_110KBPS) {
+					DWM1000Utils::writeValueToBytes(lderepc, ((0x8000 >> 3) & 0xFFFF), LEN_LDE_REPC);
+				} else {
+					DWM1000Utils::writeValueToBytes(lderepc, 0x8000, LEN_LDE_REPC);
+				}
+			} else if(_preambleCode == PREAMBLE_CODE_64MHZ_9) {
+				if(_dataRate == TRX_RATE_110KBPS) {
+					DWM1000Utils::writeValueToBytes(lderepc, ((0x28F4 >> 3) & 0xFFFF), LEN_LDE_REPC);
+				} else {
+					DWM1000Utils::writeValueToBytes(lderepc, 0x28F4, LEN_LDE_REPC);
+				}
+			} else if(_preambleCode == PREAMBLE_CODE_64MHZ_10 || _preambleCode == PREAMBLE_CODE_64MHZ_17) {
+				if(_dataRate == TRX_RATE_110KBPS) {
+					DWM1000Utils::writeValueToBytes(lderepc, ((0x3332 >> 3) & 0xFFFF), LEN_LDE_REPC);
+				} else {
+					DWM1000Utils::writeValueToBytes(lderepc, 0x3332, LEN_LDE_REPC);
+				}
+			} else if(_preambleCode == PREAMBLE_CODE_64MHZ_11) {
+				if(_dataRate == TRX_RATE_110KBPS) {
+					DWM1000Utils::writeValueToBytes(lderepc, ((0x3AE0 >> 3) & 0xFFFF), LEN_LDE_REPC);
+				} else {
+					DWM1000Utils::writeValueToBytes(lderepc, 0x3AE0, LEN_LDE_REPC);
+				}
+			} else if(_preambleCode == PREAMBLE_CODE_64MHZ_12) {
+				if(_dataRate == TRX_RATE_110KBPS) {
+					DWM1000Utils::writeValueToBytes(lderepc, ((0x3D70 >> 3) & 0xFFFF), LEN_LDE_REPC);
+				} else {
+					DWM1000Utils::writeValueToBytes(lderepc, 0x3D70, LEN_LDE_REPC);
+				}
+			} else if(_preambleCode == PREAMBLE_CODE_64MHZ_18 || _preambleCode == PREAMBLE_CODE_64MHZ_19) {
+				if(_dataRate == TRX_RATE_110KBPS) {
+					DWM1000Utils::writeValueToBytes(lderepc, ((0x35C2 >> 3) & 0xFFFF), LEN_LDE_REPC);
+				} else {
+					DWM1000Utils::writeValueToBytes(lderepc, 0x35C2, LEN_LDE_REPC);
+				}
+			} else if(_preambleCode == PREAMBLE_CODE_64MHZ_20) {
+				if(_dataRate == TRX_RATE_110KBPS) {
+					DWM1000Utils::writeValueToBytes(lderepc, ((0x47AE >> 3) & 0xFFFF), LEN_LDE_REPC);
+				} else {
+					DWM1000Utils::writeValueToBytes(lderepc, 0x47AE, LEN_LDE_REPC);
+				}
+			} else {
+				// TODO proper error/warning handling
+			}
+			
+			writeBytes(LDE_IF, LDE_REPC_SUB, lderepc, LEN_LDE_REPC);
+		}
+
+		/* TX_POWER (enabled smart transmit power control) - reg:0x1E, tables 19-20
+		* These values are based on a typical IC and an assumed IC to antenna loss of 1.5 dB with a 0 dBi antenna */
+		void txpower() {
+			byte txpower[LEN_TX_POWER];
+			if(_channel == CHANNEL_1 || _channel == CHANNEL_2) {
+				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+					if(_smartPower) {
+						DWM1000Utils::writeValueToBytes(txpower, 0x1B153555L, LEN_TX_POWER);
+					} else {
+						DWM1000Utils::writeValueToBytes(txpower, 0x55555555L, LEN_TX_POWER);
+					}
+				} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+					if(_smartPower) {
+						DWM1000Utils::writeValueToBytes(txpower, 0x0D072747L, LEN_TX_POWER);
+					} else {
+						DWM1000Utils::writeValueToBytes(txpower, 0x47474747L, LEN_TX_POWER);
+					}
+				} else {
+					// TODO proper error/warning handling
+				}
+			} else if(_channel == CHANNEL_3) {
+				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+					if(_smartPower) {
+						DWM1000Utils::writeValueToBytes(txpower, 0x150F2F4FL, LEN_TX_POWER);
+					} else {
+						DWM1000Utils::writeValueToBytes(txpower, 0x4F4F4F4FL, LEN_TX_POWER);
+					}
+				} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+					if(_smartPower) {
+						DWM1000Utils::writeValueToBytes(txpower, 0x0B2B4B6BL, LEN_TX_POWER);
+					} else {
+						DWM1000Utils::writeValueToBytes(txpower, 0x6B6B6B6BL, LEN_TX_POWER);
+					}
+				} else {
+					// TODO proper error/warning handling
+				}
+			} else if(_channel == CHANNEL_4) {
+				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+					if(_smartPower) {
+						DWM1000Utils::writeValueToBytes(txpower, 0x1F1F1F3FL, LEN_TX_POWER);
+					} else {
+						DWM1000Utils::writeValueToBytes(txpower, 0x3F3F3F3FL, LEN_TX_POWER);
+					}
+				} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+					if(_smartPower) {
+						DWM1000Utils::writeValueToBytes(txpower, 0x1A3A5A7AL, LEN_TX_POWER);
+					} else {
+						DWM1000Utils::writeValueToBytes(txpower, 0x7A7A7A7AL, LEN_TX_POWER);
+					}
+				} else {
+					// TODO proper error/warning handling
+				}
+			} else if(_channel == CHANNEL_5) {
+				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+					if(_smartPower) {
+						DWM1000Utils::writeValueToBytes(txpower, 0x140E0828L, LEN_TX_POWER);
+					} else {
+						DWM1000Utils::writeValueToBytes(txpower, 0x28282828L, LEN_TX_POWER);
+					}
+				} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+					if(_smartPower) {
+						DWM1000Utils::writeValueToBytes(txpower, 0x05254565L, LEN_TX_POWER);
+					} else {
+						DWM1000Utils::writeValueToBytes(txpower, 0x65656565L, LEN_TX_POWER);
+					}
+				} else {
+					// TODO proper error/warning handling
+				}
+			} else if(_channel == CHANNEL_7) {
+				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+					if(_smartPower) {
+						DWM1000Utils::writeValueToBytes(txpower, 0x12325272L, LEN_TX_POWER);
+					} else {
+						DWM1000Utils::writeValueToBytes(txpower, 0x72727272L, LEN_TX_POWER);
+					}
+				} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+					if(_smartPower) {
+						DWM1000Utils::writeValueToBytes(txpower, 0x315191B1L, LEN_TX_POWER);
+					} else {
+						DWM1000Utils::writeValueToBytes(txpower, 0xB1B1B1B1L, LEN_TX_POWER);
+					}
+				} else {
+					// TODO proper error/warning handling
+				}
+			} else {
+				// TODO proper error/warning handling
+			}
+			writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
+		}
+
+		/* RF_RXCTRLH - reg:0x28, sub-reg:0x0B, table 37 */
+		void rfrxctrlh() {
+			byte rfrxctrlh[LEN_RF_RXCTRLH];
+			if(_channel != CHANNEL_4 && _channel != CHANNEL_7) {
+				DWM1000Utils::writeValueToBytes(rfrxctrlh, 0xD8, LEN_RF_RXCTRLH);
+			} else {
+				DWM1000Utils::writeValueToBytes(rfrxctrlh, 0xBC, LEN_RF_RXCTRLH);
+			}
+			writeBytes(RF_CONF, RF_RXCTRLH_SUB, rfrxctrlh, LEN_RF_RXCTRLH);
+		}
+
+		/* RX_TXCTRL - reg:0x28, sub-reg:0x0C */
+		void rftxctrl() {
+			byte rftxctrl[LEN_RF_TXCTRL];
+			if(_channel == CHANNEL_1) {
+				DWM1000Utils::writeValueToBytes(rftxctrl, 0x00005C40L, LEN_RF_TXCTRL);
+			} else if(_channel == CHANNEL_2) {
+				DWM1000Utils::writeValueToBytes(rftxctrl, 0x00045CA0L, LEN_RF_TXCTRL);
+			} else if(_channel == CHANNEL_3) {
+				DWM1000Utils::writeValueToBytes(rftxctrl, 0x00086CC0L, LEN_RF_TXCTRL);
+			} else if(_channel == CHANNEL_4) {
+				DWM1000Utils::writeValueToBytes(rftxctrl, 0x00045C80L, LEN_RF_TXCTRL);
+			} else if(_channel == CHANNEL_5) {
+				DWM1000Utils::writeValueToBytes(rftxctrl, 0x001E3FE0L, LEN_RF_TXCTRL);
+			} else if(_channel == CHANNEL_7) {
+				DWM1000Utils::writeValueToBytes(rftxctrl, 0x001E7DE0L, LEN_RF_TXCTRL);
+			} else {
+				// TODO proper error/warning handling
+			}
+			writeBytes(RF_CONF, RF_TXCTRL_SUB, rftxctrl, LEN_RF_TXCTRL);
+		}
+
+		/* TC_PGDELAY - reg:0x2A, sub-reg:0x0B, table 40 */
+		void tcpgdelay() {
+			byte tcpgdelay[LEN_TC_PGDELAY];	
+			if(_channel == CHANNEL_1) {
+				DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC9, LEN_TC_PGDELAY);
+			} else if(_channel == CHANNEL_2) {
+				DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC2, LEN_TC_PGDELAY);
+			} else if(_channel == CHANNEL_3) {
+				DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC5, LEN_TC_PGDELAY);
+			} else if(_channel == CHANNEL_4) {
+				DWM1000Utils::writeValueToBytes(tcpgdelay, 0x95, LEN_TC_PGDELAY);
+			} else if(_channel == CHANNEL_5) {
+				DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC0, LEN_TC_PGDELAY);
+			} else if(_channel == CHANNEL_7) {
+				DWM1000Utils::writeValueToBytes(tcpgdelay, 0x93, LEN_TC_PGDELAY);
+			} else {
+				// TODO proper error/warning handling
+			}
+			writeBytes(TX_CAL, TC_PGDELAY_SUB, tcpgdelay, LEN_TC_PGDELAY);
+		}
+
+		// FS_PLLCFG and FS_PLLTUNE - reg:0x2B, sub-reg:0x07-0x0B, tables 43-44
+		void fspll() {
+			byte fspllcfg[LEN_FS_PLLCFG];
+			byte fsplltune[LEN_FS_PLLTUNE];
+			if(_channel == CHANNEL_1) {
+				DWM1000Utils::writeValueToBytes(fspllcfg, 0x09000407L, LEN_FS_PLLCFG);
+				DWM1000Utils::writeValueToBytes(fsplltune, 0x1E, LEN_FS_PLLTUNE);
+			} else if(_channel == CHANNEL_2 || _channel == CHANNEL_4) {
+				DWM1000Utils::writeValueToBytes(fspllcfg, 0x08400508L, LEN_FS_PLLCFG);
+				DWM1000Utils::writeValueToBytes(fsplltune, 0x26, LEN_FS_PLLTUNE);
+			} else if(_channel == CHANNEL_3) {
+				DWM1000Utils::writeValueToBytes(fspllcfg, 0x08401009L, LEN_FS_PLLCFG);
+				DWM1000Utils::writeValueToBytes(fsplltune, 0x56, LEN_FS_PLLTUNE);
+			} else if(_channel == CHANNEL_5 || _channel == CHANNEL_7) {
+				DWM1000Utils::writeValueToBytes(fspllcfg, 0x0800041DL, LEN_FS_PLLCFG);
+				DWM1000Utils::writeValueToBytes(fsplltune, 0xBE, LEN_FS_PLLTUNE);
+			} else {
+				// TODO proper error/warning handling
+			}
+			writeBytes(FS_CTRL, FS_PLLTUNE_SUB, fsplltune, LEN_FS_PLLTUNE);
+			writeBytes(FS_CTRL, FS_PLLCFG_SUB, fspllcfg, LEN_FS_PLLCFG);
+		}
+
+		/* Crystal calibration from OTP (if available)
+		* FS_XTALT - reg:0x2B, sub-reg:0x0E
+		* OTP(one-time-programmable) memory map - table 10 */
+		void fsxtalt() {
+			byte fsxtalt[LEN_FS_XTALT];
+			byte buf_otp[4];
+			readBytesOTP(0x01E, buf_otp); //0x01E -> byte[0]=XTAL_Trim
+			if (buf_otp[0] == 0) {
+				// No trim value available from OTP, use midrange value of 0x10
+				DWM1000Utils::writeValueToBytes(fsxtalt, ((0x10 & 0x1F) | 0x60), LEN_FS_XTALT);
+			} else {
+				DWM1000Utils::writeValueToBytes(fsxtalt, ((buf_otp[0] & 0x1F) | 0x60), LEN_FS_XTALT);
+			}
+			// write configuration back to chip
+			writeBytes(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
+		}
+
+		void tune(TXPowerMode mode) {
+			// these registers are going to be tuned/configured
+			agctune1();
+			agctune2();
+			agctune3();
+			drxtune0b();
+			drxtune1a();
+			drxtune1b();
+			drxtune2();
+			drxtune4H();
+			ldecfg1();
+			ldecfg2();
+			lderepc();
+
+			if(mode == TXPowerMode::AUTO_POWER) { 
+				txpower(); 
+			}
+
+			rfrxctrlh();
+			rftxctrl();
+			tcpgdelay();
+			fspll();
+			fsxtalt();
+		}
+
+		void writeNetworkIdAndDeviceAddress() {
+			writeBytes(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
+		}
+
+		void writeSystemConfigurationRegister() {
+			writeBytes(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
+		}
+
+		void writeChannelControlRegister() {
+			writeBytes(CHAN_CTRL, NO_SUB, _chanctrl, LEN_CHAN_CTRL);
+		}
+
+		void writeTransmitFrameControlRegister() {
+			writeBytes(TX_FCTRL, NO_SUB, _txfctrl, LEN_TX_FCTRL);
+		}
+
+		void writeSystemEventMaskRegister() {
+			writeBytes(SYS_MASK, NO_SUB, _sysmask, LEN_SYS_MASK);
+		}
+
+		void writeAntennaDelayRegisters() {
+			byte antennaDelayBytes[DWM1000Time::LENGTH_TIMESTAMP];
+			_antennaDelay.getTimestamp(antennaDelayBytes);
+			writeBytes(TX_ANTD, NO_SUB, antennaDelayBytes, LEN_TX_ANTD);
+			writeBytes(LDE_IF, LDE_RXANTD_SUB, antennaDelayBytes, LEN_LDE_RXANTD);
+		}
+
+		void writeConfiguration() {
+			// write all configurations back to device
+			writeNetworkIdAndDeviceAddress();
+			writeSystemConfigurationRegister();
+			writeChannelControlRegister();
+			writeTransmitFrameControlRegister();
+			writeSystemEventMaskRegister();
+			writeAntennaDelayRegisters();
+		}
+
+		void enableClock(byte clock) {
+			byte pmscctrl0[LEN_PMSC_CTRL0];
+			memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
+			readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			if(clock == AUTO_CLOCK) {
+				_currentSPI = &_fastSPI;
+				pmscctrl0[0] = AUTO_CLOCK;
+				pmscctrl0[1] &= 0xFE;
+			} else if(clock == XTI_CLOCK) {
+				_currentSPI = &_slowSPI;
+				pmscctrl0[0] &= 0xFC;
+				pmscctrl0[0] |= XTI_CLOCK;
+			} else if(clock == PLL_CLOCK) {
+				_currentSPI = &_fastSPI;
+				pmscctrl0[0] &= 0xFC;
+				pmscctrl0[0] |= PLL_CLOCK;
+			} else {
+				// TODO deliver proper warning
+			}
+			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
+		}
+
+		void manageLDE() {
+			// transfer any ldo tune values
+			byte ldoTune[LEN_OTP_RDAT];
+			readBytesOTP(0x04, ldoTune); // TODO #define
+			if(ldoTune[0] != 0) {
+				// TODO tuning available, copy over to RAM: use OTP_LDO bit
+			}
+			// tell the chip to load the LDE microcode
+			// TODO remove clock-related code (PMSC_CTRL) as handled separately
+			byte pmscctrl0[LEN_PMSC_CTRL0];
+			byte otpctrl[LEN_OTP_CTRL];
+			memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
+			memset(otpctrl, 0, LEN_OTP_CTRL);
+			readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			readBytes(OTP_IF, OTP_CTRL_SUB, otpctrl, LEN_OTP_CTRL);
+			pmscctrl0[0] = 0x01;
+			pmscctrl0[1] = 0x03;
+			otpctrl[0]   = 0x00;
+			otpctrl[1]   = 0x80;
+			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
+			writeBytes(OTP_IF, OTP_CTRL_SUB, otpctrl, 2);
+			delay(5);
+			pmscctrl0[0] = 0x00;
+			pmscctrl0[1] &= 0x02;
+			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
+		}
+
+		void useDecawaveSFD() {
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
+			switch(_dataRate) {
+				case TRX_RATE_6800KBPS:
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
+					break;
+				case TRX_RATE_850KBPS:
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10);
+					break;
+				case TRX_RATE_110KBPS:
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
+					break;
+				default:
+					return; //TODO Proper error handling
+			}
+		}
+
+		void useStandardSFD() {
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+			switch(_dataRate) {
+				case TRX_RATE_6800KBPS:
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
+					break;
+				case TRX_RATE_850KBPS:
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
+					break;
+				case TRX_RATE_110KBPS:
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
+					break;
+				default:
+					return; //TODO Proper error handling
+			}
+		}
+
+		void useRecommendedSFD() {
+			/* SFD mode and types recommended by DW1000 User manual for optimal performance */
+			switch(_dataRate) {
+				case TRX_RATE_6800KBPS:
+					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
+					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
+					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
+					break;
+				case TRX_RATE_850KBPS:
+					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
+					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
+					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10);
+					break;
+				case TRX_RATE_110KBPS:
+					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
+					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
+					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
+				default:
+					return; //TODO Error handling
+			}
+		}
+		
+		/* interrupt state handling */
+		
+		void clearInterrupts() {
+			memset(_sysmask, 0, LEN_SYS_MASK);
+		}
+
+		void clearAllStatus() {
+			//Latched bits in status register are reset by writing 1 to them
+			memset(_sysstatus, 0xff, LEN_SYS_STATUS);
+			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+		}
+
+		void clearReceiveStatus() {
+			// clear latched RX bits (i.e. write 1 to clear)
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXDFR_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEDONE_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXPHE_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXFCE_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXFCG_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT, true);
+			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+		}
+
+		void clearReceiveTimestampAvailableStatus() {
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEDONE_BIT, true);
+			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+		}
+
+		void clearTransmitStatus() {
+			// clear latched TX bits
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, TXFRB_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, TXPRS_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, TXPHS_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, TXFRS_BIT, true);
+			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+		}
+
+		/* Internal helpers to read configuration */
+
+		void readSystemConfigurationRegister() {
+			readBytes(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
+		}
+
+		void readSystemEventStatusRegister() {
+			readBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+		}
+
+		void readNetworkIdAndDeviceAddress() {
+			readBytes(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
+		}
+
+		void readSystemEventMaskRegister() {
+			readBytes(SYS_MASK, NO_SUB, _sysmask, LEN_SYS_MASK);
+		}
+
+		void readChannelControlRegister() {
+			readBytes(CHAN_CTRL, NO_SUB, _chanctrl, LEN_CHAN_CTRL);
+		}
+
+		void readTransmitFrameControlRegister() {
+			readBytes(TX_FCTRL, NO_SUB, _txfctrl, LEN_TX_FCTRL);
+		}
+
+		void handleInterrupt() {
+			// read current status and handle via callbacks
+			readSystemEventStatusRegister();
+			if(isClockProblem() /* TODO and others */ && _handleError != 0) {
+				(*_handleError)();
+			}
+			if(isTransmitDone() && _handleSent != 0) {
+				(*_handleSent)();
+				clearTransmitStatus();
+			}
+			if(isReceiveTimestampAvailable() && _handleReceiveTimestampAvailable != 0) {
+				(*_handleReceiveTimestampAvailable)();
+				clearReceiveTimestampAvailableStatus();
+			}
+			if(isReceiveFailed() && _handleReceiveFailed != 0) {
+				(*_handleReceiveFailed)();
+				clearReceiveStatus();
+				if(_permanentReceive) {
+					newReceive();
+					startReceive();
+				}
+			} else if(isReceiveTimeout() && _handleReceiveTimeout != 0) {
+				(*_handleReceiveTimeout)();
+				clearReceiveStatus();
+				if(_permanentReceive) {
+					newReceive();
+					startReceive();
+				}
+			} else if(isReceiveDone() && _handleReceived != 0) {
+				(*_handleReceived)();
+				clearReceiveStatus();
+				if(_permanentReceive) {
+					newReceive();
+					startReceive();
+				}
+			}
+			// clear all status that is left unhandled
+			clearAllStatus();
 		}
 	}
 
@@ -190,55 +890,6 @@ namespace DWM1000 {
 	
 	void attachReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void)) {
 		_handleReceiveTimestampAvailable = handleReceiveTimestampAvailable;
-	}
-
-	void manageLDE() {
-		// transfer any ldo tune values
-		byte ldoTune[LEN_OTP_RDAT];
-		readBytesOTP(0x04, ldoTune); // TODO #define
-		if(ldoTune[0] != 0) {
-			// TODO tuning available, copy over to RAM: use OTP_LDO bit
-		}
-		// tell the chip to load the LDE microcode
-		// TODO remove clock-related code (PMSC_CTRL) as handled separately
-		byte pmscctrl0[LEN_PMSC_CTRL0];
-		byte otpctrl[LEN_OTP_CTRL];
-		memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
-		memset(otpctrl, 0, LEN_OTP_CTRL);
-		readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-		readBytes(OTP_IF, OTP_CTRL_SUB, otpctrl, LEN_OTP_CTRL);
-		pmscctrl0[0] = 0x01;
-		pmscctrl0[1] = 0x03;
-		otpctrl[0]   = 0x00;
-		otpctrl[1]   = 0x80;
-		writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
-		writeBytes(OTP_IF, OTP_CTRL_SUB, otpctrl, 2);
-		delay(5);
-		pmscctrl0[0] = 0x00;
-		pmscctrl0[1] &= 0x02;
-		writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
-	}
-
-	void enableClock(byte clock) {
-		byte pmscctrl0[LEN_PMSC_CTRL0];
-		memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
-		readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-		if(clock == AUTO_CLOCK) {
-			_currentSPI = &_fastSPI;
-			pmscctrl0[0] = AUTO_CLOCK;
-			pmscctrl0[1] &= 0xFE;
-		} else if(clock == XTI_CLOCK) {
-			_currentSPI = &_slowSPI;
-			pmscctrl0[0] &= 0xFC;
-			pmscctrl0[0] |= XTI_CLOCK;
-		} else if(clock == PLL_CLOCK) {
-			_currentSPI = &_fastSPI;
-			pmscctrl0[0] &= 0xFC;
-			pmscctrl0[0] |= PLL_CLOCK;
-		} else {
-			// TODO deliver proper warning
-		}
-		writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
 	}
 
 	void enableDebounceClock() {
@@ -347,503 +998,6 @@ namespace DWM1000 {
 		setPreambleLength(mode[2]);
 	}
 
-	/* AGC_TUNE1 - reg:0x23, sub-reg:0x04, table 24 */
-	void agctune1() {
-		byte agctune1[LEN_AGC_TUNE1];
-		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-			DWM1000Utils::writeValueToBytes(agctune1, 0x8870, LEN_AGC_TUNE1);
-		} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
-			DWM1000Utils::writeValueToBytes(agctune1, 0x889B, LEN_AGC_TUNE1);
-		} else {
-			// TODO proper error/warning handling
-		}
-		writeBytes(AGC_TUNE, AGC_TUNE1_SUB, agctune1, LEN_AGC_TUNE1);
-	}
-
-	/* AGC_TUNE2 - reg:0x23, sub-reg:0x0C, table 25 */
-	void agctune2() {
-		byte agctune2[LEN_AGC_TUNE2];
-		DWM1000Utils::writeValueToBytes(agctune2, 0x2502A907L, LEN_AGC_TUNE2);
-		writeBytes(AGC_TUNE, AGC_TUNE2_SUB, agctune2, LEN_AGC_TUNE2);
-	}
-
-	/* AGC_TUNE3 - reg:0x23, sub-reg:0x12, table 26 */
-	void agctune3() {
-		byte agctune3[LEN_AGC_TUNE3];
-		DWM1000Utils::writeValueToBytes(agctune3, 0x0035, LEN_AGC_TUNE3);
-		writeBytes(AGC_TUNE, AGC_TUNE3_SUB, agctune3, LEN_AGC_TUNE3);
-	}
-
-	/* DRX_TUNE0b - reg:0x27, sub-reg:0x02 (already optimized according to Table 30 of user manual) */
-	void drxtune0b() {
-		byte drxtune0b[LEN_DRX_TUNE0b];	
-		if(_dataRate == TRX_RATE_110KBPS) {
-			DWM1000Utils::writeValueToBytes(drxtune0b, 0x0016, LEN_DRX_TUNE0b);
-		} else if(_dataRate == TRX_RATE_850KBPS) {
-			DWM1000Utils::writeValueToBytes(drxtune0b, 0x0006, LEN_DRX_TUNE0b);
-		} else if(_dataRate == TRX_RATE_6800KBPS) {
-			DWM1000Utils::writeValueToBytes(drxtune0b, 0x0001, LEN_DRX_TUNE0b);
-		} else {
-			// TODO proper error/warning handling
-		}
-		writeBytes(DRX_TUNE, DRX_TUNE0b_SUB, drxtune0b, LEN_DRX_TUNE0b);
-	}
-
-	/* DRX_TUNE1a - reg:0x27, sub-reg:0x04, table 31 */
-	void drxtune1a() {
-		byte drxtune1a[LEN_DRX_TUNE1a];
-		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-			DWM1000Utils::writeValueToBytes(drxtune1a, 0x0087, LEN_DRX_TUNE1a);
-		} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
-			DWM1000Utils::writeValueToBytes(drxtune1a, 0x008D, LEN_DRX_TUNE1a);
-		} else {
-			// TODO proper error/warning handling
-		}
-		writeBytes(DRX_TUNE, DRX_TUNE1a_SUB, drxtune1a, LEN_DRX_TUNE1a);
-	}
-
-	/* DRX_TUNE1b - reg:0x27, sub-reg:0x06, table 32 */
-	void drxtune1b() {
-		byte drxtune1b[LEN_DRX_TUNE1b];
-		if(_preambleLength == TX_PREAMBLE_LEN_1536 || _preambleLength == TX_PREAMBLE_LEN_2048 ||
-			_preambleLength == TX_PREAMBLE_LEN_4096) {
-			if(_dataRate == TRX_RATE_110KBPS) {
-				DWM1000Utils::writeValueToBytes(drxtune1b, 0x0064, LEN_DRX_TUNE1b);
-			} else {
-				// TODO proper error/warning handling
-			}
-		} else if(_preambleLength != TX_PREAMBLE_LEN_64) {
-			if(_dataRate == TRX_RATE_850KBPS || _dataRate == TRX_RATE_6800KBPS) {
-				DWM1000Utils::writeValueToBytes(drxtune1b, 0x0020, LEN_DRX_TUNE1b);
-			} else {
-				// TODO proper error/warning handling
-			}
-		} else {
-			if(_dataRate == TRX_RATE_6800KBPS) {
-				DWM1000Utils::writeValueToBytes(drxtune1b, 0x0010, LEN_DRX_TUNE1b);
-			} else {
-				// TODO proper error/warning handling
-			}
-		}
-		writeBytes(DRX_TUNE, DRX_TUNE1b_SUB, drxtune1b, LEN_DRX_TUNE1b);
-	}
-
-	/* DRX_TUNE2 - reg:0x27, sub-reg:0x08, table 33 */
-	void drxtune2() {
-		byte drxtune2[LEN_DRX_TUNE2];	
-		if(_pacSize == PAC_SIZE_8) {
-			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-				DWM1000Utils::writeValueToBytes(drxtune2, 0x311A002DL, LEN_DRX_TUNE2);
-			} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
-				DWM1000Utils::writeValueToBytes(drxtune2, 0x313B006BL, LEN_DRX_TUNE2);
-			} else {
-				// TODO proper error/warning handling
-			}
-		} else if(_pacSize == PAC_SIZE_16) {
-			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-				DWM1000Utils::writeValueToBytes(drxtune2, 0x331A0052L, LEN_DRX_TUNE2);
-			} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
-				DWM1000Utils::writeValueToBytes(drxtune2, 0x333B00BEL, LEN_DRX_TUNE2);
-			} else {
-				// TODO proper error/warning handling
-			}
-		} else if(_pacSize == PAC_SIZE_32) {
-			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-				DWM1000Utils::writeValueToBytes(drxtune2, 0x351A009AL, LEN_DRX_TUNE2);
-			} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
-				DWM1000Utils::writeValueToBytes(drxtune2, 0x353B015EL, LEN_DRX_TUNE2);
-			} else {
-				// TODO proper error/warning handling
-			}
-		} else if(_pacSize == PAC_SIZE_64) {
-			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-				DWM1000Utils::writeValueToBytes(drxtune2, 0x371A011DL, LEN_DRX_TUNE2);
-			} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
-				DWM1000Utils::writeValueToBytes(drxtune2, 0x373B0296L, LEN_DRX_TUNE2);
-			} else {
-				// TODO proper error/warning handling
-			}
-		} else {
-			// TODO proper error/warning handling
-		}
-		writeBytes(DRX_TUNE, DRX_TUNE2_SUB, drxtune2, LEN_DRX_TUNE2);
-	}
-
-	/* DRX_TUNE4H - reg:0x27, sub-reg:0x26, table 34 */
-	void drxtune4H() {
-		byte drxtune4H[LEN_DRX_TUNE4H];
-		if(_preambleLength == TX_PREAMBLE_LEN_64) {
-			DWM1000Utils::writeValueToBytes(drxtune4H, 0x0010, LEN_DRX_TUNE4H);
-		} else {
-			DWM1000Utils::writeValueToBytes(drxtune4H, 0x0028, LEN_DRX_TUNE4H);
-		}
-		writeBytes(DRX_TUNE, DRX_TUNE4H_SUB, drxtune4H, LEN_DRX_TUNE4H);
-	}
-
-	/* LDE_CFG1 - reg 0x2E, sub-reg:0x0806 */
-	void ldecfg1() {
-		byte ldecfg1[LEN_LDE_CFG1];
-		_nlos == true ? DWM1000Utils::writeValueToBytes(ldecfg1, 0x7, LEN_LDE_CFG1) : DWM1000Utils::writeValueToBytes(ldecfg1, 0xD, LEN_LDE_CFG1);
-		writeBytes(LDE_IF, LDE_CFG1_SUB, ldecfg1, LEN_LDE_CFG1);
-	}
-
-	/* LDE_CFG2 - reg 0x2E, sub-reg:0x1806, table 50 */
-	void ldecfg2() {
-		byte ldecfg2[LEN_LDE_CFG2];	
-		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-			_nlos == true ? DWM1000Utils::writeValueToBytes(ldecfg2, 0x0003, LEN_LDE_CFG2) : DWM1000Utils::writeValueToBytes(ldecfg2, 0x1607, LEN_LDE_CFG2);
-		} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
-			DWM1000Utils::writeValueToBytes(ldecfg2, 0x0607, LEN_LDE_CFG2);
-		} else {
-			// TODO proper error/warning handling
-		}
-		writeBytes(LDE_IF, LDE_CFG2_SUB, ldecfg2, LEN_LDE_CFG2);
-	}
-
-	/* LDE_REPC - reg 0x2E, sub-reg:0x2804, table 51 */
-	void lderepc() {
-		byte lderepc[LEN_LDE_REPC];
-		if(_preambleCode == PREAMBLE_CODE_16MHZ_1 || _preambleCode == PREAMBLE_CODE_16MHZ_2) {
-			if(_dataRate == TRX_RATE_110KBPS) {
-				DWM1000Utils::writeValueToBytes(lderepc, ((0x5998 >> 3) & 0xFFFF), LEN_LDE_REPC);
-			} else {
-				DWM1000Utils::writeValueToBytes(lderepc, 0x5998, LEN_LDE_REPC);
-			}
-		} else if(_preambleCode == PREAMBLE_CODE_16MHZ_3 || _preambleCode == PREAMBLE_CODE_16MHZ_8) {
-			if(_dataRate == TRX_RATE_110KBPS) {
-				DWM1000Utils::writeValueToBytes(lderepc, ((0x51EA >> 3) & 0xFFFF), LEN_LDE_REPC);
-			} else {
-				DWM1000Utils::writeValueToBytes(lderepc, 0x51EA, LEN_LDE_REPC);
-			}
-		} else if(_preambleCode == PREAMBLE_CODE_16MHZ_4) {
-			if(_dataRate == TRX_RATE_110KBPS) {
-				DWM1000Utils::writeValueToBytes(lderepc, ((0x428E >> 3) & 0xFFFF), LEN_LDE_REPC);
-			} else {
-				DWM1000Utils::writeValueToBytes(lderepc, 0x428E, LEN_LDE_REPC);
-			}
-		} else if(_preambleCode == PREAMBLE_CODE_16MHZ_5) {
-			if(_dataRate == TRX_RATE_110KBPS) {
-				DWM1000Utils::writeValueToBytes(lderepc, ((0x451E >> 3) & 0xFFFF), LEN_LDE_REPC);
-			} else {
-				DWM1000Utils::writeValueToBytes(lderepc, 0x451E, LEN_LDE_REPC);
-			}
-		} else if(_preambleCode == PREAMBLE_CODE_16MHZ_6) {
-			if(_dataRate == TRX_RATE_110KBPS) {
-				DWM1000Utils::writeValueToBytes(lderepc, ((0x2E14 >> 3) & 0xFFFF), LEN_LDE_REPC);
-			} else {
-				DWM1000Utils::writeValueToBytes(lderepc, 0x2E14, LEN_LDE_REPC);
-			}
-		} else if(_preambleCode == PREAMBLE_CODE_16MHZ_7) {
-			if(_dataRate == TRX_RATE_110KBPS) {
-				DWM1000Utils::writeValueToBytes(lderepc, ((0x8000 >> 3) & 0xFFFF), LEN_LDE_REPC);
-			} else {
-				DWM1000Utils::writeValueToBytes(lderepc, 0x8000, LEN_LDE_REPC);
-			}
-		} else if(_preambleCode == PREAMBLE_CODE_64MHZ_9) {
-			if(_dataRate == TRX_RATE_110KBPS) {
-				DWM1000Utils::writeValueToBytes(lderepc, ((0x28F4 >> 3) & 0xFFFF), LEN_LDE_REPC);
-			} else {
-				DWM1000Utils::writeValueToBytes(lderepc, 0x28F4, LEN_LDE_REPC);
-			}
-		} else if(_preambleCode == PREAMBLE_CODE_64MHZ_10 || _preambleCode == PREAMBLE_CODE_64MHZ_17) {
-			if(_dataRate == TRX_RATE_110KBPS) {
-				DWM1000Utils::writeValueToBytes(lderepc, ((0x3332 >> 3) & 0xFFFF), LEN_LDE_REPC);
-			} else {
-				DWM1000Utils::writeValueToBytes(lderepc, 0x3332, LEN_LDE_REPC);
-			}
-		} else if(_preambleCode == PREAMBLE_CODE_64MHZ_11) {
-			if(_dataRate == TRX_RATE_110KBPS) {
-				DWM1000Utils::writeValueToBytes(lderepc, ((0x3AE0 >> 3) & 0xFFFF), LEN_LDE_REPC);
-			} else {
-				DWM1000Utils::writeValueToBytes(lderepc, 0x3AE0, LEN_LDE_REPC);
-			}
-		} else if(_preambleCode == PREAMBLE_CODE_64MHZ_12) {
-			if(_dataRate == TRX_RATE_110KBPS) {
-				DWM1000Utils::writeValueToBytes(lderepc, ((0x3D70 >> 3) & 0xFFFF), LEN_LDE_REPC);
-			} else {
-				DWM1000Utils::writeValueToBytes(lderepc, 0x3D70, LEN_LDE_REPC);
-			}
-		} else if(_preambleCode == PREAMBLE_CODE_64MHZ_18 || _preambleCode == PREAMBLE_CODE_64MHZ_19) {
-			if(_dataRate == TRX_RATE_110KBPS) {
-				DWM1000Utils::writeValueToBytes(lderepc, ((0x35C2 >> 3) & 0xFFFF), LEN_LDE_REPC);
-			} else {
-				DWM1000Utils::writeValueToBytes(lderepc, 0x35C2, LEN_LDE_REPC);
-			}
-		} else if(_preambleCode == PREAMBLE_CODE_64MHZ_20) {
-			if(_dataRate == TRX_RATE_110KBPS) {
-				DWM1000Utils::writeValueToBytes(lderepc, ((0x47AE >> 3) & 0xFFFF), LEN_LDE_REPC);
-			} else {
-				DWM1000Utils::writeValueToBytes(lderepc, 0x47AE, LEN_LDE_REPC);
-			}
-		} else {
-			// TODO proper error/warning handling
-		}
-		
-		writeBytes(LDE_IF, LDE_REPC_SUB, lderepc, LEN_LDE_REPC);
-	}
-
-	/* TX_POWER (enabled smart transmit power control) - reg:0x1E, tables 19-20
-	* These values are based on a typical IC and an assumed IC to antenna loss of 1.5 dB with a 0 dBi antenna */
-	void txpower() {
-		byte txpower[LEN_TX_POWER];
-		if(_channel == CHANNEL_1 || _channel == CHANNEL_2) {
-			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-				if(_smartPower) {
-					DWM1000Utils::writeValueToBytes(txpower, 0x1B153555L, LEN_TX_POWER);
-				} else {
-					DWM1000Utils::writeValueToBytes(txpower, 0x55555555L, LEN_TX_POWER);
-				}
-			} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
-				if(_smartPower) {
-					DWM1000Utils::writeValueToBytes(txpower, 0x0D072747L, LEN_TX_POWER);
-				} else {
-					DWM1000Utils::writeValueToBytes(txpower, 0x47474747L, LEN_TX_POWER);
-				}
-			} else {
-				// TODO proper error/warning handling
-			}
-		} else if(_channel == CHANNEL_3) {
-			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-				if(_smartPower) {
-					DWM1000Utils::writeValueToBytes(txpower, 0x150F2F4FL, LEN_TX_POWER);
-				} else {
-					DWM1000Utils::writeValueToBytes(txpower, 0x4F4F4F4FL, LEN_TX_POWER);
-				}
-			} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
-				if(_smartPower) {
-					DWM1000Utils::writeValueToBytes(txpower, 0x0B2B4B6BL, LEN_TX_POWER);
-				} else {
-					DWM1000Utils::writeValueToBytes(txpower, 0x6B6B6B6BL, LEN_TX_POWER);
-				}
-			} else {
-				// TODO proper error/warning handling
-			}
-		} else if(_channel == CHANNEL_4) {
-			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-				if(_smartPower) {
-					DWM1000Utils::writeValueToBytes(txpower, 0x1F1F1F3FL, LEN_TX_POWER);
-				} else {
-					DWM1000Utils::writeValueToBytes(txpower, 0x3F3F3F3FL, LEN_TX_POWER);
-				}
-			} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
-				if(_smartPower) {
-					DWM1000Utils::writeValueToBytes(txpower, 0x1A3A5A7AL, LEN_TX_POWER);
-				} else {
-					DWM1000Utils::writeValueToBytes(txpower, 0x7A7A7A7AL, LEN_TX_POWER);
-				}
-			} else {
-				// TODO proper error/warning handling
-			}
-		} else if(_channel == CHANNEL_5) {
-			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-				if(_smartPower) {
-					DWM1000Utils::writeValueToBytes(txpower, 0x140E0828L, LEN_TX_POWER);
-				} else {
-					DWM1000Utils::writeValueToBytes(txpower, 0x28282828L, LEN_TX_POWER);
-				}
-			} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
-				if(_smartPower) {
-					DWM1000Utils::writeValueToBytes(txpower, 0x05254565L, LEN_TX_POWER);
-				} else {
-					DWM1000Utils::writeValueToBytes(txpower, 0x65656565L, LEN_TX_POWER);
-				}
-			} else {
-				// TODO proper error/warning handling
-			}
-		} else if(_channel == CHANNEL_7) {
-			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-				if(_smartPower) {
-					DWM1000Utils::writeValueToBytes(txpower, 0x12325272L, LEN_TX_POWER);
-				} else {
-					DWM1000Utils::writeValueToBytes(txpower, 0x72727272L, LEN_TX_POWER);
-				}
-			} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
-				if(_smartPower) {
-					DWM1000Utils::writeValueToBytes(txpower, 0x315191B1L, LEN_TX_POWER);
-				} else {
-					DWM1000Utils::writeValueToBytes(txpower, 0xB1B1B1B1L, LEN_TX_POWER);
-				}
-			} else {
-				// TODO proper error/warning handling
-			}
-		} else {
-			// TODO proper error/warning handling
-		}
-		writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
-	}
-
-	/* RF_RXCTRLH - reg:0x28, sub-reg:0x0B, table 37 */
-	void rfrxctrlh() {
-		byte rfrxctrlh[LEN_RF_RXCTRLH];
-		if(_channel != CHANNEL_4 && _channel != CHANNEL_7) {
-			DWM1000Utils::writeValueToBytes(rfrxctrlh, 0xD8, LEN_RF_RXCTRLH);
-		} else {
-			DWM1000Utils::writeValueToBytes(rfrxctrlh, 0xBC, LEN_RF_RXCTRLH);
-		}
-		writeBytes(RF_CONF, RF_RXCTRLH_SUB, rfrxctrlh, LEN_RF_RXCTRLH);
-	}
-
-	/* RX_TXCTRL - reg:0x28, sub-reg:0x0C */
-	void rftxctrl() {
-		byte rftxctrl[LEN_RF_TXCTRL];
-		if(_channel == CHANNEL_1) {
-			DWM1000Utils::writeValueToBytes(rftxctrl, 0x00005C40L, LEN_RF_TXCTRL);
-		} else if(_channel == CHANNEL_2) {
-			DWM1000Utils::writeValueToBytes(rftxctrl, 0x00045CA0L, LEN_RF_TXCTRL);
-		} else if(_channel == CHANNEL_3) {
-			DWM1000Utils::writeValueToBytes(rftxctrl, 0x00086CC0L, LEN_RF_TXCTRL);
-		} else if(_channel == CHANNEL_4) {
-			DWM1000Utils::writeValueToBytes(rftxctrl, 0x00045C80L, LEN_RF_TXCTRL);
-		} else if(_channel == CHANNEL_5) {
-			DWM1000Utils::writeValueToBytes(rftxctrl, 0x001E3FE0L, LEN_RF_TXCTRL);
-		} else if(_channel == CHANNEL_7) {
-			DWM1000Utils::writeValueToBytes(rftxctrl, 0x001E7DE0L, LEN_RF_TXCTRL);
-		} else {
-			// TODO proper error/warning handling
-		}
-		writeBytes(RF_CONF, RF_TXCTRL_SUB, rftxctrl, LEN_RF_TXCTRL);
-	}
-
-	/* TC_PGDELAY - reg:0x2A, sub-reg:0x0B, table 40 */
-	void tcpgdelay() {
-		byte tcpgdelay[LEN_TC_PGDELAY];	
-		if(_channel == CHANNEL_1) {
-			DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC9, LEN_TC_PGDELAY);
-		} else if(_channel == CHANNEL_2) {
-			DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC2, LEN_TC_PGDELAY);
-		} else if(_channel == CHANNEL_3) {
-			DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC5, LEN_TC_PGDELAY);
-		} else if(_channel == CHANNEL_4) {
-			DWM1000Utils::writeValueToBytes(tcpgdelay, 0x95, LEN_TC_PGDELAY);
-		} else if(_channel == CHANNEL_5) {
-			DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC0, LEN_TC_PGDELAY);
-		} else if(_channel == CHANNEL_7) {
-			DWM1000Utils::writeValueToBytes(tcpgdelay, 0x93, LEN_TC_PGDELAY);
-		} else {
-			// TODO proper error/warning handling
-		}
-		writeBytes(TX_CAL, TC_PGDELAY_SUB, tcpgdelay, LEN_TC_PGDELAY);
-	}
-
-	// FS_PLLCFG and FS_PLLTUNE - reg:0x2B, sub-reg:0x07-0x0B, tables 43-44
-	void fspll() {
-		byte fspllcfg[LEN_FS_PLLCFG];
-		byte fsplltune[LEN_FS_PLLTUNE];
-		if(_channel == CHANNEL_1) {
-			DWM1000Utils::writeValueToBytes(fspllcfg, 0x09000407L, LEN_FS_PLLCFG);
-			DWM1000Utils::writeValueToBytes(fsplltune, 0x1E, LEN_FS_PLLTUNE);
-		} else if(_channel == CHANNEL_2 || _channel == CHANNEL_4) {
-			DWM1000Utils::writeValueToBytes(fspllcfg, 0x08400508L, LEN_FS_PLLCFG);
-			DWM1000Utils::writeValueToBytes(fsplltune, 0x26, LEN_FS_PLLTUNE);
-		} else if(_channel == CHANNEL_3) {
-			DWM1000Utils::writeValueToBytes(fspllcfg, 0x08401009L, LEN_FS_PLLCFG);
-			DWM1000Utils::writeValueToBytes(fsplltune, 0x56, LEN_FS_PLLTUNE);
-		} else if(_channel == CHANNEL_5 || _channel == CHANNEL_7) {
-			DWM1000Utils::writeValueToBytes(fspllcfg, 0x0800041DL, LEN_FS_PLLCFG);
-			DWM1000Utils::writeValueToBytes(fsplltune, 0xBE, LEN_FS_PLLTUNE);
-		} else {
-			// TODO proper error/warning handling
-		}
-		writeBytes(FS_CTRL, FS_PLLTUNE_SUB, fsplltune, LEN_FS_PLLTUNE);
-		writeBytes(FS_CTRL, FS_PLLCFG_SUB, fspllcfg, LEN_FS_PLLCFG);
-	}
-
-	/* Crystal calibration from OTP (if available)
-	* FS_XTALT - reg:0x2B, sub-reg:0x0E
-	* OTP(one-time-programmable) memory map - table 10 */
-	void fsxtalt() {
-		byte fsxtalt[LEN_FS_XTALT];
-		byte buf_otp[4];
-		readBytesOTP(0x01E, buf_otp); //0x01E -> byte[0]=XTAL_Trim
-		if (buf_otp[0] == 0) {
-			// No trim value available from OTP, use midrange value of 0x10
-			DWM1000Utils::writeValueToBytes(fsxtalt, ((0x10 & 0x1F) | 0x60), LEN_FS_XTALT);
-		} else {
-			DWM1000Utils::writeValueToBytes(fsxtalt, ((buf_otp[0] & 0x1F) | 0x60), LEN_FS_XTALT);
-		}
-		// write configuration back to chip
-		writeBytes(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
-	}
-
-	void writeConfiguration() {
-		// write all configurations back to device
-		writeNetworkIdAndDeviceAddress();
-		writeSystemConfigurationRegister();
-		writeChannelControlRegister();
-		writeTransmitFrameControlRegister();
-		writeSystemEventMaskRegister();
-		writeAntennaDelayRegisters();
-	}
-
-	void tune(TXPowerMode mode) {
-		// these registers are going to be tuned/configured
-		agctune1();
-		agctune2();
-		agctune3();
-		drxtune0b();
-		drxtune1a();
-		drxtune1b();
-		drxtune2();
-		drxtune4H();
-		ldecfg1();
-		ldecfg2();
-		lderepc();
-
-		if(mode == TXPowerMode::AUTO_POWER) { 
-			txpower(); 
-		}
-
-		rfrxctrlh();
-		rftxctrl();
-		tcpgdelay();
-		fspll();
-		fsxtalt();
-	}
-
-	/* ###########################################################################
-	* #### Interrupt handling ###################################################
-	* ######################################################################### */
-
-	void handleInterrupt() {
-		// read current status and handle via callbacks
-		readSystemEventStatusRegister();
-		if(isClockProblem() /* TODO and others */ && _handleError != 0) {
-			(*_handleError)();
-		}
-		if(isTransmitDone() && _handleSent != 0) {
-			(*_handleSent)();
-			clearTransmitStatus();
-		}
-		if(isReceiveTimestampAvailable() && _handleReceiveTimestampAvailable != 0) {
-			(*_handleReceiveTimestampAvailable)();
-			clearReceiveTimestampAvailableStatus();
-		}
-		if(isReceiveFailed() && _handleReceiveFailed != 0) {
-			(*_handleReceiveFailed)();
-			clearReceiveStatus();
-			if(_permanentReceive) {
-				newReceive();
-				startReceive();
-			}
-		} else if(isReceiveTimeout() && _handleReceiveTimeout != 0) {
-			(*_handleReceiveTimeout)();
-			clearReceiveStatus();
-			if(_permanentReceive) {
-				newReceive();
-				startReceive();
-			}
-		} else if(isReceiveDone() && _handleReceived != 0) {
-			(*_handleReceived)();
-			clearReceiveStatus();
-			if(_permanentReceive) {
-				newReceive();
-				startReceive();
-			}
-		}
-		// clear all status that is left unhandled
-		clearAllStatus();
-	}
-
 	/* ###########################################################################
 	* #### Pretty printed device information ####################################
 	* ######################################################################### */
@@ -916,61 +1070,6 @@ namespace DWM1000 {
 		ch    = (uint8_t)_channel;
 		pcode = (uint8_t)_preambleCode;
 		sprintf(msgBuffer, "Data rate: %u kb/s, PRF: %u MHz, Preamble: %u symbols (code #%u), Channel: #%u", dr, prf, plen, pcode, ch);
-	}
-
-	/* ###########################################################################
-	* #### DWM1000 register read/write ###########################################
-	* ######################################################################### */
-
-	void readSystemConfigurationRegister() {
-		readBytes(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
-	}
-
-	void writeSystemConfigurationRegister() {
-		writeBytes(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
-	}
-
-	void readSystemEventStatusRegister() {
-		readBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
-	}
-
-	void readNetworkIdAndDeviceAddress() {
-		readBytes(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
-	}
-
-	void writeNetworkIdAndDeviceAddress() {
-		writeBytes(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
-	}
-
-	void readSystemEventMaskRegister() {
-		readBytes(SYS_MASK, NO_SUB, _sysmask, LEN_SYS_MASK);
-	}
-
-	void writeSystemEventMaskRegister() {
-		writeBytes(SYS_MASK, NO_SUB, _sysmask, LEN_SYS_MASK);
-	}
-
-	void readChannelControlRegister() {
-		readBytes(CHAN_CTRL, NO_SUB, _chanctrl, LEN_CHAN_CTRL);
-	}
-
-	void writeChannelControlRegister() {
-		writeBytes(CHAN_CTRL, NO_SUB, _chanctrl, LEN_CHAN_CTRL);
-	}
-
-	void readTransmitFrameControlRegister() {
-		readBytes(TX_FCTRL, NO_SUB, _txfctrl, LEN_TX_FCTRL);
-	}
-
-	void writeTransmitFrameControlRegister() {
-		writeBytes(TX_FCTRL, NO_SUB, _txfctrl, LEN_TX_FCTRL);
-	}
-
-	void writeAntennaDelayRegisters() {
-		byte antennaDelayBytes[DWM1000Time::LENGTH_TIMESTAMP];
-		_antennaDelay.getTimestamp(antennaDelayBytes);
-		writeBytes(TX_ANTD, NO_SUB, antennaDelayBytes, LEN_TX_ANTD);
-		writeBytes(LDE_IF, LDE_RXANTD_SUB, antennaDelayBytes, LEN_LDE_RXANTD);
 	}
 
 	/* ###########################################################################
@@ -1104,10 +1203,6 @@ namespace DWM1000 {
 
 	uint16_t getAntennaDelay() {
 		return static_cast<uint16_t>(_antennaDelay.getTimestamp());
-	}
-
-	void clearInterrupts() {
-		memset(_sysmask, 0, LEN_SYS_MASK);
 	}
 
 	void idle() {
@@ -1282,69 +1377,6 @@ namespace DWM1000 {
 		}
 		
 		_preambleLength = prealen;
-	}
-
-	void useDecawaveSFD() {
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
-		switch(_dataRate) {
-			case TRX_RATE_6800KBPS:
-				writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
-				break;
-			case TRX_RATE_850KBPS:
-				writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10);
-				break;
-			case TRX_RATE_110KBPS:
-				writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
-				break;
-			default:
-				return; //TODO Proper error handling
-		}
-	}
-
-	void useStandardSFD() {
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-		DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
-		switch(_dataRate) {
-			case TRX_RATE_6800KBPS:
-				writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
-				break;
-			case TRX_RATE_850KBPS:
-				writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
-				break;
-			case TRX_RATE_110KBPS:
-				writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
-				break;
-			default:
-				return; //TODO Proper error handling
-		}
-	}
-
-	void useRecommendedSFD() {
-		/* SFD mode and types recommended by DW1000 User manual for optimal performance */
-		switch(_dataRate) {
-			case TRX_RATE_6800KBPS:
-				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
-				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
-				writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
-				break;
-			case TRX_RATE_850KBPS:
-				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
-				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
-				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
-				writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10);
-				break;
-			case TRX_RATE_110KBPS:
-				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
-				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
-				writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
-			default:
-				return; //TODO Error handling
-		}
 	}
 
 	void setSFDMode(SFDMode mode) {
@@ -1678,38 +1710,6 @@ namespace DWM1000 {
 			return true;
 		}
 		return false;
-	}
-
-	void clearAllStatus() {
-		//Latched bits in status register are reset by writing 1 to them
-		memset(_sysstatus, 0xff, LEN_SYS_STATUS);
-		writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
-	}
-
-	void clearReceiveTimestampAvailableStatus() {
-		DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEDONE_BIT, true);
-		writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
-	}
-
-	void clearReceiveStatus() {
-		// clear latched RX bits (i.e. write 1 to clear)
-		DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXDFR_BIT, true);
-		DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEDONE_BIT, true);
-		DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT, true);
-		DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXPHE_BIT, true);
-		DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXFCE_BIT, true);
-		DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXFCG_BIT, true);
-		DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT, true);
-		writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
-	}
-
-	void clearTransmitStatus() {
-		// clear latched TX bits
-		DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, TXFRB_BIT, true);
-		DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, TXPRS_BIT, true);
-		DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, TXPHS_BIT, true);
-		DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, TXFRS_BIT, true);
-		writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 	}
 
 	float getReceiveQuality() {

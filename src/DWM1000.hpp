@@ -241,8 +241,8 @@ namespace DWM1000 {
 	@param[in] freq The PRF, encoded by the above defined constants.
 	*/
 	void setPulseFrequency(byte freq);
-
 	byte getPulseFrequency();
+
 	void setPreambleLength(byte prealen);
 
 	void setSFDMode(SFDMode mode);
@@ -268,7 +268,7 @@ namespace DWM1000 {
 
 	void setPreambleCode();
 	void setPreambleCode(byte preamble_code);
-	
+
 	void useSmartPower(boolean smartPower);
 
 	void setTXPower(int32_t power);
@@ -379,8 +379,6 @@ namespace DWM1000 {
 	void getVbat(float& vbat);
 	void getTempAndVbat(float& temp, float& vbat);
 
-	/* Arduino interrupt handler */
-	void handleInterrupt();
 	
 	/* Allow MAC frame filtering */
 	// TODO auto-acknowledge
@@ -400,31 +398,6 @@ namespace DWM1000 {
 	void useExtendedFrameLength(boolean val);
 	// TODO is implemented, but needs testing
 	void waitForResponse(boolean val);
-
-	// Helper functions for tune
-	void agctune1();
-	void agctune2();
-	void agctune3();
-	void drxtune0b();
-	void drxtune1a();
-	void drxtune1b();
-	void drxtune2();
-	void drxtune4H();
-	void ldecfg1();
-	void ldecfg2();
-	void lderepc();
-	void txpower();
-	void rfrxctrlh();
-	void rftxctrl();
-	void tcpgdelay();
-	void fspll();
-	void fsxtalt();
-	
-	/* function to write configurations to registers */
-	void writeConfiguration();
-
-	/* tuning according to mode.(Very important) */
-	void tune(TXPowerMode mode);
 	
 	/* device status flags */
 	boolean isReceiveTimestampAvailable();
@@ -434,33 +407,6 @@ namespace DWM1000 {
 	boolean isReceiveTimeout();
 	boolean isClockProblem();
 	
-	/* interrupt state handling */
-	void clearInterrupts();
-	void clearAllStatus();
-	void clearReceiveStatus();
-	void clearReceiveTimestampAvailableStatus();
-	void clearTransmitStatus();
-	
-	/* internal helper to read/write system registers. */
-	void readSystemEventStatusRegister();
-	void readSystemConfigurationRegister();
-	void writeSystemConfigurationRegister();
-	void readNetworkIdAndDeviceAddress();
-	void writeNetworkIdAndDeviceAddress();
-	void readSystemEventMaskRegister();
-	void writeSystemEventMaskRegister();
-	void readChannelControlRegister();
-	void writeChannelControlRegister();
-	void readTransmitFrameControlRegister();
-	void writeTransmitFrameControlRegister();
-	void writeAntennaDelayRegisters();
-	
-	/* clock management. */
-	void enableClock(byte clock);
-	
-	/* LDE micro-code management. */
-	void manageLDE();
-	
 	/* timestamp correction. */
 	void correctTimestamp(DWM1000Time& timestamp);
 	
@@ -469,9 +415,4 @@ namespace DWM1000 {
 	void readBytesOTP(uint16_t address, byte data[]);
 	void writeByte(byte cmd, uint16_t offset, byte data);
 	void writeBytes(byte cmd, uint16_t offset, byte data[], uint16_t n);
-
-	/* SFDMode functions */
-	void useDecawaveSFD();
-	void useStandardSFD();
-	void useRecommendedSFD();
 };
