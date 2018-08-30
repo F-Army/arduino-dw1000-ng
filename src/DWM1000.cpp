@@ -1359,7 +1359,28 @@ void DWM1000Class::setChannel(byte channel) {
 	setPreambleCode();
 }
 
+static boolean checkPreambleCodeValidity(byte preamble_code) {
+	if(DWM1000Class::_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+		for (auto i = 0; i < 2; i++) {
+			if(preamble_code == preamble_validity_matrix_PRF16[(int) DWM1000Class::_channel][i])
+				return true;
+		}
+		return false;
+	} else if (DWM1000Class::_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+		for(auto i = 0; i < 4; i++) {
+			if(preamble_code == preamble_validity_matrix_PRF64[(int) DWM1000Class::_channel][i])
+				return true;
+		}
+		return false;
+	} else {
+		return false; //TODO Proper error handling
+	}
+}
+
 void DWM1000Class::setPreambleCode() {
+	if(checkPreambleCodeValidity(_preambleCode)) 
+		return;
+	
 	byte preacode;
 
 	switch(_channel) {
@@ -1389,6 +1410,19 @@ void DWM1000Class::setPreambleCode() {
 	_preambleCode = preacode;
 }
 
+void DWM1000Class::setPreambleCode(byte preacode) {
+	if(checkPreambleCodeValidity(preacode)) {
+		preacode &= 0x1F;
+		_chanctrl[2] &= 0x3F;
+		_chanctrl[2] |= ((preacode << 6) & 0xFF);
+		_chanctrl[3] = 0x00;
+		_chanctrl[3] = ((((preacode >> 2) & 0x07) | (preacode << 3)) & 0xFF);
+		_preambleCode = preacode;
+	} else {
+		return; //TODO Proper error handling
+	}
+}
+
 void DWM1000Class::setDefaults() {
 	 if(_deviceMode == IDLE_MODE) {
 		useExtendedFrameLength(false);
@@ -1412,12 +1446,12 @@ void DWM1000Class::setDefaults() {
 		interruptOnReceiveTimestampAvailable(false);
 		interruptOnAutomaticAcknowledgeTrigger(true);
 		setReceiverAutoReenable(true);
-		// default mode when powering up the chip
-		// still explicitly selected for later tuning
-		enableMode(MODE_SHORTRANGE_LOWPRF_MEDIUMPREAMBLE);
 		// TODO add channel and code to mode tuples
 	    // TODO add channel and code settings with checks (see DWM1000 user manual 10.5 table 61)/
 	    setChannel(CHANNEL_5);
+		// default mode when powering up the chip
+		// still explicitly selected for later tuning
+		enableMode(MODE_SHORTRANGE_LOWPRF_MEDIUMPREAMBLE);
 	}
 }
 
