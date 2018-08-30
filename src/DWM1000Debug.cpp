@@ -20,7 +20,7 @@
  */
 
 #include <Arduino.h>
-#include "DWM1000.h"
+#include "DWM1000.hpp"
 
 namespace DWM1000Debug {
     void getPrettyBytes(byte data[], char msgBuffer[], uint16_t n) {

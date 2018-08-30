@@ -20,8 +20,8 @@
  */
 
 #include <Arduino.h>
-#include "DWM1000Utils.h"
-#include "DWM1000Constants.h"
+#include "DWM1000Utils.hpp"
+#include "DWM1000Constants.hpp"
 
 namespace DWM1000Utils {
 	/*

@@ -21,6 +21,8 @@
 
 #pragma once
 
+#include <Arduino.h>
+
 // time stamp byte length
 #define LEN_STAMP 5
 

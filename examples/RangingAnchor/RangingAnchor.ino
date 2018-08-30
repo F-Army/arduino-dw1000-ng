@@ -29,7 +29,7 @@
  */
 
 #include <SPI.h>
-#include <DWM1000.h>
+#include <DWM1000.hpp>
 
 // connection pins
 const uint8_t PIN_RST = 9; // reset pin

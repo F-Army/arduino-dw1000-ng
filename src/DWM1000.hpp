@@ -25,8 +25,8 @@
 #include <string.h>
 #include <Arduino.h>
 #include <SPI.h>
-#include "DWM1000Constants.h"
-#include "DWM1000Time.h"
+#include "DWM1000Constants.hpp"
+#include "DWM1000Time.hpp"
 
 class DWM1000Class {
 public:

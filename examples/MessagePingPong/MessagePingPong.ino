@@ -27,9 +27,9 @@
  * - add in SENDER mode timeout if no pong received then resend ping
  */
 
-#include "require_cpp11.h"
+#include "require_cpp11.hpp"
 #include <SPI.h>
-#include <DWM1000.h>
+#include <DWM1000.hpp>
 
 // connection pins
 constexpr uint8_t PIN_RST = 9; // reset pin

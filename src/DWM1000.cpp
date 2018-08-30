@@ -23,10 +23,10 @@
 #include <stdlib.h>
 #include <SPI.h>
 #include <string.h>
-#include "DWM1000Utils.h"
-#include "DWM1000Constants.h"
-#include "DWM1000.h"
-#include "DWM1000Time.h"
+#include "DWM1000Utils.hpp"
+#include "DWM1000Constants.hpp"
+#include "DWM1000.hpp"
+#include "DWM1000Time.hpp"
 
 DWM1000Class DWM1000;
 
