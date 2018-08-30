@@ -62,24 +62,24 @@ namespace DWM1000 {
 		byte _tmeas23C = 0;
 
 		/* Driver Internal State Trackers */
-		byte       _extendedFrameLength;
-		byte       _pacSize;
-		byte       _pulseFrequency;
-		byte       _dataRate;
-		byte       _preambleLength;
-		byte       _preambleCode;
-		byte       _channel;
-		boolean    _smartPower;
-		boolean    _frameCheck;
-		uint8_t    _deviceMode;
-		boolean    _permanentReceive    = false;
-		boolean    _debounceClockEnabled = false;
-		boolean    _nlos = false;
+		byte        _extendedFrameLength;
+		byte        _pacSize;
+		byte        _pulseFrequency;
+		byte        _dataRate;
+		byte        _preambleLength;
+		byte        _preambleCode;
+		byte        _channel;
+		boolean     _smartPower;
+		boolean     _frameCheck;
+		uint8_t     _deviceMode;
+		boolean     _permanentReceive    = false;
+		boolean     _debounceClockEnabled = false;
+		boolean     _nlos = false;
 		DWM1000Time _antennaDelay((int64_t) 16384);
 
 		/* SPI relative variables */
-		const SPISettings _fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
-		const SPISettings _slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
+		const SPISettings  _fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
+		const SPISettings  _slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
 		const SPISettings* _currentSPI = &_fastSPI;
 	}
 
