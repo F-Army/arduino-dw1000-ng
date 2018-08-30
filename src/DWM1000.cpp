@@ -29,60 +29,60 @@
 #include "DWM1000Time.hpp"
 
 namespace DWM1000 {
-	/* ###########################################################################
-	* #### Static member variables ##############################################
-	* ######################################################################### */
-	// pins
-	uint8_t _ss;
-	uint8_t _rst;
-	uint8_t _irq;
+	
+	/* anonymous namespace to host private-like variables and methods */
+	namespace {
+		/* pins */
+		uint8_t _ss;
+		uint8_t _rst;
+		uint8_t _irq;
 
+		/* IRQ callbacks */
+		void (* _handleSent)(void)                      = nullptr;
+		void (* _handleError)(void)                     = nullptr;
+		void (* _handleReceived)(void)                  = nullptr;
+		void (* _handleReceiveFailed)(void)             = nullptr;
+		void (* _handleReceiveTimeout)(void)            = nullptr;
+		void (* _handleReceiveTimestampAvailable)(void) = nullptr;
 
-	// IRQ callbacks
-	void (* _handleSent)(void)                      = nullptr;
-	void (* _handleError)(void)                     = nullptr;
-	void (* _handleReceived)(void)                  = nullptr;
-	void (* _handleReceiveFailed)(void)             = nullptr;
-	void (* _handleReceiveTimeout)(void)            = nullptr;
-	void (* _handleReceiveTimestampAvailable)(void) = nullptr;
+		/* SFD Mode */
+		void (* _currentSFDMode)(void) = useRecommendedSFD;
 
-	// SFD Mode
+		/* registers */
+		byte       _syscfg[LEN_SYS_CFG];
+		byte       _sysctrl[LEN_SYS_CTRL];
+		byte       _sysstatus[LEN_SYS_STATUS];
+		byte       _txfctrl[LEN_TX_FCTRL];
+		byte       _sysmask[LEN_SYS_MASK];
+		byte       _chanctrl[LEN_CHAN_CTRL];
+		byte       _networkAndAddress[LEN_PANADR];
 
-	void (* _currentSFDMode)(void) = useRecommendedSFD;
+		/* Temperature and Voltage monitoring */
+		byte _vmeas3v3 = 0;
+		byte _tmeas23C = 0;
 
-	// registers
-	byte       _syscfg[LEN_SYS_CFG];
-	byte       _sysctrl[LEN_SYS_CTRL];
-	byte       _sysstatus[LEN_SYS_STATUS];
-	byte       _txfctrl[LEN_TX_FCTRL];
-	byte       _sysmask[LEN_SYS_MASK];
-	byte       _chanctrl[LEN_CHAN_CTRL];
-	byte       _networkAndAddress[LEN_PANADR];
+		/* Driver Internal State Trackers */
+		byte       _extendedFrameLength;
+		byte       _pacSize;
+		byte       _pulseFrequency;
+		byte       _dataRate;
+		byte       _preambleLength;
+		byte       _preambleCode;
+		byte       _channel;
+		boolean    _smartPower;
+		boolean    _frameCheck;
+		uint8_t    _deviceMode;
+		boolean    _permanentReceive    = false;
+		boolean    _debounceClockEnabled = false;
+		boolean    _nlos = false;
+		DWM1000Time _antennaDelay((int64_t) 16384);
 
-	// monitoring
-	byte _vmeas3v3 = 0;
-	byte _tmeas23C = 0;
+		/* SPI relative variables */
+		const SPISettings _fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
+		const SPISettings _slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
+		const SPISettings* _currentSPI = &_fastSPI;
+	}
 
-	// driver internal state
-	byte       _extendedFrameLength;
-	byte       _pacSize;
-	byte       _pulseFrequency;
-	byte       _dataRate;
-	byte       _preambleLength;
-	byte       _preambleCode;
-	byte       _channel;
-	boolean    _smartPower;
-	boolean    _frameCheck;
-	uint8_t    _deviceMode;
-	boolean    _permanentReceive    = false;
-	boolean    _debounceClockEnabled = false;
-	boolean    _nlos = false;
-	DWM1000Time _antennaDelay((int64_t) 16384);
-
-	// SPI settings
-	const SPISettings _fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
-	const SPISettings _slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
-	const SPISettings* _currentSPI = &_fastSPI;
 
 	/* ###########################################################################
 	* #### Init and end #######################################################
