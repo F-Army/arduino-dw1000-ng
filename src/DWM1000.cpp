@@ -1360,7 +1360,6 @@ void DWM1000Class::setChannel(byte channel) {
 }
 
 static boolean checkPreambleCodeValidity(byte preamble_code) {
-
 	if(DWM1000Class::_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 		for (auto i = 0; i < 2; i++) {
 			if(preamble_code == preamble_validity_matrix_PRF16[(int) DWM1000Class::_channel][i])
@@ -1379,7 +1378,6 @@ static boolean checkPreambleCodeValidity(byte preamble_code) {
 }
 
 void DWM1000Class::setPreambleCode() {
-
 	if(checkPreambleCodeValidity(_preambleCode)) 
 		return;
 	
