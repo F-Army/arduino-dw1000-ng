@@ -20,8 +20,8 @@
  * DWM1000 UWB transceiver module.
  */
 
-#include "DWM1000Time.h"
-#include "Arduino.h"
+#include <Arduino.h>
+#include "DWM1000Time.hpp"
 
 /**
  * Initiates DWM1000Time with 0

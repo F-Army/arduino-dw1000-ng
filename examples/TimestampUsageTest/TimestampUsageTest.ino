@@ -21,7 +21,7 @@
  */
 
 #include <SPI.h>
-#include "DWM1000Time.h"
+#include <DWM1000Time.hpp>
 
 void setup() {
   Serial.begin(9600);

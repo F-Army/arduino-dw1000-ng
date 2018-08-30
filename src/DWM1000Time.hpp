@@ -32,9 +32,9 @@
 #include <Arduino.h>
 #include <stdint.h>
 #include <inttypes.h>
-#include "DWM1000CompileOptions.h"
-#include "deprecated.h"
-#include "require_cpp11.h"
+#include "DWM1000CompileOptions.hpp"
+#include "deprecated.hpp"
+#include "require_cpp11.hpp"
 
 #if DWM1000TIME_H_PRINTABLE
 class DWM1000Time : public Printable {
