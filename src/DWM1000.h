@@ -391,10 +391,6 @@ public:
 	static void getVbat(float& vbat);
 	static void getTempAndVbat(float& temp, float& vbat);
 
-	/* Debug helpers */
-	static void getPrettyBytes(byte data[], char msgBuffer[], uint16_t n);
-	static void getPrettyBytes(byte cmd, uint16_t offset, char msgBuffer[], uint16_t n);
-
 //private:
 	/* chip select, reset and interrupt pins. */
 	static uint8_t _ss;

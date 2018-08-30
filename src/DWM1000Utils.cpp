@@ -16,7 +16,7 @@
  * limitations under the License.
  *
  * @file DWM1000Utils.cpp
- * Arduino driver library (header file) for the Decawave DWM1000 UWB transceiver Module.
+ * Helper functions.
  */
 
 #include <Arduino.h>
