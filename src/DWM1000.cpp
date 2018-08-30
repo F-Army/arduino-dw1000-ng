@@ -32,6 +32,9 @@ namespace DWM1000 {
 	
 	/* anonymous namespace to host private-like variables and methods */
 	namespace {
+
+		/* ########################### VARIABLES ################################# */
+		
 		/* pins */
 		uint8_t _ss;
 		uint8_t _rst;
@@ -81,6 +84,16 @@ namespace DWM1000 {
 		const SPISettings  _fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
 		const SPISettings  _slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
 		const SPISettings* _currentSPI = &_fastSPI;
+
+		/* ############################# HELPERS ################################### */
+
+		void vbatAndTempSteps() {
+			byte step1 = 0x80; writeBytes(RF_CONF, 0x11, &step1, 1);
+			byte step2 = 0x0A; writeBytes(RF_CONF, 0x12, &step2, 1);
+			byte step3 = 0x0F; writeBytes(RF_CONF, 0x12, &step3, 1);
+			byte step4 = 0x01; writeBytes(TX_CAL, NO_SUB, &step4, 1);
+			byte step5 = 0x00; writeBytes(TX_CAL, NO_SUB, &step5, 1);
+		}
 	}
 
 
@@ -972,14 +985,6 @@ namespace DWM1000 {
 	void setDeviceAddress(uint16_t val) {
 		_networkAndAddress[0] = (byte)(val & 0xFF);
 		_networkAndAddress[1] = (byte)((val >> 8) & 0xFF);
-	}
-
-	static void vbatAndTempSteps() {
-		byte step1 = 0x80; writeBytes(RF_CONF, 0x11, &step1, 1);
-		byte step2 = 0x0A; writeBytes(RF_CONF, 0x12, &step2, 1);
-		byte step3 = 0x0F; writeBytes(RF_CONF, 0x12, &step3, 1);
-		byte step4 = 0x01; writeBytes(TX_CAL, NO_SUB, &step4, 1);
-		byte step5 = 0x00; writeBytes(TX_CAL, NO_SUB, &step5, 1);
 	}
 
 	void getTemp(float& temp) {

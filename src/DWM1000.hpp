@@ -268,6 +268,7 @@ namespace DWM1000 {
 
 	void setPreambleCode();
 	void setPreambleCode(byte preamble_code);
+	
 	void useSmartPower(boolean smartPower);
 
 	void setTXPower(int32_t power);
