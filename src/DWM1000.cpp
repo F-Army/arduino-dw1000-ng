@@ -686,6 +686,7 @@ namespace DWM1000 {
 					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
 					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
 					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
+					break;
 				default:
 					return; //TODO Error handling
 			}
@@ -1036,14 +1037,18 @@ namespace DWM1000 {
 		readBytes(TX_FCTRL, NO_SUB, tx_fctrl, LEN_TX_FCTRL);
 		/* Data Rate from 0x08 bits:13-14(tx_fctrl) */
 		dr = (uint16_t)(tx_fctrl[1] >> 5 & 0x3);
-		if(dr == TRX_RATE_110KBPS) {
-			dr = 110;
-		} else if(dr == TRX_RATE_850KBPS) {
-			dr = 850;
-		} else if(dr == TRX_RATE_6800KBPS){
-			dr = 6800;
-		} else {
-			dr = 1;	//TODO Error handling
+		switch(dr) {
+			case TRX_RATE_110KBPS:
+				dr = 110;
+				break;
+			case TRX_RATE_850KBPS:
+				dr = 850;
+				break;
+			case TRX_RATE_6800KBPS:
+				dr = 6800;
+				break;
+			default:
+				return; //TODO Error handling
 		}
 		/* PRF(16 or 64) from 0x1F bits:18-19(chan_ctrl) */
 		prf = (uint8_t)(chan_ctrl[2] >> 2 & 0x03);
