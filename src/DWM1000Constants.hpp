@@ -420,6 +420,7 @@ const byte RW_SUB_EXT = 0x80; // R/W with sub address extension
 const byte AUTO_CLOCK = 0x00;
 const byte XTI_CLOCK  = 0x01;
 const byte PLL_CLOCK  = 0x02;
+const byte PLL_TX_CLOCK = 0x20;
 
 /* range bias tables (500/900 MHz band, 16/64 MHz PRF), -61 to -95 dBm. */
 const byte BIAS_500_16_ZERO = 10;

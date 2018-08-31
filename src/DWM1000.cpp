@@ -596,6 +596,10 @@ namespace DWM1000 {
 				_currentSPI = &_fastSPI;
 				pmscctrl0[0] &= 0xFC;
 				pmscctrl0[0] |= PLL_CLOCK;
+			} else if (clock == PLL_TX_CLOCK) {
+				_currentSPI = &_fastSPI;
+				pmscctrl0[0] &= 0xCF;
+				pmscctrl0[0] |= PLL_TX_CLOCK;
 			} else {
 				// TODO deliver proper warning
 			}

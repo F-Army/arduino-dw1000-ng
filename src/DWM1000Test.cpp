@@ -23,18 +23,8 @@ namespace DWM1000 {
     void setTransmitPowerSpectrumTestMode(uint32_t repeat_interval) {
         disableSequencing();
         enableRfPllTx();
-
-        00000000
-        11111100 |
-        00000010
-
-        00000000
-        11001111 |
-        00100000
-
-        00100010
-
-        //TODO Enableclocks
+        enableClock(PLL_CLOCK);
+        enableClock(PLL_TX_CLOCK);
 
         if(repeat_interval < 4) 
             repeat_interval = 4;
@@ -42,7 +32,7 @@ namespace DWM1000 {
         byte values[4];
         writeValueToBytes(values, (int32_t) repeat_interval, 4);
         writeBytes(DX_TIME, NO_SUB, values, DX_TIME_LEN);
-        //TODO Check TXDLYS
+        //TODO Check when TXDLYS is activated
 
         byte transmitTestBytes[2];
         writeValueToBytes(transmitTestBytes, 16, LEN_DIAG_TMC);
