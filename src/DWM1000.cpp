@@ -583,6 +583,7 @@ namespace DWM1000 {
 			byte pmscctrl0[LEN_PMSC_CTRL0];
 			memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
 			readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			/* SYSCLKS */
 			if(clock == AUTO_CLOCK) {
 				_currentSPI = &_fastSPI;
 				pmscctrl0[0] = AUTO_CLOCK;

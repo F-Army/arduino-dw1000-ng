@@ -214,14 +214,21 @@
 #define LEN_LDE_REPC 2
 #define LEN_LDE_RXANTD 2
 
+// DIG_DIAG (Digital Diagnostics Interface)
+#define DIG_DIAG 0x2F
+#define DIAG_TMC_SUB 0x24
+#define LEN_DIAG_TMC 2
+
 // TX_POWER (for re-tuning only)
 #define TX_POWER 0x1E
 #define LEN_TX_POWER 4
 
 // RF_CONF (for re-tuning only)
 #define RF_CONF 0x28
+#define RF_CONF_SUB 0x00
 #define RF_RXCTRLH_SUB 0x0B
 #define RF_TXCTRL_SUB 0x0C
+#define LEN_RX_CONF_SUB 4
 #define LEN_RF_RXCTRLH 1
 #define LEN_RF_TXCTRL 4
 
