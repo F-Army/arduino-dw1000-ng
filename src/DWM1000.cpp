@@ -579,33 +579,6 @@ namespace DWM1000 {
 			writeAntennaDelayRegisters();
 		}
 
-		void enableClock(byte clock) {
-			byte pmscctrl0[LEN_PMSC_CTRL0];
-			memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
-			readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-			/* SYSCLKS */
-			if(clock == AUTO_CLOCK) {
-				_currentSPI = &_fastSPI;
-				pmscctrl0[0] = AUTO_CLOCK;
-				pmscctrl0[1] &= 0xFE;
-			} else if(clock == XTI_CLOCK) {
-				_currentSPI = &_slowSPI;
-				pmscctrl0[0] &= 0xFC;
-				pmscctrl0[0] |= XTI_CLOCK;
-			} else if(clock == PLL_CLOCK) {
-				_currentSPI = &_fastSPI;
-				pmscctrl0[0] &= 0xFC;
-				pmscctrl0[0] |= PLL_CLOCK;
-			} else if (clock == PLL_TX_CLOCK) {
-				_currentSPI = &_fastSPI;
-				pmscctrl0[0] &= 0xCF;
-				pmscctrl0[0] |= PLL_TX_CLOCK;
-			} else {
-				// TODO deliver proper warning
-			}
-			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
-		}
-
 		void manageLDE() {
 			// transfer any ldo tune values
 			byte ldoTune[LEN_OTP_RDAT];
@@ -896,6 +869,33 @@ namespace DWM1000 {
 	
 	void attachReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void)) {
 		_handleReceiveTimestampAvailable = handleReceiveTimestampAvailable;
+	}
+
+	void enableClock(byte clock) {
+		byte pmscctrl0[LEN_PMSC_CTRL0];
+		memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
+		readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+		/* SYSCLKS */
+		if(clock == AUTO_CLOCK) {
+			_currentSPI = &_fastSPI;
+			pmscctrl0[0] = AUTO_CLOCK;
+			pmscctrl0[1] &= 0xFE;
+		} else if(clock == XTI_CLOCK) {
+			_currentSPI = &_slowSPI;
+			pmscctrl0[0] &= 0xFC;
+			pmscctrl0[0] |= XTI_CLOCK;
+		} else if(clock == PLL_CLOCK) {
+			_currentSPI = &_fastSPI;
+			pmscctrl0[0] &= 0xFC;
+			pmscctrl0[0] |= PLL_CLOCK;
+		} else if (clock == PLL_TX_CLOCK) { /* NOT SYSCLKS but TX */
+			_currentSPI = &_fastSPI;
+			pmscctrl0[0] &= 0xCF;
+			pmscctrl0[0] |= PLL_TX_CLOCK;
+		} else {
+			// TODO deliver proper warning
+		}
+		writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
 	}
 
 	void enableDebounceClock() {
