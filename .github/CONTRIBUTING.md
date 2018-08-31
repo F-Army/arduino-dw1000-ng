@@ -1,10 +1,10 @@
 Code style
 ----------
 
-1. Please use ``fixed integers``, see standard library `stdint.h`. Why? This library is compatible to different boards which use different architectures (8bit vs 32bit). So unfixed ``int`` has different sizes on different environments and may cause unpredictable behaviour.
+1. Use `c++11` features whenever possible.
 
-2. If possible: use advantages of `c++11`, e.g. `constexpr`.
+2. Try to write self-documenting code, if you can't or you need to write difficult to read code for performance reasons at least try to write good comments.
 
-3. Use tab in source files. Space in examples.
+3. Write comments for public API or class methods using Doxygen syntax.
 
-4. Add documentation to **every** new function or parameter. Add documentation to most steps in your source code.
+4. DWM1000 API should be written in a different file to let the user decide when to import them (Arduino is memory-constrained).
