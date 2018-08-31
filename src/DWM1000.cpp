@@ -1061,30 +1061,39 @@ namespace DWM1000 {
 		}
 		/* PreambleLength from 0x08 bits:18-21(tx_fctrl) */
 		plen = (uint16_t)(tx_fctrl[2] >> 2 & 0xF);
-		if(plen == TX_PREAMBLE_LEN_64) {
-			plen = 64;
-		} else if(plen == TX_PREAMBLE_LEN_128) {
-			plen = 128;
-		} else if(plen == TX_PREAMBLE_LEN_256) {
-			plen = 256;
-		} else if(plen == TX_PREAMBLE_LEN_512) {
-			plen = 512;
-		} else if(plen == TX_PREAMBLE_LEN_1024) {
-			plen = 1024;
-		} else if(plen == TX_PREAMBLE_LEN_1536) {
-			plen = 1536;
-		} else if(plen == TX_PREAMBLE_LEN_2048) {
-			plen = 2048;
-		} else if(plen == TX_PREAMBLE_LEN_4096) {
-			plen = 4096;
-		} else {
-			plen = 0; // error
+		switch(plen) {
+			case TX_PREAMBLE_LEN_64:
+				plen = 64;
+				break;
+			case TX_PREAMBLE_LEN_128:
+				plen = 128;
+				break;
+			case TX_PREAMBLE_LEN_256:
+				plen = 256;
+				break;
+			case TX_PREAMBLE_LEN_512:
+				plen = 512;
+				break;
+			case TX_PREAMBLE_LEN_1024:
+				plen = 1024;
+				break;
+			case TX_PREAMBLE_LEN_1536:
+				plen = 1536;
+				break;
+			case TX_PREAMBLE_LEN_2048:
+				plen = 2048;
+				break;
+			case TX_PREAMBLE_LEN_4096:
+				plen = 4096;
+				break;
+			default:
+				return; //TODO Error handling
 		}
 		/* Channel from 0x1F bits:0-4(tx_chan) */
 		ch = (uint8_t)(chan_ctrl[0] & 0xF);
 		/* Preamble Code from 0x1F bits:24-31(chan_ctrl) */
 		pcode = (uint8_t)(chan_ctrl[3] >> 3 & 0x1F);
-		sprintf(msgBuffer, "Data rate: %u kb/s, PRF: %u MHz, Preamble: %u symbols, Channel: #%u, Pcode #%u" , dr, prf, plen, ch, pcode);
+		sprintf(msgBuffer, "Data rate: %u kb/s, PRF: %u MHz, Preamble: %u symbols, Channel: #%u, Preamble code #%u" , dr, prf, plen, ch, pcode);
 	}
 
 	/* ###########################################################################
