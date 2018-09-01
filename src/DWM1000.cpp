@@ -1351,7 +1351,6 @@ namespace DWM1000 {
         byte delayBytes[4];
         DWM1000Utils::writeValueToBytes(delayBytes, repeat_interval, 4);
         writeBytes(DX_TIME, NO_SUB, delayBytes, 4);
-        //TODO Check if TXDLYS is activated
 
 		/* Enable Transmit Power Spectrum Test Mode */
         byte diagnosticBytes[2];
