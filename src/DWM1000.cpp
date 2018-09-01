@@ -517,7 +517,7 @@ namespace DWM1000 {
 			writeBytes(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
 		}
 
-		void tune(TXPowerMode mode) {
+		void tune(TXPowerMode mode, TCGPMode modetcgp) {
 			// these registers are going to be tuned/configured
 			agctune1();
 			agctune2();
@@ -537,7 +537,11 @@ namespace DWM1000 {
 
 			rfrxctrlh();
 			rftxctrl();
-			tcpgdelay();
+
+			if(modetcgp == TCGPMode::AUTO) {
+				tcpgdelay();
+			}
+
 			fspll();
 			fsxtalt();
 		}
@@ -1296,11 +1300,11 @@ namespace DWM1000 {
 		readSystemEventMaskRegister();
 	}
 
-	void commitConfiguration(TXPowerMode mode) {
+	void commitConfiguration(TXPowerMode mode, TCGPMode modetcgp) {
 		// writes configuration to registers
 		writeConfiguration();
 		// tune according to configuration
-		tune(mode);
+		tune(mode, modetcgp);
 	}
 
 	void waitForResponse(boolean val) {

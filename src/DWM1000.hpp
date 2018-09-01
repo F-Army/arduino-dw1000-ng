@@ -330,7 +330,7 @@ namespace DWM1000 {
 	// general configuration state
 	void newConfiguration();
 
-	void commitConfiguration(TXPowerMode mode = TXPowerMode::AUTO_POWER);
+	void commitConfiguration(TXPowerMode mode = TXPowerMode::AUTO_POWER, TCGPMode modetgp = TCGPMode::AUTO);
 	
 	// reception state
 	void newReceive();
