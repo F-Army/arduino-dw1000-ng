@@ -33,7 +33,7 @@ namespace DWM1000 {
 	/* anonymous namespace to host private-like variables and methods */
 	namespace {
 
-		/* ########################### VARIABLES ################################# */
+		/* ########################### PRIVATE VARIABLES ################################# */
 
 		/* pins */
 		uint8_t _ss;
@@ -88,7 +88,7 @@ namespace DWM1000 {
 		const SPISettings  _slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
 		const SPISettings* _currentSPI = &_fastSPI;
 
-		/* ############################# METHODS ################################### */
+		/* ############################# PRIVATE METHODS ################################### */
 
 		/* Steps used to get Temp and Voltage */
 		void vbatAndTempSteps() {
@@ -775,10 +775,7 @@ namespace DWM1000 {
 		}
 	}
 
-
-	/* ###########################################################################
-	* #### Init and end #######################################################
-	* ######################################################################### */
+	/* ####################### PUBLIC ###################### */
 
 	void end() {
 		SPI.end();
