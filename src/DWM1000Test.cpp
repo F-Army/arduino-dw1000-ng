@@ -9,7 +9,7 @@ namespace DWM1000 {
         void disableSequencing() {
             enableClock(XTI_CLOCK);
             byte zero[2];
-            DWM1000Utils::writeValueToBytes(zero, 0x00, 2);
+            DWM1000Utils::writeValueToBytes(zero, 0x0000, 2);
             writeBytes(PMSC, PMSC_CTRL1_SUB, zero, 2); // To re-enable write 0xE7
         }
 
