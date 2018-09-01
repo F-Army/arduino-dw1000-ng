@@ -1,3 +1,24 @@
+/**
+ * Copyright (c) 2018 Michele 'an4cr0n' Biondi <michelebiondi01@gmail.com> 
+ * Copyright (c) 2018 Andrea 'Sonic0' Salvatori <andrea.salvatori92@gmail.com>
+ * Decawave DWM1000 driver for arduino.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @file TransmitSpectrumPowerCalibrationTest.ino
+ * This sketch is used for regulatory power testing.
+ */
+
 #include <SPI.h>
 #include <DWM1000.hpp>
 
@@ -25,7 +46,7 @@ void setup() {
     DWM1000::setChannel(CHANNEL_5);
     DWM1000::enableMode(MODE_SHORTRANGE_HIGHPRF_MEDIUMPREAMBLE);
     DWM1000::setSFDMode(SFDMode::STANDARD_SFD);
-    DWM1000::setPreambleCode(9);
+    DWM1000::setPreambleCode(PREAMBLE_CODE_64MHZ_9);
     DWM1000::useSmartPower(false);
     DWM1000::setTXPower(0x25456585);
     DWM1000::setTCPGDelay(0xC0);

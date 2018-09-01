@@ -16,6 +16,7 @@ env:
     - PLATFORMIO_CI_SRC=examples/RangingAnchor/RangingAnchor.ino
     - PLATFORMIO_CI_SRC=examples/RangingTag/RangingTag.ino
     - PLATFORMIO_CI_SRC=examples/TimestampUsageTest/TimestampUsageTest.ino
+    - PLATFORMIO_CI_SRC=examples/TransmitSpectrumPowerCalibrationTest.ino
 
 install:
     - pip install -U platformio
