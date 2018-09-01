@@ -517,7 +517,7 @@ namespace DWM1000 {
 			writeBytes(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
 		}
 
-		void tune(TXPowerMode mode, TCGPMode modetcgp) {
+		void tune(TXPowerMode mode, TCPGMode modetcpg) {
 			// these registers are going to be tuned/configured
 			agctune1();
 			agctune2();
@@ -538,7 +538,7 @@ namespace DWM1000 {
 			rfrxctrlh();
 			rftxctrl();
 
-			if(modetcgp == TCGPMode::AUTO) {
+			if(modetcpg == TCPGMode::AUTO) {
 				tcpgdelay();
 			}
 
@@ -1300,11 +1300,11 @@ namespace DWM1000 {
 		readSystemEventMaskRegister();
 	}
 
-	void commitConfiguration(TXPowerMode mode, TCGPMode modetcgp) {
+	void commitConfiguration(TXPowerMode mode, TCPGMode modetcpg) {
 		// writes configuration to registers
 		writeConfiguration();
 		// tune according to configuration
-		tune(mode, modetcgp);
+		tune(mode, modetcpg);
 	}
 
 	void waitForResponse(boolean val) {
@@ -1342,6 +1342,12 @@ namespace DWM1000 {
 		}
 
 		writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
+	}
+
+	void setTCPGDelay(int8_t tcpgdelay) {
+		byte tcpgBytes[LEN_TC_PGDELAY];
+		DWM1000Utils::writeValueToBytes(tcpgBytes, tcpgdelay, LEN_TC_PGDELAY);
+		writeBytes(TX_CAL, TC_PGDELAY_SUB, tcpgBytes, LEN_TC_PGDELAY);
 	}
 
 	void enableTransmitPowerSpectrumTestMode(int32_t repeat_interval) {
