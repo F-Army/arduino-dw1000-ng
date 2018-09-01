@@ -1338,7 +1338,7 @@ namespace DWM1000 {
 		writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
 	}
 
-	void setTransmitPowerSpectrumTestMode(int32_t repeat_interval) {
+	void enableTransmitPowerSpectrumTestMode(int32_t repeat_interval) {
         disableSequencing();
         enableRfPllTx();
         enableClock(PLL_CLOCK);
