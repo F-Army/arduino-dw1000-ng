@@ -276,6 +276,9 @@ namespace DWM1000 {
 
 	void setTXPower(int32_t power);
 	void setTXPower(DriverAmplifierValue driver_amplifier, TransmitMixerValue mixer);
+
+	/* Used for Transmit Power regulatory testing */
+	void setTransmitPowerSpectrumTestMode(int32_t repeat_interval);
 	
 	
 	/* transmit and receive configuration. */

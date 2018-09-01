@@ -773,6 +773,19 @@ namespace DWM1000 {
 			// clear all status that is left unhandled
 			clearAllStatus();
 		}
+
+		void disableSequencing() {
+            enableClock(XTI_CLOCK);
+            byte zero[2];
+            DWM1000Utils::writeValueToBytes(zero, 0x0000, 2);
+            writeBytes(PMSC, PMSC_CTRL1_SUB, zero, 2); // To re-enable write 0xE7
+        }
+
+        void enableRfPllTx() {
+            byte enable_mask[4]; // TXFEN, PLLFEN, LDOFEN
+            DWM1000Utils::writeValueToBytes(enable_mask, 0x005FFF00, LEN_RX_CONF_SUB);
+            writeBytes(RF_CONF, RF_CONF_SUB, enable_mask, LEN_RX_CONF_SUB);
+        }
 	}
 
 	/* ####################### PUBLIC ###################### */
@@ -1324,6 +1337,25 @@ namespace DWM1000 {
 
 		writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
 	}
+
+	void setTransmitPowerSpectrumTestMode(int32_t repeat_interval) {
+        disableSequencing();
+        enableRfPllTx();
+        enableClock(PLL_CLOCK);
+        enableClock(PLL_TX_CLOCK);
+
+        if(repeat_interval < 4) 
+            repeat_interval = 4;
+
+        byte values[4];
+        DWM1000Utils::writeValueToBytes(values, repeat_interval, 4);
+        writeBytes(DX_TIME, NO_SUB, values, LEN_DX_TIME);
+        //TODO Check if TXDLYS is activated
+
+        byte transmitTestBytes[2];
+        DWM1000Utils::writeValueToBytes(transmitTestBytes, 0x10, LEN_DIAG_TMC);
+        writeBytes(DIG_DIAG, DIAG_TMC_SUB, transmitTestBytes, LEN_DIAG_TMC);
+    }
 
 	DWM1000Time setDelay(const DWM1000Time& delay) {
 		if(_deviceMode == TX_MODE) {
