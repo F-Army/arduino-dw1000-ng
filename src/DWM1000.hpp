@@ -65,9 +65,6 @@ namespace DWM1000 {
 	This basically just frees SPI and the previously used pins.
 	*/
 	void end();
-
-	/* enables specific clock */
-	void enableClock(byte clock);
 	
 	/** 
 	Enable debounce Clock, used to clock the LED blinking
