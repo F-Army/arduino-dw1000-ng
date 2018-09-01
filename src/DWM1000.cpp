@@ -1347,14 +1347,16 @@ namespace DWM1000 {
         if(repeat_interval < 4) 
             repeat_interval = 4;
 
-        byte values[4];
-        DWM1000Utils::writeValueToBytes(values, repeat_interval, 4);
-        writeBytes(DX_TIME, NO_SUB, values, LEN_DX_TIME);
+		/* In diagnostic transmit power  mode (set next) the bytes 31:0 only are used for DX_TIME register */
+        byte delayBytes[4];
+        DWM1000Utils::writeValueToBytes(delayBytes, repeat_interval, 4);
+        writeBytes(DX_TIME, NO_SUB, delayBytes, 4);
         //TODO Check if TXDLYS is activated
 
-        byte transmitTestBytes[2];
-        DWM1000Utils::writeValueToBytes(transmitTestBytes, 0x10, LEN_DIAG_TMC);
-        writeBytes(DIG_DIAG, DIAG_TMC_SUB, transmitTestBytes, LEN_DIAG_TMC);
+		/* Enable Transmit Power Spectrum Test Mode */
+        byte diagnosticBytes[2];
+        DWM1000Utils::writeValueToBytes(diagnosticBytes, 0x0010, LEN_DIAG_TMC);
+        writeBytes(DIG_DIAG, DIAG_TMC_SUB, diagnosticBytes, LEN_DIAG_TMC);
     }
 
 	DWM1000Time setDelay(const DWM1000Time& delay) {
