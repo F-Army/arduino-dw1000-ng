@@ -338,7 +338,7 @@ namespace DWM1000 {
 	
 	// transmission state
 	void newTransmit();
-	void startTransmit();
+	void startTransmit(TransmissionMode mode = TransmissionMode::STANDARD_TRANSMISSION);
 	
 	/* ##### Operation mode selection ############################################ */
 	/** 
