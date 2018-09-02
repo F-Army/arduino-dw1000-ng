@@ -48,8 +48,8 @@ void setup() {
     DWM1000::setSFDMode(SFDMode::STANDARD_SFD);
     DWM1000::setPreambleCode(PREAMBLE_CODE_64MHZ_9);
     DWM1000::useSmartPower(false);
-    DWM1000::setTXPower(0x25456585);
-    DWM1000::setTCPGDelay(0xC0);
+    DWM1000::setTXPower(0x25456585); /* Change according to test */
+    DWM1000::setTCPGDelay(0xC0); /* Change according to test */
     DWM1000::suppressFrameCheck(true);
     DWM1000::commitConfiguration();
     Serial.println(F("Committed configuration ..."));
