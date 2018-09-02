@@ -64,12 +64,13 @@ void setup() {
     DWM1000::getPrintableDeviceMode(msg);
     Serial.print("Device mode: "); Serial.println(msg);
     DWM1000::newTransmit();
-    DWM1000::enableTransmitPowerSpectrumTestMode(124800);
+    DWM1000::enableTransmitPowerSpectrumTestMode(124800); /* Approx 1ms long transmissions */
     DWM1000::setData(data);
     DWM1000::startTransmit();
 
-    delay(120000);
+    delay(120000); /* 2 minutes */
 
+    /* used to stop transmission */
     DWM1000::softReset();
 }
 
