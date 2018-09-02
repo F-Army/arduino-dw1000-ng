@@ -214,14 +214,21 @@
 #define LEN_LDE_REPC 2
 #define LEN_LDE_RXANTD 2
 
+// DIG_DIAG (Digital Diagnostics Interface)
+#define DIG_DIAG 0x2F
+#define DIAG_TMC_SUB 0x24
+#define LEN_DIAG_TMC 2
+
 // TX_POWER (for re-tuning only)
 #define TX_POWER 0x1E
 #define LEN_TX_POWER 4
 
 // RF_CONF (for re-tuning only)
 #define RF_CONF 0x28
+#define RF_CONF_SUB 0x00
 #define RF_RXCTRLH_SUB 0x0B
 #define RF_TXCTRL_SUB 0x0C
+#define LEN_RX_CONF_SUB 4
 #define LEN_RF_RXCTRLH 1
 #define LEN_RF_TXCTRL 4
 
@@ -413,6 +420,7 @@ const byte RW_SUB_EXT = 0x80; // R/W with sub address extension
 const byte AUTO_CLOCK = 0x00;
 const byte XTI_CLOCK  = 0x01;
 const byte PLL_CLOCK  = 0x02;
+const byte PLL_TX_CLOCK = 0x20;
 
 /* range bias tables (500/900 MHz band, 16/64 MHz PRF), -61 to -95 dBm. */
 const byte BIAS_500_16_ZERO = 10;
@@ -472,6 +480,10 @@ enum class TransmitMixerValue : byte {
     dB_15_5
 };
 
-enum class TXPowerMode { AUTO_POWER, MANUAL_POWER };
+enum class TXPowerMode {AUTO_POWER, MANUAL_POWER};
 
-enum class SFDMode { STANDARD_SFD, DECAWAVE_SFD, RECOMMENDED_SFD};
+enum class TCPGMode {AUTO, MANUAL};
+
+enum class SFDMode {STANDARD_SFD, DECAWAVE_SFD, RECOMMENDED_SFD};
+
+enum class TransmissionMode {STANDARD_TRANSMISSION, DELAYED_TRANSMISSION};

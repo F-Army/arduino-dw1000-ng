@@ -33,7 +33,7 @@ namespace DWM1000 {
 	/* anonymous namespace to host private-like variables and methods */
 	namespace {
 
-		/* ########################### VARIABLES ################################# */
+		/* ########################### PRIVATE VARIABLES ################################# */
 
 		/* pins */
 		uint8_t _ss;
@@ -88,7 +88,7 @@ namespace DWM1000 {
 		const SPISettings  _slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
 		const SPISettings* _currentSPI = &_fastSPI;
 
-		/* ############################# METHODS ################################### */
+		/* ############################# PRIVATE METHODS ################################### */
 
 		/* Steps used to get Temp and Voltage */
 		void vbatAndTempSteps() {
@@ -517,7 +517,7 @@ namespace DWM1000 {
 			writeBytes(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
 		}
 
-		void tune(TXPowerMode mode) {
+		void tune(TXPowerMode mode, TCPGMode modetcpg) {
 			// these registers are going to be tuned/configured
 			agctune1();
 			agctune2();
@@ -537,7 +537,11 @@ namespace DWM1000 {
 
 			rfrxctrlh();
 			rftxctrl();
-			tcpgdelay();
+
+			if(modetcpg == TCPGMode::AUTO) {
+				tcpgdelay();
+			}
+
 			fspll();
 			fsxtalt();
 		}
@@ -577,28 +581,6 @@ namespace DWM1000 {
 			writeTransmitFrameControlRegister();
 			writeSystemEventMaskRegister();
 			writeAntennaDelayRegisters();
-		}
-
-		void enableClock(byte clock) {
-			byte pmscctrl0[LEN_PMSC_CTRL0];
-			memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
-			readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-			if(clock == AUTO_CLOCK) {
-				_currentSPI = &_fastSPI;
-				pmscctrl0[0] = AUTO_CLOCK;
-				pmscctrl0[1] &= 0xFE;
-			} else if(clock == XTI_CLOCK) {
-				_currentSPI = &_slowSPI;
-				pmscctrl0[0] &= 0xFC;
-				pmscctrl0[0] |= XTI_CLOCK;
-			} else if(clock == PLL_CLOCK) {
-				_currentSPI = &_fastSPI;
-				pmscctrl0[0] &= 0xFC;
-				pmscctrl0[0] |= PLL_CLOCK;
-			} else {
-				// TODO deliver proper warning
-			}
-			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
 		}
 
 		void manageLDE() {
@@ -690,6 +672,33 @@ namespace DWM1000 {
 				default:
 					return; //TODO Error handling
 			}
+		}
+
+		void enableClock(byte clock) {
+			byte pmscctrl0[LEN_PMSC_CTRL0];
+			memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
+			readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			/* SYSCLKS */
+			if(clock == AUTO_CLOCK) {
+				_currentSPI = &_fastSPI;
+				pmscctrl0[0] = AUTO_CLOCK;
+				pmscctrl0[1] &= 0xFE;
+			} else if(clock == XTI_CLOCK) {
+				_currentSPI = &_slowSPI;
+				pmscctrl0[0] &= 0xFC;
+				pmscctrl0[0] |= XTI_CLOCK;
+			} else if(clock == PLL_CLOCK) {
+				_currentSPI = &_fastSPI;
+				pmscctrl0[0] &= 0xFC;
+				pmscctrl0[0] |= PLL_CLOCK;
+			} else if (clock == PLL_TX_CLOCK) { /* NOT SYSCLKS but TX */
+				_currentSPI = &_fastSPI;
+				pmscctrl0[0] &= 0xCF;
+				pmscctrl0[0] |= PLL_TX_CLOCK;
+			} else {
+				// TODO deliver proper warning
+			}
+			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
 		}
 		
 		/* interrupt state handling */
@@ -795,12 +804,22 @@ namespace DWM1000 {
 			// clear all status that is left unhandled
 			clearAllStatus();
 		}
+
+		void disableSequencing() {
+            enableClock(XTI_CLOCK);
+            byte zero[2];
+            DWM1000Utils::writeValueToBytes(zero, 0x0000, 2);
+            writeBytes(PMSC, PMSC_CTRL1_SUB, zero, 2); // To re-enable write 0xE7
+        }
+
+        void enableRfPllTx() {
+            byte enable_mask[4]; // TXFEN, PLLFEN, LDOFEN
+            DWM1000Utils::writeValueToBytes(enable_mask, 0x005FFF00, LEN_RX_CONF_SUB);
+            writeBytes(RF_CONF, RF_CONF_SUB, enable_mask, LEN_RX_CONF_SUB);
+        }
 	}
 
-
-	/* ###########################################################################
-	* #### Init and end #######################################################
-	* ######################################################################### */
+	/* ####################### PUBLIC ###################### */
 
 	void end() {
 		SPI.end();
@@ -1256,10 +1275,12 @@ namespace DWM1000 {
 		_deviceMode = TX_MODE;
 	}
 
-	void startTransmit() {
+	void startTransmit(TransmissionMode mode) {
 		writeTransmitFrameControlRegister();
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, SFCST_BIT, !_frameCheck);
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXSTRT_BIT, true);
+		if(mode == TransmissionMode::DELAYED_TRANSMISSION)
+			DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXDLYS_BIT, true);
 		writeBytes(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
 		if(_permanentReceive) {
 			memset(_sysctrl, 0, LEN_SYS_CTRL);
@@ -1279,11 +1300,11 @@ namespace DWM1000 {
 		readSystemEventMaskRegister();
 	}
 
-	void commitConfiguration(TXPowerMode mode) {
+	void commitConfiguration(TXPowerMode mode, TCPGMode modetcpg) {
 		// writes configuration to registers
 		writeConfiguration();
 		// tune according to configuration
-		tune(mode);
+		tune(mode, modetcpg);
 	}
 
 	void waitForResponse(boolean val) {
@@ -1322,6 +1343,32 @@ namespace DWM1000 {
 
 		writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
 	}
+
+	void setTCPGDelay(uint8_t tcpgdelay) {
+		byte tcpgBytes[LEN_TC_PGDELAY];
+		DWM1000Utils::writeValueToBytes(tcpgBytes, tcpgdelay, LEN_TC_PGDELAY);
+		writeBytes(TX_CAL, TC_PGDELAY_SUB, tcpgBytes, LEN_TC_PGDELAY);
+	}
+
+	void enableTransmitPowerSpectrumTestMode(int32_t repeat_interval) {
+        disableSequencing();
+        enableRfPllTx();
+        enableClock(PLL_CLOCK);
+        enableClock(PLL_TX_CLOCK);
+
+        if(repeat_interval < 4) 
+            repeat_interval = 4;
+
+		/* In diagnostic transmit power  mode (set next) the bytes 31:0 only are used for DX_TIME register */
+        byte delayBytes[4];
+        DWM1000Utils::writeValueToBytes(delayBytes, repeat_interval, 4);
+        writeBytes(DX_TIME, NO_SUB, delayBytes, 4);
+
+		/* Enable Transmit Power Spectrum Test Mode */
+        byte diagnosticBytes[2];
+        DWM1000Utils::writeValueToBytes(diagnosticBytes, 0x0010, LEN_DIAG_TMC);
+        writeBytes(DIG_DIAG, DIAG_TMC_SUB, diagnosticBytes, LEN_DIAG_TMC);
+    }
 
 	DWM1000Time setDelay(const DWM1000Time& delay) {
 		if(_deviceMode == TX_MODE) {
