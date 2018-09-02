@@ -274,7 +274,7 @@ namespace DWM1000 {
 	void setTXPower(int32_t power);
 	void setTXPower(DriverAmplifierValue driver_amplifier, TransmitMixerValue mixer);
 
-	void setTCPGDelay(int8_t tcpg_delay);
+	void setTCPGDelay(uint8_t tcpg_delay);
 
 	/* Used for Transmit Power regulatory testing */
 	void enableTransmitPowerSpectrumTestMode(int32_t repeat_interval);
