@@ -679,22 +679,22 @@ namespace DWM1000 {
 			memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
 			readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 			/* SYSCLKS */
-			if(clock == AUTO_CLOCK) {
+			if(clock == SYS_AUTO_CLOCK) {
 				_currentSPI = &_fastSPI;
-				pmscctrl0[0] = AUTO_CLOCK;
+				pmscctrl0[0] = SYS_AUTO_CLOCK;
 				pmscctrl0[1] &= 0xFE;
-			} else if(clock == XTI_CLOCK) {
+			} else if(clock == SYS_XTI_CLOCK) {
 				_currentSPI = &_slowSPI;
 				pmscctrl0[0] &= 0xFC;
-				pmscctrl0[0] |= XTI_CLOCK;
-			} else if(clock == PLL_CLOCK) {
+				pmscctrl0[0] |= SYS_XTI_CLOCK;
+			} else if(clock == SYS_PLL_CLOCK) {
 				_currentSPI = &_fastSPI;
 				pmscctrl0[0] &= 0xFC;
-				pmscctrl0[0] |= PLL_CLOCK;
-			} else if (clock == PLL_TX_CLOCK) { /* NOT SYSCLKS but TX */
+				pmscctrl0[0] |= SYS_PLL_CLOCK;
+			} else if (clock == TX_PLL_CLOCK) { /* NOT SYSCLKS but TX */
 				_currentSPI = &_fastSPI;
 				pmscctrl0[0] &= 0xCF;
-				pmscctrl0[0] |= PLL_TX_CLOCK;
+				pmscctrl0[0] |= TX_PLL_CLOCK;
 			} else {
 				// TODO deliver proper warning
 			}
@@ -806,14 +806,15 @@ namespace DWM1000 {
 		}
 
 		void disableSequencing() {
-            enableClock(XTI_CLOCK);
+            enableClock(SYS_XTI_CLOCK);
             byte zero[2];
             DWM1000Utils::writeValueToBytes(zero, 0x0000, 2);
             writeBytes(PMSC, PMSC_CTRL1_SUB, zero, 2); // To re-enable write 0xE7
         }
 
-        void enableRfPllTx() {
-            byte enable_mask[4]; // TXFEN, PLLFEN, LDOFEN
+        void configureRFTransmitPowerSpectrumTestMode() {
+			/* Enabled TXFEN, PLLFEN, LDOFEN and set TXRXSW to TX */
+            byte enable_mask[4];
             DWM1000Utils::writeValueToBytes(enable_mask, 0x005FFF00, LEN_RX_CONF_SUB);
             writeBytes(RF_CONF, RF_CONF_SUB, enable_mask, LEN_RX_CONF_SUB);
         }
@@ -821,15 +822,27 @@ namespace DWM1000 {
 
 	/* ####################### PUBLIC ###################### */
 
-	void end() {
-		SPI.end();
+	void begin(uint8_t irq, uint8_t rst) {
+		// generous initial init/wake-up-idle delay
+		delay(5);
+		// start SPI
+		SPI.begin();
+		SPI.usingInterrupt(digitalPinToInterrupt(irq));
+		// pin and basic member setup
+		_rst        = rst;
+		_irq        = irq;
+		_deviceMode = IDLE_MODE;
+		// attach interrupt
+		//attachInterrupt(_irq, handleInterrupt, CHANGE);
+		// TODO throw error if pin is not a interrupt pin
+		attachInterrupt(digitalPinToInterrupt(_irq), handleInterrupt, RISING);
 	}
 
 	void select(uint8_t ss) {
 		reselect(ss);
 		// try locking clock at PLL speed (should be done already,
 		// but just to be sure)
-		enableClock(AUTO_CLOCK);
+		enableClock(SYS_AUTO_CLOCK);
 		delay(5);
 		// reset chip (either soft or hard)
 		if(_rst != 0xff) {
@@ -849,11 +862,11 @@ namespace DWM1000 {
 		clearInterrupts();
 		writeSystemEventMaskRegister();
 		// load LDE micro-code
-		enableClock(XTI_CLOCK);
+		enableClock(SYS_XTI_CLOCK);
 		delay(5);
 		manageLDE();
 		delay(5);
-		enableClock(AUTO_CLOCK);
+		enableClock(SYS_AUTO_CLOCK);
 		delay(5);
 		
 		// read the temp and vbat readings from OTP that were recorded during production test
@@ -871,20 +884,8 @@ namespace DWM1000 {
 		digitalWrite(_ss, HIGH);
 	}
 
-	void begin(uint8_t irq, uint8_t rst) {
-		// generous initial init/wake-up-idle delay
-		delay(5);
-		// start SPI
-		SPI.begin();
-		SPI.usingInterrupt(digitalPinToInterrupt(irq));
-		// pin and basic member setup
-		_rst        = rst;
-		_irq        = irq;
-		_deviceMode = IDLE_MODE;
-		// attach interrupt
-		//attachInterrupt(_irq, handleInterrupt, CHANGE);
-		// TODO throw error if pin is not a interrupt pin
-		attachInterrupt(digitalPinToInterrupt(_irq), handleInterrupt, RISING);
+	void end() {
+		SPI.end();
 	}
 
 	/* callback handler management. */
@@ -1352,9 +1353,9 @@ namespace DWM1000 {
 
 	void enableTransmitPowerSpectrumTestMode(int32_t repeat_interval) {
         disableSequencing();
-        enableRfPllTx();
-        enableClock(PLL_CLOCK);
-        enableClock(PLL_TX_CLOCK);
+        configureRFTransmitPowerSpectrumTestMode();
+        enableClock(SYS_PLL_CLOCK);
+        enableClock(TX_PLL_CLOCK);
 
         if(repeat_interval < 4) 
             repeat_interval = 4;
