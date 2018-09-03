@@ -822,8 +822,20 @@ namespace DWM1000 {
 
 	/* ####################### PUBLIC ###################### */
 
-	void end() {
-		SPI.end();
+	void begin(uint8_t irq, uint8_t rst) {
+		// generous initial init/wake-up-idle delay
+		delay(5);
+		// start SPI
+		SPI.begin();
+		SPI.usingInterrupt(digitalPinToInterrupt(irq));
+		// pin and basic member setup
+		_rst        = rst;
+		_irq        = irq;
+		_deviceMode = IDLE_MODE;
+		// attach interrupt
+		//attachInterrupt(_irq, handleInterrupt, CHANGE);
+		// TODO throw error if pin is not a interrupt pin
+		attachInterrupt(digitalPinToInterrupt(_irq), handleInterrupt, RISING);
 	}
 
 	void select(uint8_t ss) {
@@ -872,20 +884,8 @@ namespace DWM1000 {
 		digitalWrite(_ss, HIGH);
 	}
 
-	void begin(uint8_t irq, uint8_t rst) {
-		// generous initial init/wake-up-idle delay
-		delay(5);
-		// start SPI
-		SPI.begin();
-		SPI.usingInterrupt(digitalPinToInterrupt(irq));
-		// pin and basic member setup
-		_rst        = rst;
-		_irq        = irq;
-		_deviceMode = IDLE_MODE;
-		// attach interrupt
-		//attachInterrupt(_irq, handleInterrupt, CHANGE);
-		// TODO throw error if pin is not a interrupt pin
-		attachInterrupt(digitalPinToInterrupt(_irq), handleInterrupt, RISING);
+	void end() {
+		SPI.end();
 	}
 
 	/* callback handler management. */
