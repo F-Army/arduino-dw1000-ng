@@ -812,8 +812,9 @@ namespace DWM1000 {
             writeBytes(PMSC, PMSC_CTRL1_SUB, zero, 2); // To re-enable write 0xE7
         }
 
-        void enableRfPllTx() {
-            byte enable_mask[4]; // TXFEN, PLLFEN, LDOFEN
+        void configureRFTransmitPowerSpectrumTestMode() {
+			/* Enabled TXFEN, PLLFEN, LDOFEN and set TXRXSW to TX */
+            byte enable_mask[4];
             DWM1000Utils::writeValueToBytes(enable_mask, 0x005FFF00, LEN_RX_CONF_SUB);
             writeBytes(RF_CONF, RF_CONF_SUB, enable_mask, LEN_RX_CONF_SUB);
         }
@@ -1352,7 +1353,7 @@ namespace DWM1000 {
 
 	void enableTransmitPowerSpectrumTestMode(int32_t repeat_interval) {
         disableSequencing();
-        enableRfPllTx();
+        configureRFTransmitPowerSpectrumTestMode();
         enableClock(SYS_PLL_CLOCK);
         enableClock(TX_PLL_CLOCK);
 
