@@ -480,10 +480,6 @@ enum class TransmitMixerValue : byte {
     dB_15_5
 };
 
-enum class TXPowerMode {AUTO_POWER, MANUAL_POWER};
-
-enum class TCPGMode {AUTO, MANUAL};
-
 enum class SFDMode {STANDARD_SFD, DECAWAVE_SFD, RECOMMENDED_SFD};
 
 enum class TransmissionMode {STANDARD_TRANSMISSION, DELAYED_TRANSMISSION};

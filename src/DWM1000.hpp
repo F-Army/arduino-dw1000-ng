@@ -273,8 +273,10 @@ namespace DWM1000 {
 
 	void setTXPower(int32_t power);
 	void setTXPower(DriverAmplifierValue driver_amplifier, TransmitMixerValue mixer);
+	void setTXPowerAuto();
 
 	void setTCPGDelay(uint8_t tcpg_delay);
+	void setTCPGDelayAuto();
 
 	/* Used for Transmit Power regulatory testing */
 	void enableTransmitPowerSpectrumTestMode(int32_t repeat_interval);
@@ -332,7 +334,7 @@ namespace DWM1000 {
 	// general configuration state
 	void newConfiguration();
 
-	void commitConfiguration(TXPowerMode mode = TXPowerMode::AUTO_POWER, TCPGMode modetcpg = TCPGMode::AUTO);
+	void commitConfiguration();
 	
 	// reception state
 	void newReceive();

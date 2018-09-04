@@ -81,6 +81,8 @@ namespace DWM1000 {
 		boolean     _permanentReceive    = false;
 		boolean     _debounceClockEnabled = false;
 		boolean     _nlos = false;
+		boolean     _autoTXPower = true;
+		boolean     _autoTCPGDelay = true;
 		DWM1000Time _antennaDelay((int64_t) 16384);
 
 		/* SPI relative variables */
@@ -517,7 +519,7 @@ namespace DWM1000 {
 			writeBytes(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
 		}
 
-		void tune(TXPowerMode mode, TCPGMode modetcpg) {
+		void tune() {
 			// these registers are going to be tuned/configured
 			agctune1();
 			agctune2();
@@ -529,19 +531,11 @@ namespace DWM1000 {
 			drxtune4H();
 			ldecfg1();
 			ldecfg2();
-			lderepc();
-
-			if(mode == TXPowerMode::AUTO_POWER) { 
-				txpower(); 
-			}
-
+			lderepc(); 
+			if(_autoTXPower) txpower();
 			rfrxctrlh();
 			rftxctrl();
-
-			if(modetcpg == TCPGMode::AUTO) {
-				tcpgdelay();
-			}
-
+			if(_autoTCPGDelay) tcpgdelay();
 			fspll();
 			fsxtalt();
 		}
@@ -1301,11 +1295,11 @@ namespace DWM1000 {
 		readSystemEventMaskRegister();
 	}
 
-	void commitConfiguration(TXPowerMode mode, TCPGMode modetcpg) {
+	void commitConfiguration() {
 		// writes configuration to registers
 		writeConfiguration();
 		// tune according to configuration
-		tune(mode, modetcpg);
+		tune();
 	}
 
 	void waitForResponse(boolean val) {
@@ -1323,12 +1317,16 @@ namespace DWM1000 {
 	void useSmartPower(boolean smartPower) {
 		_smartPower = smartPower;
 		DWM1000Utils::setBit(_syscfg, LEN_SYS_CFG, DIS_STXP_BIT, !smartPower);
+		if(_smartPower) 
+			_autoTXPower = true;
 	}
 
 	void setTXPower(int32_t power) {
 		byte txpower[LEN_TX_POWER];
 		DWM1000Utils::writeValueToBytes(txpower, power, LEN_TX_POWER);
 		writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
+		useSmartPower(false);
+		_autoTXPower = false;
 	}
 
 	void setTXPower(DriverAmplifierValue driver_amplifier, TransmitMixerValue mixer) {
@@ -1343,12 +1341,23 @@ namespace DWM1000 {
 		}
 
 		writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
+		useSmartPower(false);
+		_autoTXPower = false;
+	}
+
+	void setTXPowerAuto() {
+		_autoTXPower = true;
 	}
 
 	void setTCPGDelay(uint8_t tcpgdelay) {
 		byte tcpgBytes[LEN_TC_PGDELAY];
 		DWM1000Utils::writeValueToBytes(tcpgBytes, tcpgdelay, LEN_TC_PGDELAY);
 		writeBytes(TX_CAL, TC_PGDELAY_SUB, tcpgBytes, LEN_TC_PGDELAY);
+		_autoTCPGDelay = false;
+	}
+
+	void setTCPGDelayAuto() {
+		_autoTCPGDelay = true;
 	}
 
 	void enableTransmitPowerSpectrumTestMode(int32_t repeat_interval) {

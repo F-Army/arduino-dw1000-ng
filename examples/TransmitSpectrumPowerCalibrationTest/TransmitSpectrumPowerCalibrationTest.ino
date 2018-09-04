@@ -51,7 +51,7 @@ void setup() {
     DWM1000::setTXPower(0x25456585); /* Change according to test */
     DWM1000::setTCPGDelay(0xC0); /* Change according to test */
     DWM1000::suppressFrameCheck(true);
-    DWM1000::commitConfiguration(TXPowerMode::MANUAL_POWER, TCPGMode::MANUAL);
+    DWM1000::commitConfiguration();
     Serial.println(F("Committed configuration ..."));
     // DEBUG chip info and registers pretty printed
     char msg[128];
