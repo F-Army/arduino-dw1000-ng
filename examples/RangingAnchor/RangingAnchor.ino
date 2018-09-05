@@ -135,8 +135,7 @@ void transmitPollAck() {
     DWM1000::setDefaults();
     data[0] = POLL_ACK;
     // delay the same amount as ranging tag
-    DWM1000Time deltaTime = DWM1000Time(replyDelayTimeUS, DWM1000Time::MICROSECONDS);
-    DWM1000::setDelay(deltaTime);
+    DWM1000::setDelay(replyDelayTimeUS);
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit();
 }

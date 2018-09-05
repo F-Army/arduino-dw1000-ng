@@ -1378,7 +1378,7 @@ namespace DWM1000 {
         writeBytes(DIG_DIAG, DIAG_TMC_SUB, diagnosticBytes, LEN_DIAG_TMC);
     }
 
-	DWM1000Time setDelay(const DWM1000Time& delay) {
+	DWM1000Time setDelay(uint16_t delayUS) {
 		if(_deviceMode == TX_MODE) {
 			DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXDLYS_BIT, true);
 		} else if(_deviceMode == RX_MODE) {
@@ -1387,11 +1387,13 @@ namespace DWM1000 {
 			// in idle, ignore
 			return DWM1000Time();
 		}
-		byte       delayBytes[5];
+		byte delayBytes[LEN_DX_TIME];
 		DWM1000Time futureTime;
+		DWM1000Time delayTime = DWM1000Time(delayUS, DWM1000Time::MICROSECONDS);
 		getSystemTimestamp(futureTime);
-		futureTime += delay;
+		futureTime += delayTime;
 		futureTime.getTimestamp(delayBytes);
+		/* the least significant 9-bits are ignored in DX_TIME in functional modes */
 		delayBytes[0] = 0;
 		delayBytes[1] &= 0xFE;
 		writeBytes(DX_TIME, NO_SUB, delayBytes, LEN_DX_TIME);

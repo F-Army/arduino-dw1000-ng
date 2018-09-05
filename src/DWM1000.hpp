@@ -283,7 +283,7 @@ namespace DWM1000 {
 	
 	
 	/* transmit and receive configuration. */
-	DWM1000Time  setDelay(const DWM1000Time& delay);
+	DWM1000Time  setDelay(uint16_t delayUS);
 	void         receivePermanently(boolean val);
 	void         setData(byte data[], uint16_t n);
 	void         setData(const String& data);
