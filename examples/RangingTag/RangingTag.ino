@@ -129,8 +129,7 @@ void transmitRange() {
     DWM1000::setDefaults();
     data[0] = RANGE;
     // delay sending the message and remember expected future sent timestamp
-    DWM1000Time deltaTime = DWM1000Time(replyDelayTimeUS, DWM1000Time::MICROSECONDS);
-    timeRangeSent = DWM1000::setDelay(deltaTime);
+    timeRangeSent = DWM1000::setDelay(replyDelayTimeUS);
     timePollSent.getTimestamp(data + 1);
     timePollAckReceived.getTimestamp(data + 6);
     timeRangeSent.getTimestamp(data + 11);
