@@ -106,14 +106,12 @@ void handleReceiveFailed() {
 
 void transmit() {
   DWM1000::newTransmit();
-  DWM1000::setDefaults();
   DWM1000::setData(msg);
   DWM1000::startTransmit();
 }
 
 void receiver() {
   DWM1000::newReceive();
-  DWM1000::setDefaults();
   // so we don't need to restart the receiver manually
   DWM1000::receivePermanently(true);
   DWM1000::startReceive();
