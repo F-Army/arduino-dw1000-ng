@@ -28,7 +28,7 @@ const uint8_t PIN_IRQ = 2; // irq pin
 const uint8_t PIN_SS = SS; // spi select pin
 
 // data to send
-String data = "DECAWAVE";
+String data = "00DECAWAVE00";
 
 
 void setup() {
