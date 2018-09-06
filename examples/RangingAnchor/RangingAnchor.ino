@@ -132,7 +132,6 @@ void handleReceived() {
 
 void transmitPollAck() {
     DWM1000::newTransmit();
-    DWM1000::setDefaults();
     data[0] = POLL_ACK;
     // delay the same amount as ranging tag
     DWM1000::setDelay(replyDelayTimeUS);
@@ -142,7 +141,6 @@ void transmitPollAck() {
 
 void transmitRangeReport(float curRange) {
     DWM1000::newTransmit();
-    DWM1000::setDefaults();
     data[0] = RANGE_REPORT;
     // write final ranging result
     memcpy(data + 1, &curRange, 4);
@@ -152,7 +150,6 @@ void transmitRangeReport(float curRange) {
 
 void transmitRangeFailed() {
     DWM1000::newTransmit();
-    DWM1000::setDefaults();
     data[0] = RANGE_FAILED;
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit();
@@ -160,7 +157,6 @@ void transmitRangeFailed() {
 
 void receiver() {
     DWM1000::newReceive();
-    DWM1000::setDefaults();
     // so we don't need to restart the receiver manually
     DWM1000::receivePermanently(true);
     DWM1000::startReceive();

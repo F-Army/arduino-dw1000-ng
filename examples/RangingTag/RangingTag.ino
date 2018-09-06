@@ -89,7 +89,7 @@ void setup() {
     DWM1000::attachSentHandler(handleSent);
     DWM1000::attachReceivedHandler(handleReceived);
     // anchor starts by transmitting a POLL message
-    receiver();
+    DWM1000::receivePermanently(true);
     transmitPoll();
     noteActivity();
 }
@@ -118,7 +118,6 @@ void handleReceived() {
 
 void transmitPoll() {
     DWM1000::newTransmit();
-    DWM1000::setDefaults();
     data[0] = POLL;
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit();
@@ -126,7 +125,6 @@ void transmitPoll() {
 
 void transmitRange() {
     DWM1000::newTransmit();
-    DWM1000::setDefaults();
     data[0] = RANGE;
     // delay sending the message and remember expected future sent timestamp
     timeRangeSent = DWM1000::setDelay(replyDelayTimeUS);
@@ -140,7 +138,6 @@ void transmitRange() {
 
 void receiver() {
     DWM1000::newReceive();
-    DWM1000::setDefaults();
     // so we don't need to restart the receiver manually
     DWM1000::receivePermanently(true);
     DWM1000::startReceive();

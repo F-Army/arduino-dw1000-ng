@@ -1566,7 +1566,6 @@ namespace DWM1000 {
 	}
 
 	void setDefaults() {
-		if(_deviceMode == IDLE_MODE) {
 			useExtendedFrameLength(false);
 			useSmartPower(true);
 			suppressFrameCheck(false);
@@ -1594,7 +1593,6 @@ namespace DWM1000 {
 			// default mode when powering up the chip
 			// still explicitly selected for later tuning
 			enableMode(MODE_SHORTRANGE_LOWPRF_MEDIUMPREAMBLE);
-		}
 	}
 
 	void setData(byte data[], uint16_t n) {

@@ -77,7 +77,6 @@ void transmitter() {
   // transmit some data
   Serial.print("Transmitting packet ... #"); Serial.println(sentNum);
   DWM1000::newTransmit();
-  DWM1000::setDefaults();
   String msg = "Hello DWM1000, it's #"; msg += sentNum;
   DWM1000::setData(msg);
   // delay sending the message for the given amount

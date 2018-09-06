@@ -81,7 +81,6 @@ void handleError() {
 
 void receiver() {
   DWM1000::newReceive();
-  DWM1000::setDefaults();
   // so we don't need to restart the receiver manually
   DWM1000::receivePermanently(true);
   DWM1000::startReceive();
