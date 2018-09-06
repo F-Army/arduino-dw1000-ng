@@ -1068,7 +1068,7 @@ namespace DWM1000 {
 		prf = (uint8_t)(chan_ctrl[2] >> 2 & 0x03);
 		if(prf == TX_PULSE_FREQ_16MHZ){
 			prf = 16;
-		} else if(prf = TX_PULSE_FREQ_64MHZ){
+		} else if(prf == TX_PULSE_FREQ_64MHZ){
 			prf = 64;
 		} else{
 			return; //TODO Error handling
