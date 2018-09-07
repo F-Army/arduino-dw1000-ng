@@ -49,10 +49,10 @@ namespace DWM1000 {
 		void (* _handleReceiveTimestampAvailable)(void) = nullptr;
 
 		/* SFD Mode */
-		void useDecawaveSFD();
-		void useStandardSFD();
-		void useRecommendedSFD();
-		void (* _currentSFDMode)(void) = useRecommendedSFD;
+		void _useDecawaveSFD();
+		void _useStandardSFD();
+		void _useRecommendedSFD();
+		void (* _currentSFDMode)(void) = _useRecommendedSFD;
 
 		/* registers */
 		byte       _syscfg[LEN_SYS_CFG];
@@ -93,7 +93,7 @@ namespace DWM1000 {
 		/* ############################# PRIVATE METHODS ################################### */
 
 		/* Steps used to get Temp and Voltage */
-		void vbatAndTempSteps() {
+		void _vbatAndTempSteps() {
 			byte step1 = 0x80; writeBytes(RF_CONF, 0x11, &step1, 1);
 			byte step2 = 0x0A; writeBytes(RF_CONF, 0x12, &step2, 1);
 			byte step3 = 0x0F; writeBytes(RF_CONF, 0x12, &step3, 1);
@@ -102,7 +102,7 @@ namespace DWM1000 {
 		}
 
 		/* AGC_TUNE1 - reg:0x23, sub-reg:0x04, table 24 */
-		void agctune1() {
+		void _agctune1() {
 			byte agctune1[LEN_AGC_TUNE1];
 			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 				DWM1000Utils::writeValueToBytes(agctune1, 0x8870, LEN_AGC_TUNE1);
@@ -115,21 +115,21 @@ namespace DWM1000 {
 		}
 
 		/* AGC_TUNE2 - reg:0x23, sub-reg:0x0C, table 25 */
-		void agctune2() {
+		void _agctune2() {
 			byte agctune2[LEN_AGC_TUNE2];
 			DWM1000Utils::writeValueToBytes(agctune2, 0x2502A907L, LEN_AGC_TUNE2);
 			writeBytes(AGC_TUNE, AGC_TUNE2_SUB, agctune2, LEN_AGC_TUNE2);
 		}
 
 		/* AGC_TUNE3 - reg:0x23, sub-reg:0x12, table 26 */
-		void agctune3() {
+		void _agctune3() {
 			byte agctune3[LEN_AGC_TUNE3];
 			DWM1000Utils::writeValueToBytes(agctune3, 0x0035, LEN_AGC_TUNE3);
 			writeBytes(AGC_TUNE, AGC_TUNE3_SUB, agctune3, LEN_AGC_TUNE3);
 		}
 
 		/* DRX_TUNE0b - reg:0x27, sub-reg:0x02 (already optimized according to Table 30 of user manual) */
-		void drxtune0b() {
+		void _drxtune0b() {
 			byte drxtune0b[LEN_DRX_TUNE0b];	
 			if(_dataRate == TRX_RATE_110KBPS) {
 				DWM1000Utils::writeValueToBytes(drxtune0b, 0x0016, LEN_DRX_TUNE0b);
@@ -144,7 +144,7 @@ namespace DWM1000 {
 		}
 
 		/* DRX_TUNE1a - reg:0x27, sub-reg:0x04, table 31 */
-		void drxtune1a() {
+		void _drxtune1a() {
 			byte drxtune1a[LEN_DRX_TUNE1a];
 			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 				DWM1000Utils::writeValueToBytes(drxtune1a, 0x0087, LEN_DRX_TUNE1a);
@@ -157,7 +157,7 @@ namespace DWM1000 {
 		}
 
 		/* DRX_TUNE1b - reg:0x27, sub-reg:0x06, table 32 */
-		void drxtune1b() {
+		void _drxtune1b() {
 			byte drxtune1b[LEN_DRX_TUNE1b];
 			if(_preambleLength == TX_PREAMBLE_LEN_1536 || _preambleLength == TX_PREAMBLE_LEN_2048 ||
 				_preambleLength == TX_PREAMBLE_LEN_4096) {
@@ -183,7 +183,7 @@ namespace DWM1000 {
 		}
 
 		/* DRX_TUNE2 - reg:0x27, sub-reg:0x08, table 33 */
-		void drxtune2() {
+		void _drxtune2() {
 			byte drxtune2[LEN_DRX_TUNE2];	
 			if(_pacSize == PAC_SIZE_8) {
 				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
@@ -224,7 +224,7 @@ namespace DWM1000 {
 		}
 
 		/* DRX_TUNE4H - reg:0x27, sub-reg:0x26, table 34 */
-		void drxtune4H() {
+		void _drxtune4H() {
 			byte drxtune4H[LEN_DRX_TUNE4H];
 			if(_preambleLength == TX_PREAMBLE_LEN_64) {
 				DWM1000Utils::writeValueToBytes(drxtune4H, 0x0010, LEN_DRX_TUNE4H);
@@ -235,14 +235,14 @@ namespace DWM1000 {
 		}
 
 		/* LDE_CFG1 - reg 0x2E, sub-reg:0x0806 */
-		void ldecfg1() {
+		void _ldecfg1() {
 			byte ldecfg1[LEN_LDE_CFG1];
 			_nlos == true ? DWM1000Utils::writeValueToBytes(ldecfg1, 0x7, LEN_LDE_CFG1) : DWM1000Utils::writeValueToBytes(ldecfg1, 0xD, LEN_LDE_CFG1);
 			writeBytes(LDE_IF, LDE_CFG1_SUB, ldecfg1, LEN_LDE_CFG1);
 		}
 
 		/* LDE_CFG2 - reg 0x2E, sub-reg:0x1806, table 50 */
-		void ldecfg2() {
+		void _ldecfg2() {
 			byte ldecfg2[LEN_LDE_CFG2];	
 			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 				_nlos == true ? DWM1000Utils::writeValueToBytes(ldecfg2, 0x0003, LEN_LDE_CFG2) : DWM1000Utils::writeValueToBytes(ldecfg2, 0x1607, LEN_LDE_CFG2);
@@ -255,7 +255,7 @@ namespace DWM1000 {
 		}
 
 		/* LDE_REPC - reg 0x2E, sub-reg:0x2804, table 51 */
-		void lderepc() {
+		void _lderepc() {
 			byte lderepc[LEN_LDE_REPC];
 			if(_preambleCode == PREAMBLE_CODE_16MHZ_1 || _preambleCode == PREAMBLE_CODE_16MHZ_2) {
 				if(_dataRate == TRX_RATE_110KBPS) {
@@ -338,7 +338,7 @@ namespace DWM1000 {
 
 		/* TX_POWER (enabled smart transmit power control) - reg:0x1E, tables 19-20
 		* These values are based on a typical IC and an assumed IC to antenna loss of 1.5 dB with a 0 dBi antenna */
-		void txpower() {
+		void _txpowertune() {
 			byte txpower[LEN_TX_POWER];
 			if(_channel == CHANNEL_1 || _channel == CHANNEL_2) {
 				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
@@ -427,7 +427,7 @@ namespace DWM1000 {
 		}
 
 		/* RF_RXCTRLH - reg:0x28, sub-reg:0x0B, table 37 */
-		void rfrxctrlh() {
+		void _rfrxctrlh() {
 			byte rfrxctrlh[LEN_RF_RXCTRLH];
 			if(_channel != CHANNEL_4 && _channel != CHANNEL_7) {
 				DWM1000Utils::writeValueToBytes(rfrxctrlh, 0xD8, LEN_RF_RXCTRLH);
@@ -438,7 +438,7 @@ namespace DWM1000 {
 		}
 
 		/* RX_TXCTRL - reg:0x28, sub-reg:0x0C */
-		void rftxctrl() {
+		void _rftxctrl() {
 			byte rftxctrl[LEN_RF_TXCTRL];
 			if(_channel == CHANNEL_1) {
 				DWM1000Utils::writeValueToBytes(rftxctrl, 0x00005C40L, LEN_RF_TXCTRL);
@@ -459,7 +459,7 @@ namespace DWM1000 {
 		}
 
 		/* TC_PGDELAY - reg:0x2A, sub-reg:0x0B, table 40 */
-		void tcpgdelay() {
+		void _tcpgdelaytune() {
 			byte tcpgdelay[LEN_TC_PGDELAY];	
 			if(_channel == CHANNEL_1) {
 				DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC9, LEN_TC_PGDELAY);
@@ -480,7 +480,7 @@ namespace DWM1000 {
 		}
 
 		// FS_PLLCFG and FS_PLLTUNE - reg:0x2B, sub-reg:0x07-0x0B, tables 43-44
-		void fspll() {
+		void _fspll() {
 			byte fspllcfg[LEN_FS_PLLCFG];
 			byte fsplltune[LEN_FS_PLLTUNE];
 			if(_channel == CHANNEL_1) {
@@ -505,7 +505,7 @@ namespace DWM1000 {
 		/* Crystal calibration from OTP (if available)
 		* FS_XTALT - reg:0x2B, sub-reg:0x0E
 		* OTP(one-time-programmable) memory map - table 10 */
-		void fsxtalt() {
+		void _fsxtalt() {
 			byte fsxtalt[LEN_FS_XTALT];
 			byte buf_otp[4];
 			readBytesOTP(0x01E, buf_otp); //0x01E -> byte[0]=XTAL_Trim
@@ -519,65 +519,61 @@ namespace DWM1000 {
 			writeBytes(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
 		}
 
-		void tune() {
+		void _tune() {
 			// these registers are going to be tuned/configured
-			agctune1();
-			agctune2();
-			agctune3();
-			drxtune0b();
-			drxtune1a();
-			drxtune1b();
-			drxtune2();
-			drxtune4H();
-			ldecfg1();
-			ldecfg2();
-			lderepc(); 
-			if(_autoTXPower) txpower();
-			rfrxctrlh();
-			rftxctrl();
-			if(_autoTCPGDelay) tcpgdelay();
-			fspll();
-			fsxtalt();
+			_agctune1();
+			_agctune2();
+			_agctune3();
+			_drxtune0b();
+			_drxtune1a();
+			_drxtune1b();
+			_drxtune2();
+			_drxtune4H();
+			_ldecfg1();
+			_ldecfg2();
+			_lderepc(); 
+			if(_autoTXPower) _txpowertune();
+			_rfrxctrlh();
+			_rftxctrl();
+			if(_autoTCPGDelay) _tcpgdelaytune();
+			_fspll();
+			_fsxtalt();
 		}
 
-		void writeNetworkIdAndDeviceAddress() {
-			writeBytes(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
-		}
-
-		void writeSystemConfigurationRegister() {
+		void _writeSystemConfigurationRegister() {
 			writeBytes(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
 		}
 
-		void writeChannelControlRegister() {
+		void _writeChannelControlRegister() {
 			writeBytes(CHAN_CTRL, NO_SUB, _chanctrl, LEN_CHAN_CTRL);
 		}
 
-		void writeTransmitFrameControlRegister() {
+		void _writeTransmitFrameControlRegister() {
 			writeBytes(TX_FCTRL, NO_SUB, _txfctrl, LEN_TX_FCTRL);
 		}
 
-		void writeSystemEventMaskRegister() {
+		void _writeSystemEventMaskRegister() {
 			writeBytes(SYS_MASK, NO_SUB, _sysmask, LEN_SYS_MASK);
 		}
 
-		void writeAntennaDelayRegisters() {
+		void _writeAntennaDelayRegisters() {
 			byte antennaDelayBytes[DWM1000Time::LENGTH_TIMESTAMP];
 			_antennaDelay.getTimestamp(antennaDelayBytes);
 			writeBytes(TX_ANTD, NO_SUB, antennaDelayBytes, LEN_TX_ANTD);
 			writeBytes(LDE_IF, LDE_RXANTD_SUB, antennaDelayBytes, LEN_LDE_RXANTD);
 		}
 
-		void writeConfiguration() {
+		void _writeConfiguration() {
 			// write all configurations back to device
 			writeNetworkIdAndDeviceAddress();
-			writeSystemConfigurationRegister();
-			writeChannelControlRegister();
-			writeTransmitFrameControlRegister();
-			writeSystemEventMaskRegister();
-			writeAntennaDelayRegisters();
+			_writeSystemConfigurationRegister();
+			_writeChannelControlRegister();
+			_writeTransmitFrameControlRegister();
+			_writeSystemEventMaskRegister();
+			_writeAntennaDelayRegisters();
 		}
 
-		void manageLDE() {
+		void _manageLDE() {
 			// transfer any ldo tune values
 			byte ldoTune[LEN_OTP_RDAT];
 			readBytesOTP(0x04, ldoTune); // TODO #define
@@ -604,7 +600,7 @@ namespace DWM1000 {
 			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
 		}
 
-		void useDecawaveSFD() {
+		void _useDecawaveSFD() {
 			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
 			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
 			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
@@ -623,7 +619,7 @@ namespace DWM1000 {
 			}
 		}
 
-		void useStandardSFD() {
+		void _useStandardSFD() {
 			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
 			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
 			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
@@ -642,7 +638,7 @@ namespace DWM1000 {
 			}
 		}
 
-		void useRecommendedSFD() {
+		void _useRecommendedSFD() {
 			/* SFD mode and types recommended by DW1000 User manual for optimal performance */
 			switch(_dataRate) {
 				case TRX_RATE_6800KBPS:
@@ -668,7 +664,7 @@ namespace DWM1000 {
 			}
 		}
 
-		void enableClock(byte clock) {
+		void _enableClock(byte clock) {
 			byte pmscctrl0[LEN_PMSC_CTRL0];
 			memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
 			readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
@@ -697,17 +693,17 @@ namespace DWM1000 {
 		
 		/* interrupt state handling */
 		
-		void clearInterrupts() {
+		void _clearInterrupts() {
 			memset(_sysmask, 0, LEN_SYS_MASK);
 		}
 
-		void clearAllStatus() {
+		void _clearAllStatus() {
 			//Latched bits in status register are reset by writing 1 to them
 			memset(_sysstatus, 0xff, LEN_SYS_STATUS);
 			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
-		void clearReceiveStatus() {
+		void _clearReceiveStatus() {
 			// clear latched RX bits (i.e. write 1 to clear)
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXDFR_BIT, true);
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEDONE_BIT, true);
@@ -719,12 +715,12 @@ namespace DWM1000 {
 			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
-		void clearReceiveTimestampAvailableStatus() {
+		void _clearReceiveTimestampAvailableStatus() {
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEDONE_BIT, true);
 			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
-		void clearTransmitStatus() {
+		void _clearTransmitStatus() {
 			// clear latched TX bits
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, TXFRB_BIT, true);
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, TXPRS_BIT, true);
@@ -735,78 +731,78 @@ namespace DWM1000 {
 
 		/* Internal helpers to read configuration */
 
-		void readSystemConfigurationRegister() {
+		void _readSystemConfigurationRegister() {
 			readBytes(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
 		}
 
-		void readSystemEventStatusRegister() {
+		void _readSystemEventStatusRegister() {
 			readBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
-		void readNetworkIdAndDeviceAddress() {
+		void _readNetworkIdAndDeviceAddress() {
 			readBytes(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
 		}
 
-		void readSystemEventMaskRegister() {
+		void _readSystemEventMaskRegister() {
 			readBytes(SYS_MASK, NO_SUB, _sysmask, LEN_SYS_MASK);
 		}
 
-		void readChannelControlRegister() {
+		void _readChannelControlRegister() {
 			readBytes(CHAN_CTRL, NO_SUB, _chanctrl, LEN_CHAN_CTRL);
 		}
 
-		void readTransmitFrameControlRegister() {
+		void _readTransmitFrameControlRegister() {
 			readBytes(TX_FCTRL, NO_SUB, _txfctrl, LEN_TX_FCTRL);
 		}
 
-		void handleInterrupt() {
+		void _handleInterrupt() {
 			// read current status and handle via callbacks
-			readSystemEventStatusRegister();
+			_readSystemEventStatusRegister();
 			if(isClockProblem() /* TODO and others */ && _handleError != 0) {
 				(*_handleError)();
 			}
 			if(isTransmitDone() && _handleSent != 0) {
 				(*_handleSent)();
-				clearTransmitStatus();
+				_clearTransmitStatus();
 			}
 			if(isReceiveTimestampAvailable() && _handleReceiveTimestampAvailable != 0) {
 				(*_handleReceiveTimestampAvailable)();
-				clearReceiveTimestampAvailableStatus();
+				_clearReceiveTimestampAvailableStatus();
 			}
 			if(isReceiveFailed() && _handleReceiveFailed != 0) {
 				(*_handleReceiveFailed)();
-				clearReceiveStatus();
+				_clearReceiveStatus();
 				if(_permanentReceive) {
 					newReceive();
 					startReceive();
 				}
 			} else if(isReceiveTimeout() && _handleReceiveTimeout != 0) {
 				(*_handleReceiveTimeout)();
-				clearReceiveStatus();
+				_clearReceiveStatus();
 				if(_permanentReceive) {
 					newReceive();
 					startReceive();
 				}
 			} else if(isReceiveDone() && _handleReceived != 0) {
 				(*_handleReceived)();
-				clearReceiveStatus();
+				_clearReceiveStatus();
 				if(_permanentReceive) {
 					newReceive();
 					startReceive();
 				}
 			}
 			// clear all status that is left unhandled
-			clearAllStatus();
+			_clearAllStatus();
 		}
 
-		void disableSequencing() {
-            enableClock(SYS_XTI_CLOCK);
+		void _disableSequencing() {
+            _enableClock(SYS_XTI_CLOCK);
             byte zero[2];
             DWM1000Utils::writeValueToBytes(zero, 0x0000, 2);
             writeBytes(PMSC, PMSC_CTRL1_SUB, zero, 2); // To re-enable write 0xE7
         }
 
-        void configureRFTransmitPowerSpectrumTestMode() {
+        void _configureRFTransmitPowerSpectrumTestMode() {
 			/* Enabled TXFEN, PLLFEN, LDOFEN and set TXRXSW to TX */
             byte enable_mask[4];
             DWM1000Utils::writeValueToBytes(enable_mask, 0x005FFF00, LEN_RX_CONF_SUB);
@@ -827,16 +823,16 @@ namespace DWM1000 {
 		_irq        = irq;
 		_deviceMode = IDLE_MODE;
 		// attach interrupt
-		//attachInterrupt(_irq, handleInterrupt, CHANGE);
+		//attachInterrupt(_irq, _handleInterrupt, CHANGE);
 		// TODO throw error if pin is not a interrupt pin
-		attachInterrupt(digitalPinToInterrupt(_irq), handleInterrupt, RISING);
+		attachInterrupt(digitalPinToInterrupt(_irq), _handleInterrupt, RISING);
 	}
 
 	void select(uint8_t ss) {
 		reselect(ss);
 		// try locking clock at PLL speed (should be done already,
 		// but just to be sure)
-		enableClock(SYS_AUTO_CLOCK);
+		_enableClock(SYS_AUTO_CLOCK);
 		delay(5);
 		// reset chip (either soft or hard)
 		if(_rst != 0xff) {
@@ -851,16 +847,16 @@ namespace DWM1000 {
 		memset(_syscfg, 0, LEN_SYS_CFG);
 		setDoubleBuffering(false);
 		setInterruptPolarity(true);
-		writeSystemConfigurationRegister();
+		_writeSystemConfigurationRegister();
 		// default interrupt mask, i.e. no interrupts
-		clearInterrupts();
-		writeSystemEventMaskRegister();
+		_clearInterrupts();
+		_writeSystemEventMaskRegister();
 		// load LDE micro-code
-		enableClock(SYS_XTI_CLOCK);
+		_enableClock(SYS_XTI_CLOCK);
 		delay(5);
-		manageLDE();
+		_manageLDE();
 		delay(5);
-		enableClock(SYS_AUTO_CLOCK);
+		_enableClock(SYS_AUTO_CLOCK);
 		delay(5);
 		
 		// read the temp and vbat readings from OTP that were recorded during production test
@@ -1124,22 +1120,26 @@ namespace DWM1000 {
 		_networkAndAddress[1] = (byte)((val >> 8) & 0xFF);
 	}
 
+	void writeNetworkIdAndDeviceAddress() {
+		writeBytes(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
+	}
+
 	void getTemp(float& temp) {
-		vbatAndTempSteps();
+		_vbatAndTempSteps();
 		byte sar_ltemp = 0; readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
 		temp = (sar_ltemp - _tmeas23C) * 1.14f + 23.0f;
 	}
 
 
 	void getVbat(float& vbat) {
-		vbatAndTempSteps();
+		_vbatAndTempSteps();
 		byte sar_lvbat = 0; readBytes(TX_CAL, 0x03, &sar_lvbat, 1);
 		vbat = (sar_lvbat - _vmeas3v3) / 173.0f + 3.3f;
 	}
 
 	void getTempAndVbat(float& temp, float& vbat) {
 		// follow the procedure from section 6.4 of the User Manual
-		vbatAndTempSteps();
+		_vbatAndTempSteps();
 		byte sar_lvbat = 0; readBytes(TX_CAL, 0x03, &sar_lvbat, 1);
 		byte sar_ltemp = 0; readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
 		
@@ -1253,7 +1253,7 @@ namespace DWM1000 {
 	void newReceive() {
 		idle();
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
-		clearReceiveStatus();
+		_clearReceiveStatus();
 		_deviceMode = RX_MODE;
 	}
 
@@ -1266,12 +1266,12 @@ namespace DWM1000 {
 	void newTransmit() {
 		idle();
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
-		clearTransmitStatus();
+		_clearTransmitStatus();
 		_deviceMode = TX_MODE;
 	}
 
 	void startTransmit() {
-		writeTransmitFrameControlRegister();
+		_writeTransmitFrameControlRegister();
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, SFCST_BIT, !_frameCheck);
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXSTRT_BIT, true);
 		writeBytes(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
@@ -1286,18 +1286,18 @@ namespace DWM1000 {
 
 	void newConfiguration() {
 		idle();
-		readNetworkIdAndDeviceAddress();
-		readSystemConfigurationRegister();
-		readChannelControlRegister();
-		readTransmitFrameControlRegister();
-		readSystemEventMaskRegister();
+		_readNetworkIdAndDeviceAddress();
+		_readSystemConfigurationRegister();
+		_readChannelControlRegister();
+		_readTransmitFrameControlRegister();
+		_readSystemEventMaskRegister();
 	}
 
 	void commitConfiguration() {
 		// writes configuration to registers
-		writeConfiguration();
+		_writeConfiguration();
 		// tune according to configuration
-		tune();
+		_tune();
 	}
 
 	void waitForResponse(boolean val) {
@@ -1359,10 +1359,10 @@ namespace DWM1000 {
 	}
 
 	void enableTransmitPowerSpectrumTestMode(int32_t repeat_interval) {
-        disableSequencing();
-        configureRFTransmitPowerSpectrumTestMode();
-        enableClock(SYS_PLL_CLOCK);
-        enableClock(TX_PLL_CLOCK);
+        _disableSequencing();
+        _configureRFTransmitPowerSpectrumTestMode();
+        _enableClock(SYS_PLL_CLOCK);
+        _enableClock(TX_PLL_CLOCK);
 
         if(repeat_interval < 4) 
             repeat_interval = 4;
@@ -1463,13 +1463,13 @@ namespace DWM1000 {
 	void setSFDMode(SFDMode mode) {
 		switch(mode) {
 			case SFDMode::STANDARD_SFD:
-				_currentSFDMode = useStandardSFD;
+				_currentSFDMode = _useStandardSFD;
 				break;
 			case SFDMode::DECAWAVE_SFD:
-				_currentSFDMode = useDecawaveSFD;
+				_currentSFDMode = _useDecawaveSFD;
 				break;
 			case SFDMode::RECOMMENDED_SFD:
-				_currentSFDMode = useRecommendedSFD;
+				_currentSFDMode = _useRecommendedSFD;
 				break;
 			default:
 				return; //TODO Proper error handling
@@ -1490,7 +1490,7 @@ namespace DWM1000 {
 		if(val) {
 			// in case permanent, also reenable receiver once failed
 			setReceiverAutoReenable(true);
-			writeSystemConfigurationRegister();
+			_writeSystemConfigurationRegister();
 		}
 	}
 
