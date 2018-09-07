@@ -5,7 +5,7 @@
 <br/>
 <div align="center">
 
-### Arduino driver for Decawave's [DWM1000](http://www.decawave.com/products/dwm1000-module) module.
+### Arduino library to use Decawave's [DWM1000](http://www.decawave.com/products/dwm1000-module) module.
 
 ![c++11](https://img.shields.io/badge/C%2B%2B-11-brightgreen.svg)
 </div>
@@ -27,4 +27,4 @@ Check examples for basic usage.
 
 License
 -------
-Apache License 2.0 (see [LICENSE.md](https://github.com/F-Army/arduino-dwm1000/blob/master/LICENSE.md))
+GNU General Public License 3.0 (see [LICENSE.md](https://github.com/F-Army/arduino-dwm1000/blob/master/LICENSE.md))
