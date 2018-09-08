@@ -812,6 +812,10 @@ namespace DWM1000 {
 			_clearAllStatus();
 		}
 
+		void _setInterruptPolarity(boolean val) {
+			DWM1000Utils::setBit(_syscfg, LEN_SYS_CFG, HIRQ_POL_BIT, val);
+		}
+
 		void _disableSequencing() {
             _enableClock(SYS_XTI_CLOCK);
             byte zero[2];
@@ -863,7 +867,7 @@ namespace DWM1000 {
 		// default system configuration
 		memset(_syscfg, 0, LEN_SYS_CFG);
 		setDoubleBuffering(false);
-		setInterruptPolarity(true);
+		_setInterruptPolarity(true);
 		_writeSystemConfigurationRegister();
 		// default interrupt mask, i.e. no interrupts
 		_clearInterrupts();
@@ -1214,10 +1218,6 @@ namespace DWM1000 {
 
 	void setDoubleBuffering(boolean val) {
 		DWM1000Utils::setBit(_syscfg, LEN_SYS_CFG, DIS_DRXB_BIT, !val);
-	}
-
-	void setInterruptPolarity(boolean val) {
-		DWM1000Utils::setBit(_syscfg, LEN_SYS_CFG, HIRQ_POL_BIT, val);
 	}
 
 	void setReceiverAutoReenable(boolean val) {

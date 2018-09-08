@@ -194,16 +194,6 @@ namespace DWM1000 {
 	void setReceiverAutoReenable(boolean val);
 	
 	/** 
-	Specifies the interrupt polarity of the DWM1000 chip. 
-
-	As part of `setDefaults()` if the device is in idle mode, interrupt polarity is set to 
-	active high.
-
-	@param[in] val `true` for active high interrupts, `false` for active low interrupts.
-	*/
-	void setInterruptPolarity(boolean val);
-	
-	/** 
 	Specifies whether to suppress any frame check measures while sending or receiving messages.
 	If suppressed, no 2-byte checksum is appended to the message before sending and this 
 	checksum is also not expected at receiver side. Note that when suppressing frame checks, 
