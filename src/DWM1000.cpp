@@ -100,7 +100,7 @@ namespace DWM1000 {
 		boolean     _nlos = false;
 		boolean     _autoTXPower = true;
 		boolean     _autoTCPGDelay = true;
-		DWM1000Time _antennaDelay((int64_t) 16384);
+		DWM1000Time _antennaDelay;
 
 		/* SPI relative variables */
 		const SPISettings  _fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
@@ -1607,6 +1607,7 @@ namespace DWM1000 {
 			// TODO add channel and code to mode tuples
 			// TODO add channel and code settings with checks (see DWM1000 user manual 10.5 table 61)/
 			setChannel(CHANNEL_5);
+			setAntennaDelay(16384);
 			// default mode when powering up the chip
 			// still explicitly selected for later tuning
 			enableMode(MODE_SHORTRANGE_LOWPRF_MEDIUMPREAMBLE);
