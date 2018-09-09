@@ -251,7 +251,7 @@ void loop() {
                     accuracyCounter++;
                 } else {
                     accuracyCounter = 0;
-                    antenna_delay += (distance > EXPECTED_RANGE) ? -ANTENNA_DELAY_STEPS : ANTENNA_DELAY_STEPS;
+                    antenna_delay += (distance > EXPECTED_RANGE) ? ANTENNA_DELAY_STEPS : -ANTENNA_DELAY_STEPS;
                     DWM1000::setAntennaDelay(antenna_delay);
                     DWM1000::commitConfiguration();
                 }
