@@ -247,7 +247,7 @@ void loop() {
                 computeRangeAsymmetric(); // CHOSEN RANGING ALGORITHM
                 transmitRangeReport(timeComputedRange.getAsMicroSeconds());
                 float distance = timeComputedRange.getAsMeters();
-                if(distance >= (EXPECTED_RANGE - EXPECTED_RANGE_EPSILON) || distance <= (EXPECTED_RANGE + EXPECTED_RANGE_EPSILON)) {
+                if(distance >= (EXPECTED_RANGE - EXPECTED_RANGE_EPSILON) && distance <= (EXPECTED_RANGE + EXPECTED_RANGE_EPSILON)) {
                     accuracyCounter++;
                 } else {
                     accuracyCounter = 0;
