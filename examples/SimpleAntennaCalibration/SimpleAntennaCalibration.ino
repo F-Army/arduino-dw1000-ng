@@ -257,7 +257,9 @@ void loop() {
                 }
 
                 if(accuracyCounter == ACCURACY_THRESHOLD) {
-                    Serial.println("Found Antenna Delay value (Divide by two if necessary): %d", antenna_delay);
+                    Serial.print("Found Antenna Delay value (Divide by two if necessary): ");
+                    Serial.println(antenna_delay);
+                    delay(10000);
                 }
                 Serial.print("Range: "); Serial.print(distance); Serial.print(" m");
                 Serial.print("\t RX power: "); Serial.print(DWM1000::getReceivePower()); Serial.print(" dBm");
