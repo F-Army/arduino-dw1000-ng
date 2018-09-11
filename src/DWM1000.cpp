@@ -1280,6 +1280,11 @@ namespace DWM1000 {
 		writeBytes(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
 	}
 
+	void startReceiveDelayed() {
+		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, RXDLYS_BIT, true);
+		startReceive();
+	}
+
 	void newTransmit() {
 		idle();
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
@@ -1299,6 +1304,11 @@ namespace DWM1000 {
 		} else {
 			_deviceMode = IDLE_MODE;
 		}
+	}
+
+	void startTransmitDelayed() {
+		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXDLYS_BIT, true);
+		startTransmit();
 	}
 
 	void newConfiguration() {
@@ -1396,14 +1406,6 @@ namespace DWM1000 {
     }
 
 	DWM1000Time setDelay(uint16_t delayUS) {
-		if(_deviceMode == TX_MODE) {
-			DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXDLYS_BIT, true);
-		} else if(_deviceMode == RX_MODE) {
-			DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, RXDLYS_BIT, true);
-		} else {
-			// in idle, ignore
-			return DWM1000Time();
-		}
 		byte delayBytes[LEN_DX_TIME];
 		DWM1000Time futureTime;
 		DWM1000Time delayTime = DWM1000Time(delayUS, DWM1000Time::MICROSECONDS);

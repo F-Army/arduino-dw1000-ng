@@ -348,10 +348,12 @@ namespace DWM1000 {
 	// reception state
 	void newReceive();
 	void startReceive();
+	void startReceiveDelayed();
 	
 	// transmission state
 	void newTransmit();
 	void startTransmit();
+	void startTransmitDelayed();
 	
 	/* ##### Operation mode selection ############################################ */
 	/** 
