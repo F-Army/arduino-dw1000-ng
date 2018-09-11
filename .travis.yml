@@ -16,6 +16,7 @@ env:
     - PLATFORMIO_CI_SRC=examples/TwoWayRangingResponder/TwoWayRangingResponder.ino
     - PLATFORMIO_CI_SRC=examples/TwoWayRangingInitiator/TwoWayRangingInitiator.ino
     - PLATFORMIO_CI_SRC=examples/TimestampUsageTest/TimestampUsageTest.ino
+    - PLATFORMIO_CI_SRC=examples/SimpleAntennaCalibration/SimpleAntennaCalibration.ino
     - PLATFORMIO_CI_SRC=examples/TransmitSpectrumPowerCalibrationTest/TransmitSpectrumPowerCalibrationTest.ino
     - PLATFORMIO_CI_SRC=examples/TwoWayRangingInitiatorDevice/TwoWayRangingInitiatorDevice.ino
     - PLATFORMIO_CI_SRC=examples/TwoWayRangingResponderDevice/TwoWayRangingResponderDevice.ino
