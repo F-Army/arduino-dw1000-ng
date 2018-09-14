@@ -1286,7 +1286,6 @@ namespace DWM1000 {
 	}
 
 	void newTransmit() {
-		forceIdle();
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
 		_clearTransmitStatus();
 		_deviceMode = TX_MODE;
