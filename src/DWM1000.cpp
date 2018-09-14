@@ -1265,7 +1265,6 @@ namespace DWM1000 {
 	}
 
 	void newReceive() {
-		forceIdle();
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
 		_clearReceiveStatus();
 	}
@@ -1626,7 +1625,7 @@ namespace DWM1000 {
 	// TODO reorder
 	uint16_t getDataLength() {
 		uint16_t len = 0;
-		
+
 		// 10 bits of RX frame control register
 		byte rxFrameInfo[LEN_RX_FINFO];
 		readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
