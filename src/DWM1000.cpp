@@ -1005,7 +1005,7 @@ namespace DWM1000 {
 			pinMode(_rst, INPUT);
 			delay(10); // dwm1000 data sheet v1.2 page 5: nominal 3 ms, to be safe take more time
 			// force into idle mode (although it should be already after reset)
-			idle();
+			forceIdle();
 		}
 	}
 
@@ -1021,7 +1021,7 @@ namespace DWM1000 {
 		pmscctrl0[3] = 0xF0;
 		writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 		// force into idle mode
-		idle();
+		forceIdle();
 	}
 
 	void enableMode(const byte mode[]) {
@@ -1260,7 +1260,7 @@ namespace DWM1000 {
 		return static_cast<uint16_t>(_antennaDelay.getTimestamp());
 	}
 
-	void idle() {
+	void forceIdle() {
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TRXOFF_BIT, true);
 		_deviceMode = IDLE_MODE;
@@ -1268,7 +1268,7 @@ namespace DWM1000 {
 	}
 
 	void newReceive() {
-		idle();
+		forceIdle();
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
 		_clearReceiveStatus();
 		_deviceMode = RX_MODE;
@@ -1286,7 +1286,7 @@ namespace DWM1000 {
 	}
 
 	void newTransmit() {
-		idle();
+		forceIdle();
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
 		_clearTransmitStatus();
 		_deviceMode = TX_MODE;
@@ -1312,7 +1312,7 @@ namespace DWM1000 {
 	}
 
 	void newConfiguration() {
-		idle();
+		forceIdle();
 		_readNetworkIdAndDeviceAddress();
 		_readSystemConfigurationRegister();
 		_readChannelControlRegister();

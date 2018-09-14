@@ -38,7 +38,7 @@ public:
     void setTransmitHandler(void (* handleSent)(void));
     void setReceiveHandler(void (* handleReceived)(void));
 
-    void idle();
+    void forceIdle();
     void receive();
     void transmit(byte data[], uint16_t dataLength);
     void transmitDelayed(byte data[], uint16_t dataLength);

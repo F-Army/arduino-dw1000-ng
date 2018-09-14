@@ -91,8 +91,8 @@ DWM1000Time DWM1000Device::setTransmitDelay(uint16_t delayUs) {
     return DWM1000::setDelay(delayUs);
 }
 
-void DWM1000Device::idle() {
-    DWM1000::idle();
+void DWM1000Device::forceIdle() {
+    DWM1000::forceIdle();
 }
 
 void DWM1000Device::receive() {

@@ -338,7 +338,7 @@ namespace DWM1000 {
 	
 	/* device state management. */
 	// idle state
-	void idle();
+	void forceIdle();
 	
 	// general configuration state
 	void newConfiguration();
