@@ -105,6 +105,7 @@ void setup() {
     dwm.setReceiveHandler(handleReceived);
     // anchor starts in receiving mode, awaiting a ranging poll message
     dwm.receive();
+    dwm.setPermanentReceiveMode(true);
     noteActivity();
     // for first time ranging frequency computation
     rangingCountPeriod = millis();
