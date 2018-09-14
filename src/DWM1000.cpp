@@ -1265,6 +1265,7 @@ namespace DWM1000 {
 	}
 
 	void newReceive() {
+		forceIdle();
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
 		_clearReceiveStatus();
 	}
