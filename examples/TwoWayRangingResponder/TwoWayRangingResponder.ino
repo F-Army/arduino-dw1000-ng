@@ -154,7 +154,7 @@ void transmitPollAck() {
     // delay the same amount as ranging tag
     DWM1000::setDelay(replyDelayTimeUS);
     DWM1000::setData(data, LEN_DATA);
-    DWM1000::startTransmitDelayed();
+    DWM1000::startTransmit(TransmitMode::DELAYED);
 }
 
 void transmitRangeReport(float curRange) {

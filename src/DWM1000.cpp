@@ -1292,9 +1292,11 @@ namespace DWM1000 {
 		_deviceMode = TX_MODE;
 	}
 
-	void startTransmit() {
+	void startTransmit(TransmitMode mode) {
 		_writeTransmitFrameControlRegister();
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, SFCST_BIT, !_frameCheck);
+		if(mode == TransmitMode::DELAYED)
+			DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXDLYS_BIT, true);
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXSTRT_BIT, true);
 		writeBytes(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
 		if(_permanentReceive) {
@@ -1304,11 +1306,6 @@ namespace DWM1000 {
 		} else {
 			_deviceMode = IDLE_MODE;
 		}
-	}
-
-	void startTransmitDelayed() {
-		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXDLYS_BIT, true);
-		startTransmit();
 	}
 
 	void newConfiguration() {

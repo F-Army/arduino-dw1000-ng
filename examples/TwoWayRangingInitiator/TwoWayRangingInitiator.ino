@@ -150,7 +150,7 @@ void transmitRange() {
     timePollAckReceived.getTimestamp(data + 6);
     timeRangeSent.getTimestamp(data + 11);
     DWM1000::setData(data, LEN_DATA);
-    DWM1000::startTransmitDelayed();
+    DWM1000::startTransmit(TransmitMode::DELAYED);
     //Serial.print("Expect RANGE to be sent @ "); Serial.println(timeRangeSent.getAsFloat());
 }
 
