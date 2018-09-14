@@ -94,7 +94,6 @@ namespace DWM1000 {
 		byte        _channel;
 		boolean     _smartPower;
 		boolean     _frameCheck;
-		uint8_t     _deviceMode;
 		boolean     _permanentReceive    = false;
 		boolean     _debounceClockEnabled = false;
 		boolean     _nlos = false;
@@ -842,7 +841,6 @@ namespace DWM1000 {
 		// pin and basic member setup
 		_rst        = rst;
 		_irq        = irq;
-		_deviceMode = IDLE_MODE;
 		// attach interrupt
 		//attachInterrupt(_irq, _handleInterrupt, CHANGE);
 		// TODO throw error if pin is not a interrupt pin
@@ -1263,7 +1261,6 @@ namespace DWM1000 {
 	void forceIdle() {
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TRXOFF_BIT, true);
-		_deviceMode = IDLE_MODE;
 		writeBytes(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
 	}
 
@@ -1271,7 +1268,6 @@ namespace DWM1000 {
 		forceIdle();
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
 		_clearReceiveStatus();
-		_deviceMode = RX_MODE;
 	}
 
 	void startReceive(ReceiveMode mode) {
@@ -1281,12 +1277,11 @@ namespace DWM1000 {
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, RXENAB_BIT, true);
 		writeBytes(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
 	}
-	
+
 	void startTransmit(TransmitMode mode) {
 		forceIdle();
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
 		_clearTransmitStatus();
-		_deviceMode = TX_MODE;
 		_writeTransmitFrameControlRegister();
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, SFCST_BIT, !_frameCheck);
 		if(mode == TransmitMode::DELAYED)
@@ -1295,10 +1290,7 @@ namespace DWM1000 {
 		writeBytes(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
 		if(_permanentReceive) {
 			memset(_sysctrl, 0, LEN_SYS_CTRL);
-			_deviceMode = RX_MODE;
 			startReceive();
-		} else {
-			_deviceMode = IDLE_MODE;
 		}
 	}
 
@@ -1634,15 +1626,12 @@ namespace DWM1000 {
 	// TODO reorder
 	uint16_t getDataLength() {
 		uint16_t len = 0;
-		if(_deviceMode == TX_MODE) {
-			// 10 bits of TX frame control register
-			len = ((((uint16_t)_txfctrl[1] << 8) | (uint16_t)_txfctrl[0]) & 0x03FF);
-		} else if(_deviceMode == RX_MODE) {
-			// 10 bits of RX frame control register
-			byte rxFrameInfo[LEN_RX_FINFO];
-			readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
-			len = ((((uint16_t)rxFrameInfo[1] << 8) | (uint16_t)rxFrameInfo[0]) & 0x03FF);
-		}
+		
+		// 10 bits of RX frame control register
+		byte rxFrameInfo[LEN_RX_FINFO];
+		readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
+		len = ((((uint16_t)rxFrameInfo[1] << 8) | (uint16_t)rxFrameInfo[0]) & 0x03FF);
+		
 		if(_frameCheck && len > 2) {
 			return len-2;
 		}
