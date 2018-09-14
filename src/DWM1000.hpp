@@ -347,8 +347,7 @@ namespace DWM1000 {
 	
 	// reception state
 	void newReceive();
-	void startReceive();
-	void startReceiveDelayed();
+	void startReceive(ReceiveMode mode = ReceiveMode::IMMEDIATE);
 	
 	// transmission state
 	void startTransmit(TransmitMode mode = TransmitMode::IMMEDIATE);

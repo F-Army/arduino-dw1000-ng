@@ -1274,17 +1274,14 @@ namespace DWM1000 {
 		_deviceMode = RX_MODE;
 	}
 
-	void startReceive() {
+	void startReceive(ReceiveMode mode) {
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, SFCST_BIT, !_frameCheck);
+		if(mode == ReceiveMode::DELAYED)
+			DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, RXDLYS_BIT, true);
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, RXENAB_BIT, true);
 		writeBytes(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
 	}
-
-	void startReceiveDelayed() {
-		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, RXDLYS_BIT, true);
-		startReceive();
-	}
-
+	
 	void startTransmit(TransmitMode mode) {
 		forceIdle();
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
