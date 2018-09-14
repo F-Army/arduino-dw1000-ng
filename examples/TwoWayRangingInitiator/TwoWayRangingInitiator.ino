@@ -138,11 +138,6 @@ void transmitPoll() {
     data[0] = POLL;
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit();
-    
-    byte test[1];
-    DWM1000::readBytes(0x19, 16, test, 1);
-    Serial.print("STAT: ");
-    Serial.println(test);
 }
 
 void transmitRange() {
@@ -205,7 +200,7 @@ void loop() {
             expectedMsgId = POLL_ACK;
             float curRange;
             memcpy(&curRange, data + 1, 4);
-            transmitP   oll();
+            transmitPoll();
             noteActivity();
         } else if (msgId == RANGE_FAILED) {
             expectedMsgId = POLL_ACK;
