@@ -123,7 +123,6 @@ void handleReceiveFailed() {
 }
 
 void transmit() {
-  DWM1000::newTransmit();
   DWM1000::setData(msg);
   DWM1000::startTransmit();
 }

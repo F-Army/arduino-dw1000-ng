@@ -135,14 +135,12 @@ void handleReceived() {
 }
 
 void transmitPoll() {
-    DWM1000::newTransmit();
     data[0] = POLL;
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit();
 }
 
 void transmitRange() {
-    DWM1000::newTransmit();
     data[0] = RANGE;
     // delay sending the message and remember expected future sent timestamp
     timeRangeSent = DWM1000::setDelay(replyDelayTimeUS);

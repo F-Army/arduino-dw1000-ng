@@ -351,7 +351,6 @@ namespace DWM1000 {
 	void startReceiveDelayed();
 	
 	// transmission state
-	void newTransmit();
 	void startTransmit(TransmitMode mode = TransmitMode::IMMEDIATE);
 		
 	/* ##### Operation mode selection ############################################ */

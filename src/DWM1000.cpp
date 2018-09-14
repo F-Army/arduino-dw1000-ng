@@ -1285,14 +1285,11 @@ namespace DWM1000 {
 		startReceive();
 	}
 
-	void newTransmit() {
+	void startTransmit(TransmitMode mode) {
 		forceIdle();
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
 		_clearTransmitStatus();
 		_deviceMode = TX_MODE;
-	}
-
-	void startTransmit(TransmitMode mode) {
 		_writeTransmitFrameControlRegister();
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, SFCST_BIT, !_frameCheck);
 		if(mode == TransmitMode::DELAYED)
