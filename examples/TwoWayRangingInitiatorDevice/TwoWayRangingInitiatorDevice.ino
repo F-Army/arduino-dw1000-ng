@@ -90,6 +90,8 @@ void setup() {
     // attach callback for (successfully) sent and received messages
     dwm.setTransmitHandler(handleSent);
     dwm.setReceiveHandler(handleReceived);
+    dwm.setPermanentReceiveMode(true);
+
     transmitPoll();
     noteActivity();
 }

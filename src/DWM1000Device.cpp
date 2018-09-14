@@ -46,7 +46,6 @@ void DWM1000Device::init() {
     DWM1000::setDeviceAddress(_shortAddress);
     DWM1000::setNetworkId(_panId);
     DWM1000::commitConfiguration();
-    DWM1000::receivePermanently(true);
 }
 
 void DWM1000Device::init(uint16_t antennaDelay) {
@@ -58,7 +57,6 @@ void DWM1000Device::init(uint16_t antennaDelay) {
     DWM1000::setDeviceAddress(_shortAddress);
     DWM1000::setNetworkId(_panId);
     DWM1000::commitConfiguration();
-    DWM1000::receivePermanently(true);
 }
 
 void DWM1000Device::setShortAddress(uint16_t shortAddress) {
@@ -85,6 +83,10 @@ void DWM1000Device::setTransmitHandler(void (* handleSent)(void)) {
 
 void DWM1000Device::setReceiveHandler(void (* handleReceived)(void)) {
     DWM1000::attachReceivedHandler(handleReceived);
+}
+
+void DWM1000Device::setPermanentReceiveMode(boolean val) {
+    DWM1000::receivePermanently(val);
 }
 
 DWM1000Time DWM1000Device::setTransmitDelay(uint16_t delayUs) {
