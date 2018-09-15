@@ -721,12 +721,11 @@ namespace DWM1000 {
 		void _clearReceiveStatus() {
 			// clear latched RX bits (i.e. write 1 to clear)
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXDFR_BIT, true);
-			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEDONE_BIT, true);
-			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT, true);
-			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXPHE_BIT, true);
-			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXFCE_BIT, true);
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXFCG_BIT, true);
-			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXPRD_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXSFDD_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXPHD_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEDONE_BIT, true);
 			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 

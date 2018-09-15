@@ -105,6 +105,9 @@
 #define TXPHS_BIT 6
 #define TXFRS_BIT 7
 #define LDEDONE_BIT 10
+#define RXPRD_BIT 8
+#define RXSFDD_BIT 9
+#define RXPHD_BIT 11
 #define RXPHE_BIT 12
 #define RXDFR_BIT 13
 #define RXFCG_BIT 14
