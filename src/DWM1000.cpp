@@ -1865,11 +1865,19 @@ namespace DWM1000 {
 		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 			Serial.println("Pillola rossa");
 			A       = 113.77;
+			Serial.print("A:"); Serial.println(A);
+		Serial.print("corrFuck:"); Serial.println(corrFac);
 			corrFac = 2.3334;
+			Serial.print("A:"); Serial.println(A);
+		Serial.print("corrFuck:"); Serial.println(corrFac);
 		} else {
 			Serial.println("Pillola blu");
 			A       = 121.74;
+			Serial.print("A:"); Serial.println(A);
+		Serial.print("corrFuck:"); Serial.println(corrFac);
 			corrFac = 1.1667;
+			Serial.print("A:"); Serial.println(A);
+		Serial.print("corrFuck:"); Serial.println(corrFac);
 		}
 		Serial.print("A:"); Serial.println(A);
 		Serial.print("corrFuck:"); Serial.println(corrFac);
