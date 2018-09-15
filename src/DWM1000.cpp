@@ -812,7 +812,7 @@ namespace DWM1000 {
 					(*_handleReceiveTimestampAvailable)();
 			}
 			if(isReceiveFailed()) {
-				_clearReceiveStatus();
+				_clearReceiveFailedStatus();
 				forceTRxOff();
 				_resetReceiver();
 				if(_handleReceiveFailed != nullptr)
