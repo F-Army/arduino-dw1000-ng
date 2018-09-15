@@ -705,30 +705,6 @@ namespace DWM1000 {
 			}
 			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
 		}
-
-		uint16_t _correctN(uint16_t N) {
-			byte chanCtrl;
-			byte sfdLength;
-			readBytes(CHAN_CTRL, NO_SUB, &chanCtrl, LEN_CHAN_CTRL);
-			readBytes(USR_SFD, SFD_LENGTH_SUB, &sfdLength, LEN_SFD_LENGTH);
-			boolean SFD_is_proprietary = DWM1000Utils::getBit(&chanCtrl, LEN_CHAN_CTRL, DWSFD_BIT);
-			if(SFD_is_proprietary) {
-				switch(sfdLength) {
-					case 0x08:
-						N -= 10; break;
-					case 0x10:
-						N -= 18; break;
-					case 0x40:
-						N -= 82; break;
-					default:
-						break;
-				}
-			} else {
-				N -= (sfdLength == 0x08 ? 5 : 64);
-			}
-
-			return N;
-		}
 		
 		/* interrupt state handling */
 		
@@ -1843,63 +1819,26 @@ namespace DWM1000 {
 		readBytes(RX_FQUAL, FP_AMPL3_SUB, fpAmpl3Bytes, LEN_FP_AMPL3);
 		readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
 		f1 = (uint16_t)fpAmpl1Bytes[0] | ((uint16_t)fpAmpl1Bytes[1] << 8);
-		Serial.print("F1: "); Serial.println(f1);
 		f2 = (uint16_t)fpAmpl2Bytes[0] | ((uint16_t)fpAmpl2Bytes[1] << 8);
-		Serial.print("F2: "); Serial.println(f2);
 		f3 = (uint16_t)fpAmpl3Bytes[0] | ((uint16_t)fpAmpl3Bytes[1] << 8);
-		Serial.print("F3: "); Serial.println(f3);
 		N  = (((uint16_t)rxFrameInfo[2] >> 4) & 0xFF) | ((uint16_t)rxFrameInfo[3] << 4);
-		Serial.print("N: "); Serial.println(N);
-
-		/* Correction of N */
-		byte rxpacc_nosat[LEN_RXPACC_NOSAT];
-		uint16_t N_nosat;
-		readBytes(DRX_TUNE, RXPACC_NOSAT_SUB, rxpacc_nosat, LEN_RXPACC_NOSAT);
-		N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
-		Serial.print("NOSAT:"); Serial.println(N_nosat);
-		if(N == N_nosat) {
-			N = _correctN(N);
-		}
-
-		Serial.print("New N"); Serial.println(N);
+		
 		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-			Serial.println("Pillola rossa");
 			A       = 113.77;
-			Serial.print("A:"); Serial.println(A);
-		Serial.print("corrFuck:"); Serial.println(corrFac);
 			corrFac = 2.3334;
-			Serial.print("A:"); Serial.println(A);
-		Serial.print("corrFuck:"); Serial.println(corrFac);
 		} else {
-			Serial.println("Pillola blu");
 			A       = 121.74;
-			Serial.print("A:"); Serial.println(A);
-		Serial.print("corrFuck:"); Serial.println(corrFac);
 			corrFac = 1.1667;
-			Serial.print("A:"); Serial.println(A);
-		Serial.print("corrFuck:"); Serial.println(corrFac);
 		}
 		A = 113.77;
 		corrFac = 2.3334;
-		Serial.print("A:"); Serial.println(A);
-		Serial.print("corrFuck:"); Serial.println(corrFac);
 		float estFpPwr = 10.0*log10(((float)f1*(float)f1+(float)f2*(float)f2+(float)f3*(float)f3)/((float)N*(float)N))-A;
-		Serial.println("OH OH DIMME:");
-		Serial.print(estFpPwr);
 		if(estFpPwr <= -88) {
-							Serial.println("Verdecchia if");
-
 			return estFpPwr;
 		} else {
-							Serial.println("Verdecchia else");
-
 			// approximation of Fig. 22 in user manual for dbm correction
 			estFpPwr += (estFpPwr+88)*corrFac;
 		}
-						Serial.println("Verdecchia madonna");
-
-		Serial.print("VALORE FINALE:");
-		Serial.println(estFpPwr);
 		return estFpPwr;
 	}
 
@@ -1913,18 +1852,6 @@ namespace DWM1000 {
 		readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
 		C = (uint16_t)cirPwrBytes[0] | ((uint16_t)cirPwrBytes[1] << 8);
 		N = (((uint16_t)rxFrameInfo[2] >> 4) & 0xFF) | ((uint16_t)rxFrameInfo[3] << 4);
-		
-		/* Correction of N */
-		byte rxpacc_nosat[LEN_RXPACC_NOSAT];
-		uint16_t N_nosat;
-		readBytes(DRX_TUNE, RXPACC_NOSAT_SUB, rxpacc_nosat, LEN_RXPACC_NOSAT);
-		N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
-		Serial.print("NOSAT:"); Serial.println(N_nosat);
-		if(N == N_nosat) {
-			N = _correctN(N);
-		}
-
-		Serial.print("New N"); Serial.println(N);
 
 		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 			A       = 113.77;
