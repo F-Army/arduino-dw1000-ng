@@ -1879,6 +1879,7 @@ namespace DWM1000 {
 			Serial.print("A:"); Serial.println(A);
 		Serial.print("corrFuck:"); Serial.println(corrFac);
 		}
+		A = 113.77;
 		Serial.print("A:"); Serial.println(A);
 		Serial.print("corrFuck:"); Serial.println(corrFac);
 		float estFpPwr = 10.0*log10(((float)f1*(float)f1+(float)f2*(float)f2+(float)f3*(float)f3)/((float)N*(float)N))-A;
