@@ -1863,9 +1863,11 @@ namespace DWM1000 {
 
 		Serial.print("New N"); Serial.println(N);
 		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+			Serial.println("Pillola rossa");
 			A       = 113.77;
 			corrFac = 2.3334;
 		} else {
+			Serial.println("Pillola blu");
 			A       = 121.74;
 			corrFac = 1.1667;
 		}
