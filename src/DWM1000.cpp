@@ -705,6 +705,28 @@ namespace DWM1000 {
 			}
 			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
 		}
+
+		void _correctN(uint16_t& N) {
+			byte chanCtrl;
+			byte sfdLength;
+			readBytes(CHAN_CTRL, NO_SUB, &chanCtrl, LEN_CHAN_CTRL);
+			readBytes(USR_SFD, SFD_LENGTH_SUB, &sfdLength, LEN_SFD_LENGTH);
+			boolean SFD_is_proprietary = DWM1000Utils::getBit(&chanCtrl, LEN_CHAN_CTRL, DWSFD_BIT);
+			if(SFD_is_proprietary) {
+				switch(sfdLength) {
+					case 0x08:
+						N -= 10; break;
+					case 0x10:
+						N -= 18; break;
+					case 0x40:
+						N -= 82; break;
+					default:
+						break;
+				}
+			} else {
+				N -= (sfdLength == 0x08 ? 5 : 64);
+			}
+		}
 		
 		/* interrupt state handling */
 		
@@ -1807,29 +1829,6 @@ namespace DWM1000 {
 		return (float)f2/noise;
 	}
 
-	static void correctN(uint16_t& N) {
-		/* Needs correction */
-		byte chanCtrl;
-		byte sfdLength;
-		readBytes(CHAN_CTRL, NO_SUB, &chanCtrl, LEN_CHAN_CTRL);
-		readBytes(USR_SFD, SFD_LENGTH_SUB, &sfdLength, LEN_SFD_LENGTH);
-		boolean SFD_is_proprietary = DWM1000Utils::getBit(&chanCtrl, LEN_CHAN_CTRL, DWSFD_BIT);
-		if(SFD_is_proprietary) {
-			switch(sfdLength) {
-				case 0x08:
-					N -= 10; break;
-				case 0x10:
-					N -= 18; break;
-				case 0x40:
-					N -= 82; break;
-				default:
-					break;
-			}
-		} else {
-			N -= (sfdLength == 0x08 ? 5 : 64);
-		}
-	}
-
 	float getFirstPathPower() {
 		byte         fpAmpl1Bytes[LEN_FP_AMPL1];
 		byte         fpAmpl2Bytes[LEN_FP_AMPL2];
@@ -1856,7 +1855,7 @@ namespace DWM1000 {
 		readBytes(DRX_TUNE, RXPACC_NOSAT_SUB, rxpacc_nosat, LEN_RXPACC_NOSAT);
 		N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
 		if(N == N_nosat) {
-			//correctN(N);
+			_correctN(N);
 		}
 
 		Serial.print("New N"); Serial.println(N);
@@ -1897,7 +1896,7 @@ namespace DWM1000 {
 		readBytes(DRX_TUNE, RXPACC_NOSAT_SUB, rxpacc_nosat, LEN_RXPACC_NOSAT);
 		N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
 		if(N == N_nosat) {
-			correctN(N);
+			_correctN(N);
 		}
 
 		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
