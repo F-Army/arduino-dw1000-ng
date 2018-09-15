@@ -92,11 +92,10 @@ void setup() {
 void handleReceived() {
   // status change on reception success
   numReceived++;
-  Serial.println(numReceived);
   // get data as string
   DWM1000::getData(message);
-  //Serial.println(message.length());
-  //Serial.print("Received message ... #"); Serial.println(numReceived);
+  Serial.println(message.length());
+  Serial.print("Received message ... #"); Serial.println(numReceived);
   //Serial.print("Data is ... "); Serial.println(message);
   //Serial.print("FP power is [dBm] ... "); Serial.println(DWM1000::getFirstPathPower());
   Serial.print("RX power is [dBm] ... "); Serial.println(DWM1000::getReceivePower());
