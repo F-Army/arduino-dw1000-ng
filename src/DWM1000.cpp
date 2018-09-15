@@ -777,9 +777,10 @@ namespace DWM1000 {
 			if(isClockProblem() /* TODO and others */ && _handleError != 0) {
 				(*_handleError)();
 			}
-			if(isTransmitDone() && _handleSent != 0) {
-				(*_handleSent)();
+			if(isTransmitDone()) {
 				_clearTransmitStatus();
+				if(_handleSent != nullptr)
+					(*_handleSent)();
 			}
 			if(isReceiveTimestampAvailable() && _handleReceiveTimestampAvailable != 0) {
 				(*_handleReceiveTimestampAvailable)();
