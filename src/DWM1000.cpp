@@ -1842,11 +1842,14 @@ namespace DWM1000 {
 		readBytes(RX_FQUAL, FP_AMPL3_SUB, fpAmpl3Bytes, LEN_FP_AMPL3);
 		readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
 		f1 = (uint16_t)fpAmpl1Bytes[0] | ((uint16_t)fpAmpl1Bytes[1] << 8);
+		Serial.print("F1: "); Serial.println(f1);
 		f2 = (uint16_t)fpAmpl2Bytes[0] | ((uint16_t)fpAmpl2Bytes[1] << 8);
+		Serial.print("F2: "); Serial.println(f2);
 		f3 = (uint16_t)fpAmpl3Bytes[0] | ((uint16_t)fpAmpl3Bytes[1] << 8);
+		Serial.print("F3: "); Serial.println(f3);
 		N  = (((uint16_t)rxFrameInfo[2] >> 4) & 0xFF) | ((uint16_t)rxFrameInfo[3] << 4);
+		Serial.print("N: "); Serial.println(N);
 
-		Serial.println("Very good #1");
 		/* Correction of N */
 		byte rxpacc_nosat[LEN_RXPACC_NOSAT];
 		uint16_t N_nosat;
@@ -1855,8 +1858,6 @@ namespace DWM1000 {
 		if(N == N_nosat) {
 			correctN(N);
 		}
-
-		Serial.println("Very good #2");
 
 		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 			A       = 113.77;
@@ -1872,7 +1873,7 @@ namespace DWM1000 {
 			// approximation of Fig. 22 in user manual for dbm correction
 			estFpPwr += (estFpPwr+88)*corrFac;
 		}
-		Serial.println("Very good #3\nPRINT:");
+		Serial.print("VALORE FINALE:");
 		Serial.println(estFpPwr);
 		return estFpPwr;
 	}
