@@ -1870,6 +1870,8 @@ namespace DWM1000 {
 			corrFac = 1.1667;
 		}
 		float estFpPwr = 10.0*log10(((float)f1*(float)f1+(float)f2*(float)f2+(float)f3*(float)f3)/((float)N*(float)N))-A;
+		Serial.println("OH OH DIMME:");
+		Serial.print(estFpPwr);
 		if(estFpPwr <= -88) {
 							Serial.println("Verdecchia if");
 
