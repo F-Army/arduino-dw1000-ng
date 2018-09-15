@@ -1858,7 +1858,7 @@ namespace DWM1000 {
 		N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
 		Serial.print("NOSAT:"); Serial.println(N_nosat);
 		if(N == N_nosat) {
-			//N = _correctN(N);
+			N = _correctN(N);
 		}
 
 		Serial.print("New N"); Serial.println(N);
