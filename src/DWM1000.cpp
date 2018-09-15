@@ -1862,6 +1862,7 @@ namespace DWM1000 {
 		}
 
 		Serial.print("New N"); Serial.println(N);
+		Serial.println("Verdecchia");
 
 		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 			A       = 113.77;
