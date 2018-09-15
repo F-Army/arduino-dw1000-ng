@@ -159,7 +159,6 @@ void transmitRangeFailed() {
 void receiver() {
     DWM1000::newReceive();
     // so we don't need to restart the receiver manually
-    DWM1000::receivePermanently(true);
     DWM1000::startReceive();
 }
 

@@ -107,7 +107,6 @@ void setup() {
     DWM1000::attachSentHandler(handleSent);
     DWM1000::attachReceivedHandler(handleReceived);
     // anchor starts by transmitting a POLL message
-    DWM1000::receivePermanently(true);
     transmitPoll();
     noteActivity();
 }

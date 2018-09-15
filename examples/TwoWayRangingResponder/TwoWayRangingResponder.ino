@@ -120,8 +120,7 @@ void setup() {
     DWM1000::attachSentHandler(handleSent);
     DWM1000::attachReceivedHandler(handleReceived);
     // anchor starts in receiving mode, awaiting a ranging poll message
-    DWM1000::receivePermanently(true);
-   
+       
     receiver();
     noteActivity();
     // for first time ranging frequency computation
