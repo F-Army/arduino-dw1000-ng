@@ -1859,6 +1859,8 @@ namespace DWM1000 {
 			correctN(N);
 		}
 
+		Serial.print("New N"); Serial.println(N);
+
 		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 			A       = 113.77;
 			corrFac = 2.3334;
