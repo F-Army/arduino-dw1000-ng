@@ -116,6 +116,7 @@
 #define LDEERR_BIT 18
 #define RFPLL_LL_BIT 24
 #define CLKPLL_LL_BIT 25
+#define AFFREJ_BIT 29
 
 // system event mask register
 // NOTE: uses the bit definitions of SYS_STATUS (below 32)

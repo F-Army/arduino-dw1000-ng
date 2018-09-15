@@ -740,6 +740,16 @@ namespace DWM1000 {
 			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
+		void _clearReceiveFailedStatus() {
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXPHE_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXFCE_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXSFDTO_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, AFFREJ_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT, true);
+			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+		}
+
 		void _clearTransmitStatus() {
 			// clear latched TX bits
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, AAT_BIT, true);
