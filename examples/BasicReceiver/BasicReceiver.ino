@@ -57,7 +57,7 @@ String message;
 
 void setup() {
   // DEBUG monitoring
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println(F("### DWM1000-arduino-receiver-test ###"));
   // initialize the driver
   DWM1000::begin(PIN_IRQ, PIN_RST);
