@@ -715,11 +715,11 @@ namespace DWM1000 {
 			if(SFD_is_proprietary) {
 				switch(sfdLength) {
 					case 0x08:
-						N -= 10; break;
+						*N -= 10; break;
 					case 0x10:
-						N -= 18; break;
+						*N -= 18; break;
 					case 0x40:
-						N -= 82; break;
+						*N -= 82; break;
 					default:
 						break;
 				}
