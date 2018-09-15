@@ -92,7 +92,7 @@ void setup() {
 void handleReceived() {
   // status change on reception success
   numReceived++;
-  Serial.println(num);
+  Serial.println(numReceived);
   // get data as string
   //DWM1000::getData(message);
   //Serial.println(message.length());
