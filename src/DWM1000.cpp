@@ -816,12 +816,14 @@ namespace DWM1000 {
 				_resetReceiver();
 				if(_handleReceiveFailed != nullptr)
 					(*_handleReceiveFailed)();
+			}
 			if(isReceiveTimeout()) {
 				_clearReceiveTimeoutStatus();
 				forceTRxOff();
 				_resetReceiver();
 				if(_handleReceiveTimeout != nullptr)
 					(*_handleReceiveTimeout)();
+			}
 			if(isReceiveDone()) {
 				_clearReceiveStatus();
 				if(_handleReceived != nullptr)
