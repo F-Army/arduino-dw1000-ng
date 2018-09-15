@@ -94,7 +94,7 @@ void handleReceived() {
   numReceived++;
   Serial.println(numReceived);
   // get data as string
-  //DWM1000::getData(message);
+  DWM1000::getData(message);
   //Serial.println(message.length());
   //Serial.print("Received message ... #"); Serial.println(numReceived);
   //Serial.print("Data is ... "); Serial.println(message);
