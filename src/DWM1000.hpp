@@ -336,20 +336,15 @@ namespace DWM1000 {
 	
 	void attachReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void));
 	
-	/* device state management. */
-	// idle state
-	void forceIdle();
+	void forceTRxOff();
 	
-	// general configuration state
 	void newConfiguration();
 
 	void commitConfiguration();
 	
-	// reception state
 	void newReceive();
 	void startReceive(ReceiveMode mode = ReceiveMode::IMMEDIATE);
 	
-	// transmission state
 	void startTransmit(TransmitMode mode = TransmitMode::IMMEDIATE);
 		
 	/* ##### Operation mode selection ############################################ */
