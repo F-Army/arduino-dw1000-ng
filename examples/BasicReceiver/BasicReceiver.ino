@@ -66,6 +66,7 @@ void setup() {
   // general configuration
   DWM1000::newConfiguration();
   DWM1000::setDefaults();
+  DWM1000::setReceiverAutoReenable(true);
   DWM1000::setDeviceAddress(6);
   DWM1000::setNetworkId(10);
   DWM1000::commitConfiguration();
@@ -83,43 +84,28 @@ void setup() {
   // attach callback for (successfully) received messages
   DWM1000::attachReceivedHandler(handleReceived);
   DWM1000::attachReceiveFailedHandler(handleError);
-  DWM1000::attachErrorHandler(handleError);
   // start reception
-  receiver();
+  DWM1000::newReceive();
+  DWM1000::startReceive();
 }
 
 void handleReceived() {
   // status change on reception success
-  received = true;
-}
-
-void handleError() {
-  error = true;
-}
-
-void receiver() {
-  DWM1000::newReceive();
-  // so we don't need to restart the receiver manually
+  numReceived++;
+  // get data as string
+  DWM1000::getData(message);
+  Serial.print("Received message ... #"); Serial.println(numReceived);
+  Serial.print("Data is ... "); Serial.println(message);
+  Serial.print("FP power is [dBm] ... "); Serial.println(DWM1000::getFirstPathPower());
+  Serial.print("RX power is [dBm] ... "); Serial.println(DWM1000::getReceivePower());
+  Serial.print("Signal quality is ... "); Serial.println(DWM1000::getReceiveQuality());
   DWM1000::startReceive();
 }
 
-void loop() {
-  // enter on confirmation of ISR status change (successfully received)
-  if (received) {
-    numReceived++;
-    // get data as string
-    DWM1000::getData(message);
-    Serial.print("Received message ... #"); Serial.println(numReceived);
-    Serial.print("Data is ... "); Serial.println(message);
-    Serial.print("FP power is [dBm] ... "); Serial.println(DWM1000::getFirstPathPower());
-    Serial.print("RX power is [dBm] ... "); Serial.println(DWM1000::getReceivePower());
-    Serial.print("Signal quality is ... "); Serial.println(DWM1000::getReceiveQuality());
-    received = false;
-  }
-  if (error) {
-    Serial.println("Error receiving a message");
-    error = false;
-    DWM1000::getData(message);
-    Serial.print("Error data is ... "); Serial.println(message);
-  }
+void handleError() {
+  Serial.println("Error receiving a message");
+  DWM1000::getData(message);
+  Serial.print("Error data is ... "); Serial.println(message);
 }
+
+void loop() { }

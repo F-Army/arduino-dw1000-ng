@@ -83,15 +83,10 @@ void setup() {
   // attach callback for (successfully) sent messages
   DWM1000::attachSentHandler(handleSent);
   // start a transmission
-  transmitter();
+  transmit();
 }
 
-void handleSent() {
-  // status change on sent success
-  sentAck = true;
-}
-
-void transmitter() {
+void transmit() {
   // transmit some data
   Serial.print("Transmitting packet ... #"); Serial.println(sentNum);
   String msg = "Hello DWM1000, it's #"; msg += sentNum;
@@ -102,14 +97,7 @@ void transmitter() {
   delaySent = millis();
 }
 
-void loop() {
-  if (!sentAck) {
-    return;
-  }
-  // continue on success confirmation
-  // (we are here after the given amount of send delay time has passed)
-  sentAck = false;
-  // update and print some information about the sent message
+void handleSent() {
   Serial.print("ARDUINO delay sent [ms] ... "); Serial.println(millis() - delaySent);
   DWM1000Time newSentTime;
   DWM1000::getTransmitTimestamp(newSentTime);
@@ -120,5 +108,7 @@ void loop() {
   sentTime = newSentTime;
   sentNum++;
   // again, transmit some data
-  transmitter();
+  transmit();
 }
+
+void loop() { }
