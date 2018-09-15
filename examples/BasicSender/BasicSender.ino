@@ -97,7 +97,7 @@ void transmitter() {
   String msg = "Hello DWM1000, it's #"; msg += sentNum;
   DWM1000::setData(msg);
   // delay sending the message for the given amount
-  DWM1000::setDelay(10);
+  DWM1000::setDelay(3000);
   DWM1000::startTransmit(TransmitMode::DELAYED);
   delaySent = millis();
 }
