@@ -745,6 +745,15 @@ namespace DWM1000 {
 			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
+		void _resetReceiver() {
+			byte pmscctrl0[LEN_PMSC_CTRL0];
+			readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			pmscctrl0[3] = 0xE0;
+			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			pmscctrl0[3] = 0xF0;
+			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+		}
+
 		/* Internal helpers to read configuration */
 
 		void _readSystemConfigurationRegister() {
@@ -782,19 +791,27 @@ namespace DWM1000 {
 				if(_handleSent != nullptr)
 					(*_handleSent)();
 			}
-			if(isReceiveTimestampAvailable() && _handleReceiveTimestampAvailable != 0) {
-				(*_handleReceiveTimestampAvailable)();
+			if(isReceiveTimestampAvailable()) {
 				_clearReceiveTimestampAvailableStatus();
+				if(_handleReceiveTimestampAvailable != nullptr)
+					(*_handleReceiveTimestampAvailable)();
 			}
-			if(isReceiveFailed() && _handleReceiveFailed != 0) {
-				(*_handleReceiveFailed)();
+			if(isReceiveFailed()) {
 				_clearReceiveStatus();
-			} else if(isReceiveTimeout() && _handleReceiveTimeout != 0) {
-				(*_handleReceiveTimeout)();
+				forceTRxOff();
+				_resetReceiver();
+				if(_handleReceiveFailed != nullptr)
+					(*_handleReceiveFailed)();
+			} else if(isReceiveTimeout()) {
 				_clearReceiveStatus();
-			} else if(isReceiveDone() && _handleReceived != 0) {
-				(*_handleReceived)();
+				forceTRxOff();
+				_resetReceiver();
+				if(_handleReceiveTimeout != nullptr)
+					(*_handleReceiveTimeout)();
+			} else if(isReceiveDone()) {
 				_clearReceiveStatus();
+				if(_handleReceived != nullptr)
+					(*_handleReceived)();
 			}
 			// clear all status that is left unhandled
 			_clearAllStatus();
