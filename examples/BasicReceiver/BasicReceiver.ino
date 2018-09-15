@@ -99,7 +99,7 @@ void handleReceived() {
   //Serial.print("Received message ... #"); Serial.println(numReceived);
   //Serial.print("Data is ... "); Serial.println(message);
   //Serial.print("FP power is [dBm] ... "); Serial.println(DWM1000::getFirstPathPower());
-  //Serial.print("RX power is [dBm] ... "); Serial.println(DWM1000::getReceivePower());
+  Serial.print("RX power is [dBm] ... "); Serial.println(DWM1000::getReceivePower());
   Serial.print("Signal quality is ... "); Serial.println(DWM1000::getReceiveQuality());
   DWM1000::startReceive();
 }
