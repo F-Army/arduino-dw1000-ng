@@ -708,7 +708,8 @@ namespace DWM1000 {
 
 		void _correctN(uint16_t* N) {
 			Serial.println("N is: "); Serial.print(N);
-			Serial.println("Location of N is: "); Serial.print(&N);
+			long long memory_loc = &N;
+			Serial.println("Location of N is: "); Serial.print(memory_loc);
 			byte chanCtrl;
 			byte sfdLength;
 			readBytes(CHAN_CTRL, NO_SUB, &chanCtrl, LEN_CHAN_CTRL);
@@ -730,7 +731,8 @@ namespace DWM1000 {
 			}
 
 			Serial.println("New N is: "); Serial.print(N);
-			Serial.println("New Location of N is: "); Serial.print(&N);
+			memory_loc = &N;
+			Serial.println("Location of N is: "); Serial.print(memory_loc);
 		}
 		
 		/* interrupt state handling */
