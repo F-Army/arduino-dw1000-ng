@@ -1637,7 +1637,7 @@ namespace DWM1000 {
 		byte rxFrameInfo[LEN_RX_FINFO];
 		readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
 		len = ((((uint16_t)rxFrameInfo[1] << 8) | (uint16_t)rxFrameInfo[0]) & 0x03FF);
-		
+		Serial.print("LUNGHEZZA = "); Serial.println(len);
 		if(_frameCheck && len > 2) {
 			return len-2;
 		}
