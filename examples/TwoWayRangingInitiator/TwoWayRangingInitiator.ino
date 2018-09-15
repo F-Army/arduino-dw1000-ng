@@ -135,14 +135,12 @@ void handleReceived() {
 }
 
 void transmitPoll() {
-    DWM1000::newTransmit();
     data[0] = POLL;
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit();
 }
 
 void transmitRange() {
-    DWM1000::newTransmit();
     data[0] = RANGE;
     // delay sending the message and remember expected future sent timestamp
     timeRangeSent = DWM1000::setDelay(replyDelayTimeUS);
@@ -150,14 +148,13 @@ void transmitRange() {
     timePollAckReceived.getTimestamp(data + 6);
     timeRangeSent.getTimestamp(data + 11);
     DWM1000::setData(data, LEN_DATA);
-    DWM1000::startTransmitDelayed();
+    DWM1000::startTransmit(TransmitMode::DELAYED);
     //Serial.print("Expect RANGE to be sent @ "); Serial.println(timeRangeSent.getAsFloat());
 }
 
 void receiver() {
     DWM1000::newReceive();
     // so we don't need to restart the receiver manually
-    DWM1000::receivePermanently(true);
     DWM1000::startReceive();
 }
 

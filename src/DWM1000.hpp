@@ -347,14 +347,11 @@ namespace DWM1000 {
 	
 	// reception state
 	void newReceive();
-	void startReceive();
-	void startReceiveDelayed();
+	void startReceive(ReceiveMode mode = ReceiveMode::IMMEDIATE);
 	
 	// transmission state
-	void newTransmit();
-	void startTransmit();
-	void startTransmitDelayed();
-	
+	void startTransmit(TransmitMode mode = TransmitMode::IMMEDIATE);
+		
 	/* ##### Operation mode selection ############################################ */
 	/** 
 	Specifies the mode of operation for the DWM1000. Modes of operation are pre-defined

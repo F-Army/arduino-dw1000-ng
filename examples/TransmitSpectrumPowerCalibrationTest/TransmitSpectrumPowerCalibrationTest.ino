@@ -60,7 +60,6 @@ void setup() {
     Serial.print("Network ID & Device Address: "); Serial.println(msg);
     DWM1000::getPrintableDeviceMode(msg);
     Serial.print("Device mode: "); Serial.println(msg);
-    DWM1000::newTransmit();
     DWM1000::enableTransmitPowerSpectrumTestMode(124800); /* Approx 1ms long transmissions */
     DWM1000::setData(data);
     DWM1000::startTransmit();

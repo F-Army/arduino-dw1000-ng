@@ -120,6 +120,8 @@ void setup() {
     DWM1000::attachSentHandler(handleSent);
     DWM1000::attachReceivedHandler(handleReceived);
     // anchor starts in receiving mode, awaiting a ranging poll message
+    DWM1000::receivePermanently(true);
+   
     receiver();
     noteActivity();
     // for first time ranging frequency computation
@@ -149,16 +151,14 @@ void handleReceived() {
 }
 
 void transmitPollAck() {
-    DWM1000::newTransmit();
     data[0] = POLL_ACK;
     // delay the same amount as ranging tag
     DWM1000::setDelay(replyDelayTimeUS);
     DWM1000::setData(data, LEN_DATA);
-    DWM1000::startTransmitDelayed();
+    DWM1000::startTransmit(TransmitMode::DELAYED);
 }
 
 void transmitRangeReport(float curRange) {
-    DWM1000::newTransmit();
     data[0] = RANGE_REPORT;
     // write final ranging result
     memcpy(data + 1, &curRange, 4);
@@ -167,7 +167,6 @@ void transmitRangeReport(float curRange) {
 }
 
 void transmitRangeFailed() {
-    DWM1000::newTransmit();
     data[0] = RANGE_FAILED;
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit();
@@ -176,7 +175,6 @@ void transmitRangeFailed() {
 void receiver() {
     DWM1000::newReceive();
     // so we don't need to restart the receiver manually
-    DWM1000::receivePermanently(true);
     DWM1000::startReceive();
 }
 

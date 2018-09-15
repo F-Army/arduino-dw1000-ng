@@ -104,15 +104,13 @@ void DWM1000Device::receive() {
 
 
 void DWM1000Device::transmit(byte data[], uint16_t dataLength) {
-    DWM1000::newTransmit();
     DWM1000::setData(data, dataLength);
     DWM1000::startTransmit();
 }
 
 void DWM1000Device::transmitDelayed(byte data[], uint16_t dataLength) {
-    DWM1000::newTransmit();
     DWM1000::setData(data, dataLength);
-    DWM1000::startTransmitDelayed();
+    DWM1000::startTransmit(TransmitMode::DELAYED);
 }
 
 uint16_t DWM1000Device::getShortAddress() {
