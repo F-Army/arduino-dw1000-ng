@@ -706,7 +706,7 @@ namespace DWM1000 {
 			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
 		}
 
-		void _correctN(uint16_t& N) {
+		void _correctN(uint16_t* N) {
 			byte chanCtrl;
 			byte sfdLength;
 			readBytes(CHAN_CTRL, NO_SUB, &chanCtrl, LEN_CHAN_CTRL);
@@ -724,7 +724,7 @@ namespace DWM1000 {
 						break;
 				}
 			} else {
-				N -= (sfdLength == 0x08 ? 5 : 64);
+				*N -= (sfdLength == 0x08 ? 5 : 64);
 			}
 		}
 		
@@ -1855,7 +1855,7 @@ namespace DWM1000 {
 		readBytes(DRX_TUNE, RXPACC_NOSAT_SUB, rxpacc_nosat, LEN_RXPACC_NOSAT);
 		N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
 		if(N == N_nosat) {
-			_correctN(N);
+			_correctN(&N);
 		}
 
 		Serial.print("New N"); Serial.println(N);
@@ -1896,7 +1896,7 @@ namespace DWM1000 {
 		readBytes(DRX_TUNE, RXPACC_NOSAT_SUB, rxpacc_nosat, LEN_RXPACC_NOSAT);
 		N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
 		if(N == N_nosat) {
-			_correctN(N);
+			_correctN(&N);
 		}
 
 		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
