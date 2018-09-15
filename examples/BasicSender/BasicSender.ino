@@ -98,7 +98,7 @@ void transmitter() {
   DWM1000::setData(msg);
   // delay sending the message for the given amount
   DWM1000::setDelay(10);
-  DWM1000::startTransmit(TransmitMode::IMMEDIATE);
+  DWM1000::startTransmit(TransmitMode::DELAYED);
   delaySent = millis();
 }
 
