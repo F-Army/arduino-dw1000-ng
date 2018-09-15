@@ -735,6 +735,11 @@ namespace DWM1000 {
 			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
+		void _clearReceiveTimeoutStatus() {
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXRFTO_BIT, true);
+			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+		}
+
 		void _clearTransmitStatus() {
 			// clear latched TX bits
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, AAT_BIT, true);
@@ -802,19 +807,17 @@ namespace DWM1000 {
 				_resetReceiver();
 				if(_handleReceiveFailed != nullptr)
 					(*_handleReceiveFailed)();
-			} else if(isReceiveTimeout()) {
-				_clearReceiveStatus();
+			if(isReceiveTimeout()) {
+				_clearReceiveTimeoutStatus();
 				forceTRxOff();
 				_resetReceiver();
 				if(_handleReceiveTimeout != nullptr)
 					(*_handleReceiveTimeout)();
-			} else if(isReceiveDone()) {
+			if(isReceiveDone()) {
 				_clearReceiveStatus();
 				if(_handleReceived != nullptr)
 					(*_handleReceived)();
 			}
-			// clear all status that is left unhandled
-			_clearAllStatus();
 		}
 
 		void _setInterruptPolarity(boolean val) {
