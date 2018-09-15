@@ -1872,7 +1872,8 @@ namespace DWM1000 {
 			// approximation of Fig. 22 in user manual for dbm correction
 			estFpPwr += (estFpPwr+88)*corrFac;
 		}
-		Serial.println("Very good #3");
+		Serial.println("Very good #3\nPRINT:");
+		Serial.println(estFpPwr);
 		return estFpPwr;
 	}
 
