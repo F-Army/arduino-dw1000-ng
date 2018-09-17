@@ -1837,7 +1837,7 @@ namespace DWM1000 {
 	float getReceivePower() {
 		volatile byte     cirPwrBytes[LEN_CIR_PWR];
 		volatile byte     rxFrameInfo[LEN_RX_FINFO];
-		uint32_t twoPower17 = 131072;
+		volatile float twoPower17 = 131072;
 		volatile uint16_t C, N;
 		volatile float    A, corrFac;
 		readBytes(RX_FQUAL, CIR_PWR_SUB, (byte *)cirPwrBytes, LEN_CIR_PWR);
@@ -1852,7 +1852,7 @@ namespace DWM1000 {
 			A       = 121.74;
 			corrFac = 1.1667;
 		}
-		float estRxPwr = 10.0*log10(((float)C*(float)twoPower17)/((float)N*(float)N))-A;
+		float estRxPwr = 10.0*log10(((float)C*twoPower17)/((float)N*(float)N))-A;
 		if(estRxPwr <= -88) {
 			return estRxPwr;
 		} else {
