@@ -1808,10 +1808,10 @@ namespace DWM1000 {
 		volatile byte         rxFrameInfo[LEN_RX_FINFO];
 		volatile uint16_t     f1, f2, f3, N;
 		volatile float        A, corrFac;
-		readBytes(RX_TIME, FP_AMPL1_SUB, static_cast<byte []>(fpAmpl1Bytes), LEN_FP_AMPL1);
-		readBytes(RX_FQUAL, FP_AMPL2_SUB, static_cast<byte []>(fpAmpl2Bytes), LEN_FP_AMPL2);
-		readBytes(RX_FQUAL, FP_AMPL3_SUB, static_cast<byte []>(fpAmpl3Bytes), LEN_FP_AMPL3);
-		readBytes(RX_FINFO, NO_SUB, static_cast<byte []>(rxFrameInfo), LEN_RX_FINFO);
+		readBytes(RX_TIME, FP_AMPL1_SUB, static_cast<byte [LEN_FP_AMPL1]>(fpAmpl1Bytes), LEN_FP_AMPL1);
+		readBytes(RX_FQUAL, FP_AMPL2_SUB, static_cast<byte [LEN_FP_AMPL2]>(fpAmpl2Bytes), LEN_FP_AMPL2);
+		readBytes(RX_FQUAL, FP_AMPL3_SUB, static_cast<byte [LEN_FP_AMPL3]>(fpAmpl3Bytes), LEN_FP_AMPL3);
+		readBytes(RX_FINFO, NO_SUB, static_cast<byte [LEN_RX_FINFO]>(rxFrameInfo), LEN_RX_FINFO);
 		f1 = (uint16_t)fpAmpl1Bytes[0] | ((uint16_t)fpAmpl1Bytes[1] << 8);
 		f2 = (uint16_t)fpAmpl2Bytes[0] | ((uint16_t)fpAmpl2Bytes[1] << 8);
 		f3 = (uint16_t)fpAmpl3Bytes[0] | ((uint16_t)fpAmpl3Bytes[1] << 8);
@@ -1840,8 +1840,8 @@ namespace DWM1000 {
 		uint32_t twoPower17 = 131072;
 		volatile uint16_t C, N;
 		volatile float    A, corrFac;
-		readBytes(RX_FQUAL, CIR_PWR_SUB, static_cast<byte []>(cirPwrBytes), LEN_CIR_PWR);
-		readBytes(RX_FINFO, NO_SUB, static_cast<byte []>(rxFrameInfo), LEN_RX_FINFO);
+		readBytes(RX_FQUAL, CIR_PWR_SUB, static_cast<byte [LEN_CIR_PWR]>(cirPwrBytes), LEN_CIR_PWR);
+		readBytes(RX_FINFO, NO_SUB, static_cast<byte [LEN_RX_FINFO]>(rxFrameInfo), LEN_RX_FINFO);
 		C = (uint16_t)cirPwrBytes[0] | ((uint16_t)cirPwrBytes[1] << 8);
 		N = (((uint16_t)rxFrameInfo[2] >> 4) & 0xFF) | ((uint16_t)rxFrameInfo[3] << 4);
 
