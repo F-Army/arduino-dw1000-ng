@@ -70,7 +70,7 @@ DWM1000Time timeRangeSent;
 #define LEN_DATA 16
 byte data[LEN_DATA];
 // watchdog and reset period
-uint32_t lastActivity;
+volatile uint32_t lastActivity;
 uint32_t resetPeriod = 250;
 // reply times (same on both sides for symm. ranging)
 uint16_t replyDelayTimeUS = 3000;
@@ -113,16 +113,17 @@ void noteActivity() {
 }
 
 void handleSent() {
+    noteActivity();
     if(data[0] == POLL) {
         DWM1000::getTransmitTimestamp(timePollSent);
     } else if(data[0] == RANGE) {
         DWM1000::getTransmitTimestamp(timeRangeSent);
     }
     DWM1000::startReceive();
-    noteActivity();
 }
 
 void handleReceived() {
+    noteActivity();
     DWM1000::getData(data, LEN_DATA);
     if (data[0] != expectedMsgId) {
         // unexpected message, start over again
@@ -140,7 +141,6 @@ void handleReceived() {
     } else if (data[0] == RANGE_FAILED) {
         transmitPoll();
     }
-    noteActivity();
 }
 
 void transmitPoll() {
@@ -148,7 +148,6 @@ void transmitPoll() {
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit();
     expectedMsgId = POLL_ACK;
-    noteActivity();
 }
 
 void transmitRange() {
@@ -162,7 +161,6 @@ void transmitRange() {
     DWM1000::startTransmit(TransmitMode::DELAYED);
     //Serial.print("Expect RANGE to be sent @ "); Serial.println(timeRangeSent.getAsFloat());
     expectedMsgId = RANGE_REPORT;
-    noteActivity();
 }
 
 void loop() {
