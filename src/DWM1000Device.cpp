@@ -94,7 +94,6 @@ void DWM1000Device::forceIdle() {
 }
 
 void DWM1000Device::receive() {
-    DWM1000::newReceive();
     DWM1000::startReceive();
 }
 
