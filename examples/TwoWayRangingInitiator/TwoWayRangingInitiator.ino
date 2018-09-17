@@ -62,9 +62,6 @@ const uint8_t PIN_SS = SS; // spi select pin
 #define RANGE_FAILED 255
 // message flow state
 volatile byte expectedMsgId = POLL_ACK;
-// message sent/received state
-volatile boolean sentAck = false;
-volatile boolean receivedAck = false;
 // timestamps to remember
 DWM1000Time timePollSent;
 DWM1000Time timePollAckReceived;
@@ -108,7 +105,6 @@ void setup() {
     DWM1000::attachReceivedHandler(handleReceived);
     // anchor starts by transmitting a POLL message
     transmitPoll();
-    noteActivity();
 }
 
 void noteActivity() {
@@ -116,27 +112,43 @@ void noteActivity() {
     lastActivity = millis();
 }
 
-void resetInactive() {
-    // tag sends POLL and listens for POLL_ACK
-    expectedMsgId = POLL_ACK;
-    transmitPoll();
+void handleSent() {
+    if(data[0] == POLL) {
+        DWM1000::getTransmitTimestamp(timePollSent);
+    } else if(data[0] == RANGE) {
+        DWM1000::getTransmitTimestamp(timeRangeSent);
+    }
+    DWM1000::startReceive();
     noteActivity();
 }
 
-void handleSent() {
-    // status change on sent success
-    sentAck = true;
-}
-
 void handleReceived() {
-    // status change on received success
-    receivedAck = true;
+    DWM1000::getData(data, LEN_DATA);
+    if (data[0] != expectedMsgId) {
+        // unexpected message, start over again
+        //Serial.print("Received wrong message # "); Serial.println(msgId);
+        transmitPoll();
+        return;
+    }
+    if (data[0] == POLL_ACK) {
+        DWM1000::getReceiveTimestamp(timePollAckReceived);
+        transmitRange();
+    } else if (data[0] == RANGE_REPORT) {
+        float curRange;
+        memcpy(&curRange, data + 1, 4);
+        transmitPoll();
+    } else if (data[0] == RANGE_FAILED) {
+        transmitPoll();
+    }
+    noteActivity();
 }
 
 void transmitPoll() {
     data[0] = POLL;
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit();
+    expectedMsgId = POLL_ACK;
+    noteActivity();
 }
 
 void transmitRange() {
@@ -149,62 +161,15 @@ void transmitRange() {
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit(TransmitMode::DELAYED);
     //Serial.print("Expect RANGE to be sent @ "); Serial.println(timeRangeSent.getAsFloat());
-}
-
-void receiver() {
-    DWM1000::newReceive();
-    // so we don't need to restart the receiver manually
-    DWM1000::startReceive();
+    expectedMsgId = RANGE_REPORT;
+    noteActivity();
 }
 
 void loop() {
-    if (!sentAck && !receivedAck) {
-        // check if inactive
-        if (millis() - lastActivity > resetPeriod) {
-            resetInactive();
-        }
-        return;
-    }
-    // continue on any success confirmation
-    if (sentAck) {
-        sentAck = false;
-        byte msgId = data[0];
-        if (msgId == POLL) {
-            DWM1000::getTransmitTimestamp(timePollSent);
-            //Serial.print("Sent POLL @ "); Serial.println(timePollSent.getAsFloat());
-        } else if (msgId == RANGE) {
-            DWM1000::getTransmitTimestamp(timeRangeSent);
-            noteActivity();
-        }
-    }
-    if (receivedAck) {
-        receivedAck = false;
-        // get message and parse
-        DWM1000::getData(data, LEN_DATA);
-        byte msgId = data[0];
-        if (msgId != expectedMsgId) {
-            // unexpected message, start over again
-            //Serial.print("Received wrong message # "); Serial.println(msgId);
-            expectedMsgId = POLL_ACK;
-            transmitPoll();
-            return;
-        }
-        if (msgId == POLL_ACK) {
-            DWM1000::getReceiveTimestamp(timePollAckReceived);
-            expectedMsgId = RANGE_REPORT;
-            transmitRange();
-            noteActivity();
-        } else if (msgId == RANGE_REPORT) {
-            expectedMsgId = POLL_ACK;
-            float curRange;
-            memcpy(&curRange, data + 1, 4);
-            transmitPoll();
-            noteActivity();
-        } else if (msgId == RANGE_FAILED) {
-            expectedMsgId = POLL_ACK;
-            transmitPoll();
-            noteActivity();
-        }
+    // check if inactive
+    if (millis() - lastActivity > resetPeriod) {
+        DWM1000::forceTRxOff();
+        transmitPoll();
     }
 }
 
