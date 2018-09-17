@@ -1299,7 +1299,6 @@ namespace DWM1000 {
 	}
 
 	void startTransmit(TransmitMode mode) {
-		/* forceTRxOff(); */
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
 		_writeTransmitFrameControlRegister();
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, SFCST_BIT, !_frameCheck);
