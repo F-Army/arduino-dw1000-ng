@@ -53,7 +53,7 @@ const uint8_t PIN_SS = SS; // spi select pin
 volatile boolean received = false;
 volatile boolean error = false;
 volatile int16_t numReceived = 0; // todo check int type
-String message;
+volatile String message;
 
 void setup() {
   // DEBUG monitoring
@@ -85,7 +85,6 @@ void setup() {
   DWM1000::attachReceivedHandler(handleReceived);
   DWM1000::attachReceiveFailedHandler(handleError);
   // start reception
-  //DWM1000::newReceive();
   DWM1000::startReceive();
 }
 
