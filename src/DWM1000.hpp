@@ -341,7 +341,6 @@ namespace DWM1000 {
 
 	void commitConfiguration();
 	
-	void newReceive();
 	void startReceive(ReceiveMode mode = ReceiveMode::IMMEDIATE);
 	
 	void startTransmit(TransmitMode mode = TransmitMode::IMMEDIATE);
