@@ -85,7 +85,7 @@ void setup() {
   DWM1000::attachReceivedHandler(handleReceived);
   DWM1000::attachReceiveFailedHandler(handleError);
   // start reception
-  DWM1000::newReceive();
+  //DWM1000::newReceive();
   DWM1000::startReceive();
 }
 
