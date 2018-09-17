@@ -48,11 +48,8 @@ const uint8_t PIN_RST = 9; // reset pin
 const uint8_t PIN_IRQ = 2; // irq pin
 const uint8_t PIN_SS = SS; // spi select pin
 
-// DEBUG packet sent status and count
-boolean sent = false;
-volatile boolean sentAck = false;
 volatile unsigned long delaySent = 0;
-int16_t sentNum = 0; // todo check int type
+volatile int16_t sentNum = 0; // todo check int type
 DWM1000Time sentTime;
 
 void setup() {
