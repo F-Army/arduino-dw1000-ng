@@ -1802,16 +1802,16 @@ namespace DWM1000 {
 	}
 
 	float getFirstPathPower() {
-		byte         fpAmpl1Bytes[LEN_FP_AMPL1];
-		byte         fpAmpl2Bytes[LEN_FP_AMPL2];
-		byte         fpAmpl3Bytes[LEN_FP_AMPL3];
-		byte         rxFrameInfo[LEN_RX_FINFO];
+		volatile byte         fpAmpl1Bytes[LEN_FP_AMPL1];
+		volatile byte         fpAmpl2Bytes[LEN_FP_AMPL2];
+		volatile byte         fpAmpl3Bytes[LEN_FP_AMPL3];
+		volatile byte         rxFrameInfo[LEN_RX_FINFO];
 		volatile uint16_t     f1, f2, f3, N;
 		volatile float        A, corrFac;
-		readBytes(RX_TIME, FP_AMPL1_SUB, fpAmpl1Bytes, LEN_FP_AMPL1);
-		readBytes(RX_FQUAL, FP_AMPL2_SUB, fpAmpl2Bytes, LEN_FP_AMPL2);
-		readBytes(RX_FQUAL, FP_AMPL3_SUB, fpAmpl3Bytes, LEN_FP_AMPL3);
-		readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
+		readBytes(RX_TIME, FP_AMPL1_SUB, (byte[])fpAmpl1Bytes, LEN_FP_AMPL1);
+		readBytes(RX_FQUAL, FP_AMPL2_SUB, (byte[])fpAmpl2Bytes, LEN_FP_AMPL2);
+		readBytes(RX_FQUAL, FP_AMPL3_SUB, (byte[])fpAmpl3Bytes, LEN_FP_AMPL3);
+		readBytes(RX_FINFO, NO_SUB, (byte[])rxFrameInfo, LEN_RX_FINFO);
 		f1 = (uint16_t)fpAmpl1Bytes[0] | ((uint16_t)fpAmpl1Bytes[1] << 8);
 		f2 = (uint16_t)fpAmpl2Bytes[0] | ((uint16_t)fpAmpl2Bytes[1] << 8);
 		f3 = (uint16_t)fpAmpl3Bytes[0] | ((uint16_t)fpAmpl3Bytes[1] << 8);
@@ -1835,13 +1835,13 @@ namespace DWM1000 {
 	}
 
 	float getReceivePower() {
-		byte     cirPwrBytes[LEN_CIR_PWR];
-		byte     rxFrameInfo[LEN_RX_FINFO];
+		volatile byte     cirPwrBytes[LEN_CIR_PWR];
+		volatile byte     rxFrameInfo[LEN_RX_FINFO];
 		uint32_t twoPower17 = 131072;
 		volatile uint16_t C, N;
 		volatile float    A, corrFac;
-		readBytes(RX_FQUAL, CIR_PWR_SUB, cirPwrBytes, LEN_CIR_PWR);
-		readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
+		readBytes(RX_FQUAL, CIR_PWR_SUB, (byte [])cirPwrBytes, LEN_CIR_PWR);
+		readBytes(RX_FINFO, NO_SUB, (byte [])rxFrameInfo, LEN_RX_FINFO);
 		C = (uint16_t)cirPwrBytes[0] | ((uint16_t)cirPwrBytes[1] << 8);
 		N = (((uint16_t)rxFrameInfo[2] >> 4) & 0xFF) | ((uint16_t)rxFrameInfo[3] << 4);
 
