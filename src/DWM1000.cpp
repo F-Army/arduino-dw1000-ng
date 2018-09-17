@@ -1824,8 +1824,6 @@ namespace DWM1000 {
 			A       = 121.74;
 			corrFac = 1.1667;
 		}
-		A = 113.77;
-		corrFac = 2.3334;
 		float estFpPwr = 10.0*log10(((float)f1*(float)f1+(float)f2*(float)f2+(float)f3*(float)f3)/((float)N*(float)N))-A;
 		if(estFpPwr <= -88) {
 			return estFpPwr;
