@@ -50,8 +50,6 @@ const uint8_t PIN_IRQ = 2; // irq pin
 const uint8_t PIN_SS = SS; // spi select pin
 
 // DEBUG packet sent status and count
-volatile boolean received = false;
-volatile boolean error = false;
 volatile int16_t numReceived = 0; // todo check int type
 String message;
 
