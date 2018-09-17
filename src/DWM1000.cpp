@@ -1806,9 +1806,9 @@ namespace DWM1000 {
 		byte         fpAmpl2Bytes[LEN_FP_AMPL2];
 		byte         fpAmpl3Bytes[LEN_FP_AMPL3];
 		byte         rxFrameInfo[LEN_RX_FINFO];
-		uint16_t     f1, f2, f3, N;
-		float        A, corrFac;
-		readBytes(RX_TIME, FP_AMPL1_SUB, fpAmpl1Bytes, LEN_FP_AMPL1);
+		volatile uint16_t     f1, f2, f3, N;
+		volatile float        A, corrFac;
+		readBytes(RX_TIME, FP_AMPL1_SUB, (fpAmpl1Bytes, LEN_FP_AMPL1);
 		readBytes(RX_FQUAL, FP_AMPL2_SUB, fpAmpl2Bytes, LEN_FP_AMPL2);
 		readBytes(RX_FQUAL, FP_AMPL3_SUB, fpAmpl3Bytes, LEN_FP_AMPL3);
 		readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
@@ -1838,8 +1838,8 @@ namespace DWM1000 {
 		byte     cirPwrBytes[LEN_CIR_PWR];
 		byte     rxFrameInfo[LEN_RX_FINFO];
 		uint32_t twoPower17 = 131072;
-		uint16_t C, N;
-		float    A, corrFac;
+		volatile uint16_t C, N;
+		volatile float    A, corrFac;
 		readBytes(RX_FQUAL, CIR_PWR_SUB, cirPwrBytes, LEN_CIR_PWR);
 		readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
 		C = (uint16_t)cirPwrBytes[0] | ((uint16_t)cirPwrBytes[1] << 8);
