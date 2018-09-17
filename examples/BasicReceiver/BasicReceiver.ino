@@ -53,7 +53,7 @@ const uint8_t PIN_SS = SS; // spi select pin
 volatile boolean received = false;
 volatile boolean error = false;
 volatile int16_t numReceived = 0; // todo check int type
-volatile String message;
+String message;
 
 void setup() {
   // DEBUG monitoring
