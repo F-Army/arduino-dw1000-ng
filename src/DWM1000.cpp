@@ -1808,7 +1808,7 @@ namespace DWM1000 {
 		byte         rxFrameInfo[LEN_RX_FINFO];
 		volatile uint16_t     f1, f2, f3, N;
 		volatile float        A, corrFac;
-		readBytes(RX_TIME, FP_AMPL1_SUB, (fpAmpl1Bytes, LEN_FP_AMPL1);
+		readBytes(RX_TIME, FP_AMPL1_SUB, fpAmpl1Bytes, LEN_FP_AMPL1);
 		readBytes(RX_FQUAL, FP_AMPL2_SUB, fpAmpl2Bytes, LEN_FP_AMPL2);
 		readBytes(RX_FQUAL, FP_AMPL3_SUB, fpAmpl3Bytes, LEN_FP_AMPL3);
 		readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
