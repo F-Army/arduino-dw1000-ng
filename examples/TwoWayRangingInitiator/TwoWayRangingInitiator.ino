@@ -61,7 +61,7 @@ const uint8_t PIN_SS = SS; // spi select pin
 #define RANGE_REPORT 3
 #define RANGE_FAILED 255
 // message flow state
-volatile byte expectedMsgId = POLL_ACK;
+byte expectedMsgId = POLL_ACK;
 // timestamps to remember
 DWM1000Time timePollSent;
 DWM1000Time timePollAckReceived;
@@ -70,10 +70,13 @@ DWM1000Time timeRangeSent;
 #define LEN_DATA 16
 byte data[LEN_DATA];
 // watchdog and reset period
-volatile uint32_t lastActivity;
+uint32_t lastActivity;
 uint32_t resetPeriod = 250;
 // reply times (same on both sides for symm. ranging)
 uint16_t replyDelayTimeUS = 3000;
+
+volatile boolean transmitDone = false;
+volatile boolean receiveDone = false;
 
 void setup() {
     // DEBUG monitoring
@@ -113,34 +116,11 @@ void noteActivity() {
 }
 
 void handleSent() {
-    noteActivity();
-    if(data[0] == POLL) {
-        DWM1000::getTransmitTimestamp(timePollSent);
-    } else if(data[0] == RANGE) {
-        DWM1000::getTransmitTimestamp(timeRangeSent);
-    }
-    DWM1000::startReceive();
+    transmitDone = true;
 }
 
 void handleReceived() {
-    noteActivity();
-    DWM1000::getData(data, LEN_DATA);
-    if (data[0] != expectedMsgId) {
-        // unexpected message, start over again
-        //Serial.print("Received wrong message # "); Serial.println(msgId);
-        transmitPoll();
-        return;
-    }
-    if (data[0] == POLL_ACK) {
-        DWM1000::getReceiveTimestamp(timePollAckReceived);
-        transmitRange();
-    } else if (data[0] == RANGE_REPORT) {
-        float curRange;
-        memcpy(&curRange, data + 1, 4);
-        transmitPoll();
-    } else if (data[0] == RANGE_FAILED) {
-        transmitPoll();
-    }
+    receiveDone = true;
 }
 
 void transmitPoll() {
@@ -165,9 +145,44 @@ void transmitRange() {
 
 void loop() {
     // check if inactive
-    if (millis() - lastActivity > resetPeriod) {
-        DWM1000::forceTRxOff();
-        transmitPoll();
+    if(!transmitDone && !receiveDone) {
+        if (millis() - lastActivity > resetPeriod) {
+            DWM1000::forceTRxOff();
+            transmitPoll();
+        }
+    }
+
+    if(transmitDone) {
+        transmitDone = false;
+        noteActivity();
+        if(data[0] == POLL) {
+            DWM1000::getTransmitTimestamp(timePollSent);
+        } else if(data[0] == RANGE) {
+            DWM1000::getTransmitTimestamp(timeRangeSent);
+        }
+        DWM1000::startReceive();
+    }
+
+    if(receiveDone) {
+        receiveDone = false;
+        noteActivity();
+        DWM1000::getData(data, LEN_DATA);
+        if (data[0] != expectedMsgId) {
+            // unexpected message, start over again
+            //Serial.print("Received wrong message # "); Serial.println(msgId);
+            transmitPoll();
+            return;
+        }
+        if (data[0] == POLL_ACK) {
+            DWM1000::getReceiveTimestamp(timePollAckReceived);
+            transmitRange();
+        } else if (data[0] == RANGE_REPORT) {
+            float curRange;
+            memcpy(&curRange, data + 1, 4);
+            transmitPoll();
+        } else if (data[0] == RANGE_FAILED) {
+            transmitPoll();
+        }
     }
 }
 

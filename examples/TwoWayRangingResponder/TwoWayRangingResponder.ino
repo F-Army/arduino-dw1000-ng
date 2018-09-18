@@ -62,7 +62,7 @@ const uint8_t PIN_SS = SS; // spi select pin
 #define RANGE_REPORT 3
 #define RANGE_FAILED 255
 // message flow state
-volatile byte expectedMsgId = POLL;
+byte expectedMsgId = POLL;
 // timestamps to remember
 DWM1000Time timePollSent;
 DWM1000Time timePollReceived;
@@ -76,14 +76,17 @@ DWM1000Time timeComputedRange;
 #define LEN_DATA 16
 byte data[LEN_DATA];
 // watchdog and reset period
-volatile uint32_t lastActivity;
+uint32_t lastActivity;
 uint32_t resetPeriod = 250;
 // reply times (same on both sides for symm. ranging)
 uint16_t replyDelayTimeUS = 3000;
 // ranging counter (per second)
-volatile uint16_t successRangingCount = 0;
-volatile uint32_t rangingCountPeriod = 0;
-volatile float samplingRate = 0;
+uint16_t successRangingCount = 0;
+uint32_t rangingCountPeriod = 0;
+float samplingRate = 0;
+
+volatile boolean transmitDone = false;
+volatile boolean receiveDone = false;
 
 void setup() {
     // DEBUG monitoring
@@ -135,51 +138,11 @@ void resetInactive() {
 }
 
 void handleSent() {
-    noteActivity();
-    if (data[0] == POLL_ACK) {
-        DWM1000::getTransmitTimestamp(timePollAckSent);
-    }
-    DWM1000::startReceive();
+    transmitDone = true;
 }
 
 void handleReceived() {
-    noteActivity();
-    DWM1000::getData(data, LEN_DATA);
-    if (data[0] != expectedMsgId) {
-        // unexpected message, start over again (except if already POLL)
-        transmitRangeFailed();
-    }
-    if (data[0] == POLL) {
-        // on POLL we (re-)start, so no protocol failure
-        DWM1000::getReceiveTimestamp(timePollReceived);
-        expectedMsgId = RANGE;
-        transmitPollAck();
-    }
-    else if (data[0] == RANGE) {
-        DWM1000::getReceiveTimestamp(timeRangeReceived);
-        expectedMsgId = POLL;
-        timePollSent.setTimestamp(data + 1);
-        timePollAckReceived.setTimestamp(data + 6);
-        timeRangeSent.setTimestamp(data + 11);
-        // (re-)compute range as two-way ranging is done
-        computeRangeAsymmetric(); // CHOSEN RANGING ALGORITHM
-        transmitRangeReport(timeComputedRange.getAsMicroSeconds());
-        float distance = timeComputedRange.getAsMeters();
-        Serial.print("Range: "); Serial.print(distance); Serial.print(" m");
-        Serial.print("\t RX power: "); Serial.print(DWM1000::getReceivePower()); Serial.print(" dBm");
-        Serial.print("\t Sampling: "); Serial.print(samplingRate); Serial.println(" Hz");
-        //Serial.print("FP power is [dBm]: "); Serial.print(DWM1000::getFirstPathPower());
-        //Serial.print("RX power is [dBm]: "); Serial.println(DWM1000::getReceivePower());
-        //Serial.print("Receive quality: "); Serial.println(DWM1000::getReceiveQuality());
-        // update sampling rate (each second)
-        successRangingCount++;
-        int32_t curMillis = millis();
-        if (curMillis - rangingCountPeriod > 1000) {
-            samplingRate = (1000.0f * successRangingCount) / (curMillis - rangingCountPeriod);
-            rangingCountPeriod = curMillis;
-            successRangingCount = 0;
-        }
-    }
+    receiveDone = true;
 }
 
 void transmitPollAck() {
@@ -243,9 +206,61 @@ void computeRangeSymmetric() {
 
 void loop() {
     // check if inactive
-    if (millis() - lastActivity > resetPeriod) {
-        DWM1000::forceTRxOff();
-        resetInactive();
+    if(!transmitDone && !receiveDone) {
+        if (millis() - lastActivity > resetPeriod) {
+            DWM1000::forceTRxOff();
+            resetInactive();
+        }
+    }
+
+    if(receiveDone) {
+        receiveDone = false;
+        noteActivity();
+        DWM1000::getData(data, LEN_DATA);
+        if (data[0] != expectedMsgId) {
+            // unexpected message, start over again (except if already POLL)
+            transmitRangeFailed();
+        }
+        if (data[0] == POLL) {
+            // on POLL we (re-)start, so no protocol failure
+            DWM1000::getReceiveTimestamp(timePollReceived);
+            expectedMsgId = RANGE;
+            transmitPollAck();
+        }
+        else if (data[0] == RANGE) {
+            DWM1000::getReceiveTimestamp(timeRangeReceived);
+            expectedMsgId = POLL;
+            timePollSent.setTimestamp(data + 1);
+            timePollAckReceived.setTimestamp(data + 6);
+            timeRangeSent.setTimestamp(data + 11);
+            // (re-)compute range as two-way ranging is done
+            computeRangeAsymmetric(); // CHOSEN RANGING ALGORITHM
+            transmitRangeReport(timeComputedRange.getAsMicroSeconds());
+            float distance = timeComputedRange.getAsMeters();
+            Serial.print("Range: "); Serial.print(distance); Serial.print(" m");
+            Serial.print("\t RX power: "); Serial.print(DWM1000::getReceivePower()); Serial.print(" dBm");
+            Serial.print("\t Sampling: "); Serial.print(samplingRate); Serial.println(" Hz");
+            //Serial.print("FP power is [dBm]: "); Serial.print(DWM1000::getFirstPathPower());
+            //Serial.print("RX power is [dBm]: "); Serial.println(DWM1000::getReceivePower());
+            //Serial.print("Receive quality: "); Serial.println(DWM1000::getReceiveQuality());
+            // update sampling rate (each second)
+            successRangingCount++;
+            int32_t curMillis = millis();
+            if (curMillis - rangingCountPeriod > 1000) {
+                samplingRate = (1000.0f * successRangingCount) / (curMillis - rangingCountPeriod);
+                rangingCountPeriod = curMillis;
+                successRangingCount = 0;
+            }
+        }
+    }
+
+    if(transmitDone) {
+        transmitDone = false;
+        noteActivity();
+        if (data[0] == POLL_ACK) {
+            DWM1000::getTransmitTimestamp(timePollAckSent);
+        }
+        DWM1000::startReceive();
     }
 }
 
