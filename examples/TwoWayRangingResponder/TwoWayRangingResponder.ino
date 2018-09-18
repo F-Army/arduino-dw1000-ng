@@ -153,10 +153,8 @@ void handleReceived() {
 
 void transmitPollAck() {
     data[0] = POLL_ACK;
-    // delay the same amount as ranging tag
-    DWM1000::setDelay(replyDelayTimeUS);
     DWM1000::setData(data, LEN_DATA);
-    DWM1000::startTransmit(TransmitMode::DELAYED);
+    DWM1000::startTransmit();
 }
 
 void transmitRangeReport(float curRange) {
@@ -232,7 +230,6 @@ void loop() {
             DWM1000::getTransmitTimestamp(timePollAckSent);
             noteActivity();
         }
-        receiver();
     }
     if (receivedAck) {
         receivedAck = false;

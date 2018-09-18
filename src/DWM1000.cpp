@@ -94,7 +94,6 @@ namespace DWM1000 {
 		byte        _channel;
 		boolean     _smartPower;
 		boolean     _frameCheck;
-		boolean     _permanentReceive    = false;
 		boolean     _debounceClockEnabled = false;
 		boolean     _nlos = false;
 		boolean     _autoTXPower = true;
@@ -817,20 +816,12 @@ namespace DWM1000 {
 				_clearReceiveFailedStatus();
 				forceTRxOff();
 				_resetReceiver();
-				if(_permanentReceive) {
-					newReceive();
-					startReceive();
-				}
 			} else if(isReceiveTimeout()) {
 				if(_handleReceiveTimeout != nullptr)
 					(*_handleReceiveTimeout)();
 				_clearReceiveTimeoutStatus();
 				forceTRxOff();
 				_resetReceiver();
-				if(_permanentReceive) {
-					newReceive();
-					startReceive();
-				}
 			} else if(isReceiveDone()) {
 				if(_handleReceived != nullptr)
 					(*_handleReceived)();
@@ -1294,7 +1285,6 @@ namespace DWM1000 {
 	void newReceive() {
 		forceTRxOff();
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
-		//_clearReceiveStatus();
 	}
 
 	void startReceive(ReceiveMode mode) {
@@ -1315,6 +1305,7 @@ namespace DWM1000 {
 			DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXDLYS_BIT, true);
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXSTRT_BIT, true);
 		writeBytes(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
+		
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
 		startReceive();
 	}
@@ -1510,15 +1501,6 @@ namespace DWM1000 {
 		_extendedFrameLength = (val ? FRAME_LENGTH_EXTENDED : FRAME_LENGTH_NORMAL);
 		_syscfg[2] &= 0xFC;
 		_syscfg[2] |= _extendedFrameLength;
-	}
-
-	void receivePermanently(boolean val) {
-		_permanentReceive = val;
-		if(val) {
-			// in case permanent, also reenable receiver once failed
-			setReceiverAutoReenable(true);
-			_writeSystemConfigurationRegister();
-		}
 	}
 
 	void setChannel(byte channel) {
