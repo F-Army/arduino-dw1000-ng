@@ -121,7 +121,6 @@ void setup() {
     DWM1000::attachSentHandler(handleSent);
     DWM1000::attachReceivedHandler(handleReceived);
     // anchor starts in receiving mode, awaiting a ranging poll message
-    //DWM1000::receivePermanently(true);
    
     receiver();
     noteActivity();
@@ -155,7 +154,6 @@ void transmitPollAck() {
     data[0] = POLL_ACK;
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit();
-    DWM1000::startReceive();
 }
 
 void transmitRangeReport(float curRange) {
@@ -164,14 +162,12 @@ void transmitRangeReport(float curRange) {
     memcpy(data + 1, &curRange, 4);
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit();
-    DWM1000::startReceive();
 }
 
 void transmitRangeFailed() {
     data[0] = RANGE_FAILED;
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit();
-    DWM1000::startReceive();
 }
 
 void receiver() {
@@ -233,6 +229,7 @@ void loop() {
             DWM1000::getTransmitTimestamp(timePollAckSent);
             noteActivity();
         }
+        DWM1000::startReceive();
     }
     if (receivedAck) {
         receivedAck = false;
@@ -260,15 +257,16 @@ void loop() {
                 timeRangeSent.setTimestamp(data + 11);
                 // (re-)compute range as two-way ranging is done
                 computeRangeAsymmetric(); // CHOSEN RANGING ALGORITHM
-                transmitRangeReport(timeComputedRange.getAsMicroSeconds());
                 float distance = timeComputedRange.getAsMeters();
-                Serial.print("Range: "); Serial.print(distance); Serial.print(" m");
-                Serial.print("\t RX power: "); Serial.print(DWM1000::getReceivePower()); Serial.print(" dBm");
-                Serial.print("\t Sampling: "); Serial.print(samplingRate); Serial.println(" Hz");
+                String rangeString = "Range: "; rangeString += distance; rangeString += " m";
+                rangeString += "\t RX power: "; rangeString += DWM1000::getReceivePower(); rangeString += " dBm";
+                rangeString += "\t Sampling: "; rangeString += samplingRate; rangeString += " Hz";
+                Serial.println(rangeString);
                 //Serial.print("FP power is [dBm]: "); Serial.print(DWM1000::getFirstPathPower());
                 //Serial.print("RX power is [dBm]: "); Serial.println(DWM1000::getReceivePower());
                 //Serial.print("Receive quality: "); Serial.println(DWM1000::getReceiveQuality());
                 // update sampling rate (each second)
+                transmitRangeReport(timeComputedRange.getAsMicroSeconds());
                 successRangingCount++;
                 if (curMillis - rangingCountPeriod > 1000) {
                     samplingRate = (1000.0f * successRangingCount) / (curMillis - rangingCountPeriod);
