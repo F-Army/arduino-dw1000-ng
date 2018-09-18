@@ -212,8 +212,8 @@ void loop() {
             expectedMsgId = POLL_ACK;
             float curRange;
             memcpy(&curRange, data + 1, 4);
-            transmitPoll();
             noteActivity();
+            transmitPoll();
         } else if (msgId == RANGE_FAILED) {
             Serial.println("RANGE_FAILED");
             expectedMsgId = POLL_ACK;
