@@ -172,7 +172,7 @@ void transmitRangeFailed() {
 }
 
 void receiver() {
-    DWM1000::newReceive();
+    DWM1000::forceTRxOff();
     // so we don't need to restart the receiver manually
     DWM1000::startReceive();
 }
