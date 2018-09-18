@@ -805,19 +805,19 @@ namespace DWM1000 {
 				if(_handleSent != nullptr)
 					(*_handleSent)();
 			}
-			if(isReceiveTimestampAvailable()) {
+			if(isReceiveTimestampAvailable() && _handleReceiveTimestampAvailable != 0) {
 				_clearReceiveTimestampAvailableStatus();
 				if(_handleReceiveTimestampAvailable != nullptr)
 					(*_handleReceiveTimestampAvailable)();
 			}
-			if(isReceiveFailed()) {
+			if(isReceiveFailed() && _handleReceiveFailed != 0) {
 				_clearReceiveFailedStatus();
 				forceTRxOff();
 				_resetReceiver();
 				if(_handleReceiveFailed != nullptr)
 					(*_handleReceiveFailed)();
 			}
-			if(isReceiveTimeout()) {
+			if(isReceiveTimeout() && _handleReceiveTimeout != 0) {
 				_clearReceiveTimeoutStatus();
 				forceTRxOff();
 				_resetReceiver();
