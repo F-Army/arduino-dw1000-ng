@@ -121,7 +121,7 @@ void noteActivity() {
 void resetInactive() {
     // tag sends POLL and listens for POLL_ACK
     expectedMsgId = POLL_ACK;
-    DWM1000::forceTRxOff()
+    DWM1000::forceTRxOff();
     transmitPoll();
     noteActivity();
 }
