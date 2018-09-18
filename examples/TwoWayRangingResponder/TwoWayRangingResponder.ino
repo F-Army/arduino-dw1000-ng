@@ -104,6 +104,7 @@ void setup() {
     DWM1000::setDefaults();
     DWM1000::setDeviceAddress(1);
     DWM1000::setNetworkId(10);
+    DWM1000::setReceiverAutoReenable(true);
     DWM1000::commitConfiguration();
     Serial.println(F("Committed configuration ..."));
     // DEBUG chip info and registers pretty printed
@@ -120,7 +121,7 @@ void setup() {
     DWM1000::attachSentHandler(handleSent);
     DWM1000::attachReceivedHandler(handleReceived);
     // anchor starts in receiving mode, awaiting a ranging poll message
-    DWM1000::receivePermanently(true);
+    //DWM1000::receivePermanently(true);
    
     receiver();
     noteActivity();
@@ -231,6 +232,7 @@ void loop() {
             DWM1000::getTransmitTimestamp(timePollAckSent);
             noteActivity();
         }
+        receiver();
     }
     if (receivedAck) {
         receivedAck = false;
