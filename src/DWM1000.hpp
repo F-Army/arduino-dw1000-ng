@@ -337,8 +337,8 @@ namespace DWM1000 {
 	void attachReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void));
 	
 	/* device state management. */
-	// idle state
-	void forceIdle();
+	// force idle state
+	void forceTRxOff();
 	
 	// general configuration state
 	void newConfiguration();
