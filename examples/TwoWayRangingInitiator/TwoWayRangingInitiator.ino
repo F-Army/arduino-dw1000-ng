@@ -153,12 +153,6 @@ void transmitRange() {
     //Serial.print("Expect RANGE to be sent @ "); Serial.println(timeRangeSent.getAsFloat());
 }
 
-void receiver() {
-    DWM1000::newReceive();
-    // so we don't need to restart the receiver manually
-    DWM1000::startReceive();
-}
-
 void loop() {
     if (!sentAck && !receivedAck) {
         // check if inactive
