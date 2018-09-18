@@ -94,7 +94,6 @@ namespace DWM1000 {
 		byte        _channel;
 		boolean     _smartPower;
 		boolean     _frameCheck;
-		boolean     _permanentReceive    = false;
 		boolean     _debounceClockEnabled = false;
 		boolean     _nlos = false;
 		boolean     _autoTXPower = true;
@@ -722,12 +721,11 @@ namespace DWM1000 {
 		void _clearReceiveStatus() {
 			// clear latched RX bits (i.e. write 1 to clear)
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXDFR_BIT, true);
-			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEDONE_BIT, true);
-			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT, true);
-			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXPHE_BIT, true);
-			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXFCE_BIT, true);
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXFCG_BIT, true);
-			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXPRD_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXSFDD_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXPHD_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEDONE_BIT, true);
 			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
@@ -736,13 +734,38 @@ namespace DWM1000 {
 			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
+		void _clearReceiveTimeoutStatus() {
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXRFTO_BIT, true);
+			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+		}
+
+		void _clearReceiveFailedStatus() {
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXPHE_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXFCE_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXSFDTO_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, AFFREJ_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT, true);
+			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+		}
+
 		void _clearTransmitStatus() {
 			// clear latched TX bits
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, AAT_BIT, true);
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, TXFRB_BIT, true);
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, TXPRS_BIT, true);
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, TXPHS_BIT, true);
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, TXFRS_BIT, true);
 			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+		}
+
+		void _resetReceiver() {
+			byte pmscctrl0[LEN_PMSC_CTRL0];
+			readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			pmscctrl0[3] = 0xE0;
+			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			pmscctrl0[3] = 0xF0;
+			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 		}
 
 		/* Internal helpers to read configuration */
@@ -777,38 +800,35 @@ namespace DWM1000 {
 			if(isClockProblem() /* TODO and others */ && _handleError != 0) {
 				(*_handleError)();
 			}
-			if(isTransmitDone() && _handleSent != 0) {
-				(*_handleSent)();
+			if(isTransmitDone()) {
 				_clearTransmitStatus();
+				if(_handleSent != nullptr)
+					(*_handleSent)();
 			}
-			if(isReceiveTimestampAvailable() && _handleReceiveTimestampAvailable != 0) {
-				(*_handleReceiveTimestampAvailable)();
+			if(isReceiveTimestampAvailable()) {
 				_clearReceiveTimestampAvailableStatus();
+				if(_handleReceiveTimestampAvailable != nullptr)
+					(*_handleReceiveTimestampAvailable)();
 			}
-			if(isReceiveFailed() && _handleReceiveFailed != 0) {
-				(*_handleReceiveFailed)();
-				_clearReceiveStatus();
-				if(_permanentReceive) {
-					newReceive();
-					startReceive();
-				}
-			} else if(isReceiveTimeout() && _handleReceiveTimeout != 0) {
-				(*_handleReceiveTimeout)();
-				_clearReceiveStatus();
-				if(_permanentReceive) {
-					newReceive();
-					startReceive();
-				}
-			} else if(isReceiveDone() && _handleReceived != 0) {
-				(*_handleReceived)();
-				_clearReceiveStatus();
-				if(_permanentReceive) {
-					newReceive();
-					startReceive();
-				}
+			if(isReceiveFailed()) {
+				_clearReceiveFailedStatus();
+				forceTRxOff();
+				_resetReceiver();
+				if(_handleReceiveFailed != nullptr)
+					(*_handleReceiveFailed)();
 			}
-			// clear all status that is left unhandled
-			_clearAllStatus();
+			if(isReceiveTimeout()) {
+				_clearReceiveTimeoutStatus();
+				forceTRxOff();
+				_resetReceiver();
+				if(_handleReceiveTimeout != nullptr)
+					(*_handleReceiveTimeout)();
+			}
+			if(isReceiveDone()) {
+				_clearReceiveStatus();
+				if(_handleReceived != nullptr)
+					(*_handleReceived)();
+			}
 		}
 
 		void _setInterruptPolarity(boolean val) {
@@ -1003,7 +1023,7 @@ namespace DWM1000 {
 			pinMode(_rst, INPUT);
 			delay(10); // dwm1000 data sheet v1.2 page 5: nominal 3 ms, to be safe take more time
 			// force into idle mode (although it should be already after reset)
-			forceIdle();
+			forceTRxOff();
 		}
 	}
 
@@ -1019,7 +1039,7 @@ namespace DWM1000 {
 		pmscctrl0[3] = 0xF0;
 		writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 		// force into idle mode
-		forceIdle();
+		forceTRxOff();
 	}
 
 	void enableMode(const byte mode[]) {
@@ -1258,19 +1278,14 @@ namespace DWM1000 {
 		return static_cast<uint16_t>(_antennaDelay.getTimestamp());
 	}
 
-	void forceIdle() {
+	void forceTRxOff() {
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TRXOFF_BIT, true);
 		writeBytes(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
 	}
 
-	void newReceive() {
-		forceIdle();
-		memset(_sysctrl, 0, LEN_SYS_CTRL);
-		_clearReceiveStatus();
-	}
-
 	void startReceive(ReceiveMode mode) {
+		memset(_sysctrl, 0, LEN_SYS_CTRL);
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, SFCST_BIT, !_frameCheck);
 		if(mode == ReceiveMode::DELAYED)
 			DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, RXDLYS_BIT, true);
@@ -1279,23 +1294,17 @@ namespace DWM1000 {
 	}
 
 	void startTransmit(TransmitMode mode) {
-		forceIdle();
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
-		_clearTransmitStatus();
 		_writeTransmitFrameControlRegister();
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, SFCST_BIT, !_frameCheck);
 		if(mode == TransmitMode::DELAYED)
 			DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXDLYS_BIT, true);
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXSTRT_BIT, true);
 		writeBytes(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
-		if(_permanentReceive) {
-			memset(_sysctrl, 0, LEN_SYS_CTRL);
-			startReceive();
-		}
 	}
 
 	void newConfiguration() {
-		forceIdle();
+		forceTRxOff();
 		_readNetworkIdAndDeviceAddress();
 		_readSystemConfigurationRegister();
 		_readChannelControlRegister();
@@ -1487,15 +1496,6 @@ namespace DWM1000 {
 		_syscfg[2] |= _extendedFrameLength;
 	}
 
-	void receivePermanently(boolean val) {
-		_permanentReceive = val;
-		if(val) {
-			// in case permanent, also reenable receiver once failed
-			setReceiverAutoReenable(true);
-			_writeSystemConfigurationRegister();
-		}
-	}
-
 	void setChannel(byte channel) {
 		channel &= 0xF;
 		_chanctrl[0] = ((channel | (channel << 4)) & 0xFF);
@@ -1587,7 +1587,7 @@ namespace DWM1000 {
 			interruptOnReceived(true);
 			interruptOnReceiveFailed(true);
 			interruptOnReceiveTimestampAvailable(false);
-			interruptOnAutomaticAcknowledgeTrigger(true);
+			interruptOnAutomaticAcknowledgeTrigger(false);
 			setReceiverAutoReenable(true);
 			// TODO add channel and code to mode tuples
 			// TODO add channel and code settings with checks (see DWM1000 user manual 10.5 table 61)/
@@ -1631,7 +1631,6 @@ namespace DWM1000 {
 		byte rxFrameInfo[LEN_RX_FINFO];
 		readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
 		len = ((((uint16_t)rxFrameInfo[1] << 8) | (uint16_t)rxFrameInfo[0]) & 0x03FF);
-		
 		if(_frameCheck && len > 2) {
 			return len-2;
 		}
@@ -1802,54 +1801,22 @@ namespace DWM1000 {
 		return (float)f2/noise;
 	}
 
-	static void correctN(uint16_t& N) {
-		/* Needs correction */
-		byte chanCtrl;
-		byte sfdLength;
-		readBytes(CHAN_CTRL, NO_SUB, &chanCtrl, LEN_CHAN_CTRL);
-		readBytes(USR_SFD, SFD_LENGTH_SUB, &sfdLength, LEN_SFD_LENGTH);
-		boolean SFD_is_proprietary = DWM1000Utils::getBit(&chanCtrl, LEN_CHAN_CTRL, DWSFD_BIT);
-		if(SFD_is_proprietary) {
-			switch(sfdLength) {
-				case 0x08:
-					N -= 10; break;
-				case 0x10:
-					N -= 18; break;
-				case 0x40:
-					N -= 82; break;
-				default:
-					break;
-			}
-		} else {
-			N -= (sfdLength == 0x08 ? 5 : 64);
-		}
-	}
-
 	float getFirstPathPower() {
-		byte         fpAmpl1Bytes[LEN_FP_AMPL1];
-		byte         fpAmpl2Bytes[LEN_FP_AMPL2];
-		byte         fpAmpl3Bytes[LEN_FP_AMPL3];
-		byte         rxFrameInfo[LEN_RX_FINFO];
-		uint16_t     f1, f2, f3, N;
-		float        A, corrFac;
-		readBytes(RX_TIME, FP_AMPL1_SUB, fpAmpl1Bytes, LEN_FP_AMPL1);
-		readBytes(RX_FQUAL, FP_AMPL2_SUB, fpAmpl2Bytes, LEN_FP_AMPL2);
-		readBytes(RX_FQUAL, FP_AMPL3_SUB, fpAmpl3Bytes, LEN_FP_AMPL3);
-		readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
+		volatile byte         fpAmpl1Bytes[LEN_FP_AMPL1];
+		volatile byte         fpAmpl2Bytes[LEN_FP_AMPL2];
+		volatile byte         fpAmpl3Bytes[LEN_FP_AMPL3];
+		volatile byte         rxFrameInfo[LEN_RX_FINFO];
+		volatile uint16_t     f1, f2, f3, N;
+		volatile float        A, corrFac;
+		readBytes(RX_TIME, FP_AMPL1_SUB, (byte *)fpAmpl1Bytes, LEN_FP_AMPL1);
+		readBytes(RX_FQUAL, FP_AMPL2_SUB, (byte *)fpAmpl2Bytes, LEN_FP_AMPL2);
+		readBytes(RX_FQUAL, FP_AMPL3_SUB, (byte *)fpAmpl3Bytes, LEN_FP_AMPL3);
+		readBytes(RX_FINFO, NO_SUB, (byte *)rxFrameInfo, LEN_RX_FINFO);
 		f1 = (uint16_t)fpAmpl1Bytes[0] | ((uint16_t)fpAmpl1Bytes[1] << 8);
 		f2 = (uint16_t)fpAmpl2Bytes[0] | ((uint16_t)fpAmpl2Bytes[1] << 8);
 		f3 = (uint16_t)fpAmpl3Bytes[0] | ((uint16_t)fpAmpl3Bytes[1] << 8);
 		N  = (((uint16_t)rxFrameInfo[2] >> 4) & 0xFF) | ((uint16_t)rxFrameInfo[3] << 4);
-
-		/* Correction of N */
-		byte rxpacc_nosat[LEN_RXPACC_NOSAT];
-		uint16_t N_nosat;
-		readBytes(DRX_TUNE, RXPACC_NOSAT_SUB, rxpacc_nosat, LEN_RXPACC_NOSAT);
-		N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
-		if(N == N_nosat) {
-			correctN(N);
-		}
-
+		
 		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 			A       = 113.77;
 			corrFac = 2.3334;
@@ -1868,24 +1835,15 @@ namespace DWM1000 {
 	}
 
 	float getReceivePower() {
-		byte     cirPwrBytes[LEN_CIR_PWR];
-		byte     rxFrameInfo[LEN_RX_FINFO];
-		uint32_t twoPower17 = 131072;
-		uint16_t C, N;
-		float    A, corrFac;
-		readBytes(RX_FQUAL, CIR_PWR_SUB, cirPwrBytes, LEN_CIR_PWR);
-		readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
+		volatile byte     cirPwrBytes[LEN_CIR_PWR];
+		volatile byte     rxFrameInfo[LEN_RX_FINFO];
+		volatile float twoPower17 = 131072;
+		volatile uint16_t C, N;
+		volatile float    A, corrFac;
+		readBytes(RX_FQUAL, CIR_PWR_SUB, (byte *)cirPwrBytes, LEN_CIR_PWR);
+		readBytes(RX_FINFO, NO_SUB, (byte *)rxFrameInfo, LEN_RX_FINFO);
 		C = (uint16_t)cirPwrBytes[0] | ((uint16_t)cirPwrBytes[1] << 8);
 		N = (((uint16_t)rxFrameInfo[2] >> 4) & 0xFF) | ((uint16_t)rxFrameInfo[3] << 4);
-		
-		/* Correction of N */
-		byte rxpacc_nosat[LEN_RXPACC_NOSAT];
-		uint16_t N_nosat;
-		readBytes(DRX_TUNE, RXPACC_NOSAT_SUB, rxpacc_nosat, LEN_RXPACC_NOSAT);
-		N_nosat = (uint16_t)rxpacc_nosat[0] | ((uint16_t)rxpacc_nosat[1] << 8);
-		if(N == N_nosat) {
-			correctN(N);
-		}
 
 		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 			A       = 113.77;
@@ -1894,7 +1852,7 @@ namespace DWM1000 {
 			A       = 121.74;
 			corrFac = 1.1667;
 		}
-		float estRxPwr = 10.0*log10(((float)C*(float)twoPower17)/((float)N*(float)N))-A;
+		float estRxPwr = 10.0*log10(((float)C*twoPower17)/((float)N*(float)N))-A;
 		if(estRxPwr <= -88) {
 			return estRxPwr;
 		} else {

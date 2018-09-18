@@ -48,16 +48,14 @@ const uint8_t PIN_RST = 9; // reset pin
 const uint8_t PIN_IRQ = 2; // irq pin
 const uint8_t PIN_SS = SS; // spi select pin
 
-// DEBUG packet sent status and count
-boolean sent = false;
-volatile boolean sentAck = false;
-volatile unsigned long delaySent = 0;
+unsigned long delaySent = 0;
 int16_t sentNum = 0; // todo check int type
 DWM1000Time sentTime;
+volatile boolean transmitDone = false;
 
 void setup() {
   // DEBUG monitoring
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println(F("### DWM1000-arduino-sender-test ###"));
   // initialize the driver
   DWM1000::begin(PIN_IRQ, PIN_RST);
@@ -83,42 +81,37 @@ void setup() {
   // attach callback for (successfully) sent messages
   DWM1000::attachSentHandler(handleSent);
   // start a transmission
-  transmitter();
+  transmit();
 }
 
-void handleSent() {
-  // status change on sent success
-  sentAck = true;
-}
-
-void transmitter() {
+void transmit() {
   // transmit some data
   Serial.print("Transmitting packet ... #"); Serial.println(sentNum);
   String msg = "Hello DWM1000, it's #"; msg += sentNum;
   DWM1000::setData(msg);
   // delay sending the message for the given amount
-  DWM1000::setDelay(10);
-  DWM1000::startTransmit();
+  DWM1000::setDelay(10000);
+  DWM1000::startTransmit(TransmitMode::DELAYED);
   delaySent = millis();
 }
 
-void loop() {
-  if (!sentAck) {
-    return;
+void handleSent() {
+  transmitDone = true;
+}
+
+void loop() { 
+  if(transmitDone) {
+    transmitDone = false;
+    Serial.print("ARDUINO delay sent [ms] ... "); Serial.println(millis() - delaySent);
+    DWM1000Time newSentTime;
+    DWM1000::getTransmitTimestamp(newSentTime);
+    Serial.print("Processed packet ... #"); Serial.println(sentNum);
+    Serial.print("Sent timestamp ... "); Serial.println(newSentTime.getAsMicroSeconds());
+    // note: delta is just for simple demo as not correct on system time counter wrap-around
+    Serial.print("DWM1000 delta send time [ms] ... "); Serial.println((newSentTime.getAsMicroSeconds() - sentTime.getAsMicroSeconds()) * 1.0e-3);
+    sentTime = newSentTime;
+    sentNum++;
+    // again, transmit some data
+    transmit();
   }
-  // continue on success confirmation
-  // (we are here after the given amount of send delay time has passed)
-  sentAck = false;
-  // update and print some information about the sent message
-  Serial.print("ARDUINO delay sent [ms] ... "); Serial.println(millis() - delaySent);
-  DWM1000Time newSentTime;
-  DWM1000::getTransmitTimestamp(newSentTime);
-  Serial.print("Processed packet ... #"); Serial.println(sentNum);
-  Serial.print("Sent timestamp ... "); Serial.println(newSentTime.getAsMicroSeconds());
-  // note: delta is just for simple demo as not correct on system time counter wrap-around
-  Serial.print("DWM1000 delta send time [ms] ... "); Serial.println((newSentTime.getAsMicroSeconds() - sentTime.getAsMicroSeconds()) * 1.0e-3);
-  sentTime = newSentTime;
-  sentNum++;
-  // again, transmit some data
-  transmitter();
 }

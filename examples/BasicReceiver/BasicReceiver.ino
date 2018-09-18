@@ -50,14 +50,14 @@ const uint8_t PIN_IRQ = 2; // irq pin
 const uint8_t PIN_SS = SS; // spi select pin
 
 // DEBUG packet sent status and count
-volatile boolean received = false;
-volatile boolean error = false;
-volatile int16_t numReceived = 0; // todo check int type
+int16_t numReceived = 0; // todo check int type
 String message;
+volatile boolean receiveDone = false;
+volatile boolean receiveError = false;
 
 void setup() {
   // DEBUG monitoring
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println(F("### DWM1000-arduino-receiver-test ###"));
   // initialize the driver
   DWM1000::begin(PIN_IRQ, PIN_RST);
@@ -66,6 +66,7 @@ void setup() {
   // general configuration
   DWM1000::newConfiguration();
   DWM1000::setDefaults();
+  DWM1000::setReceiverAutoReenable(true);
   DWM1000::setDeviceAddress(6);
   DWM1000::setNetworkId(10);
   DWM1000::commitConfiguration();
@@ -83,30 +84,29 @@ void setup() {
   // attach callback for (successfully) received messages
   DWM1000::attachReceivedHandler(handleReceived);
   DWM1000::attachReceiveFailedHandler(handleError);
-  DWM1000::attachErrorHandler(handleError);
   // start reception
-  receiver();
-}
-
-void handleReceived() {
-  // status change on reception success
-  received = true;
-}
-
-void handleError() {
-  error = true;
-}
-
-void receiver() {
-  DWM1000::newReceive();
-  // so we don't need to restart the receiver manually
-  DWM1000::receivePermanently(true);
   DWM1000::startReceive();
 }
 
+void handleReceived() {
+  receiveDone = true;
+  
+}
+
+void handleError() {
+  receiveError = true;
+  
+}
+
 void loop() {
-  // enter on confirmation of ISR status change (successfully received)
-  if (received) {
+  if(receiveError) {
+    receiveError = false;
+    Serial.println("Error receiving a message");
+    DWM1000::getData(message);
+    Serial.print("Error data is ... "); Serial.println(message);
+  }
+  if(receiveDone) {
+    receiveDone = false;
     numReceived++;
     // get data as string
     DWM1000::getData(message);
@@ -115,12 +115,6 @@ void loop() {
     Serial.print("FP power is [dBm] ... "); Serial.println(DWM1000::getFirstPathPower());
     Serial.print("RX power is [dBm] ... "); Serial.println(DWM1000::getReceivePower());
     Serial.print("Signal quality is ... "); Serial.println(DWM1000::getReceiveQuality());
-    received = false;
-  }
-  if (error) {
-    Serial.println("Error receiving a message");
-    error = false;
-    DWM1000::getData(message);
-    Serial.print("Error data is ... "); Serial.println(message);
+    DWM1000::startReceive();
   }
 }

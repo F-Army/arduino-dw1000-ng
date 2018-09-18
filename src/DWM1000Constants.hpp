@@ -105,6 +105,9 @@
 #define TXPHS_BIT 6
 #define TXFRS_BIT 7
 #define LDEDONE_BIT 10
+#define RXPRD_BIT 8
+#define RXSFDD_BIT 9
+#define RXPHD_BIT 11
 #define RXPHE_BIT 12
 #define RXDFR_BIT 13
 #define RXFCG_BIT 14
@@ -116,6 +119,7 @@
 #define LDEERR_BIT 18
 #define RFPLL_LL_BIT 24
 #define CLKPLL_LL_BIT 25
+#define AFFREJ_BIT 29
 
 // system event mask register
 // NOTE: uses the bit definitions of SYS_STATUS (below 32)

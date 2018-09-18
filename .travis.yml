@@ -12,7 +12,6 @@ env:
     - PLATFORMIO_CI_SRC=examples/BasicConnectivityTest/BasicConnectivityTest.ino
     - PLATFORMIO_CI_SRC=examples/BasicReceiver/BasicReceiver.ino
     - PLATFORMIO_CI_SRC=examples/BasicSender/BasicSender.ino
-    - PLATFORMIO_CI_SRC=examples/MessagePingPong/MessagePingPong.ino
     - PLATFORMIO_CI_SRC=examples/TwoWayRangingResponder/TwoWayRangingResponder.ino
     - PLATFORMIO_CI_SRC=examples/TwoWayRangingInitiator/TwoWayRangingInitiator.ino
     - PLATFORMIO_CI_SRC=examples/TimestampUsageTest/TimestampUsageTest.ino
