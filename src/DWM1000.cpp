@@ -840,8 +840,6 @@ namespace DWM1000 {
 					startReceive();
 				}
 			}
-			// clear all status that is left unhandled
-			_clearAllStatus();
 		}
 
 		void _setInterruptPolarity(boolean val) {
