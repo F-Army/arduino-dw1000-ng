@@ -123,6 +123,7 @@ void setup() {
     //DWM1000::receivePermanently(true);
    
     receiver();
+    Serial.println("Vado in RX 1");        
     noteActivity();
     // for first time ranging frequency computation
     rangingCountPeriod = millis();
@@ -139,6 +140,7 @@ void resetInactive() {
     DWM1000::forceTRxOff();
     receiver();
     noteActivity();
+    Serial.println("Resettato");
 }
 
 void handleSent() {
@@ -226,8 +228,22 @@ void loop() {
     }
     // continue on any success confirmation
     if (sentAck) {
+        Serial.print("Inviato:");
         sentAck = false;
         byte msgId = data[0];
+        switch(msgId) {
+            case POLL_ACK:
+                Serial.println(" POLLACK");
+                return;
+            case RANGE_REPORT:
+                Serial.println(" RANGE REPORT");
+                return;
+            case RANGE_FAILED:
+                Serial.println(" RANGE FAILED");
+                return;
+            default:
+                Serial.println(" INASPETTATO");
+        }
         if (msgId == POLL_ACK) {
             DWM1000::getTransmitTimestamp(timePollAckSent);
             noteActivity();
@@ -235,6 +251,7 @@ void loop() {
         DWM1000::startReceive();
     }
     if (receivedAck) {
+        Serial.print("Ricevuto:")
         receivedAck = false;
         // get message and parse
         DWM1000::getData(data, LEN_DATA);
@@ -244,6 +261,7 @@ void loop() {
             protocolFailed = true;
         }
         if (msgId == POLL) {
+            Serial.println("POLL");            
             // on POLL we (re-)start, so no protocol failure
             protocolFailed = false;
             DWM1000::getReceiveTimestamp(timePollReceived);
@@ -252,6 +270,7 @@ void loop() {
             noteActivity();
         }
         else if (msgId == RANGE) {
+            Serial.println("RANGE");    
             DWM1000::getReceiveTimestamp(timeRangeReceived);
             expectedMsgId = POLL;
             if (!protocolFailed) {
