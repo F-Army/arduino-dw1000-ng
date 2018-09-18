@@ -155,6 +155,7 @@ void transmitPollAck() {
     data[0] = POLL_ACK;
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit();
+    DWM1000::startReceive();
 }
 
 void transmitRangeReport(float curRange) {
@@ -163,12 +164,14 @@ void transmitRangeReport(float curRange) {
     memcpy(data + 1, &curRange, 4);
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit();
+    DWM1000::startReceive();
 }
 
 void transmitRangeFailed() {
     data[0] = RANGE_FAILED;
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit();
+    DWM1000::startReceive();
 }
 
 void receiver() {

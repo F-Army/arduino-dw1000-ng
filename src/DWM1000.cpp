@@ -1301,9 +1301,6 @@ namespace DWM1000 {
 			DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXDLYS_BIT, true);
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXSTRT_BIT, true);
 		writeBytes(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
-		
-		
-		startReceive();
 	}
 
 	void newConfiguration() {
