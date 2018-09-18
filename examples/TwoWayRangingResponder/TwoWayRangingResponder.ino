@@ -251,7 +251,7 @@ void loop() {
         DWM1000::startReceive();
     }
     if (receivedAck) {
-        Serial.print("Ricevuto:")
+        Serial.print("Ricevuto:");
         receivedAck = false;
         // get message and parse
         DWM1000::getData(data, LEN_DATA);
