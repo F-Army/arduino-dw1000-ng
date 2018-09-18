@@ -722,12 +722,11 @@ namespace DWM1000 {
 		void _clearReceiveStatus() {
 			// clear latched RX bits (i.e. write 1 to clear)
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXDFR_BIT, true);
-			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEDONE_BIT, true);
-			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT, true);
-			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXPHE_BIT, true);
-			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXFCE_BIT, true);
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXFCG_BIT, true);
-			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXPRD_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXSFDD_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXPHD_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEDONE_BIT, true);
 			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
@@ -736,13 +735,38 @@ namespace DWM1000 {
 			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
+		void _clearReceiveTimeoutStatus() {
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXRFTO_BIT, true);
+			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+		}
+
+		void _clearReceiveFailedStatus() {
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXPHE_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXFCE_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, RXSFDTO_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, AFFREJ_BIT, true);
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT, true);
+			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+		}
+
 		void _clearTransmitStatus() {
 			// clear latched TX bits
+			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, AAT_BIT, true);
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, TXFRB_BIT, true);
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, TXPRS_BIT, true);
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, TXPHS_BIT, true);
 			DWM1000Utils::setBit(_sysstatus, LEN_SYS_STATUS, TXFRS_BIT, true);
 			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+		}
+
+		void _resetReceiver() {
+			byte pmscctrl0[LEN_PMSC_CTRL0];
+			readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			pmscctrl0[3] = 0xE0;
+			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			pmscctrl0[3] = 0xF0;
+			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 		}
 
 		/* Internal helpers to read configuration */
@@ -777,24 +801,32 @@ namespace DWM1000 {
 			if(isClockProblem() /* TODO and others */ && _handleError != 0) {
 				(*_handleError)();
 			}
-			if(isTransmitDone() && _handleSent != 0) {
-				(*_handleSent)();
+			if(isTransmitDone()) {
+				if(_handleSent != nullptr)
+					(*_handleSent)();
 				_clearTransmitStatus();
 			}
-			if(isReceiveTimestampAvailable() && _handleReceiveTimestampAvailable != 0) {
-				(*_handleReceiveTimestampAvailable)();
+			if(isReceiveTimestampAvailable()) {
+				if(_handleReceiveTimestampAvailable != nullptr)
+					(*_handleReceiveTimestampAvailable)();
 				_clearReceiveTimestampAvailableStatus();
 			}
-			if(isReceiveFailed() && _handleReceiveFailed != 0) {
-				(*_handleReceiveFailed)();
-				_clearReceiveStatus();
+			if(isReceiveFailed()) {
+				if(_handleReceiveFailed != nullptr)
+					(*_handleReceiveFailed)();
+				_clearReceiveFailedStatus();
+				forceIdle();
+				_resetReceiver();
 				if(_permanentReceive) {
 					newReceive();
 					startReceive();
 				}
-			} else if(isReceiveTimeout() && _handleReceiveTimeout != 0) {
-				(*_handleReceiveTimeout)();
-				_clearReceiveStatus();
+			} else if(isReceiveTimeout()) {
+				if(_handleReceiveTimeout != nullptr)
+					(*_handleReceiveTimeout)();
+				_clearReceiveTimeoutStatus();
+				forceIdle();
+				_resetReceiver();
 				if(_permanentReceive) {
 					newReceive();
 					startReceive();
