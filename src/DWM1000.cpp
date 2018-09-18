@@ -1304,6 +1304,7 @@ namespace DWM1000 {
 	}
 
 	void startReceive(ReceiveMode mode) {
+		memset(_sysctrl, 0, LEN_SYS_CTRL);
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, SFCST_BIT, !_frameCheck);
 		if(mode == ReceiveMode::DELAYED)
 			DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, RXDLYS_BIT, true);
