@@ -835,10 +835,6 @@ namespace DWM1000 {
 				if(_handleReceived != nullptr)
 					(*_handleReceived)();
 				_clearReceiveStatus();
-				if(_permanentReceive) {
-					newReceive();
-					startReceive();
-				}
 			}
 		}
 
