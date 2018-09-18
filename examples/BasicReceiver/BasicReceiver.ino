@@ -50,8 +50,10 @@ const uint8_t PIN_IRQ = 2; // irq pin
 const uint8_t PIN_SS = SS; // spi select pin
 
 // DEBUG packet sent status and count
-volatile int16_t numReceived = 0; // todo check int type
+int16_t numReceived = 0; // todo check int type
 String message;
+volatile boolean receiveDone = false;
+volatile boolean receiveError = false;
 
 void setup() {
   // DEBUG monitoring
@@ -87,22 +89,32 @@ void setup() {
 }
 
 void handleReceived() {
-  // status change on reception success
-  numReceived++;
-  // get data as string
-  DWM1000::getData(message);
-  Serial.print("Received message ... #"); Serial.println(numReceived);
-  Serial.print("Data is ... "); Serial.println(message);
-  Serial.print("FP power is [dBm] ... "); Serial.println(DWM1000::getFirstPathPower());
-  Serial.print("RX power is [dBm] ... "); Serial.println(DWM1000::getReceivePower());
-  Serial.print("Signal quality is ... "); Serial.println(DWM1000::getReceiveQuality());
-  DWM1000::startReceive();
+  receiveDone = true;
+  
 }
 
 void handleError() {
-  Serial.println("Error receiving a message");
-  DWM1000::getData(message);
-  Serial.print("Error data is ... "); Serial.println(message);
+  receiveError = true;
+  
 }
 
-void loop() { }
+void loop() {
+  if(receiveError) {
+    receiveError = false;
+    Serial.println("Error receiving a message");
+    DWM1000::getData(message);
+    Serial.print("Error data is ... "); Serial.println(message);
+  }
+  if(receiveDone) {
+    receiveDone = false;
+    numReceived++;
+    // get data as string
+    DWM1000::getData(message);
+    Serial.print("Received message ... #"); Serial.println(numReceived);
+    Serial.print("Data is ... "); Serial.println(message);
+    Serial.print("FP power is [dBm] ... "); Serial.println(DWM1000::getFirstPathPower());
+    Serial.print("RX power is [dBm] ... "); Serial.println(DWM1000::getReceivePower());
+    Serial.print("Signal quality is ... "); Serial.println(DWM1000::getReceiveQuality());
+    DWM1000::startReceive();
+  }
+}

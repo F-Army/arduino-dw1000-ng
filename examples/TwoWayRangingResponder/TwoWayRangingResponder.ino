@@ -244,6 +244,7 @@ void computeRangeSymmetric() {
 void loop() {
     // check if inactive
     if (millis() - lastActivity > resetPeriod) {
+        DWM1000::forceTRxOff();
         resetInactive();
     }
 }

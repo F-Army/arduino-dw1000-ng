@@ -48,9 +48,10 @@ const uint8_t PIN_RST = 9; // reset pin
 const uint8_t PIN_IRQ = 2; // irq pin
 const uint8_t PIN_SS = SS; // spi select pin
 
-volatile unsigned long delaySent = 0;
-volatile int16_t sentNum = 0; // todo check int type
+unsigned long delaySent = 0;
+int16_t sentNum = 0; // todo check int type
 DWM1000Time sentTime;
+volatile boolean transmitDone = false;
 
 void setup() {
   // DEBUG monitoring
@@ -89,23 +90,28 @@ void transmit() {
   String msg = "Hello DWM1000, it's #"; msg += sentNum;
   DWM1000::setData(msg);
   // delay sending the message for the given amount
-  DWM1000::setDelay(3000);
+  DWM1000::setDelay(500);
   DWM1000::startTransmit(TransmitMode::DELAYED);
   delaySent = millis();
 }
 
 void handleSent() {
-  Serial.print("ARDUINO delay sent [ms] ... "); Serial.println(millis() - delaySent);
-  DWM1000Time newSentTime;
-  DWM1000::getTransmitTimestamp(newSentTime);
-  Serial.print("Processed packet ... #"); Serial.println(sentNum);
-  Serial.print("Sent timestamp ... "); Serial.println(newSentTime.getAsMicroSeconds());
-  // note: delta is just for simple demo as not correct on system time counter wrap-around
-  Serial.print("DWM1000 delta send time [ms] ... "); Serial.println((newSentTime.getAsMicroSeconds() - sentTime.getAsMicroSeconds()) * 1.0e-3);
-  sentTime = newSentTime;
-  sentNum++;
-  // again, transmit some data
-  transmit();
+  transmitDone = true;
 }
 
-void loop() { }
+void loop() { 
+  if(transmitDone) {
+    transmitDone = false;
+    Serial.print("ARDUINO delay sent [ms] ... "); Serial.println(millis() - delaySent);
+    DWM1000Time newSentTime;
+    DWM1000::getTransmitTimestamp(newSentTime);
+    Serial.print("Processed packet ... #"); Serial.println(sentNum);
+    Serial.print("Sent timestamp ... "); Serial.println(newSentTime.getAsMicroSeconds());
+    // note: delta is just for simple demo as not correct on system time counter wrap-around
+    Serial.print("DWM1000 delta send time [ms] ... "); Serial.println((newSentTime.getAsMicroSeconds() - sentTime.getAsMicroSeconds()) * 1.0e-3);
+    sentTime = newSentTime;
+    sentNum++;
+    // again, transmit some data
+    transmit();
+  }
+}
