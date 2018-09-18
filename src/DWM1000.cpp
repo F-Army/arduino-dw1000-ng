@@ -1587,7 +1587,6 @@ namespace DWM1000 {
 			interruptOnReceiveFailed(true);
 			interruptOnReceiveTimestampAvailable(false);
 			interruptOnAutomaticAcknowledgeTrigger(true);
-			setReceiverAutoReenable(true);
 			// TODO add channel and code to mode tuples
 			// TODO add channel and code settings with checks (see DWM1000 user manual 10.5 table 61)/
 			setChannel(CHANNEL_5);
