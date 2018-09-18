@@ -1298,7 +1298,7 @@ namespace DWM1000 {
 	void newReceive() {
 		forceTRxOff();
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
-		_clearReceiveStatus();
+		//_clearReceiveStatus();
 	}
 
 	void startReceive(ReceiveMode mode) {
