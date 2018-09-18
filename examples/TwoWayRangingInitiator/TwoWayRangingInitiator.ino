@@ -162,6 +162,7 @@ void loop() {
     if (!sentAck && !receivedAck) {
         // check if inactive
         if (millis() - lastActivity > resetPeriod) {
+             Serial.println("RESET");
             DWM1000::forceTRxOff();
             resetInactive();
         }
