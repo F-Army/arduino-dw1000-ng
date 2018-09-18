@@ -169,41 +169,52 @@ void loop() {
     }
     // continue on any success confirmation
     if (sentAck) {
+        Serial.print("Inviato:");
         sentAck = false;
         byte msgId = data[0];
         if (msgId == POLL) {
+            Serial.println("POLL");
             DWM1000::getTransmitTimestamp(timePollSent);
             //Serial.print("Sent POLL @ "); Serial.println(timePollSent.getAsFloat());
         } else if (msgId == RANGE) {
+            Serial.println("RANGE");
             DWM1000::getTransmitTimestamp(timeRangeSent);
             noteActivity();
         }
+        Serial.println("Mi metto in ricezione");
         DWM1000::startReceive();
     }
     if (receivedAck) {
+        Serial.print("Ricevuto:");
         receivedAck = false;
         // get message and parse
         DWM1000::getData(data, LEN_DATA);
         byte msgId = data[0];
         if (msgId != expectedMsgId) {
+            Serial.print("(INASPETTATO)");
             // unexpected message, start over again
             //Serial.print("Received wrong message # "); Serial.println(msgId);
             expectedMsgId = POLL_ACK;
             transmitPoll();
             return;
+        } else {
+            Serial.print("(ASPETTATO)");
         }
         if (msgId == POLL_ACK) {
+            Serial.println("POLL_ACK");
             DWM1000::getReceiveTimestamp(timePollAckReceived);
             expectedMsgId = RANGE_REPORT;
             transmitRange();
             noteActivity();
         } else if (msgId == RANGE_REPORT) {
+            Serial.println("RANGE_REPORT");
             expectedMsgId = POLL_ACK;
             float curRange;
             memcpy(&curRange, data + 1, 4);
             transmitPoll();
             noteActivity();
         } else if (msgId == RANGE_FAILED) {
+            Serial.println("RANGE_FAILED");
             expectedMsgId = POLL_ACK;
             transmitPoll();
             noteActivity();

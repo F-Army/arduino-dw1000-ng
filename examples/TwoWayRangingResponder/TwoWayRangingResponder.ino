@@ -231,19 +231,16 @@ void loop() {
         Serial.print("Inviato:");
         sentAck = false;
         byte msgId = data[0];
-        switch(msgId) {
-            case POLL_ACK:
-                Serial.println(" POLLACK");
-                return;
-            case RANGE_REPORT:
-                Serial.println(" RANGE REPORT");
-                return;
-            case RANGE_FAILED:
-                Serial.println(" RANGE FAILED");
-                return;
-            default:
-                Serial.println(" INASPETTATO");
-        }
+        if(msgId == POLL_ACK)
+            Serial.println(" POLLACK");
+        else if(msgId == RANGE_REPORT)
+            Serial.println(" RANGE REPORT");
+        else if(msgId == RANGE_FAILED)
+            Serial.println(" RANGE FAILED");
+        else
+            Serial.println(" INASPETTATO");
+
+        Serial.println("Arrivo sopra a if");
         if (msgId == POLL_ACK) {
             DWM1000::getTransmitTimestamp(timePollAckSent);
             noteActivity();
