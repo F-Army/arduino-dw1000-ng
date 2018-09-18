@@ -1312,6 +1312,7 @@ namespace DWM1000 {
 	}
 
 	void startTransmit(TransmitMode mode) {
+		forceTRxOff();
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
 		_clearTransmitStatus();
 		_writeTransmitFrameControlRegister();
