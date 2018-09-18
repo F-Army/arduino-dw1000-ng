@@ -248,6 +248,7 @@ void loop() {
             DWM1000::getTransmitTimestamp(timePollAckSent);
             noteActivity();
         }
+        Serial.println("Mi metto in ricezione");
         DWM1000::startReceive();
     }
     if (receivedAck) {
