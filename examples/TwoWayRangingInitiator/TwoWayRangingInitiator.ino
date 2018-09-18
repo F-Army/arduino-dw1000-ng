@@ -61,7 +61,10 @@ const uint8_t PIN_SS = SS; // spi select pin
 #define RANGE_REPORT 3
 #define RANGE_FAILED 255
 // message flow state
-byte expectedMsgId = POLL_ACK;
+volatile byte expectedMsgId = POLL_ACK;
+// message sent/received state
+volatile boolean sentAck = false;
+volatile boolean receivedAck = false;
 // timestamps to remember
 DWM1000Time timePollSent;
 DWM1000Time timePollAckReceived;
@@ -74,9 +77,6 @@ uint32_t lastActivity;
 uint32_t resetPeriod = 250;
 // reply times (same on both sides for symm. ranging)
 uint16_t replyDelayTimeUS = 3000;
-
-volatile boolean transmitDone = false;
-volatile boolean receiveDone = false;
 
 void setup() {
     // DEBUG monitoring
@@ -107,7 +107,9 @@ void setup() {
     DWM1000::attachSentHandler(handleSent);
     DWM1000::attachReceivedHandler(handleReceived);
     // anchor starts by transmitting a POLL message
+    //DWM1000::receivePermanently(true);
     transmitPoll();
+    noteActivity();
 }
 
 void noteActivity() {
@@ -115,19 +117,27 @@ void noteActivity() {
     lastActivity = millis();
 }
 
+void resetInactive() {
+    // tag sends POLL and listens for POLL_ACK
+    expectedMsgId = POLL_ACK;
+    transmitPoll();
+    noteActivity();
+}
+
 void handleSent() {
-    transmitDone = true;
+    // status change on sent success
+    sentAck = true;
 }
 
 void handleReceived() {
-    receiveDone = true;
+    // status change on received success
+    receivedAck = true;
 }
 
 void transmitPoll() {
     data[0] = POLL;
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit();
-    expectedMsgId = POLL_ACK;
 }
 
 void transmitRange() {
@@ -140,48 +150,63 @@ void transmitRange() {
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit(TransmitMode::DELAYED);
     //Serial.print("Expect RANGE to be sent @ "); Serial.println(timeRangeSent.getAsFloat());
-    expectedMsgId = RANGE_REPORT;
+}
+
+void receiver() {
+    //DWM1000::newReceive();
+    // so we don't need to restart the receiver manually
+    DWM1000::startReceive();
 }
 
 void loop() {
-    // check if inactive
-    if(!transmitDone && !receiveDone) {
+    if (!sentAck && !receivedAck) {
+        // check if inactive
         if (millis() - lastActivity > resetPeriod) {
             DWM1000::forceTRxOff();
-            transmitPoll();
+            resetInactive();
         }
+        return;
     }
-
-    if(transmitDone) {
-        transmitDone = false;
-        noteActivity();
-        if(data[0] == POLL) {
+    // continue on any success confirmation
+    if (sentAck) {
+        sentAck = false;
+        byte msgId = data[0];
+        if (msgId == POLL) {
             DWM1000::getTransmitTimestamp(timePollSent);
-        } else if(data[0] == RANGE) {
+            //Serial.print("Sent POLL @ "); Serial.println(timePollSent.getAsFloat());
+        } else if (msgId == RANGE) {
             DWM1000::getTransmitTimestamp(timeRangeSent);
+            noteActivity();
         }
         DWM1000::startReceive();
     }
-
-    if(receiveDone) {
-        receiveDone = false;
-        noteActivity();
+    if (receivedAck) {
+        receivedAck = false;
+        // get message and parse
         DWM1000::getData(data, LEN_DATA);
-        if (data[0] != expectedMsgId) {
+        byte msgId = data[0];
+        if (msgId != expectedMsgId) {
             // unexpected message, start over again
             //Serial.print("Received wrong message # "); Serial.println(msgId);
+            expectedMsgId = POLL_ACK;
             transmitPoll();
             return;
         }
-        if (data[0] == POLL_ACK) {
+        if (msgId == POLL_ACK) {
             DWM1000::getReceiveTimestamp(timePollAckReceived);
+            expectedMsgId = RANGE_REPORT;
             transmitRange();
-        } else if (data[0] == RANGE_REPORT) {
+            noteActivity();
+        } else if (msgId == RANGE_REPORT) {
+            expectedMsgId = POLL_ACK;
             float curRange;
             memcpy(&curRange, data + 1, 4);
             transmitPoll();
-        } else if (data[0] == RANGE_FAILED) {
+            noteActivity();
+        } else if (msgId == RANGE_FAILED) {
+            expectedMsgId = POLL_ACK;
             transmitPoll();
+            noteActivity();
         }
     }
 }
