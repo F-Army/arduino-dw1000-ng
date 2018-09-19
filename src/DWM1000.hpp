@@ -42,6 +42,7 @@
 #include <string.h>
 #include <Arduino.h>
 #include <SPI.h>
+#include "DWM1000Constants.hpp"
 #include "DWM1000Time.hpp"
 
 namespace DWM1000 {
