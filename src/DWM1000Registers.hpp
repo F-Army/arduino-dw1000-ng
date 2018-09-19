@@ -68,7 +68,7 @@ constexpr byte RXDLYS_BIT = 9;
 constexpr byte SYS_STATUS = 0x0F;
 constexpr byte LEN_SYS_STATUS = 5;
 constexpr byte CPLOCK_BIT = 1;
-constexpr byte AAT_BIT = = 3;
+constexpr byte AAT_BIT = 3;
 constexpr byte TXFRB_BIT = 4;
 constexpr byte TXPRS_BIT = 5;
 constexpr byte TXPHS_BIT = 6;
