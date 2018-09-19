@@ -21,7 +21,6 @@ newConfiguration	KEYWORD2
 commitConfiguration	KEYWORD2
 startTransmit	KEYWORD2
 startReceive	KEYWORD2
-setDefaults	KEYWORD2
 getPrettyBytes KEYWORD2
 # TODO ...
 
