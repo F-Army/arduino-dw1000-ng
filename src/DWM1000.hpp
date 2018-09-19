@@ -186,9 +186,6 @@ namespace DWM1000 {
 	Specifies whether the DWM1000 chip should, again, turn on its receiver in case that the
 	last reception failed. 
 
-	This setting is enabled as part of `setDefaults()` if the device is
-	in idle mode.
-
 	@param[in] val `true` to enable, `false` to disable receiver auto-reenable.
 	*/
 	void setReceiverAutoReenable(boolean val);
@@ -199,8 +196,6 @@ namespace DWM1000 {
 	checksum is also not expected at receiver side. Note that when suppressing frame checks, 
 	the error event handler	(attached via `attachReceiveErrorHandler()`) will not be triggered 
 	if received data is corrupted.
-
-	Frame checks are enabled as part of `setDefaults()` if the device is in idle mode.
 
 	@param[in] val `true` to suppress frame check on sender and receiver side, `false` otherwise.
 	*/
@@ -226,8 +221,6 @@ namespace DWM1000 {
 
 	(see chapters 9.1/2/3/4 DW1000 user manual)
 
-	See `setDefaults()` and `enableMode()` for additional information on data rate settings.
-
 	WARNING: It resets SFD configuration to recommended in table 21 of DW1000 User manual.
 
 	@param[in] rate The data transmission rate, encoded by the above defined constants.
@@ -244,8 +237,6 @@ namespace DWM1000 {
 	power, but also delivers slightly better transmission performance (i.e. on communication range and 
 	timestamp accuracy) 
 	(see chapters 9.1/2/3/4 DW1000 user manual).
-
-	See `setDefaults()` and `enableMode()` for additional information on PRF settings.
 
 	@param[in] freq The PRF, encoded by the above defined constants.
 	*/
@@ -378,14 +369,9 @@ namespace DWM1000 {
 	Note that SHORTRANGE and SHORTPREAMBLE refers to the better power efficiency and improved transmission performance
 	of 16 MHZ and 64 MHZ PRF respectively (see `setPulseFrequency()`).
 
-	The default setting that is selected by `setDefaults()` is MODE_LONGRANGE_LOWPRF_SHORTPREAMBLE.
-
 	@param[in] mode The mode of operation, encoded by the above defined constants.
 	*/
 	void enableMode(const byte mode[]);
-	
-	/* use RX/TX specific and general default settings */
-	void setDefaults();
 	
 	/* host-initiated reading of temperature and battery voltage */
 	void getTemp(float& temp);

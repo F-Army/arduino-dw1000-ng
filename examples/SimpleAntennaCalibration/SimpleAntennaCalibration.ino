@@ -112,7 +112,18 @@ void setup() {
     Serial.println(F("DWM1000 initialized ..."));
     // general configuration
     DWM1000::newConfiguration();
-    DWM1000::setDefaults();
+    DWM1000::useExtendedFrameLength(false);
+	DWM1000::useSmartPower(true);
+	DWM1000::suppressFrameCheck(false);
+	DWM1000::setFrameFilter(false);
+	DWM1000::interruptOnSent(true);
+	DWM1000::interruptOnReceived(true);
+	DWM1000::interruptOnReceiveFailed(true);
+	DWM1000::interruptOnReceiveTimestampAvailable(false);
+	DWM1000::interruptOnAutomaticAcknowledgeTrigger(true);
+	DWM1000::setChannel(CHANNEL_5);
+	DWM1000::setAntennaDelay(16384);
+	DWM1000::enableMode(MODE_SHORTRANGE_LOWPRF_MEDIUMPREAMBLE);
     DWM1000::setDeviceAddress(1);
     DWM1000::setNetworkId(10);
     DWM1000::setAntennaDelay(antenna_delay);
