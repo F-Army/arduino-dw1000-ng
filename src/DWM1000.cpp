@@ -801,31 +801,31 @@ namespace DWM1000 {
 				(*_handleError)();
 			}
 			if(isTransmitDone()) {
+				_clearTransmitStatus();
 				if(_handleSent != nullptr)
 					(*_handleSent)();
-				_clearTransmitStatus();
 			}
 			if(isReceiveTimestampAvailable()) {
+				_clearReceiveTimestampAvailableStatus();
 				if(_handleReceiveTimestampAvailable != nullptr)
 					(*_handleReceiveTimestampAvailable)();
-				_clearReceiveTimestampAvailableStatus();
 			}
 			if(isReceiveFailed()) {
-				if(_handleReceiveFailed != nullptr)
-					(*_handleReceiveFailed)();
 				_clearReceiveFailedStatus();
 				forceTRxOff();
 				_resetReceiver();
+				if(_handleReceiveFailed != nullptr)
+					(*_handleReceiveFailed)();
 			} else if(isReceiveTimeout()) {
-				if(_handleReceiveTimeout != nullptr)
-					(*_handleReceiveTimeout)();
 				_clearReceiveTimeoutStatus();
 				forceTRxOff();
 				_resetReceiver();
+				if(_handleReceiveTimeout != nullptr)
+					(*_handleReceiveTimeout)();
 			} else if(isReceiveDone()) {
+				_clearReceiveStatus();
 				if(_handleReceived != nullptr)
 					(*_handleReceived)();
-				_clearReceiveStatus();
 			}
 		}
 
