@@ -17,11 +17,34 @@
  */
 
 /*
-    SimpleAntennaCalibration:
-        This sketch can be used to automatically find a antenna delay value.
-        This is an extension of the RangingAnchor sketch so you need to upload RangingTag to the other device.
-        If the other device has 0 antenna delay set, it is recommended to set both devices to half the final result.
-*/
+ * Copyright (c) 2015 by Thomas Trojer <thomas@trojer.net>
+ * Decawave DWM1000 library for arduino.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @file RangingAnchor.ino
+ * Use this to test two-way ranging functionality with two
+ * DWM1000:: This is the anchor component's code which computes range after
+ * exchanging some messages. Addressing and frame filtering is currently done
+ * in a custom way, as no MAC features are implemented yet.
+ *
+ * Complements the "RangingTag" example sketch.
+ *
+ * @todo
+ *  - weighted average of ranging results based on signal quality
+ *  - use enum instead of define
+ *  - move strings to flash (less RAM consumption)
+ */
 
 #include <SPI.h>
 #include <DWM1000.hpp>
@@ -38,10 +61,12 @@ const uint8_t PIN_SS = SS; // spi select pin
 #define RANGE 2
 #define RANGE_REPORT 3
 #define RANGE_FAILED 255
-#define EXPECTED_RANGE 7.94
+
+#define EXPECTED_RANGE 7.94 // Recommended value for default values, refer to chapter 8.3.1 of DW1000 User manual
 #define EXPECTED_RANGE_EPSILON 0.05
 #define ACCURACY_THRESHOLD 5
 #define ANTENNA_DELAY_STEPS 1
+
 // message flow state
 volatile byte expectedMsgId = POLL;
 // message sent/received state
@@ -53,6 +78,7 @@ boolean protocolFailed = false;
 // Antenna calibration variables
 int accuracyCounter = 0;
 uint16_t antenna_delay = 16384;
+
 // timestamps to remember
 DWM1000Time timePollSent;
 DWM1000Time timePollReceived;
@@ -106,6 +132,7 @@ void setup() {
     DWM1000::attachSentHandler(handleSent);
     DWM1000::attachReceivedHandler(handleReceived);
     // anchor starts in receiving mode, awaiting a ranging poll message
+   
     receiver();
     noteActivity();
     // for first time ranging frequency computation
@@ -136,8 +163,6 @@ void handleReceived() {
 
 void transmitPollAck() {
     data[0] = POLL_ACK;
-    // delay the same amount as ranging tag
-    DWM1000::setDelay(replyDelayTimeUS);
     DWM1000::setData(data, LEN_DATA);
     DWM1000::startTransmit();
 }
@@ -157,9 +182,8 @@ void transmitRangeFailed() {
 }
 
 void receiver() {
-    DWM1000::newReceive();
+    DWM1000::forceTRxOff();
     // so we don't need to restart the receiver manually
-    DWM1000::receivePermanently(true);
     DWM1000::startReceive();
 }
 
@@ -216,6 +240,7 @@ void loop() {
             DWM1000::getTransmitTimestamp(timePollAckSent);
             noteActivity();
         }
+        DWM1000::startReceive();
     }
     if (receivedAck) {
         receivedAck = false;
@@ -243,8 +268,13 @@ void loop() {
                 timeRangeSent.setTimestamp(data + 11);
                 // (re-)compute range as two-way ranging is done
                 computeRangeAsymmetric(); // CHOSEN RANGING ALGORITHM
-                transmitRangeReport(timeComputedRange.getAsMicroSeconds());
                 float distance = timeComputedRange.getAsMeters();
+                String rangeString = "Range: "; rangeString += distance; rangeString += " m";
+                rangeString += "\t RX power: "; rangeString += DWM1000::getReceivePower(); rangeString += " dBm";
+                rangeString += "\t Sampling: "; rangeString += samplingRate; rangeString += " Hz";
+                Serial.println(rangeString);
+
+                // Antenna delay script
                 if(distance >= (EXPECTED_RANGE - EXPECTED_RANGE_EPSILON) && distance <= (EXPECTED_RANGE + EXPECTED_RANGE_EPSILON)) {
                     accuracyCounter++;
                 } else {
@@ -255,17 +285,13 @@ void loop() {
                 }
 
                 if(accuracyCounter == ACCURACY_THRESHOLD) {
-                    Serial.print("Found Antenna Delay value (Divide by two if necessary): ");
+                    Serial.print("Found Antenna Delay value (Divide by two if one antenna is set to 0): ");
                     Serial.println(antenna_delay);
                     delay(10000);
                 }
-                Serial.print("Range: "); Serial.print(distance); Serial.print(" m");
-                Serial.print("\t RX power: "); Serial.print(DWM1000::getReceivePower()); Serial.print(" dBm");
-                Serial.print("\t Sampling: "); Serial.print(samplingRate); Serial.println(" Hz");
-                //Serial.print("FP power is [dBm]: "); Serial.print(DWM1000::getFirstPathPower());
-                //Serial.print("RX power is [dBm]: "); Serial.println(DWM1000::getReceivePower());
-                //Serial.print("Receive quality: "); Serial.println(DWM1000::getReceiveQuality());
-                // update sampling rate (each second)
+
+                transmitRangeReport(timeComputedRange.getAsMicroSeconds());
+                // update sampling rate (each second)                
                 successRangingCount++;
                 if (curMillis - rangingCountPeriod > 1000) {
                     samplingRate = (1000.0f * successRangingCount) / (curMillis - rangingCountPeriod);

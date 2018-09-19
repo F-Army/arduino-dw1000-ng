@@ -35,7 +35,7 @@ void setup() {
     // initialize the driver
     DWM1000::begin(PIN_IRQ, PIN_RST);
     DWM1000::select(PIN_SS);
-    Serial.println("DWM1000 initialized ...");
+    Serial.println(F("DWM1000 initialized ..."));
     // general configuration
     DWM1000::newConfiguration();
     DWM1000::setDeviceAddress(1);
@@ -50,16 +50,7 @@ void setup() {
     DWM1000::suppressFrameCheck(true);
     DWM1000::commitConfiguration();
     Serial.println(F("Committed configuration ..."));
-    // DEBUG chip info and registers pretty printed
-    char msg[128];
-    DWM1000::getPrintableDeviceIdentifier(msg);
-    Serial.print("Device ID: "); Serial.println(msg);
-    DWM1000::getPrintableExtendedUniqueIdentifier(msg);
-    Serial.print("Unique ID: "); Serial.println(msg);
-    DWM1000::getPrintableNetworkIdAndShortAddress(msg);
-    Serial.print("Network ID & Device Address: "); Serial.println(msg);
-    DWM1000::getPrintableDeviceMode(msg);
-    Serial.print("Device mode: "); Serial.println(msg);
+    
     DWM1000::enableTransmitPowerSpectrumTestMode(124800); /* Approx 1ms long transmissions */
     DWM1000::setData(data);
     DWM1000::startTransmit();
@@ -73,4 +64,3 @@ void setup() {
 void loop() {
     
 }
-

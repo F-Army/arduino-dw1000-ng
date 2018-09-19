@@ -68,6 +68,7 @@ void setup() {
   DWM1000::setDefaults();
   DWM1000::setDeviceAddress(6);
   DWM1000::setNetworkId(10);
+  DWM1000::setReceiverAutoReenable(true);
   DWM1000::commitConfiguration();
   Serial.println(F("Committed configuration ..."));
   // DEBUG chip info and registers pretty printed
@@ -85,7 +86,7 @@ void setup() {
   DWM1000::attachReceiveFailedHandler(handleError);
   DWM1000::attachErrorHandler(handleError);
   // start reception
-  receiver();
+  DWM1000::startReceive();
 }
 
 void handleReceived() {
@@ -97,29 +98,22 @@ void handleError() {
   error = true;
 }
 
-void receiver() {
-  DWM1000::newReceive();
-  // so we don't need to restart the receiver manually
-  DWM1000::receivePermanently(true);
-  DWM1000::startReceive();
-}
-
 void loop() {
   // enter on confirmation of ISR status change (successfully received)
   if (received) {
+    received = false;
     numReceived++;
     // get data as string
     DWM1000::getData(message);
     Serial.print("Received message ... #"); Serial.println(numReceived);
     Serial.print("Data is ... "); Serial.println(message);
-    Serial.print("FP power is [dBm] ... "); Serial.println(DWM1000::getFirstPathPower());
     Serial.print("RX power is [dBm] ... "); Serial.println(DWM1000::getReceivePower());
     Serial.print("Signal quality is ... "); Serial.println(DWM1000::getReceiveQuality());
-    received = false;
+    DWM1000::startReceive();
   }
   if (error) {
-    Serial.println("Error receiving a message");
     error = false;
+    Serial.println("Error receiving a message");
     DWM1000::getData(message);
     Serial.print("Error data is ... "); Serial.println(message);
   }

@@ -91,6 +91,7 @@ void setup() {
     DWM1000::setDefaults();
     DWM1000::setDeviceAddress(2);
     DWM1000::setNetworkId(10);
+    DWM1000::setReceiverAutoReenable(true);
     DWM1000::commitConfiguration();
     Serial.println(F("Committed configuration ..."));
     // DEBUG chip info and registers pretty printed
@@ -107,7 +108,6 @@ void setup() {
     DWM1000::attachSentHandler(handleSent);
     DWM1000::attachReceivedHandler(handleReceived);
     // anchor starts by transmitting a POLL message
-    DWM1000::receivePermanently(true);
     transmitPoll();
     noteActivity();
 }
@@ -120,6 +120,7 @@ void noteActivity() {
 void resetInactive() {
     // tag sends POLL and listens for POLL_ACK
     expectedMsgId = POLL_ACK;
+    DWM1000::forceTRxOff();
     transmitPoll();
     noteActivity();
 }
@@ -152,12 +153,6 @@ void transmitRange() {
     //Serial.print("Expect RANGE to be sent @ "); Serial.println(timeRangeSent.getAsFloat());
 }
 
-void receiver() {
-    DWM1000::newReceive();
-    // so we don't need to restart the receiver manually
-    DWM1000::startReceive();
-}
-
 void loop() {
     if (!sentAck && !receivedAck) {
         // check if inactive
@@ -177,6 +172,7 @@ void loop() {
             DWM1000::getTransmitTimestamp(timeRangeSent);
             noteActivity();
         }
+        DWM1000::startReceive();
     }
     if (receivedAck) {
         receivedAck = false;

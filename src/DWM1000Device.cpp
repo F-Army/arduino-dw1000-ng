@@ -85,10 +85,6 @@ void DWM1000Device::setReceiveHandler(void (* handleReceived)(void)) {
     DWM1000::attachReceivedHandler(handleReceived);
 }
 
-void DWM1000Device::setPermanentReceiveMode(boolean val) {
-    DWM1000::receivePermanently(val);
-}
-
 DWM1000Time DWM1000Device::setTransmitDelay(uint16_t delayUs) {
     return DWM1000::setDelay(delayUs);
 }
@@ -98,7 +94,7 @@ void DWM1000Device::forceIdle() {
 }
 
 void DWM1000Device::receive() {
-    DWM1000::newReceive();
+    DWM1000::forceTRxOff();
     DWM1000::startReceive();
 }
 

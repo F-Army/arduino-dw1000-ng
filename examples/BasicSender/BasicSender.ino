@@ -83,7 +83,7 @@ void setup() {
   // attach callback for (successfully) sent messages
   DWM1000::attachSentHandler(handleSent);
   // start a transmission
-  transmitter();
+  transmit();
 }
 
 void handleSent() {
@@ -91,34 +91,33 @@ void handleSent() {
   sentAck = true;
 }
 
-void transmitter() {
+void transmit() {
   // transmit some data
   Serial.print("Transmitting packet ... #"); Serial.println(sentNum);
   String msg = "Hello DWM1000, it's #"; msg += sentNum;
   DWM1000::setData(msg);
   // delay sending the message for the given amount
-  DWM1000::setDelay(10);
-  DWM1000::startTransmit();
+  DWM1000::setDelay(10000);
+  DWM1000::startTransmit(TransmitMode::DELAYED);
   delaySent = millis();
 }
 
 void loop() {
-  if (!sentAck) {
-    return;
+  if (sentAck) {
+    // continue on success confirmation
+    // (we are here after the given amount of send delay time has passed)
+    sentAck = false;
+    // update and print some information about the sent message
+    Serial.print("ARDUINO delay sent [ms] ... "); Serial.println(millis() - delaySent);
+    DWM1000Time newSentTime;
+    DWM1000::getTransmitTimestamp(newSentTime);
+    Serial.print("Processed packet ... #"); Serial.println(sentNum);
+    Serial.print("Sent timestamp ... "); Serial.println(newSentTime.getAsMicroSeconds());
+    // note: delta is just for simple demo as not correct on system time counter wrap-around
+    Serial.print("DWM1000 delta send time [ms] ... "); Serial.println((newSentTime.getAsMicroSeconds() - sentTime.getAsMicroSeconds()) * 1.0e-3);
+    sentTime = newSentTime;
+    sentNum++;
+    // again, transmit some data
+    transmit();
   }
-  // continue on success confirmation
-  // (we are here after the given amount of send delay time has passed)
-  sentAck = false;
-  // update and print some information about the sent message
-  Serial.print("ARDUINO delay sent [ms] ... "); Serial.println(millis() - delaySent);
-  DWM1000Time newSentTime;
-  DWM1000::getTransmitTimestamp(newSentTime);
-  Serial.print("Processed packet ... #"); Serial.println(sentNum);
-  Serial.print("Sent timestamp ... "); Serial.println(newSentTime.getAsMicroSeconds());
-  // note: delta is just for simple demo as not correct on system time counter wrap-around
-  Serial.print("DWM1000 delta send time [ms] ... "); Serial.println((newSentTime.getAsMicroSeconds() - sentTime.getAsMicroSeconds()) * 1.0e-3);
-  sentTime = newSentTime;
-  sentNum++;
-  // again, transmit some data
-  transmitter();
 }

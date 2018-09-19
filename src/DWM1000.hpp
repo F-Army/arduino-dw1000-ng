@@ -293,7 +293,6 @@ namespace DWM1000 {
 	
 	/* transmit and receive configuration. */
 	DWM1000Time  setDelay(uint16_t delayUS);
-	void         receivePermanently(boolean val);
 	void         setData(byte data[], uint16_t n);
 	void         setData(const String& data);
 	void         getData(byte data[], uint16_t n);
@@ -346,7 +345,6 @@ namespace DWM1000 {
 	void commitConfiguration();
 	
 	// reception state
-	void newReceive();
 	void startReceive(ReceiveMode mode = ReceiveMode::IMMEDIATE);
 	
 	// transmission state
