@@ -873,15 +873,15 @@ namespace DWM1000 {
 		reset(rst);
 		// default network and node id
 		DWM1000Utils::writeValueToBytes(_networkAndAddress, 0xFF, LEN_PANADR);
-		writeNetworkIdAndDeviceAddress();
-		// default system configuration
+
+		// mimic default system configuration inside the DWM1000
 		memset(_syscfg, 0, LEN_SYS_CFG);
 		setDoubleBuffering(false);
 		_setInterruptPolarity(true);
-		_writeSystemConfigurationRegister();
-		// default interrupt mask, i.e. no interrupts
+
+		// mimic default interrupt mask, i.e. no interrupts
 		_clearInterrupts();
-		_writeSystemEventMaskRegister();
+
 		// load LDE micro-code
 		_enableClock(SYS_XTI_CLOCK);
 		delay(5);
