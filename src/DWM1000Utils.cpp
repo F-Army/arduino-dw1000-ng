@@ -38,7 +38,7 @@
 
 #include <Arduino.h>
 #include "DWM1000Utils.hpp"
-#include "DWM1000Constants.hpp"
+#include "DWM1000Registers.hpp"
 
 namespace DWM1000Utils {
 	/*
@@ -115,7 +115,7 @@ namespace DWM1000Utils {
 	}
 
 	void convertToByte(char string[], byte* bytes) {
-		byte    eui_byte[LEN_EUI];
+		byte eui_byte[LEN_EUI];
 		// we fill it with the char array under the form of "AA:FF:1C:...."
 		for(uint16_t i = 0; i < LEN_EUI; i++) {
 			eui_byte[i] = (nibbleFromChar(string[i*3]) << 4)+nibbleFromChar(string[i*3+1]);
