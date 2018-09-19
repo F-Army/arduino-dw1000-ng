@@ -60,8 +60,7 @@ void setup() {
   Serial.begin(9600);
   Serial.println(F("### DWM1000-arduino-sender-test ###"));
   // initialize the driver
-  DWM1000::begin(PIN_IRQ, PIN_RST);
-  DWM1000::select(PIN_SS);
+  DWM1000::begin(PIN_SS, PIN_IRQ, PIN_RST);
   Serial.println(F("DWM1000 initialized ..."));
   // general configuration
   DWM1000::newConfiguration();
