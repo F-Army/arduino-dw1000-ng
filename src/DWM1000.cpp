@@ -42,6 +42,7 @@
 #include <string.h>
 #include "DWM1000Utils.hpp"
 #include "DWM1000Constants.hpp"
+#include "DWM1000Registers.hpp"
 #include "DWM1000.hpp"
 #include "DWM1000Time.hpp"
 
