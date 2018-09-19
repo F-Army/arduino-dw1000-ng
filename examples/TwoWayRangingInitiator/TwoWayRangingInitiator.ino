@@ -91,6 +91,7 @@ void setup() {
     DWM1000::setDefaults();
     DWM1000::setDeviceAddress(2);
     DWM1000::setNetworkId(10);
+    DWM1000::setReceiverAutoReenable(true);
     DWM1000::commitConfiguration();
     Serial.println(F("Committed configuration ..."));
     // DEBUG chip info and registers pretty printed
