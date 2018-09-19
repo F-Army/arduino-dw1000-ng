@@ -52,10 +52,9 @@ namespace DWM1000 {
 
 		/* ########################### PRIVATE VARIABLES ################################# */
 
-		/* pins */
-		uint8_t _ss;
-		uint8_t _rst;
-		uint8_t _irq;
+		/* SPI select pin and interrupt pin*/
+		uint8_t _ss = 0xff;
+		uint8_t _irq = 0xff;
 
 		/* IRQ callbacks */
 		void (* _handleSent)(void)                      = nullptr;
@@ -850,44 +849,39 @@ namespace DWM1000 {
 
 	/* ####################### PUBLIC ###################### */
 
-	void begin(uint8_t irq, uint8_t rst) {
+	void begin(uint8_t ss, uint8_t irq, uint8_t rst) {
 		// generous initial init/wake-up-idle delay
 		delay(5);
 		// start SPI
 		SPI.begin();
-		SPI.usingInterrupt(digitalPinToInterrupt(irq));
 		// pin and basic member setup
-		_rst        = rst;
-		_irq        = irq;
 		// attach interrupt
-		//attachInterrupt(_irq, _handleInterrupt, CHANGE);
 		// TODO throw error if pin is not a interrupt pin
-		attachInterrupt(digitalPinToInterrupt(_irq), _handleInterrupt, RISING);
-	}
-
-	void select(uint8_t ss) {
-		reselect(ss);
+		attachInterrupt(digitalPinToInterrupt(irq), _handleInterrupt, RISING);
+		uint8_t oldSS = _ss;
+		uint8_t oldIRQ = _irq;
+		select(ss, irq);
 		// try locking clock at PLL speed (should be done already,
 		// but just to be sure)
 		_enableClock(SYS_AUTO_CLOCK);
 		delay(5);
 		// reset chip (either soft or hard)
-		if(_rst != 0xff) {
+		if(rst != 0xff) {
 			// DWM1000 data sheet v2.08 §5.6.1 page 20, the RSTn pin should not be driven high but left floating.
-			pinMode(_rst, INPUT);
+			pinMode(rst, INPUT);
 		}
-		reset();
+		reset(rst);
 		// default network and node id
 		DWM1000Utils::writeValueToBytes(_networkAndAddress, 0xFF, LEN_PANADR);
-		writeNetworkIdAndDeviceAddress();
-		// default system configuration
+
+		// mimic default system configuration inside the DWM1000
 		memset(_syscfg, 0, LEN_SYS_CFG);
 		setDoubleBuffering(false);
 		_setInterruptPolarity(true);
-		_writeSystemConfigurationRegister();
-		// default interrupt mask, i.e. no interrupts
+
+		// mimic default interrupt mask, i.e. no interrupts
 		_clearInterrupts();
-		_writeSystemEventMaskRegister();
+
 		// load LDE micro-code
 		_enableClock(SYS_XTI_CLOCK);
 		delay(5);
@@ -903,10 +897,16 @@ namespace DWM1000 {
 		_vmeas3v3 = buf_otp[0];
 		readBytesOTP(0x009, buf_otp); // the stored 23C reading
 		_tmeas23C = buf_otp[0];
+
+		/* Selects old device if any */
+		if(oldSS != 0xff)
+			select(oldSS, oldIRQ);
 	}
 
-	void reselect(uint8_t ss) {
+	void select(uint8_t ss, uint8_t irq) {
 		_ss = ss;
+		_irq = irq;
+		SPI.usingInterrupt(digitalPinToInterrupt(irq));
 		pinMode(_ss, OUTPUT);
 		digitalWrite(_ss, HIGH);
 	}
@@ -1010,15 +1010,15 @@ namespace DWM1000 {
 	}
 
 
-	void reset() {
-		if(_rst == 0xff) {
+	void reset(uint8_t rst) {
+		if(rst == 0xff) {
 			softReset();
 		} else {
 			// DWM1000 data sheet v2.08 §5.6.1 page 20, the RSTn pin should not be driven high but left floating.
-			pinMode(_rst, OUTPUT);
-			digitalWrite(_rst, LOW);
+			pinMode(rst, OUTPUT);
+			digitalWrite(rst, LOW);
 			delay(2);  // DWM1000 data sheet v2.08 §5.6.1 page 20: nominal 50ns, to be safe take more time
-			pinMode(_rst, INPUT);
+			pinMode(rst, INPUT);
 			delay(10); // dwm1000 data sheet v1.2 page 5: nominal 3 ms, to be safe take more time
 			// force into idle mode (although it should be already after reset)
 			forceTRxOff();
