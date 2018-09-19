@@ -39,6 +39,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include "DWM1000Registers.hpp"
 
 namespace DWM1000Debug {
     void getPrettyBytes(byte data[], char msgBuffer[], uint16_t n);
