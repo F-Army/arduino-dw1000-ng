@@ -54,17 +54,7 @@ namespace DWM1000 {
 	@param[in] irq The interrupt line/pin that connects the Arduino.
 	@param[in] rst The reset line/pin for hard resets of ICs that connect to the Arduino. Value 0xff means soft reset.
 	*/
-	void begin(uint8_t irq, uint8_t rst = 0xff);
-	
-	/** 
-	Selects a specific DWM1000 chip for communication. In case of a single DWM1000 chip in use
-	this call only needs to be done once at start up, but is still mandatory. Other than a call
-	to `reselect()` this function performs an initial setup of the now-selected chip.
-
-	@param[in] ss The chip select line/pin that connects the to-be-selected chip with the
-	Arduino.
-	*/
-	void select(uint8_t ss);
+	void begin(uint8_t ss, uint8_t irq, uint8_t rst = 0xff);
 	
 	/** 
 	(Re-)selects a specific DWM1000 chip for communication. In case of a single DWM1000 chip in use
@@ -75,8 +65,8 @@ namespace DWM1000 {
 	@param[in] ss The chip select line/pin that connects the to-be-selected chip with the
 	Arduino.
 	*/
-	void reselect(uint8_t ss);
-	
+	void select(uint8_t ss, uint8_t irq);
+
 	/** 
 	Tells the driver library that no communication to a DWM1000 will be required anymore.
 	This basically just frees SPI and the previously used pins.
@@ -113,7 +103,7 @@ namespace DWM1000 {
 	is preferred, although a soft reset of the currently selected one is executed if no 
 	reset pin has been specified (when using `begin(int)`, instead of `begin(int, int)`).
 	*/
-	void reset();
+	void reset(uint8_t rst = 0xff);
 	
 	/** 
 	Resets the currently selected DWM1000 chip programmatically (via corresponding commands).
