@@ -261,6 +261,7 @@ namespace DWM1000 {
 
 	void useSmartPower(boolean smartPower);
 
+	void setTXPower(byte power[]);
 	void setTXPower(int32_t power);
 	void setTXPower(DriverAmplifierValue driver_amplifier, TransmitMixerValue mixer);
 	void setTXPowerAuto();

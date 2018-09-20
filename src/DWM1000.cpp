@@ -86,7 +86,7 @@ namespace DWM1000 {
 
 		/* Driver Internal State Trackers */
 		byte        _extendedFrameLength;
-		byte        _pacSize;
+		//byte        _pacSize;
 		byte        _pulseFrequency;
 		byte        _dataRate;
 		byte        _preambleLength;
@@ -1336,12 +1336,17 @@ namespace DWM1000 {
 			_autoTXPower = true;
 	}
 
+	void setTXPower(byte power[]) {
+		//TODO Check byte length
+		writeBytes(TX_POWER, NO_SUB, power, LEN_TX_POWER);
+		useSmartPower(false);
+		_autoTXPower = false;
+	}
+
 	void setTXPower(int32_t power) {
 		byte txpower[LEN_TX_POWER];
 		DWM1000Utils::writeValueToBytes(txpower, power, LEN_TX_POWER);
-		writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
-		useSmartPower(false);
-		_autoTXPower = false;
+		setTXPower(txpower);
 	}
 
 	void setTXPower(DriverAmplifierValue driver_amplifier, TransmitMixerValue mixer) {
@@ -1355,9 +1360,7 @@ namespace DWM1000 {
 			txpower[i] = pwr;
 		}
 
-		writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
-		useSmartPower(false);
-		_autoTXPower = false;
+		setTXPower(txpower);
 	}
 
 	void setTXPowerAuto() {
