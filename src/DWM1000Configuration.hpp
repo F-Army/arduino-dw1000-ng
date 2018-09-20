@@ -19,6 +19,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include "DWM1000Registers.hpp"
 
 class DWM1000Configuration {
 public:

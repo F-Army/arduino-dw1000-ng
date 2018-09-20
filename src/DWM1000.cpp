@@ -1367,7 +1367,7 @@ namespace DWM1000 {
 		_autoTXPower = true;
 	}
 
-	void setTCPGDelay(uint8_t tcpgdelay) {
+	void setTCPGDelay(byte tcpgdelay) {
 		byte tcpgBytes[LEN_TC_PGDELAY];
 		DWM1000Utils::writeValueToBytes(tcpgBytes, tcpgdelay, LEN_TC_PGDELAY);
 		writeBytes(TX_CAL, TC_PGDELAY_SUB, tcpgBytes, LEN_TC_PGDELAY);
