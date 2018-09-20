@@ -86,7 +86,7 @@ namespace DWM1000 {
 
 		/* Driver Internal State Trackers */
 		byte        _extendedFrameLength;
-		//byte        _pacSize;
+		byte        _pacSize;
 		byte        _pulseFrequency;
 		byte        _dataRate;
 		byte        _preambleLength;
