@@ -1294,7 +1294,6 @@ namespace DWM1000 {
 
 	void startTransmit(TransmitMode mode) {
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
-		_writeTransmitFrameControlRegister();
 		DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, SFCST_BIT, !_frameCheck);
 		if(mode == TransmitMode::DELAYED)
 			DWM1000Utils::setBit(_sysctrl, LEN_SYS_CTRL, TXDLYS_BIT, true);
@@ -1578,9 +1577,12 @@ namespace DWM1000 {
 		}
 		// transmit data and length
 		writeBytes(TX_BUFFER, NO_SUB, data, n);
+		
+		/* Sets up transmit frame control length based on data length */
 		_txfctrl[0] = (byte)(n & 0xFF); // 1 byte (regular length + 1 bit)
 		_txfctrl[1] &= 0xE0;
 		_txfctrl[1] |= (byte)((n >> 8) & 0x03);  // 2 added bits if extended length
+		_writeTransmitFrameControlRegister();
 	}
 
 	void setData(const String& data) {
