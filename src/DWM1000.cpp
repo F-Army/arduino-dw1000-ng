@@ -1336,12 +1336,17 @@ namespace DWM1000 {
 			_autoTXPower = true;
 	}
 
+	void setTXPower(byte power[]) {
+		//TODO Check byte length
+		writeBytes(TX_POWER, NO_SUB, power, LEN_TX_POWER);
+		useSmartPower(false);
+		_autoTXPower = false;
+	}
+
 	void setTXPower(int32_t power) {
 		byte txpower[LEN_TX_POWER];
 		DWM1000Utils::writeValueToBytes(txpower, power, LEN_TX_POWER);
-		writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
-		useSmartPower(false);
-		_autoTXPower = false;
+		setTXPower(txpower);
 	}
 
 	void setTXPower(DriverAmplifierValue driver_amplifier, TransmitMixerValue mixer) {
@@ -1355,16 +1360,14 @@ namespace DWM1000 {
 			txpower[i] = pwr;
 		}
 
-		writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
-		useSmartPower(false);
-		_autoTXPower = false;
+		setTXPower(txpower);
 	}
 
 	void setTXPowerAuto() {
 		_autoTXPower = true;
 	}
 
-	void setTCPGDelay(uint8_t tcpgdelay) {
+	void setTCPGDelay(byte tcpgdelay) {
 		byte tcpgBytes[LEN_TC_PGDELAY];
 		DWM1000Utils::writeValueToBytes(tcpgBytes, tcpgdelay, LEN_TC_PGDELAY);
 		writeBytes(TX_CAL, TC_PGDELAY_SUB, tcpgBytes, LEN_TC_PGDELAY);
