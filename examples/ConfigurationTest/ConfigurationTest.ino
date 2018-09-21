@@ -82,7 +82,7 @@ void setup() {
     Serial.print("INTERRUPT ON RECEIVED:");
     defaultConfig.getInterruptOnReceived() ? Serial.println(" OK") : Serial.println(" FAILED");
     Serial.print("INTERRUPT ON RECEIVED FAILED:");
-    defaultConfig.getInterruptOnReceive Failed() ? Serial.println(" OK") : Serial.println(" FAILED");
+    defaultConfig.getInterruptOnReceiveFailed() ? Serial.println(" OK") : Serial.println(" FAILED");
     Serial.print("INTERRUPT ON RECEIVE TIMEOUT:");
     defaultConfig.getInterruptOnReceiveTimeout() ? Serial.println(" OK") : Serial.println(" FAILED");
     Serial.print("INTERRUPT ON RECEIVE TIMESTAMP AVAILABLE:");
@@ -122,7 +122,7 @@ void setup() {
     Serial.print("INTERRUPT ON RECEIVED:");
     smartPowerConfig.getInterruptOnReceived() ? Serial.println(" OK") : Serial.println(" FAILED");
     Serial.print("INTERRUPT ON RECEIVED FAILED:");
-    smartPowerConfig.getInterruptOnReceive Failed() ? Serial.println(" OK") : Serial.println(" FAILED");
+    smartPowerConfig.getInterruptOnReceiveFailed() ? Serial.println(" OK") : Serial.println(" FAILED");
     Serial.print("INTERRUPT ON RECEIVE TIMEOUT:");
     smartPowerConfig.getInterruptOnReceiveTimeout() ? Serial.println(" OK") : Serial.println(" FAILED");
     Serial.print("INTERRUPT ON RECEIVE TIMESTAMP AVAILABLE:");
@@ -164,7 +164,7 @@ void setup() {
     Serial.print("INTERRUPT ON RECEIVED:");
     !manualPowerConfig.getInterruptOnReceived() ? Serial.println(" OK") : Serial.println(" FAILED");
     Serial.print("INTERRUPT ON RECEIVED FAILED:");
-    !manualPowerConfig.getInterruptOnReceive Failed() ? Serial.println(" OK") : Serial.println(" FAILED");
+    !manualPowerConfig.getInterruptOnReceiveFailed() ? Serial.println(" OK") : Serial.println(" FAILED");
     Serial.print("INTERRUPT ON RECEIVE TIMEOUT:");
     !manualPowerConfig.getInterruptOnReceiveTimeout() ? Serial.println(" OK") : Serial.println(" FAILED");
     Serial.print("INTERRUPT ON RECEIVE TIMESTAMP AVAILABLE:");
