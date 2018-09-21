@@ -59,7 +59,7 @@ DWM1000Configuration::DWM1000Configuration(
     setNlos(nlos);
     setSmartPower(smartPower);
     setTxPower(NULL);
-    setTCPGDelay(NULL);
+    setTcpgDelay(NULL);
     setAntennaDelay(antennaDelay);
 }
 
@@ -166,7 +166,7 @@ void        DWM1000Configuration::setDefaultProfile() {
     setNlos(false);
     setSmartPower(true);
     setTxPower(NULL);
-    setTCPGDelay(NULL);
+    setTcpgDelay(NULL);
     setAntennaDelay(16384);
 }
 
