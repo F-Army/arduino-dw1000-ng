@@ -46,13 +46,6 @@ public:
     void getEUI(char *);
     DWM1000Configuration getConfiguration();
 
-    DWM1000Time getLastSendTimestamp();
-    DWM1000Time getLastReceiveTimestamp();
-
-    void getReceiveData(byte data[], uint16_t n);
-    void getReceiveData(String& data);
-
-    
     /* Setters */
     void setShortAddress(uint16_t shortAddress);
     void setPanId(uint16_t panId);
@@ -79,6 +72,12 @@ public:
     void receiveDelayed(uint16_t delayMicroSeconds);
 
     void forceIdle();
+
+    DWM1000Time retrieveLastTransmitTimestamp();
+    DWM1000Time retrieveLastReceiveTimestamp();
+
+    void retrieveReceivedData(byte data[], uint16_t n);
+    void retrieveReceivedData(String& data);
 
     /*
     //TODO
