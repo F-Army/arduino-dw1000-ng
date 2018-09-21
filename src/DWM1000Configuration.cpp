@@ -145,7 +145,7 @@ void        DWM1000Configuration::setTxPower(int32_t txPower) { _txPower = txPow
 void        DWM1000Configuration::setTcpgDelay(byte tcpgDelay) { _tcpgDelay = tcpgDelay; }
 void        DWM1000Configuration::setAntennaDelay(uint16_t antennaDelay) { _antennaDelay = antennaDelay; }
 
-DWM1000Configuration::setDefaultProfile() {
+void        DWM1000Configuration::setDefaultProfile() {
     setDatarate(TRX_RATE_6800KBPS);
     setPulseFrequency(TX_PULSE_FREQ_16MHZ);
     setPreambleLength(TX_PREAMBLE_LEN_128);
