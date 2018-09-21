@@ -41,7 +41,6 @@ public:
         boolean receiverAutoReenable,
         boolean nlos,
         boolean smartPower,
-        byte tcpgDelay,
         uint16_t antennaDelay = 16384
     );
 
@@ -87,6 +86,8 @@ public:
     int32_t     getTxPower();
     byte        getTcpgDelay();
     uint16_t    getAntennaDelay();
+    boolean     getAutoTxPower();
+    boolean     getAutoTcpgDelay();
 
     void        setDatarate(byte dataRate);
     void        setPulseFrequency(byte pulseFrequency);
@@ -108,6 +109,8 @@ public:
     void        setTcpgDelay(byte tcpgDelay);
     void        setAntennaDelay(uint16_t antennaDelay);
 
+    void        setDefaultProfile();
+
 private:
     byte        _dataRate;
     byte        _pulseFrequency;
@@ -128,4 +131,7 @@ private:
     int32_t     _txPower;
     byte        _tcpgDelay;
     uint16_t    _antennaDelay;
+
+    boolean     _autoTXPower;
+    boolean     _autoTCPGDelay;
 };
