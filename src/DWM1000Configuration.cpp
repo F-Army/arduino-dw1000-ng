@@ -125,25 +125,25 @@ uint16_t    DWM1000Configuration::getAntennaDelay() { return _antennaDelay; }
 boolean     DWM1000Configuration::getAutoTxPower() { return _txPower; }
 boolean     DWM1000Configuration::getAutoTcpgDelay() { return _tcpgDelay; }
 
-void        setDatarate(byte dataRate) { _dataRate = dataRate; }
-void        setPulseFrequency(byte pulseFrequency) { _pulseFrequency = pulseFrequency; }
-void        setPreambleLength(byte preambleLength) { _preambleLength = preambleLength; }
-void        setChannel(byte channel) { _channel = channel; }
-void        setPreambleCode(byte preambleCode) { _preambleCode = preambleCode; }
-void        setInterruptOnSent(boolean interruptOnSent) { _interruptOnSent = interruptOnSent; }
-void        setInterruptOnReceived(boolean interruptOnReceived) { _interruptOnReceived = interruptOnReceived; }
-void        setInterruptOnReceiveFailed(boolean interruptOnReceiveFailed) { _interruptOnReceiveFailed = interruptOnReceiveFailed; }
-void        setInterruptOnReceiveTimeout(boolean interruptOnReceiveTimeout) { _interruptOnReceiveTimeout = interruptOnReceiveTimeout; }
-void        setInterruptOnReceiveTimestampAvailable(boolean interruptOnReceiveTimestampAvailable) { _interruptOnReceiveTimestampAvailable = interruptOnReceiveTimestampAvailable; }
-void        setInterruptOnAutomaticAcknowledgeTrigger(boolean interruptOnAutomaticAcknowledgeTrigger) { _interruptOnAutomaticAcknowledgeTrigger = interruptOnAutomaticAcknowledgeTrigger; }
-void        setFrameCheck(boolean frameCheck) { _frameCheck = frameCheck; }
-void        setExtendedFrameLength(boolean extendedFrameLength) { _extendedFrameLength = extendedFrameLength; }
-void        setReceiverAutoReenable(boolean receiverAutoReenable) { _receiverAutoReenable = receiverAutoReenable; }
-void        setNlos(boolean nlos) { _nlos = nlos; }
-void        setSmartPower(boolean smartPower) { _smartPower = smartPower; }
-void        setTxPower(int32_t txPower) { _txPower = txPower; }
-void        setTcpgDelay(byte tcpgDelay) { _tcpgDelay = tcpgDelay; }
-void        setAntennaDelay(uint16_t antennaDelay) { _antennaDelay = antennaDelay;}
+void        DWM1000Configuration::setDatarate(byte dataRate) { _dataRate = dataRate; }
+void        DWM1000Configuration::setPulseFrequency(byte pulseFrequency) { _pulseFrequency = pulseFrequency; }
+void        DWM1000Configuration::setPreambleLength(byte preambleLength) { _preambleLength = preambleLength; }
+void        DWM1000Configuration::setChannel(byte channel) { _channel = channel; }
+void        DWM1000Configuration::setPreambleCode(byte preambleCode) { _preambleCode = preambleCode; }
+void        DWM1000Configuration::setInterruptOnSent(boolean interruptOnSent) { _interruptOnSent = interruptOnSent; }
+void        DWM1000Configuration::setInterruptOnReceived(boolean interruptOnReceived) { _interruptOnReceived = interruptOnReceived; }
+void        DWM1000Configuration::setInterruptOnReceiveFailed(boolean interruptOnReceiveFailed) { _interruptOnReceiveFailed = interruptOnReceiveFailed; }
+void        DWM1000Configuration::setInterruptOnReceiveTimeout(boolean interruptOnReceiveTimeout) { _interruptOnReceiveTimeout = interruptOnReceiveTimeout; }
+void        DWM1000Configuration::setInterruptOnReceiveTimestampAvailable(boolean interruptOnReceiveTimestampAvailable) { _interruptOnReceiveTimestampAvailable = interruptOnReceiveTimestampAvailable; }
+void        DWM1000Configuration::setInterruptOnAutomaticAcknowledgeTrigger(boolean interruptOnAutomaticAcknowledgeTrigger) { _interruptOnAutomaticAcknowledgeTrigger = interruptOnAutomaticAcknowledgeTrigger; }
+void        DWM1000Configuration::setFrameCheck(boolean frameCheck) { _frameCheck = frameCheck; }
+void        DWM1000Configuration::setExtendedFrameLength(boolean extendedFrameLength) { _extendedFrameLength = extendedFrameLength; }
+void        DWM1000Configuration::setReceiverAutoReenable(boolean receiverAutoReenable) { _receiverAutoReenable = receiverAutoReenable; }
+void        DWM1000Configuration::setNlos(boolean nlos) { _nlos = nlos; }
+void        DWM1000Configuration::setSmartPower(boolean smartPower) { _smartPower = smartPower; }
+void        DWM1000Configuration::setTxPower(int32_t txPower) { _txPower = txPower; }
+void        DWM1000Configuration::setTcpgDelay(byte tcpgDelay) { _tcpgDelay = tcpgDelay; }
+void        DWM1000Configuration::setAntennaDelay(uint16_t antennaDelay) { _antennaDelay = antennaDelay; }
 
 DWM1000Configuration::setDefaultProfile() {
     setDatarate(TRX_RATE_6800KBPS);
