@@ -127,5 +127,5 @@ private:
     boolean     _smartPower;
     int32_t     _txPower;
     byte        _tcpgDelay;
-    uint16_t    _antennaDelay = 16384;
+    uint16_t    _antennaDelay;
 };
