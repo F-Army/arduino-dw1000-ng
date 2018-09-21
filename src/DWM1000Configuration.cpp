@@ -124,9 +124,7 @@ boolean     DWM1000Configuration::getNlos() { return _nlos; }
 boolean     DWM1000Configuration::getSmartPower() { return _smartPower; }
 int32_t     DWM1000Configuration::getTxPower() { return _txPower; }
 byte        DWM1000Configuration::getTcpgDelay() { return _tcpgDelay; }
-uint16_t    DWM1000Configuration::getAntennaDelay() { return _antennaDelay; } 
-boolean     DWM1000Configuration::getAutoTxPower() { return _txPower; }
-boolean     DWM1000Configuration::getAutoTcpgDelay() { return _tcpgDelay; }
+uint16_t    DWM1000Configuration::getAntennaDelay() { return _antennaDelay; }
 
 void        DWM1000Configuration::setDatarate(byte dataRate) { _dataRate = dataRate; }
 void        DWM1000Configuration::setPulseFrequency(byte pulseFrequency) { _pulseFrequency = pulseFrequency; }
@@ -148,26 +146,26 @@ void        DWM1000Configuration::setTxPower(int32_t txPower) { _txPower = txPow
 void        DWM1000Configuration::setTcpgDelay(byte tcpgDelay) { _tcpgDelay = tcpgDelay; }
 void        DWM1000Configuration::setAntennaDelay(uint16_t antennaDelay) { _antennaDelay = antennaDelay; }
 
-void        DWM1000Configuration::setDefaultProfile() {
-    setDatarate(TRX_RATE_6800KBPS);
-    setPulseFrequency(TX_PULSE_FREQ_16MHZ);
-    setPreambleLength(TX_PREAMBLE_LEN_128);
-    setChannel(CHANNEL_5);
-    setPreambleCode(PREAMBLE_CODE_16MHZ_4);
-    setInterruptOnSent(true);
-	setInterruptOnReceived(true);
-	setInterruptOnReceiveFailed(true);
-    setInterruptOnReceiveTimeout(true);
-	setInterruptOnReceiveTimestampAvailable(false);
-	setInterruptOnAutomaticAcknowledgeTrigger(true);
-    setFrameCheck(true);
-    setExtendedFrameLength(false);
-    setReceiverAutoReenable(true);
-    setNlos(false);
-    setSmartPower(true);
-    setTxPower(NULL);
-    setTcpgDelay(NULL);
-    setAntennaDelay(16384);
+void DWM1000Configuration::setDefaultProfile() {
+        setDatarate(TRX_RATE_6800KBPS);
+        setPulseFrequency(TX_PULSE_FREQ_16MHZ);
+        setPreambleLength(TX_PREAMBLE_LEN_128);
+        setChannel(CHANNEL_5);
+        setPreambleCode(PREAMBLE_CODE_16MHZ_4);
+        setInterruptOnSent(true);
+        setInterruptOnReceived(true);
+        setInterruptOnReceiveFailed(true);
+        setInterruptOnReceiveTimeout(true);
+        setInterruptOnReceiveTimestampAvailable(false);
+        setInterruptOnAutomaticAcknowledgeTrigger(true);
+        setFrameCheck(true);
+        setExtendedFrameLength(false);
+        setReceiverAutoReenable(true);
+        setNlos(false);
+        setSmartPower(true);
+        setTxPower(NULL);
+        setTcpgDelay(NULL);
+        setAntennaDelay(16384);
 }
 
 
