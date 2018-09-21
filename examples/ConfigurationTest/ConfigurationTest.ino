@@ -39,7 +39,6 @@ DWM1000Configuration smartPowerConfig(
     true,
     16384
 );
-
 DWM1000Configuration manualPowerConfig(
     TRX_RATE_850KBPS,
     TX_PULSE_FREQ_64MHZ,
@@ -108,6 +107,7 @@ void setup() {
 
     /* Test smartpowerconfig */
     Serial.println(F("\nTEST SMARTPOWERCONFING\n"));
+    Serial.print("DATARATE:")
     smartPowerConfig.getDatarate() == TRX_RATE_110KBPS ? Serial.println(" OK") : Serial.println(" FAILED");
     Serial.print("PULSE FREQUENCY:");
     smartPowerConfig.getPulseFrequency() == TX_PULSE_FREQ_16MHZ ? Serial.println(" OK") : Serial.println(" FAILED");
