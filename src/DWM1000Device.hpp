@@ -25,7 +25,6 @@
 
 class DWM1000Device {
 public:
-
     /* Constructors */
     DWM1000Device(uint8_t ss, uint8_t irq, uint8_t rst, uint16_t shortAddress);
     DWM1000Device(uint8_t ss, uint8_t irq, uint8_t rst, uint16_t shortAddress, DWM1000Configuration config);
@@ -90,7 +89,6 @@ public:
     */
 
 private:
-
     static int SPICurrentDevice;
     
     uint8_t _ss;
