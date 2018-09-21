@@ -58,6 +58,8 @@ DWM1000Configuration::DWM1000Configuration(
     setReceiverAutoReenable(receiverAutoReenable);
     setNlos(nlos);
     setSmartPower(smartPower);
+    setTxPower(NULL);
+    setTCPGDelay(NULL);
     setAntennaDelay(antennaDelay);
 }
 
@@ -96,6 +98,7 @@ DWM1000Configuration::DWM1000Configuration(
     setExtendedFrameLength(extendedFrameLength);
     setReceiverAutoReenable(receiverAutoReenable);
     setNlos(nlos);
+    setSmartPower(false);
     setTxPower(txPower);
     setTcpgDelay(tcpgDelay);
     setAntennaDelay(antennaDelay);
@@ -162,6 +165,8 @@ void        DWM1000Configuration::setDefaultProfile() {
     setReceiverAutoReenable(true);
     setNlos(false);
     setSmartPower(true);
+    setTxPower(NULL);
+    setTCPGDelay(NULL);
     setAntennaDelay(16384);
 }
 
