@@ -61,7 +61,7 @@ DWM1000Configuration::DWM1000Configuration(
     setAntennaDelay(antennaDelay);
 }
 
-DWM1000Configuration(
+DWM1000Configuration::DWM1000Configuration(
         byte dataRate,
         byte pulseFrequency,
         byte preambleLength,

@@ -114,7 +114,7 @@ public:
 private:
     byte        _dataRate;
     byte        _pulseFrequency;
-    byte        _preambleLength,;
+    byte        _preambleLength;
     byte        _channel;
     byte        _preambleCode;
     boolean     _interruptOnSent;
