@@ -16,17 +16,4 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#include <Arduino.h>
 #include "DWM1000Configuration.hpp"
-
-class DWM1000Device {
-public:
-    DWM1000Device(uint8_t ss, uint8_t irq, uint8_t rst, uint16_t shortAddress);
-    DWM1000Device(uint8_t rst, uint8_t irq, uint8_t ss, uint16_t shortAddress, uint16_t panId);
-    DWM1000Device(uint8_t rst, uint8_t irq, uint8_t ss, uint16_t shortAddress, uint16_t panId, char eui[]);
-    ~DWM1000Device();
-
-    void select();
-};

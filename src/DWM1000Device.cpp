@@ -17,3 +17,4 @@
  */
 
 #include "DWM1000Device.hpp"
+#include "DWM1000Configuration.hpp"
