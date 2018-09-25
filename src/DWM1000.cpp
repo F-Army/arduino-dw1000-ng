@@ -79,21 +79,21 @@ namespace DWM1000 {
 		byte _tmeas23C = 0;
 
 		/* Driver Internal State Trackers */
-		byte        _extendedFrameLength;
-		byte        _pacSize;
-		byte        _pulseFrequency;
-		byte        _dataRate;
-		byte        _preambleLength;
-		byte        _preambleCode;
-		byte        _channel;
-		boolean     _smartPower;
-		boolean     _frameCheck;
-		boolean     _debounceClockEnabled = false;
-		boolean     _nlos = false;
-		boolean		_standardSFD = true;
-		boolean     _autoTXPower = true;
-		boolean     _autoTCPGDelay = true;
-		DWM1000Time _antennaDelay;
+		byte        	_extendedFrameLength;
+		byte        	_pacSize;
+		byte        	_pulseFrequency;
+		byte        	_dataRate;
+		byte        	_preambleLength;
+		PreambleCode	_preambleCode;
+		byte        	_channel;
+		boolean     	_smartPower;
+		boolean     	_frameCheck;
+		boolean     	_debounceClockEnabled = false;
+		boolean     	_nlos = false;
+		boolean			_standardSFD = true;
+		boolean     	_autoTXPower = true;
+		boolean     	_autoTCPGDelay = true;
+		DWM1000Time 	_antennaDelay;
 
 		/* SPI relative variables */
 		const SPISettings  _fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
@@ -279,73 +279,73 @@ namespace DWM1000 {
 		/* LDE_REPC - reg 0x2E, sub-reg:0x2804, table 51 */
 		void _lderepc() {
 			byte lderepc[LEN_LDE_REPC];
-			if(_preambleCode == PREAMBLE_CODE_16MHZ_1 || _preambleCode == PREAMBLE_CODE_16MHZ_2) {
+			if(_preambleCode == PreambleCode::PREAMBLE_CODE_1 || _preambleCode == PreambleCode::PREAMBLE_CODE_2) {
 				if(_dataRate == TRX_RATE_110KBPS) {
 					DWM1000Utils::writeValueToBytes(lderepc, ((0x5998 >> 3) & 0xFFFF), LEN_LDE_REPC);
 				} else {
 					DWM1000Utils::writeValueToBytes(lderepc, 0x5998, LEN_LDE_REPC);
 				}
-			} else if(_preambleCode == PREAMBLE_CODE_16MHZ_3 || _preambleCode == PREAMBLE_CODE_16MHZ_8) {
+			} else if(_preambleCode == PreambleCode::PREAMBLE_CODE_3 || _preambleCode == PreambleCode::PREAMBLE_CODE_8) {
 				if(_dataRate == TRX_RATE_110KBPS) {
 					DWM1000Utils::writeValueToBytes(lderepc, ((0x51EA >> 3) & 0xFFFF), LEN_LDE_REPC);
 				} else {
 					DWM1000Utils::writeValueToBytes(lderepc, 0x51EA, LEN_LDE_REPC);
 				}
-			} else if(_preambleCode == PREAMBLE_CODE_16MHZ_4) {
+			} else if(_preambleCode == PreambleCode::PREAMBLE_CODE_4) {
 				if(_dataRate == TRX_RATE_110KBPS) {
 					DWM1000Utils::writeValueToBytes(lderepc, ((0x428E >> 3) & 0xFFFF), LEN_LDE_REPC);
 				} else {
 					DWM1000Utils::writeValueToBytes(lderepc, 0x428E, LEN_LDE_REPC);
 				}
-			} else if(_preambleCode == PREAMBLE_CODE_16MHZ_5) {
+			} else if(_preambleCode == PreambleCode::PREAMBLE_CODE_5) {
 				if(_dataRate == TRX_RATE_110KBPS) {
 					DWM1000Utils::writeValueToBytes(lderepc, ((0x451E >> 3) & 0xFFFF), LEN_LDE_REPC);
 				} else {
 					DWM1000Utils::writeValueToBytes(lderepc, 0x451E, LEN_LDE_REPC);
 				}
-			} else if(_preambleCode == PREAMBLE_CODE_16MHZ_6) {
+			} else if(_preambleCode == PreambleCode::PREAMBLE_CODE_6) {
 				if(_dataRate == TRX_RATE_110KBPS) {
 					DWM1000Utils::writeValueToBytes(lderepc, ((0x2E14 >> 3) & 0xFFFF), LEN_LDE_REPC);
 				} else {
 					DWM1000Utils::writeValueToBytes(lderepc, 0x2E14, LEN_LDE_REPC);
 				}
-			} else if(_preambleCode == PREAMBLE_CODE_16MHZ_7) {
+			} else if(_preambleCode == PreambleCode::PREAMBLE_CODE_7) {
 				if(_dataRate == TRX_RATE_110KBPS) {
 					DWM1000Utils::writeValueToBytes(lderepc, ((0x8000 >> 3) & 0xFFFF), LEN_LDE_REPC);
 				} else {
 					DWM1000Utils::writeValueToBytes(lderepc, 0x8000, LEN_LDE_REPC);
 				}
-			} else if(_preambleCode == PREAMBLE_CODE_64MHZ_9) {
+			} else if(_preambleCode == PreambleCode::PREAMBLE_CODE_9) {
 				if(_dataRate == TRX_RATE_110KBPS) {
 					DWM1000Utils::writeValueToBytes(lderepc, ((0x28F4 >> 3) & 0xFFFF), LEN_LDE_REPC);
 				} else {
 					DWM1000Utils::writeValueToBytes(lderepc, 0x28F4, LEN_LDE_REPC);
 				}
-			} else if(_preambleCode == PREAMBLE_CODE_64MHZ_10 || _preambleCode == PREAMBLE_CODE_64MHZ_17) {
+			} else if(_preambleCode == PreambleCode::PREAMBLE_CODE_10 || _preambleCode == PreambleCode::PREAMBLE_CODE_17) {
 				if(_dataRate == TRX_RATE_110KBPS) {
 					DWM1000Utils::writeValueToBytes(lderepc, ((0x3332 >> 3) & 0xFFFF), LEN_LDE_REPC);
 				} else {
 					DWM1000Utils::writeValueToBytes(lderepc, 0x3332, LEN_LDE_REPC);
 				}
-			} else if(_preambleCode == PREAMBLE_CODE_64MHZ_11) {
+			} else if(_preambleCode == PreambleCode::PREAMBLE_CODE_11) {
 				if(_dataRate == TRX_RATE_110KBPS) {
 					DWM1000Utils::writeValueToBytes(lderepc, ((0x3AE0 >> 3) & 0xFFFF), LEN_LDE_REPC);
 				} else {
 					DWM1000Utils::writeValueToBytes(lderepc, 0x3AE0, LEN_LDE_REPC);
 				}
-			} else if(_preambleCode == PREAMBLE_CODE_64MHZ_12) {
+			} else if(_preambleCode == PreambleCode::PREAMBLE_CODE_12) {
 				if(_dataRate == TRX_RATE_110KBPS) {
 					DWM1000Utils::writeValueToBytes(lderepc, ((0x3D70 >> 3) & 0xFFFF), LEN_LDE_REPC);
 				} else {
 					DWM1000Utils::writeValueToBytes(lderepc, 0x3D70, LEN_LDE_REPC);
 				}
-			} else if(_preambleCode == PREAMBLE_CODE_64MHZ_18 || _preambleCode == PREAMBLE_CODE_64MHZ_19) {
+			} else if(_preambleCode == PreambleCode::PREAMBLE_CODE_18 || _preambleCode == PreambleCode::PREAMBLE_CODE_19) {
 				if(_dataRate == TRX_RATE_110KBPS) {
 					DWM1000Utils::writeValueToBytes(lderepc, ((0x35C2 >> 3) & 0xFFFF), LEN_LDE_REPC);
 				} else {
 					DWM1000Utils::writeValueToBytes(lderepc, 0x35C2, LEN_LDE_REPC);
 				}
-			} else if(_preambleCode == PREAMBLE_CODE_64MHZ_20) {
+			} else if(_preambleCode == PreambleCode::PREAMBLE_CODE_20) {
 				if(_dataRate == TRX_RATE_110KBPS) {
 					DWM1000Utils::writeValueToBytes(lderepc, ((0x47AE >> 3) & 0xFFFF), LEN_LDE_REPC);
 				} else {
@@ -562,7 +562,7 @@ namespace DWM1000 {
 			_fsxtalt();
 		}
 
-		boolean _checkPreambleCodeValidity(byte preamble_code) {
+		boolean _checkPreambleCodeValidity(PreambleCode preamble_code) {
 			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 				for (auto i = 0; i < 2; i++) {
 					if(preamble_code == preamble_validity_matrix_PRF16[(int) _channel][i])
@@ -581,33 +581,34 @@ namespace DWM1000 {
 		}
 
 		void _setValidPreambleCode() {
-			byte preacode;
+			PreambleCode preamble_code;
 
 			switch(_channel) {
 				case CHANNEL_1:
-					preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_2 : PREAMBLE_CODE_64MHZ_10;
+					preamble_code = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PreambleCode::PREAMBLE_CODE_2 : PreambleCode::PREAMBLE_CODE_10;
 					break;
 				case CHANNEL_3:
-					preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_6 : PREAMBLE_CODE_64MHZ_10;
+					preamble_code = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PreambleCode::PREAMBLE_CODE_6 : PreambleCode::PREAMBLE_CODE_10;
 					break;
 				case CHANNEL_4:
 				case CHANNEL_7:
-					preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_8 : PREAMBLE_CODE_64MHZ_18;
+					preamble_code = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PreambleCode::PREAMBLE_CODE_8 : PreambleCode::PREAMBLE_CODE_18;
 					break;
 				case CHANNEL_2:
 				case CHANNEL_5:
-					preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_3 : PREAMBLE_CODE_64MHZ_10;
+					preamble_code = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PreambleCode::PREAMBLE_CODE_3 : PreambleCode::PREAMBLE_CODE_10;
 					break;
 				default:
 					return; //TODO Proper Error Handling
 			}
-
+			byte preacode = static_cast<byte>(preamble_code);
 			preacode &= 0x1F;
 			_chanctrl[2] &= 0x3F;
 			_chanctrl[2] |= ((preacode << 6) & 0xFF);
 			_chanctrl[3] = 0x00;
 			_chanctrl[3] = ((((preacode >> 2) & 0x07) | (preacode << 3)) & 0xFF);
-			_preambleCode = preacode;
+
+			_preambleCode = preamble_code;
 		}
 
 		void _setNonStandardSFDLength() {
@@ -1518,7 +1519,8 @@ namespace DWM1000 {
 		_chanctrl[2] |= ((preacode << 6) & 0xFF);
 		_chanctrl[3] = 0x00;
 		_chanctrl[3] = ((((preacode >> 2) & 0x07) | (preacode << 3)) & 0xFF);
-		_preambleCode = preacode;
+
+		_preambleCode = preamble_code;
 	}
 
 	void setData(byte data[], uint16_t n) {
