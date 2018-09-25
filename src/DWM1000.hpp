@@ -213,7 +213,7 @@ namespace DWM1000 {
 
 	@param[in] rate The data transmission rate, encoded by the above defined constants.
 	*/
-	void setDataRate(byte rate);
+	void setDataRate(DataRate data_rate);
 	
 	/** 
 	Specifies the pulse repetition frequency (PRF) of data transmissions with the DWM1000. Either

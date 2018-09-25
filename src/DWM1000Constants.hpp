@@ -44,6 +44,7 @@
 #define LED_MODE 1
 
 /* preamble codes (CHAN_CTRL - RX & TX _CODE) - reg:0x1F, bits:31-27,26-22 */
+
 enum class PreambleCode : byte {
     CODE_1 = 1,
     CODE_2,
@@ -88,9 +89,11 @@ constexpr byte preamble_validity_matrix_PRF64[8][4] = {
 };
 
 /* transmission/reception bit rate (TXBR) - reg:0x08, bits:14,13 */
-constexpr byte TRX_RATE_110KBPS  = 0x00;
-constexpr byte TRX_RATE_850KBPS  = 0x01;
-constexpr byte TRX_RATE_6800KBPS = 0x02;
+enum class DataRate : byte {
+    RATE_110KBPS, 
+    RATE_850KBPS, 
+    RATE_6800KBPS
+};
 
 /* transmission pulse frequency (TXPRF) - reg:0x08, bits:17,16
 * 0x00 is 4MHZ, but receiver in DWM1000 does not support it (!??) */
