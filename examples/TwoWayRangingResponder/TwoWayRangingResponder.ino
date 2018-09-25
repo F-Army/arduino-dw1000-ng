@@ -48,6 +48,7 @@
 
 #include <SPI.h>
 #include <DWM1000.hpp>
+#include <DWM1000RangingUtils.hpp>
 
 // connection pins
 const uint8_t PIN_RST = 9; // reset pin
@@ -75,8 +76,9 @@ DWM1000Time timePollAckSent;
 DWM1000Time timePollAckReceived;
 DWM1000Time timeRangeSent;
 DWM1000Time timeRangeReceived;
-// last computed range/time
+
 DWM1000Time timeComputedRange;
+// last computed range/time
 // data buffer
 #define LEN_DATA 16
 byte data[LEN_DATA];
@@ -186,42 +188,6 @@ void receiver() {
     DWM1000::startReceive();
 }
 
-/*
- * RANGING ALGORITHMS
- * ------------------
- * Either of the below functions can be used for range computation (see line "CHOSEN
- * RANGING ALGORITHM" in the code).
- * - Asymmetric is more computation intense but least error prone
- * - Symmetric is less computation intense but more error prone to clock drifts
- *
- * The anchors and tags of this reference example use the same reply delay times, hence
- * are capable of symmetric ranging (and of asymmetric ranging anyway).
- */
-
-void computeRangeAsymmetric() {
-    // asymmetric two-way ranging (more computation intense, less error prone)
-    DWM1000Time round1 = (timePollAckReceived - timePollSent).wrap();
-    DWM1000Time reply1 = (timePollAckSent - timePollReceived).wrap();
-    DWM1000Time round2 = (timeRangeReceived - timePollAckSent).wrap();
-    DWM1000Time reply2 = (timeRangeSent - timePollAckReceived).wrap();
-    DWM1000Time tof = (round1 * round2 - reply1 * reply2) / (round1 + round2 + reply1 + reply2);
-    // set tof timestamp
-    timeComputedRange.setTimestamp(tof);
-}
-
-void computeRangeSymmetric() {
-    // symmetric two-way ranging (less computation intense, more error prone on clock drift)
-    DWM1000Time tof = ((timePollAckReceived - timePollSent) - (timePollAckSent - timePollReceived) +
-                      (timeRangeReceived - timePollAckSent) - (timeRangeSent - timePollAckReceived)) * 0.25f;
-    // set tof timestamp
-    timeComputedRange.setTimestamp(tof);
-}
-
-/*
- * END RANGING ALGORITHMS
- * ----------------------
- */
-
 void loop() {
     int32_t curMillis = millis();
     if (!sentAck && !receivedAck) {
@@ -266,7 +232,12 @@ void loop() {
                 timePollAckReceived.setTimestamp(data + 6);
                 timeRangeSent.setTimestamp(data + 11);
                 // (re-)compute range as two-way ranging is done
-                computeRangeAsymmetric(); // CHOSEN RANGING ALGORITHM
+                timeComputedRange = DWM1000RangingUtils::computeRangeAsymmetric(timePollSent,
+                                                            timePollReceived, 
+                                                            timePollAckSent, 
+                                                            timePollAckReceived, 
+                                                            timeRangeSent, 
+                                                            timeRangeReceived);
                 float distance = timeComputedRange.getAsMeters();
                 String rangeString = "Range: "; rangeString += distance; rangeString += " m";
                 rangeString += "\t RX power: "; rangeString += DWM1000::getReceivePower(); rangeString += " dBm";
