@@ -1163,12 +1163,27 @@ namespace DWM1000 {
 		_writeNetworkIdAndDeviceAddress();
 	}
 
+	void setEUI(char eui[]) {
+		byte eui_byte[LEN_EUI];
+		DWM1000Utils::convertToByte(eui, eui_byte);
+		setEUI(eui_byte);
+	}
+
+	void setEUI(byte eui[]) {
+		//we reverse the address->
+		byte    reverseEUI[8];
+		uint8_t     size = 8;
+		for(uint8_t i    = 0; i < size; i++) {
+			*(reverseEUI+i) = *(eui+size-i-1);
+		}
+		writeBytes(EUI, NO_SUB, reverseEUI, LEN_EUI);
+	}
+
 	void getTemp(float& temp) {
 		_vbatAndTempSteps();
 		byte sar_ltemp = 0; readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
 		temp = (sar_ltemp - _tmeas23C) * 1.14f + 23.0f;
 	}
-
 
 	void getVbat(float& vbat) {
 		_vbatAndTempSteps();
@@ -1185,22 +1200,6 @@ namespace DWM1000 {
 		// calculate voltage and temperature
 		vbat = (sar_lvbat - _vmeas3v3) / 173.0f + 3.3f;
 		temp = (sar_ltemp - _tmeas23C) * 1.14f + 23.0f;
-	}
-
-	void setEUI(char eui[]) {
-		byte eui_byte[LEN_EUI];
-		DWM1000Utils::convertToByte(eui, eui_byte);
-		setEUI(eui_byte);
-	}
-
-	void setEUI(byte eui[]) {
-		//we reverse the address->
-		byte    reverseEUI[8];
-		uint8_t     size = 8;
-		for(uint8_t i    = 0; i < size; i++) {
-			*(reverseEUI+i) = *(eui+size-i-1);
-		}
-		writeBytes(EUI, NO_SUB, reverseEUI, LEN_EUI);
 	}
 
 

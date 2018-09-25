@@ -165,8 +165,6 @@ namespace DWM1000 {
 	*/
 	void setDeviceAddress(uint16_t val);
 	// TODO MAC and filters
-
-	void writeNetworkIdAndDeviceAddress();
 	
 	void setEUI(char eui[]);
 	void setEUI(byte eui[]);
