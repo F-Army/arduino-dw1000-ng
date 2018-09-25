@@ -64,7 +64,7 @@ enum class PreambleCode : byte {
 };
 
 /* Validity matrix for 16 MHz PRF preamble codes */
-constexpr PreambleCode preamble_validity_matrix_PRF16[8][2] = {
+PreambleCode preamble_validity_matrix_PRF16[8][2] = {
     {PreambleCode::PREAMBLE_CODE_20, PreambleCode::PREAMBLE_CODE_20}, /* INVALID as Channel 0 doesn't exist */
     {PreambleCode::PREAMBLE_CODE_1, PreambleCode::PREAMBLE_CODE_2},
     {PreambleCode::PREAMBLE_CODE_3, PreambleCode::PREAMBLE_CODE_4},
@@ -76,7 +76,7 @@ constexpr PreambleCode preamble_validity_matrix_PRF16[8][2] = {
 };
 
 /* Validity matrix for 64 MHz PRF preamble codes */
-constexpr PreambleCode preamble_validity_matrix_PRF64[8][4] = {
+PreambleCode preamble_validity_matrix_PRF64[8][4] = {
     {PreambleCode::PREAMBLE_CODE_1, PreambleCode::PREAMBLE_CODE_1, PreambleCode::PREAMBLE_CODE_1, PreambleCode::PREAMBLE_CODE_1}, /* INVALID Channel 0 doesn't exist */
     {PreambleCode::PREAMBLE_CODE_9, PreambleCode::PREAMBLE_CODE_10, PreambleCode::PREAMBLE_CODE_11, PreambleCode::PREAMBLE_CODE_12},
     {PreambleCode::PREAMBLE_CODE_9, PreambleCode::PREAMBLE_CODE_10, PreambleCode::PREAMBLE_CODE_11, PreambleCode::PREAMBLE_CODE_12},
