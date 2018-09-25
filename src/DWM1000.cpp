@@ -1328,6 +1328,7 @@ namespace DWM1000 {
 		DWM1000Utils::setBit(_syscfg, LEN_SYS_CFG, DIS_STXP_BIT, !smartPower);
 		if(_smartPower) 
 			_autoTXPower = true;
+		_writeSystemConfigurationRegister();
 	}
 
 	void setTXPower(byte power[]) {
