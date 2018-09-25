@@ -564,13 +564,10 @@ namespace DWM1000 {
 
 		boolean _checkPreambleCodeValidity() {
 			byte preacode = static_cast<byte>(_preambleCode);
-			Serial.print("VALORE: "); Serial.println(preacode);
 			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 				for (auto i = 0; i < 2; i++) {
-					if(preacode == preamble_validity_matrix_PRF16[(int) _channel][i]){
-						Serial.println("RITORNO TRUE");
+					if(preacode == preamble_validity_matrix_PRF16[(int) _channel][i])
 						return true;
-					}
 				}
 				return false;
 			} else if (_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
@@ -580,7 +577,6 @@ namespace DWM1000 {
 				}
 				return false;
 			} else {
-				Serial.println("RITORNO FALSE");
 				return false; //TODO Proper error handling
 			}
 		}
