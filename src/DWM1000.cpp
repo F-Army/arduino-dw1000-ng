@@ -636,8 +636,8 @@ namespace DWM1000 {
 
 		void _useStandardSFD() {
 			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
 			/*switch(_dataRate) {
 				case TRX_RATE_6800KBPS:
 					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
