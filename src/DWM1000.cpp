@@ -570,6 +570,7 @@ namespace DWM1000 {
 					if(preacode == preamble_validity_matrix_PRF16[(int) _channel][i])
 						return true;
 				}
+				Serial.println("RITORNO FALSE");
 				return false;
 			} else if (_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
 				for(auto i = 0; i < 4; i++) {
@@ -1317,10 +1318,7 @@ namespace DWM1000 {
 	void commitConfiguration() {
 		if(!_checkPreambleCodeValidity());
 			_setValidPreambleCode();
-		
-		byte preacode = static_cast<byte>(_preambleCode);
-			Serial.print("VALORE: "); Serial.println(preacode);
-			
+
 		if(!_standardSFD)
 			_setNonStandardSFDLength();
 
