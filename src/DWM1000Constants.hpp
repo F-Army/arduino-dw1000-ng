@@ -45,22 +45,22 @@
 
 /* preamble codes (CHAN_CTRL - RX & TX _CODE) - reg:0x1F, bits:31-27,26-22 */
 enum class PreambleCode : byte {
-    PREAMBLE_CODE_1 = 1,
-    PREAMBLE_CODE_2,
-    PREAMBLE_CODE_3,
-    PREAMBLE_CODE_4,
-    PREAMBLE_CODE_5,
-    PREAMBLE_CODE_6,
-    PREAMBLE_CODE_7,
-    PREAMBLE_CODE_8,
-    PREAMBLE_CODE_9,
-    PREAMBLE_CODE_10,
-    PREAMBLE_CODE_11,
-    PREAMBLE_CODE_12,
-    PREAMBLE_CODE_17 = 17,
-    PREAMBLE_CODE_18,
-    PREAMBLE_CODE_19,
-    PREAMBLE_CODE_20
+    CODE_1 = 1,
+    CODE_2,
+    CODE_3,
+    CODE_4,
+    CODE_5,
+    CODE_6,
+    CODE_7,
+    CODE_8,
+    CODE_9,
+    CODE_10,
+    CODE_11,
+    CODE_12,
+    CODE_17 = 17,
+    CODE_18,
+    CODE_19,
+    CODE_20
 };
 
 /* Validity matrix for 16 MHz PRF preamble codes */
