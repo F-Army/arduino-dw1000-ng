@@ -1359,6 +1359,7 @@ namespace DWM1000 {
 
 	void setTXPowerAuto() {
 		_autoTXPower = true;
+		_txpowertune();
 	}
 
 	void setTCPGDelay(byte tcpgdelay) {
