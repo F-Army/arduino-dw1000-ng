@@ -1869,7 +1869,7 @@ namespace DWM1000 {
 			SPI.transfer(header[i]); // send header
 		}
 		for(i = 0; i < n; i++) {
-			data[i] = SPI.transfer(JUNK); // read values
+			data[i] = SPI.transfer(0x00); // read values
 		}
 		delayMicroseconds(5);
 		digitalWrite(_ss, HIGH);

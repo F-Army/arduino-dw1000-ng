@@ -40,9 +40,6 @@
 
 #include <Arduino.h>
 
-// used for SPI ready w/o actual writes
-#define JUNK 0x00
-
 #define MSGP0 6
 #define MSGP1 8
 #define MSGP2 10
