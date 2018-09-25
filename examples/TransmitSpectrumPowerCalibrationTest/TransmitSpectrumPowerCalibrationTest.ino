@@ -40,7 +40,9 @@ void setup() {
     DWM1000::setDeviceAddress(1);
     DWM1000::setNetworkId(10);
     DWM1000::setChannel(CHANNEL_5);
-    DWM1000::enableMode(MODE_SHORTRANGE_HIGHPRF_MEDIUMPREAMBLE);
+    DWM1000::setDataRate(TRX_RATE_6800KBPS);
+    DWM1000::setPulseFrequency(TX_PULSE_FREQ_16MHZ);
+    DWM1000::setPreambleLength(TX_PREAMBLE_LEN_128);
     DWM1000::setSFDMode(SFDMode::STANDARD_SFD);
     DWM1000::setPreambleCode(PREAMBLE_CODE_64MHZ_9);
     DWM1000::useSmartPower(false);
