@@ -1318,6 +1318,9 @@ namespace DWM1000 {
 		if(!_checkPreambleCodeValidity());
 			_setValidPreambleCode();
 		
+		byte preacode = static_cast<byte>(_preambleCode);
+			Serial.print("VALORE: "); Serial.println(preacode);
+			
 		if(!_standardSFD)
 			_setNonStandardSFDLength();
 
