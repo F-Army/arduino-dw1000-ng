@@ -40,16 +40,6 @@
 
 #include <Arduino.h>
 
-#define MSGP0 6
-#define MSGP1 8
-#define MSGP2 10
-#define MSGP3 12
-#define MSGP4 14
-#define MSGP5 16
-#define MSGP6 18
-#define MSGP7 20
-#define MSGP8 22
-
 #define GPIO_MODE 0
 #define LED_MODE 1
 
