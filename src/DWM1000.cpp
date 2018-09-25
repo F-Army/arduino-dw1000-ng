@@ -69,7 +69,7 @@ namespace DWM1000 {
 		void _useDecawaveSFD();
 		void _useStandardSFD();
 		void _useRecommendedSFD();
-		void (* _currentSFDMode)(void) = _useRecommendedSFD;
+		void (* _currentSFDMode)(void) = _useStandardSFD;
 
 		/* registers */
 		byte       _syscfg[LEN_SYS_CFG];
@@ -638,7 +638,7 @@ namespace DWM1000 {
 			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
 			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
 			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
-			switch(_dataRate) {
+			/*switch(_dataRate) {
 				case TRX_RATE_6800KBPS:
 					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
 					break;
@@ -651,6 +651,7 @@ namespace DWM1000 {
 				default:
 					return; //TODO Proper error handling
 			}
+			*/
 		}
 
 		void _useRecommendedSFD() {
