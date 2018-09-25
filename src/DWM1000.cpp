@@ -1313,10 +1313,8 @@ namespace DWM1000 {
 	}
 
 	void commitConfiguration() {
-		/*
 		if(!_checkPreambleCodeValidity(_preambleCode));
 			_setValidPreambleCode();
-		*/
 		
 		if(!_standardSFD)
 			_setNonStandardSFDLength();
