@@ -64,27 +64,27 @@ enum class PreambleCode : byte {
 };
 
 /* Validity matrix for 16 MHz PRF preamble codes */
-PreambleCode preamble_validity_matrix_PRF16[8][2] = {
-    {PreambleCode::PREAMBLE_CODE_20, PreambleCode::PREAMBLE_CODE_20}, /* INVALID as Channel 0 doesn't exist */
-    {PreambleCode::PREAMBLE_CODE_1, PreambleCode::PREAMBLE_CODE_2},
-    {PreambleCode::PREAMBLE_CODE_3, PreambleCode::PREAMBLE_CODE_4},
-    {PreambleCode::PREAMBLE_CODE_5, PreambleCode::PREAMBLE_CODE_6},
-    {PreambleCode::PREAMBLE_CODE_7, PreambleCode::PREAMBLE_CODE_8},
-    {PreambleCode::PREAMBLE_CODE_3, PreambleCode::PREAMBLE_CODE_4},
-    {PreambleCode::PREAMBLE_CODE_20, PreambleCode::PREAMBLE_CODE_20}, /* INVALID Channel 5 doesn't exist */
-    {PreambleCode::PREAMBLE_CODE_7, PreambleCode::PREAMBLE_CODE_8}
+constexpr byte preamble_validity_matrix_PRF16[8][2] = {
+    {0,0}, /* Channel 0 doesn't exist */
+    {1, 2},
+    {3, 4},
+    {5, 6},
+    {7, 8},
+    {3, 4},
+    {0,0}, /* Channel 5 doesn't exist */
+    {7, 8}
 };
 
 /* Validity matrix for 64 MHz PRF preamble codes */
-PreambleCode preamble_validity_matrix_PRF64[8][4] = {
-    {PreambleCode::PREAMBLE_CODE_1, PreambleCode::PREAMBLE_CODE_1, PreambleCode::PREAMBLE_CODE_1, PreambleCode::PREAMBLE_CODE_1}, /* INVALID Channel 0 doesn't exist */
-    {PreambleCode::PREAMBLE_CODE_9, PreambleCode::PREAMBLE_CODE_10, PreambleCode::PREAMBLE_CODE_11, PreambleCode::PREAMBLE_CODE_12},
-    {PreambleCode::PREAMBLE_CODE_9, PreambleCode::PREAMBLE_CODE_10, PreambleCode::PREAMBLE_CODE_11, PreambleCode::PREAMBLE_CODE_12},
-    {PreambleCode::PREAMBLE_CODE_9, PreambleCode::PREAMBLE_CODE_10, PreambleCode::PREAMBLE_CODE_11, PreambleCode::PREAMBLE_CODE_12},
-    {PreambleCode::PREAMBLE_CODE_17, PreambleCode::PREAMBLE_CODE_18, PreambleCode::PREAMBLE_CODE_19, PreambleCode::PREAMBLE_CODE_20},
-    {PreambleCode::PREAMBLE_CODE_9, PreambleCode::PREAMBLE_CODE_10, PreambleCode::PREAMBLE_CODE_11, PreambleCode::PREAMBLE_CODE_12},
-    {PreambleCode::PREAMBLE_CODE_1, PreambleCode::PREAMBLE_CODE_1, PreambleCode::PREAMBLE_CODE_1, PreambleCode::PREAMBLE_CODE_1}, /* INVALID Channel 5 doesn't exist */
-    {PreambleCode::PREAMBLE_CODE_17, PreambleCode::PREAMBLE_CODE_18, PreambleCode::PREAMBLE_CODE_19, PreambleCode::PREAMBLE_CODE_20}
+constexpr byte preamble_validity_matrix_PRF64[8][4] = {
+    {0,0,0,0}, /* Channel 0 doesn't exist */
+    {9, 10, 11, 12},
+    {9, 10, 11, 12},
+    {9, 10, 11, 12},
+    {17, 18, 19, 20},
+    {9, 10, 11, 12},
+    {0,0,0,0}, /* Channel 5 doesn't exist */
+    {17, 18, 19, 20}
 };
 
 /* transmission/reception bit rate (TXBR) - reg:0x08, bits:14,13 */

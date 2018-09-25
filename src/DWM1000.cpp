@@ -563,15 +563,17 @@ namespace DWM1000 {
 		}
 
 		boolean _checkPreambleCodeValidity() {
+
+			byte preacode = static_cast<byte>(_preambleCode);
 			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 				for (auto i = 0; i < 2; i++) {
-					if(_preambleCode == preamble_validity_matrix_PRF16[(int) _channel][i])
+					if(preacode == preamble_validity_matrix_PRF16[(int) _channel][i])
 						return true;
 				}
 				return false;
 			} else if (_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
 				for(auto i = 0; i < 4; i++) {
-					if(_preambleCode == preamble_validity_matrix_PRF64[(int) _channel][i])
+					if(preacode == preamble_validity_matrix_PRF64[(int) _channel][i])
 						return true;
 				}
 				return false;
