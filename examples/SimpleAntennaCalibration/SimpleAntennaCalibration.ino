@@ -128,9 +128,8 @@ void setup() {
     DWM1000::setPreambleCode(PREAMBLE_CODE_16MHZ_3);
     DWM1000::setDeviceAddress(1);
     DWM1000::setNetworkId(10);
-    DWM1000::setAntennaDelay(antenna_delay);
     DWM1000::commitConfiguration();
-    
+
 	DWM1000::setAntennaDelay(16384);
     Serial.println(F("Committed configuration ..."));
     // DEBUG chip info and registers pretty printed
