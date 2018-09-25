@@ -65,11 +65,6 @@ namespace DWM1000 {
 		void (* _handleReceiveTimeout)(void)            = nullptr;
 		void (* _handleReceiveTimestampAvailable)(void) = nullptr;
 
-		/* SFD Mode */
-		void _useDecawaveSFD();
-		void _useStandardSFD();
-		void (* _currentSFDMode)(void) = _useStandardSFD;
-
 		/* registers */
 		byte       _syscfg[LEN_SYS_CFG];
 		byte       _sysctrl[LEN_SYS_CTRL];
@@ -95,6 +90,7 @@ namespace DWM1000 {
 		boolean     _frameCheck;
 		boolean     _debounceClockEnabled = false;
 		boolean     _nlos = false;
+		boolean		_standardSFD = true;
 		boolean     _autoTXPower = true;
 		boolean     _autoTCPGDelay = true;
 		DWM1000Time _antennaDelay;
@@ -146,31 +142,22 @@ namespace DWM1000 {
 		void _drxtune0b() {
 			byte drxtune0b[LEN_DRX_TUNE0b];
 			if(_dataRate == TRX_RATE_110KBPS) {
-				if(_currentSFDMode == _useDecawaveSFD) {
+				if(!_standardSFD) {
 					DWM1000Utils::writeValueToBytes(drxtune0b, 0x0016, LEN_DRX_TUNE0b);
-				} else if(_currentSFDMode == _useStandardSFD) {
-					DWM1000Utils::writeValueToBytes(drxtune0b, 0x000A, LEN_DRX_TUNE0b);
 				} else {
-					//TODO Error handling
-					return;
+					DWM1000Utils::writeValueToBytes(drxtune0b, 0x000A, LEN_DRX_TUNE0b);
 				}
 			} else if(_dataRate == TRX_RATE_850KBPS) {
-				if(_currentSFDMode == _useDecawaveSFD) {
+				if(!_standardSFD) {
 					DWM1000Utils::writeValueToBytes(drxtune0b, 0x0006, LEN_DRX_TUNE0b);
-				} else if(_currentSFDMode == _useStandardSFD) {
-					DWM1000Utils::writeValueToBytes(drxtune0b, 0x0001, LEN_DRX_TUNE0b);
 				} else {
-					//TODO Error handling
-					return;
+					DWM1000Utils::writeValueToBytes(drxtune0b, 0x0001, LEN_DRX_TUNE0b);
 				}
 			} else if(_dataRate == TRX_RATE_6800KBPS) {
-				if(_currentSFDMode == _useDecawaveSFD) {
+				if(!_standardSFD) {
 					DWM1000Utils::writeValueToBytes(drxtune0b, 0x0002, LEN_DRX_TUNE0b);
-				} else if(_currentSFDMode == _useStandardSFD) {
-					DWM1000Utils::writeValueToBytes(drxtune0b, 0x0001, LEN_DRX_TUNE0b);
 				} else {
-					//TODO Error handling
-					return;
+					DWM1000Utils::writeValueToBytes(drxtune0b, 0x0001, LEN_DRX_TUNE0b);
 				}
 			} else {
 				// TODO proper error/warning handling
@@ -633,33 +620,6 @@ namespace DWM1000 {
 			pmscctrl0[0] = 0x00;
 			pmscctrl0[1] &= 0x02;
 			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
-		}
-
-		void _useDecawaveSFD() {
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
-			switch(_dataRate) {
-				case TRX_RATE_6800KBPS:
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
-					break;
-				case TRX_RATE_850KBPS:
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
-					break;
-				case TRX_RATE_110KBPS:
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
-					break;
-				default:
-					return; //TODO Proper error handling
-			}
-		}
-
-		void _useStandardSFD() {
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
 		}
 
 		void _enableClock(byte clock) {
@@ -1288,6 +1248,21 @@ namespace DWM1000 {
 	}
 
 	void commitConfiguration() {
+		if(!_standardSFD) {
+			switch(_dataRate) {
+				case TRX_RATE_6800KBPS:
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
+					break;
+				case TRX_RATE_850KBPS:
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10);
+					break;
+				case TRX_RATE_110KBPS:
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
+					break;
+				default:
+					return; //TODO Proper error handling
+			}
+		}
 		// writes configuration to registers
 		_writeConfiguration();
 		// tune according to configuration
@@ -1406,7 +1381,6 @@ namespace DWM1000 {
 			DWM1000Utils::setBit(_syscfg, LEN_SYS_CFG, RXM110K_BIT, false);
 		}
 		_dataRate = rate;
-		(*_currentSFDMode)();
 	}
 
 	void setPulseFrequency(byte freq) {
@@ -1451,20 +1425,24 @@ namespace DWM1000 {
 		_preambleLength = prealen;
 	}
 
+
 	void setSFDMode(SFDMode mode) {
 		switch(mode) {
 			case SFDMode::STANDARD_SFD:
-				_currentSFDMode = _useStandardSFD;
+				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
+				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
+				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+				_standardSFD = true;
 				break;
 			case SFDMode::DECAWAVE_SFD:
-				_currentSFDMode = _useDecawaveSFD;
+				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
+				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
+				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
+				_standardSFD = false;
 				break;
 			default:
 				return; //TODO Proper error handling
 		}
-
-		/* Sets new SFD parameters by calling the relative function */
-		(*_currentSFDMode)();
 	}
 
 	void useExtendedFrameLength(boolean val) {
