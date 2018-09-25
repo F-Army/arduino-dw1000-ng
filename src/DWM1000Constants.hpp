@@ -103,14 +103,17 @@ enum class PulseFrequency : byte {
 };
 
 /* preamble length (PE + TXPSR) - reg:0x08, bits:21,20,19,18 - table 16 */
-constexpr byte TX_PREAMBLE_LEN_64   = 0x01;
-constexpr byte TX_PREAMBLE_LEN_128  = 0x05;
-constexpr byte TX_PREAMBLE_LEN_256  = 0x09;
-constexpr byte TX_PREAMBLE_LEN_512  = 0x0D;
-constexpr byte TX_PREAMBLE_LEN_1024 = 0x02;
-constexpr byte TX_PREAMBLE_LEN_1536 = 0x06;
-constexpr byte TX_PREAMBLE_LEN_2048 = 0x0A;
-constexpr byte TX_PREAMBLE_LEN_4096 = 0x03;
+enum class PreambleLength : byte {
+    LEN_64   = 0x01,
+    LEN_128  = 0x05,
+    LEN_256  = 0x09,
+    LEN_512  = 0x0D,
+    LEN_1024 = 0x02,
+    LEN_1536 = 0x06,
+    LEN_2048 = 0x0A,
+    LEN_4096 = 0x03
+};
+
 
 /* PAC size (DRX_TUNE2) - reg:0x08, sub-reg:0x27, bits:26,25 - table 33
 * The value to program the sub-register changes in based of RXPRF */

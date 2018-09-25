@@ -230,7 +230,7 @@ namespace DWM1000 {
 	*/
 	void setPulseFrequency(PulseFrequency frequency);
 
-	void setPreambleLength(byte prealen);
+	void setPreambleLength(PreambleLength preamble_length);
 
 	void setSFDMode(SFDMode mode);
 	

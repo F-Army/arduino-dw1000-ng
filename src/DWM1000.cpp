@@ -83,7 +83,7 @@ namespace DWM1000 {
 		byte        	_pacSize;
 		PulseFrequency	_pulseFrequency;
 		DataRate        _dataRate;
-		byte        	_preambleLength;
+		PreambleLength	_preambleLength;
 		PreambleCode	_preambleCode;
 		byte        	_channel;
 		boolean     	_smartPower;
@@ -181,14 +181,14 @@ namespace DWM1000 {
 		/* DRX_TUNE1b - reg:0x27, sub-reg:0x06, table 32 */
 		void _drxtune1b() {
 			byte drxtune1b[LEN_DRX_TUNE1b];
-			if(_preambleLength == TX_PREAMBLE_LEN_1536 || _preambleLength == TX_PREAMBLE_LEN_2048 ||
-				_preambleLength == TX_PREAMBLE_LEN_4096) {
+			if(_preambleLength == PreambleLength::LEN_1536 || _preambleLength == PreambleLength::LEN_2048 ||
+				_preambleLength == PreambleLength::LEN_4096) {
 				if(_dataRate == DataRate::RATE_110KBPS) {
 					DWM1000Utils::writeValueToBytes(drxtune1b, 0x0064, LEN_DRX_TUNE1b);
 				} else {
 					// TODO proper error/warning handling
 				}
-			} else if(_preambleLength != TX_PREAMBLE_LEN_64) {
+			} else if(_preambleLength != PreambleLength::LEN_64) {
 				if(_dataRate == DataRate::RATE_850KBPS || _dataRate == DataRate::RATE_6800KBPS) {
 					DWM1000Utils::writeValueToBytes(drxtune1b, 0x0020, LEN_DRX_TUNE1b);
 				} else {
@@ -248,7 +248,7 @@ namespace DWM1000 {
 		/* DRX_TUNE4H - reg:0x27, sub-reg:0x26, table 34 */
 		void _drxtune4H() {
 			byte drxtune4H[LEN_DRX_TUNE4H];
-			if(_preambleLength == TX_PREAMBLE_LEN_64) {
+			if(_preambleLength == PreambleLength::LEN_64) {
 				DWM1000Utils::writeValueToBytes(drxtune4H, 0x0010, LEN_DRX_TUNE4H);
 			} else {
 				DWM1000Utils::writeValueToBytes(drxtune4H, 0x0028, LEN_DRX_TUNE4H);
@@ -1115,28 +1115,28 @@ namespace DWM1000 {
 		/* PreambleLength from 0x08 bits:18-21(tx_fctrl) */
 		plen = (uint16_t)(tx_fctrl[2] >> 2 & 0xF);
 		switch(plen) {
-			case TX_PREAMBLE_LEN_64:
+			case 0x01:
 				plen = 64;
 				break;
-			case TX_PREAMBLE_LEN_128:
+			case 0x05:
 				plen = 128;
 				break;
-			case TX_PREAMBLE_LEN_256:
+			case 0x09:
 				plen = 256;
 				break;
-			case TX_PREAMBLE_LEN_512:
+			case 0x0D:
 				plen = 512;
 				break;
-			case TX_PREAMBLE_LEN_1024:
+			case 0x02:
 				plen = 1024;
 				break;
-			case TX_PREAMBLE_LEN_1536:
+			case 0x06:
 				plen = 1536;
 				break;
-			case TX_PREAMBLE_LEN_2048:
+			case 0x0A:
 				plen = 2048;
 				break;
-			case TX_PREAMBLE_LEN_4096:
+			case 0x03:
 				plen = 4096;
 				break;
 			default:
@@ -1451,32 +1451,33 @@ namespace DWM1000 {
 		_pulseFrequency = frequency;
 	}
 
-	void setPreambleLength(byte prealen) {
+	void setPreambleLength(PreambleLength preamble_length) {
+		byte prealen = static_cast<byte>(preamble_length);
 		prealen &= 0x0F;
 		_txfctrl[2] &= 0xC3;
 		_txfctrl[2] |= (byte)((prealen << 2) & 0xFF);
 		
-		switch(prealen) {
-			case TX_PREAMBLE_LEN_64:
+		switch(preamble_length) {
+			case PreambleLength::LEN_64:
 				_pacSize = PAC_SIZE_8;
 				break;
-			case TX_PREAMBLE_LEN_128:
+			case PreambleLength::LEN_128:
 				_pacSize = PAC_SIZE_8;
 				break;
-			case TX_PREAMBLE_LEN_256:
+			case PreambleLength::LEN_256:
 				_pacSize = PAC_SIZE_16;
 				break;
-			case TX_PREAMBLE_LEN_512:
+			case PreambleLength::LEN_512:
 				_pacSize = PAC_SIZE_16;
 				break;
-			case TX_PREAMBLE_LEN_1024:
+			case PreambleLength::LEN_1024:
 				_pacSize = PAC_SIZE_32;
 				break;
 			default:
 				_pacSize = PAC_SIZE_64; // In case of 1536, 2048 or 4096 preamble length.
 		}
 		
-		_preambleLength = prealen;
+		_preambleLength = preamble_length;
 	}
 
 
