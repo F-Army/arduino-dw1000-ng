@@ -626,6 +626,10 @@ namespace DWM1000 {
 			}
 		}
 
+		void _writeNetworkIdAndDeviceAddress() {
+			writeBytes(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
+		}
+
 		void _writeSystemConfigurationRegister() {
 			writeBytes(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
 		}
@@ -651,7 +655,6 @@ namespace DWM1000 {
 
 		void _writeConfiguration() {
 			// write all configurations back to device
-			writeNetworkIdAndDeviceAddress();
 			_writeSystemConfigurationRegister();
 			_writeChannelControlRegister();
 			_writeTransmitFrameControlRegister();
@@ -1151,15 +1154,13 @@ namespace DWM1000 {
 	void setNetworkId(uint16_t val) {
 		_networkAndAddress[2] = (byte)(val & 0xFF);
 		_networkAndAddress[3] = (byte)((val >> 8) & 0xFF);
+		_writeNetworkIdAndDeviceAddress();
 	}
 
 	void setDeviceAddress(uint16_t val) {
 		_networkAndAddress[0] = (byte)(val & 0xFF);
 		_networkAndAddress[1] = (byte)((val >> 8) & 0xFF);
-	}
-
-	void writeNetworkIdAndDeviceAddress() {
-		writeBytes(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
+		_writeNetworkIdAndDeviceAddress();
 	}
 
 	void getTemp(float& temp) {
