@@ -125,12 +125,15 @@ enum class PacSize : byte {
 };
 
 /* channel of operation (CHAN_CTRL - TX & RX _CHAN) - reg:0x1F, bits:3-0,7-4 */
-constexpr byte CHANNEL_1 = 1;
-constexpr byte CHANNEL_2 = 2;
-constexpr byte CHANNEL_3 = 3;
-constexpr byte CHANNEL_4 = 4;
-constexpr byte CHANNEL_5 = 5;
-constexpr byte CHANNEL_7 = 7;
+enum class Channel : byte {
+    CHANNEL_1 = 1,
+    CHANNEL_2,
+    CHANNEL_3,
+    CHANNEL_4,
+    CHANNEL_5,
+    CHANNEL_7 = 7
+};
+
 
 /* frame length settings. */
 constexpr byte FRAME_LENGTH_NORMAL   = 0x00;

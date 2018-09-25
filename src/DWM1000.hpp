@@ -251,7 +251,7 @@ namespace DWM1000 {
 
 	@param[in] channel The Number of channel, encoded by the above defined constants.
 	 */
-	void setChannel(byte channel);
+	void setChannel(Channel channel);
 
 	void setPreambleCode(PreambleCode preamble_code);
 

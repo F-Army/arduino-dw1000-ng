@@ -85,7 +85,7 @@ namespace DWM1000 {
 		DataRate        _dataRate;
 		PreambleLength	_preambleLength;
 		PreambleCode	_preambleCode;
-		byte        	_channel;
+		Channel        	_channel;
 		boolean     	_smartPower;
 		boolean     	_frameCheck;
 		boolean     	_debounceClockEnabled = false;
@@ -362,7 +362,7 @@ namespace DWM1000 {
 		* These values are based on a typical IC and an assumed IC to antenna loss of 1.5 dB with a 0 dBi antenna */
 		void _txpowertune() {
 			byte txpower[LEN_TX_POWER];
-			if(_channel == CHANNEL_1 || _channel == CHANNEL_2) {
+			if(_channel == Channel::CHANNEL_1 || _channel == Channel::CHANNEL_2) {
 				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 					if(_smartPower) {
 						DWM1000Utils::writeValueToBytes(txpower, 0x1B153555L, LEN_TX_POWER);
@@ -378,7 +378,7 @@ namespace DWM1000 {
 				} else {
 					// TODO proper error/warning handling
 				}
-			} else if(_channel == CHANNEL_3) {
+			} else if(_channel == Channel::CHANNEL_3) {
 				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 					if(_smartPower) {
 						DWM1000Utils::writeValueToBytes(txpower, 0x150F2F4FL, LEN_TX_POWER);
@@ -394,7 +394,7 @@ namespace DWM1000 {
 				} else {
 					// TODO proper error/warning handling
 				}
-			} else if(_channel == CHANNEL_4) {
+			} else if(_channel == Channel::CHANNEL_4) {
 				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 					if(_smartPower) {
 						DWM1000Utils::writeValueToBytes(txpower, 0x1F1F1F3FL, LEN_TX_POWER);
@@ -410,7 +410,7 @@ namespace DWM1000 {
 				} else {
 					// TODO proper error/warning handling
 				}
-			} else if(_channel == CHANNEL_5) {
+			} else if(_channel == Channel::CHANNEL_5) {
 				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 					if(_smartPower) {
 						DWM1000Utils::writeValueToBytes(txpower, 0x140E0828L, LEN_TX_POWER);
@@ -426,7 +426,7 @@ namespace DWM1000 {
 				} else {
 					// TODO proper error/warning handling
 				}
-			} else if(_channel == CHANNEL_7) {
+			} else if(_channel == Channel::CHANNEL_7) {
 				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 					if(_smartPower) {
 						DWM1000Utils::writeValueToBytes(txpower, 0x12325272L, LEN_TX_POWER);
@@ -451,7 +451,7 @@ namespace DWM1000 {
 		/* RF_RXCTRLH - reg:0x28, sub-reg:0x0B, table 37 */
 		void _rfrxctrlh() {
 			byte rfrxctrlh[LEN_RF_RXCTRLH];
-			if(_channel != CHANNEL_4 && _channel != CHANNEL_7) {
+			if(_channel != Channel::CHANNEL_4 && _channel != Channel::CHANNEL_7) {
 				DWM1000Utils::writeValueToBytes(rfrxctrlh, 0xD8, LEN_RF_RXCTRLH);
 			} else {
 				DWM1000Utils::writeValueToBytes(rfrxctrlh, 0xBC, LEN_RF_RXCTRLH);
@@ -462,17 +462,17 @@ namespace DWM1000 {
 		/* RX_TXCTRL - reg:0x28, sub-reg:0x0C */
 		void _rftxctrl() {
 			byte rftxctrl[LEN_RF_TXCTRL];
-			if(_channel == CHANNEL_1) {
+			if(_channel == Channel::CHANNEL_1) {
 				DWM1000Utils::writeValueToBytes(rftxctrl, 0x00005C40L, LEN_RF_TXCTRL);
-			} else if(_channel == CHANNEL_2) {
+			} else if(_channel == Channel::CHANNEL_2) {
 				DWM1000Utils::writeValueToBytes(rftxctrl, 0x00045CA0L, LEN_RF_TXCTRL);
-			} else if(_channel == CHANNEL_3) {
+			} else if(_channel == Channel::CHANNEL_3) {
 				DWM1000Utils::writeValueToBytes(rftxctrl, 0x00086CC0L, LEN_RF_TXCTRL);
-			} else if(_channel == CHANNEL_4) {
+			} else if(_channel == Channel::CHANNEL_4) {
 				DWM1000Utils::writeValueToBytes(rftxctrl, 0x00045C80L, LEN_RF_TXCTRL);
-			} else if(_channel == CHANNEL_5) {
+			} else if(_channel == Channel::CHANNEL_5) {
 				DWM1000Utils::writeValueToBytes(rftxctrl, 0x001E3FE0L, LEN_RF_TXCTRL);
-			} else if(_channel == CHANNEL_7) {
+			} else if(_channel == Channel::CHANNEL_7) {
 				DWM1000Utils::writeValueToBytes(rftxctrl, 0x001E7DE0L, LEN_RF_TXCTRL);
 			} else {
 				// TODO proper error/warning handling
@@ -483,17 +483,17 @@ namespace DWM1000 {
 		/* TC_PGDELAY - reg:0x2A, sub-reg:0x0B, table 40 */
 		void _tcpgdelaytune() {
 			byte tcpgdelay[LEN_TC_PGDELAY];	
-			if(_channel == CHANNEL_1) {
+			if(_channel == Channel::CHANNEL_1) {
 				DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC9, LEN_TC_PGDELAY);
-			} else if(_channel == CHANNEL_2) {
+			} else if(_channel == Channel::CHANNEL_2) {
 				DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC2, LEN_TC_PGDELAY);
-			} else if(_channel == CHANNEL_3) {
+			} else if(_channel == Channel::CHANNEL_3) {
 				DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC5, LEN_TC_PGDELAY);
-			} else if(_channel == CHANNEL_4) {
+			} else if(_channel == Channel::CHANNEL_4) {
 				DWM1000Utils::writeValueToBytes(tcpgdelay, 0x95, LEN_TC_PGDELAY);
-			} else if(_channel == CHANNEL_5) {
+			} else if(_channel == Channel::CHANNEL_5) {
 				DWM1000Utils::writeValueToBytes(tcpgdelay, 0xC0, LEN_TC_PGDELAY);
-			} else if(_channel == CHANNEL_7) {
+			} else if(_channel == Channel::CHANNEL_7) {
 				DWM1000Utils::writeValueToBytes(tcpgdelay, 0x93, LEN_TC_PGDELAY);
 			} else {
 				// TODO proper error/warning handling
@@ -505,16 +505,16 @@ namespace DWM1000 {
 		void _fspll() {
 			byte fspllcfg[LEN_FS_PLLCFG];
 			byte fsplltune[LEN_FS_PLLTUNE];
-			if(_channel == CHANNEL_1) {
+			if(_channel == Channel::CHANNEL_1) {
 				DWM1000Utils::writeValueToBytes(fspllcfg, 0x09000407L, LEN_FS_PLLCFG);
 				DWM1000Utils::writeValueToBytes(fsplltune, 0x1E, LEN_FS_PLLTUNE);
-			} else if(_channel == CHANNEL_2 || _channel == CHANNEL_4) {
+			} else if(_channel == Channel::CHANNEL_2 || _channel == Channel::CHANNEL_4) {
 				DWM1000Utils::writeValueToBytes(fspllcfg, 0x08400508L, LEN_FS_PLLCFG);
 				DWM1000Utils::writeValueToBytes(fsplltune, 0x26, LEN_FS_PLLTUNE);
-			} else if(_channel == CHANNEL_3) {
+			} else if(_channel == Channel::CHANNEL_3) {
 				DWM1000Utils::writeValueToBytes(fspllcfg, 0x08401009L, LEN_FS_PLLCFG);
 				DWM1000Utils::writeValueToBytes(fsplltune, 0x56, LEN_FS_PLLTUNE);
-			} else if(_channel == CHANNEL_5 || _channel == CHANNEL_7) {
+			} else if(_channel == Channel::CHANNEL_5 || _channel == Channel::CHANNEL_7) {
 				DWM1000Utils::writeValueToBytes(fspllcfg, 0x0800041DL, LEN_FS_PLLCFG);
 				DWM1000Utils::writeValueToBytes(fsplltune, 0xBE, LEN_FS_PLLTUNE);
 			} else {
@@ -585,18 +585,18 @@ namespace DWM1000 {
 			PreambleCode preamble_code;
 
 			switch(_channel) {
-				case CHANNEL_1:
+				case Channel::CHANNEL_1:
 					preamble_code = _pulseFrequency == PulseFrequency::FREQ_16MHZ ? PreambleCode::CODE_2 : PreambleCode::CODE_10;
 					break;
-				case CHANNEL_3:
+				case Channel::CHANNEL_3:
 					preamble_code = _pulseFrequency == PulseFrequency::FREQ_16MHZ ? PreambleCode::CODE_6 : PreambleCode::CODE_10;
 					break;
-				case CHANNEL_4:
-				case CHANNEL_7:
+				case Channel::CHANNEL_4:
+				case Channel::CHANNEL_7:
 					preamble_code = _pulseFrequency == PulseFrequency::FREQ_16MHZ ? PreambleCode::CODE_8 : PreambleCode::CODE_18;
 					break;
-				case CHANNEL_2:
-				case CHANNEL_5:
+				case Channel::CHANNEL_2:
+				case Channel::CHANNEL_5:
 					preamble_code = _pulseFrequency == PulseFrequency::FREQ_16MHZ ? PreambleCode::CODE_3 : PreambleCode::CODE_10;
 					break;
 				default:
@@ -1506,9 +1506,11 @@ namespace DWM1000 {
 		_syscfg[2] |= _extendedFrameLength;
 	}
 
-	void setChannel(byte channel) {
-		channel &= 0xF;
-		_chanctrl[0] = ((channel | (channel << 4)) & 0xFF);
+	void setChannel(Channel channel) {
+		byte chan = static_cast<byte>(channel);
+		chan &= 0xF;
+		_chanctrl[0] = ((chan | (chan << 4)) & 0xFF);
+
 		_channel = channel;
 	}
 
@@ -1621,7 +1623,7 @@ namespace DWM1000 {
 		// select range low/high values from corresponding table
 		int16_t rangeBiasHigh;
 		int16_t rangeBiasLow;
-		if(_channel == CHANNEL_4 || _channel == CHANNEL_7) {
+		if(_channel == Channel::CHANNEL_4 || _channel == Channel::CHANNEL_7) {
 			// 900 MHz receiver bandwidth
 			if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 				rangeBiasHigh = (rxPowerBaseHigh < BIAS_900_16_ZERO ? -BIAS_900_16[rxPowerBaseHigh] : BIAS_900_16[rxPowerBaseHigh]);
