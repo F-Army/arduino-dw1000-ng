@@ -562,16 +562,16 @@ namespace DWM1000 {
 			_fsxtalt();
 		}
 
-		boolean _checkPreambleCodeValidity(PreambleCode preamble_code) {
+		boolean _checkPreambleCodeValidity() {
 			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
 				for (auto i = 0; i < 2; i++) {
-					if(preamble_code == preamble_validity_matrix_PRF16[(int) _channel][i])
+					if(_preambleCode == preamble_validity_matrix_PRF16[(int) _channel][i])
 						return true;
 				}
 				return false;
 			} else if (_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
 				for(auto i = 0; i < 4; i++) {
-					if(preamble_code == preamble_validity_matrix_PRF64[(int) _channel][i])
+					if(_preambleCode == preamble_validity_matrix_PRF64[(int) _channel][i])
 						return true;
 				}
 				return false;
@@ -1313,7 +1313,7 @@ namespace DWM1000 {
 	}
 
 	void commitConfiguration() {
-		if(!_checkPreambleCodeValidity(_preambleCode));
+		if(!_checkPreambleCodeValidity());
 			_setValidPreambleCode();
 		
 		if(!_standardSFD)
