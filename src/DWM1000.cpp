@@ -142,15 +142,36 @@ namespace DWM1000 {
 			writeBytes(AGC_TUNE, AGC_TUNE3_SUB, agctune3, LEN_AGC_TUNE3);
 		}
 
-		/* DRX_TUNE0b - reg:0x27, sub-reg:0x02 (already optimized according to Table 30 of user manual) */
+		/* DRX_TUNE0b - reg:0x27, sub-reg:0x02, table 30 */
 		void _drxtune0b() {
-			byte drxtune0b[LEN_DRX_TUNE0b];	
+			byte drxtune0b[LEN_DRX_TUNE0b];
 			if(_dataRate == TRX_RATE_110KBPS) {
-				DWM1000Utils::writeValueToBytes(drxtune0b, 0x0016, LEN_DRX_TUNE0b);
+				if(_currentSFDMode == _useDecawaveSFD) {
+					DWM1000Utils::writeValueToBytes(drxtune0b, 0x0016, LEN_DRX_TUNE0b);
+				} else if(_currentSFDMode == _useStandardSFD) {
+					DWM1000Utils::writeValueToBytes(drxtune0b, 0x000A, LEN_DRX_TUNE0b);
+				} else {
+					//TODO Error handling
+					return;
+				}
 			} else if(_dataRate == TRX_RATE_850KBPS) {
-				DWM1000Utils::writeValueToBytes(drxtune0b, 0x0006, LEN_DRX_TUNE0b);
+				if(_currentSFDMode == _useDecawaveSFD) {
+					DWM1000Utils::writeValueToBytes(drxtune0b, 0x0006, LEN_DRX_TUNE0b);
+				} else if(_currentSFDMode == _useStandardSFD) {
+					DWM1000Utils::writeValueToBytes(drxtune0b, 0x0001, LEN_DRX_TUNE0b);
+				} else {
+					//TODO Error handling
+					return;
+				}
 			} else if(_dataRate == TRX_RATE_6800KBPS) {
-				DWM1000Utils::writeValueToBytes(drxtune0b, 0x0001, LEN_DRX_TUNE0b);
+				if(_currentSFDMode == _useDecawaveSFD) {
+					DWM1000Utils::writeValueToBytes(drxtune0b, 0x0002, LEN_DRX_TUNE0b);
+				} else if(_currentSFDMode == _useStandardSFD) {
+					DWM1000Utils::writeValueToBytes(drxtune0b, 0x0001, LEN_DRX_TUNE0b);
+				} else {
+					//TODO Error handling
+					return;
+				}
 			} else {
 				// TODO proper error/warning handling
 			}
