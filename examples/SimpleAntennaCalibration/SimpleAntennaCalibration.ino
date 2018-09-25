@@ -130,7 +130,7 @@ void setup() {
     DWM1000::setNetworkId(10);
     DWM1000::commitConfiguration();
 
-	DWM1000::setAntennaDelay(16384);
+	DWM1000::setAntennaDelay(antenna_delay);
     Serial.println(F("Committed configuration ..."));
     // DEBUG chip info and registers pretty printed
     char msg[128];
