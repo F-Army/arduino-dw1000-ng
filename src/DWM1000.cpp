@@ -656,7 +656,6 @@ namespace DWM1000 {
 			_writeChannelControlRegister();
 			_writeTransmitFrameControlRegister();
 			_writeSystemEventMaskRegister();
-			_writeAntennaDelayRegisters();
 		}
 
 		void _manageLDE() {
@@ -1272,6 +1271,7 @@ namespace DWM1000 {
 
 	void setAntennaDelay(const uint16_t value) {
 		_antennaDelay.setTimestamp(value);
+		_writeAntennaDelayRegisters();
 	}
 
 	uint16_t getAntennaDelay() {
