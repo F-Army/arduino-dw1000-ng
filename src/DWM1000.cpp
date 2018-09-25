@@ -1041,12 +1041,6 @@ namespace DWM1000 {
 		forceTRxOff();
 	}
 
-	void enableMode(const byte mode[]) {
-		setDataRate(mode[0]);
-		setPulseFrequency(mode[1]);
-		setPreambleLength(mode[2]);
-	}
-
 	/* ###########################################################################
 	* #### Pretty printed device information ####################################
 	* ######################################################################### */
