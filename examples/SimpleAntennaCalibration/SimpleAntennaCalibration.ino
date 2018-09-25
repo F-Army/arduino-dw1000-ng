@@ -120,6 +120,7 @@ void setup() {
 	DWM1000::interruptOnReceiveFailed(true);
 	DWM1000::interruptOnReceiveTimestampAvailable(false);
 	DWM1000::interruptOnAutomaticAcknowledgeTrigger(true);
+    DWM1000::setSFDMode(SFDMode::STANDARD_SFD);
 	DWM1000::setChannel(CHANNEL_5);
 	DWM1000::setAntennaDelay(16384);
     DWM1000::setDataRate(TRX_RATE_6800KBPS);
