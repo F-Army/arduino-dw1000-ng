@@ -66,25 +66,25 @@ enum class PreambleCode : byte {
 /* Validity matrix for 16 MHz PRF preamble codes */
 constexpr byte preamble_validity_matrix_PRF16[8][2] = {
     {0,0}, /* Channel 0 doesn't exist */
-    {PREAMBLE_CODE_16MHZ_1, PREAMBLE_CODE_16MHZ_2},
-    {PREAMBLE_CODE_16MHZ_3, PREAMBLE_CODE_16MHZ_4},
-    {PREAMBLE_CODE_16MHZ_5, PREAMBLE_CODE_16MHZ_6},
-    {PREAMBLE_CODE_16MHZ_7, PREAMBLE_CODE_16MHZ_8},
-    {PREAMBLE_CODE_16MHZ_3, PREAMBLE_CODE_16MHZ_4},
+    {1, 2},
+    {3, 4},
+    {5, 6},
+    {7, 8},
+    {3, 4},
     {0,0}, /* Channel 5 doesn't exist */
-    {PREAMBLE_CODE_16MHZ_7, PREAMBLE_CODE_16MHZ_8}
+    {7, 8}
 };
 
 /* Validity matrix for 64 MHz PRF preamble codes */
 constexpr byte preamble_validity_matrix_PRF64[8][4] = {
     {0,0,0,0}, /* Channel 0 doesn't exist */
-    {PREAMBLE_CODE_64MHZ_9, PREAMBLE_CODE_64MHZ_10, PREAMBLE_CODE_64MHZ_11, PREAMBLE_CODE_64MHZ_12},
-    {PREAMBLE_CODE_64MHZ_9, PREAMBLE_CODE_64MHZ_10, PREAMBLE_CODE_64MHZ_11, PREAMBLE_CODE_64MHZ_12},
-    {PREAMBLE_CODE_64MHZ_9, PREAMBLE_CODE_64MHZ_10, PREAMBLE_CODE_64MHZ_11, PREAMBLE_CODE_64MHZ_12},
-    {PREAMBLE_CODE_64MHZ_17, PREAMBLE_CODE_64MHZ_18, PREAMBLE_CODE_64MHZ_19, PREAMBLE_CODE_64MHZ_20},
-    {PREAMBLE_CODE_64MHZ_9, PREAMBLE_CODE_64MHZ_10, PREAMBLE_CODE_64MHZ_11, PREAMBLE_CODE_64MHZ_12},
+    {9, 10, 11, 12},
+    {9, 10, 11, 12},
+    {9, 10, 11, 12},
+    {17, 18, 19, 20},
+    {9, 10, 11, 12},
     {0,0,0,0}, /* Channel 5 doesn't exist */
-    {PREAMBLE_CODE_64MHZ_17, PREAMBLE_CODE_64MHZ_18, PREAMBLE_CODE_64MHZ_19, PREAMBLE_CODE_64MHZ_20}
+    {17, 18, 19, 20}
 };
 
 /* transmission/reception bit rate (TXBR) - reg:0x08, bits:14,13 */
