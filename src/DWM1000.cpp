@@ -1270,7 +1270,7 @@ namespace DWM1000 {
 	}
 
 	void setAntennaDelay(uint16_t value) {
-		_antennaDelay.setTimestamp(value);
+		_antennaDelay.setTimestamp(static_cast<int64_t>(value));
 		_writeAntennaDelayRegisters();
 	}
 
