@@ -117,10 +117,12 @@ enum class PreambleLength : byte {
 
 /* PAC size (DRX_TUNE2) - reg:0x08, sub-reg:0x27, bits:26,25 - table 33
 * The value to program the sub-register changes in based of RXPRF */
-constexpr byte PAC_SIZE_8  = 8;
-constexpr byte PAC_SIZE_16 = 16;
-constexpr byte PAC_SIZE_32 = 32;
-constexpr byte PAC_SIZE_64 = 64;
+enum class PacSize : byte {
+    SIZE_8  = 8,
+    SIZE_16 = 16,
+    SIZE_32 = 32,
+    SIZE_64 = 64
+};
 
 /* channel of operation (CHAN_CTRL - TX & RX _CHAN) - reg:0x1F, bits:3-0,7-4 */
 constexpr byte CHANNEL_1 = 1;

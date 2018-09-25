@@ -80,7 +80,7 @@ namespace DWM1000 {
 
 		/* Driver Internal State Trackers */
 		byte        	_extendedFrameLength;
-		byte        	_pacSize;
+		PacSize        	_pacSize;
 		PulseFrequency	_pulseFrequency;
 		DataRate        _dataRate;
 		PreambleLength	_preambleLength;
@@ -207,7 +207,7 @@ namespace DWM1000 {
 		/* DRX_TUNE2 - reg:0x27, sub-reg:0x08, table 33 */
 		void _drxtune2() {
 			byte drxtune2[LEN_DRX_TUNE2];	
-			if(_pacSize == PAC_SIZE_8) {
+			if(_pacSize == PacSize::SIZE_8) {
 				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 					DWM1000Utils::writeValueToBytes(drxtune2, 0x311A002DL, LEN_DRX_TUNE2);
 				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
@@ -215,7 +215,7 @@ namespace DWM1000 {
 				} else {
 					// TODO proper error/warning handling
 				}
-			} else if(_pacSize == PAC_SIZE_16) {
+			} else if(_pacSize == PacSize::SIZE_16) {
 				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 					DWM1000Utils::writeValueToBytes(drxtune2, 0x331A0052L, LEN_DRX_TUNE2);
 				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
@@ -223,7 +223,7 @@ namespace DWM1000 {
 				} else {
 					// TODO proper error/warning handling
 				}
-			} else if(_pacSize == PAC_SIZE_32) {
+			} else if(_pacSize == PacSize::SIZE_32) {
 				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 					DWM1000Utils::writeValueToBytes(drxtune2, 0x351A009AL, LEN_DRX_TUNE2);
 				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
@@ -231,7 +231,7 @@ namespace DWM1000 {
 				} else {
 					// TODO proper error/warning handling
 				}
-			} else if(_pacSize == PAC_SIZE_64) {
+			} else if(_pacSize == PacSize::SIZE_64) {
 				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 					DWM1000Utils::writeValueToBytes(drxtune2, 0x371A011DL, LEN_DRX_TUNE2);
 				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
@@ -1459,22 +1459,22 @@ namespace DWM1000 {
 		
 		switch(preamble_length) {
 			case PreambleLength::LEN_64:
-				_pacSize = PAC_SIZE_8;
+				_pacSize = PacSize::SIZE_8;
 				break;
 			case PreambleLength::LEN_128:
-				_pacSize = PAC_SIZE_8;
+				_pacSize = PacSize::SIZE_8;
 				break;
 			case PreambleLength::LEN_256:
-				_pacSize = PAC_SIZE_16;
+				_pacSize = PacSize::SIZE_16;
 				break;
 			case PreambleLength::LEN_512:
-				_pacSize = PAC_SIZE_16;
+				_pacSize = PacSize::SIZE_16;
 				break;
 			case PreambleLength::LEN_1024:
-				_pacSize = PAC_SIZE_32;
+				_pacSize = PacSize::SIZE_32;
 				break;
 			default:
-				_pacSize = PAC_SIZE_64; // In case of 1536, 2048 or 4096 preamble length.
+				_pacSize = PacSize::SIZE_64; // In case of 1536, 2048 or 4096 preamble length.
 		}
 		
 		_preambleLength = preamble_length;
