@@ -81,7 +81,7 @@ namespace DWM1000 {
 		/* Driver Internal State Trackers */
 		byte        	_extendedFrameLength;
 		byte        	_pacSize;
-		byte        	_pulseFrequency;
+		PulseFrequency	_pulseFrequency;
 		DataRate        _dataRate;
 		byte        	_preambleLength;
 		PreambleCode	_preambleCode;
@@ -114,9 +114,9 @@ namespace DWM1000 {
 		/* AGC_TUNE1 - reg:0x23, sub-reg:0x04, table 24 */
 		void _agctune1() {
 			byte agctune1[LEN_AGC_TUNE1];
-			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+			if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 				DWM1000Utils::writeValueToBytes(agctune1, 0x8870, LEN_AGC_TUNE1);
-			} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+			} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 				DWM1000Utils::writeValueToBytes(agctune1, 0x889B, LEN_AGC_TUNE1);
 			} else {
 				// TODO proper error/warning handling
@@ -168,9 +168,9 @@ namespace DWM1000 {
 		/* DRX_TUNE1a - reg:0x27, sub-reg:0x04, table 31 */
 		void _drxtune1a() {
 			byte drxtune1a[LEN_DRX_TUNE1a];
-			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+			if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 				DWM1000Utils::writeValueToBytes(drxtune1a, 0x0087, LEN_DRX_TUNE1a);
-			} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+			} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 				DWM1000Utils::writeValueToBytes(drxtune1a, 0x008D, LEN_DRX_TUNE1a);
 			} else {
 				// TODO proper error/warning handling
@@ -208,33 +208,33 @@ namespace DWM1000 {
 		void _drxtune2() {
 			byte drxtune2[LEN_DRX_TUNE2];	
 			if(_pacSize == PAC_SIZE_8) {
-				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 					DWM1000Utils::writeValueToBytes(drxtune2, 0x311A002DL, LEN_DRX_TUNE2);
-				} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 					DWM1000Utils::writeValueToBytes(drxtune2, 0x313B006BL, LEN_DRX_TUNE2);
 				} else {
 					// TODO proper error/warning handling
 				}
 			} else if(_pacSize == PAC_SIZE_16) {
-				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 					DWM1000Utils::writeValueToBytes(drxtune2, 0x331A0052L, LEN_DRX_TUNE2);
-				} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 					DWM1000Utils::writeValueToBytes(drxtune2, 0x333B00BEL, LEN_DRX_TUNE2);
 				} else {
 					// TODO proper error/warning handling
 				}
 			} else if(_pacSize == PAC_SIZE_32) {
-				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 					DWM1000Utils::writeValueToBytes(drxtune2, 0x351A009AL, LEN_DRX_TUNE2);
-				} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 					DWM1000Utils::writeValueToBytes(drxtune2, 0x353B015EL, LEN_DRX_TUNE2);
 				} else {
 					// TODO proper error/warning handling
 				}
 			} else if(_pacSize == PAC_SIZE_64) {
-				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 					DWM1000Utils::writeValueToBytes(drxtune2, 0x371A011DL, LEN_DRX_TUNE2);
-				} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 					DWM1000Utils::writeValueToBytes(drxtune2, 0x373B0296L, LEN_DRX_TUNE2);
 				} else {
 					// TODO proper error/warning handling
@@ -266,9 +266,9 @@ namespace DWM1000 {
 		/* LDE_CFG2 - reg 0x2E, sub-reg:0x1806, table 50 */
 		void _ldecfg2() {
 			byte ldecfg2[LEN_LDE_CFG2];	
-			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+			if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 				_nlos == true ? DWM1000Utils::writeValueToBytes(ldecfg2, 0x0003, LEN_LDE_CFG2) : DWM1000Utils::writeValueToBytes(ldecfg2, 0x1607, LEN_LDE_CFG2);
-			} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+			} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 				DWM1000Utils::writeValueToBytes(ldecfg2, 0x0607, LEN_LDE_CFG2);
 			} else {
 				// TODO proper error/warning handling
@@ -363,13 +363,13 @@ namespace DWM1000 {
 		void _txpowertune() {
 			byte txpower[LEN_TX_POWER];
 			if(_channel == CHANNEL_1 || _channel == CHANNEL_2) {
-				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 					if(_smartPower) {
 						DWM1000Utils::writeValueToBytes(txpower, 0x1B153555L, LEN_TX_POWER);
 					} else {
 						DWM1000Utils::writeValueToBytes(txpower, 0x55555555L, LEN_TX_POWER);
 					}
-				} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 					if(_smartPower) {
 						DWM1000Utils::writeValueToBytes(txpower, 0x0D072747L, LEN_TX_POWER);
 					} else {
@@ -379,13 +379,13 @@ namespace DWM1000 {
 					// TODO proper error/warning handling
 				}
 			} else if(_channel == CHANNEL_3) {
-				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 					if(_smartPower) {
 						DWM1000Utils::writeValueToBytes(txpower, 0x150F2F4FL, LEN_TX_POWER);
 					} else {
 						DWM1000Utils::writeValueToBytes(txpower, 0x4F4F4F4FL, LEN_TX_POWER);
 					}
-				} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 					if(_smartPower) {
 						DWM1000Utils::writeValueToBytes(txpower, 0x0B2B4B6BL, LEN_TX_POWER);
 					} else {
@@ -395,13 +395,13 @@ namespace DWM1000 {
 					// TODO proper error/warning handling
 				}
 			} else if(_channel == CHANNEL_4) {
-				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 					if(_smartPower) {
 						DWM1000Utils::writeValueToBytes(txpower, 0x1F1F1F3FL, LEN_TX_POWER);
 					} else {
 						DWM1000Utils::writeValueToBytes(txpower, 0x3F3F3F3FL, LEN_TX_POWER);
 					}
-				} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 					if(_smartPower) {
 						DWM1000Utils::writeValueToBytes(txpower, 0x1A3A5A7AL, LEN_TX_POWER);
 					} else {
@@ -411,13 +411,13 @@ namespace DWM1000 {
 					// TODO proper error/warning handling
 				}
 			} else if(_channel == CHANNEL_5) {
-				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 					if(_smartPower) {
 						DWM1000Utils::writeValueToBytes(txpower, 0x140E0828L, LEN_TX_POWER);
 					} else {
 						DWM1000Utils::writeValueToBytes(txpower, 0x28282828L, LEN_TX_POWER);
 					}
-				} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 					if(_smartPower) {
 						DWM1000Utils::writeValueToBytes(txpower, 0x05254565L, LEN_TX_POWER);
 					} else {
@@ -427,13 +427,13 @@ namespace DWM1000 {
 					// TODO proper error/warning handling
 				}
 			} else if(_channel == CHANNEL_7) {
-				if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 					if(_smartPower) {
 						DWM1000Utils::writeValueToBytes(txpower, 0x12325272L, LEN_TX_POWER);
 					} else {
 						DWM1000Utils::writeValueToBytes(txpower, 0x72727272L, LEN_TX_POWER);
 					}
-				} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 					if(_smartPower) {
 						DWM1000Utils::writeValueToBytes(txpower, 0x315191B1L, LEN_TX_POWER);
 					} else {
@@ -564,13 +564,13 @@ namespace DWM1000 {
 
 		boolean _checkPreambleCodeValidity() {
 			byte preacode = static_cast<byte>(_preambleCode);
-			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+			if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 				for (auto i = 0; i < 2; i++) {
 					if(preacode == preamble_validity_matrix_PRF16[(int) _channel][i])
 						return true;
 				}
 				return false;
-			} else if (_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+			} else if (_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 				for(auto i = 0; i < 4; i++) {
 					if(preacode == preamble_validity_matrix_PRF64[(int) _channel][i])
 						return true;
@@ -586,18 +586,18 @@ namespace DWM1000 {
 
 			switch(_channel) {
 				case CHANNEL_1:
-					preamble_code = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PreambleCode::CODE_2 : PreambleCode::CODE_10;
+					preamble_code = _pulseFrequency == PulseFrequency::FREQ_16MHZ ? PreambleCode::CODE_2 : PreambleCode::CODE_10;
 					break;
 				case CHANNEL_3:
-					preamble_code = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PreambleCode::CODE_6 : PreambleCode::CODE_10;
+					preamble_code = _pulseFrequency == PulseFrequency::FREQ_16MHZ ? PreambleCode::CODE_6 : PreambleCode::CODE_10;
 					break;
 				case CHANNEL_4:
 				case CHANNEL_7:
-					preamble_code = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PreambleCode::CODE_8 : PreambleCode::CODE_18;
+					preamble_code = _pulseFrequency == PulseFrequency::FREQ_16MHZ ? PreambleCode::CODE_8 : PreambleCode::CODE_18;
 					break;
 				case CHANNEL_2:
 				case CHANNEL_5:
-					preamble_code = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PreambleCode::CODE_3 : PreambleCode::CODE_10;
+					preamble_code = _pulseFrequency == PulseFrequency::FREQ_16MHZ ? PreambleCode::CODE_3 : PreambleCode::CODE_10;
 					break;
 				default:
 					return; //TODO Proper Error Handling
@@ -1105,9 +1105,9 @@ namespace DWM1000 {
 		}
 		/* PRF(16 or 64) from 0x1F bits:18-19(chan_ctrl) */
 		prf = (uint8_t)(chan_ctrl[2] >> 2 & 0x03);
-		if(prf == TX_PULSE_FREQ_16MHZ){
+		if(prf == 0x01){
 			prf = 16;
-		} else if(prf == TX_PULSE_FREQ_64MHZ){
+		} else if(prf == 0x02){
 			prf = 64;
 		} else{
 			return; //TODO Error handling
@@ -1440,17 +1440,15 @@ namespace DWM1000 {
 		_dataRate = data_rate;
 	}
 
-	void setPulseFrequency(byte freq) {
+	void setPulseFrequency(PulseFrequency frequency) {
+		byte freq = static_cast<byte>(frequency);
 		freq &= 0x03;
 		_txfctrl[2] &= 0xFC;
 		_txfctrl[2] |= (byte)(freq & 0xFF);
 		_chanctrl[2] &= 0xF3;
 		_chanctrl[2] |= (byte)((freq << 2) & 0xFF);
-		_pulseFrequency = freq;
-	}
 
-	byte getPulseFrequency() {
-		return _pulseFrequency;
+		_pulseFrequency = frequency;
 	}
 
 	void setPreambleLength(byte prealen) {
@@ -1624,12 +1622,12 @@ namespace DWM1000 {
 		int16_t rangeBiasLow;
 		if(_channel == CHANNEL_4 || _channel == CHANNEL_7) {
 			// 900 MHz receiver bandwidth
-			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+			if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 				rangeBiasHigh = (rxPowerBaseHigh < BIAS_900_16_ZERO ? -BIAS_900_16[rxPowerBaseHigh] : BIAS_900_16[rxPowerBaseHigh]);
 				rangeBiasHigh <<= 1;
 				rangeBiasLow  = (rxPowerBaseLow < BIAS_900_16_ZERO ? -BIAS_900_16[rxPowerBaseLow] : BIAS_900_16[rxPowerBaseLow]);
 				rangeBiasLow <<= 1;
-			} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+			} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 				rangeBiasHigh = (rxPowerBaseHigh < BIAS_900_64_ZERO ? -BIAS_900_64[rxPowerBaseHigh] : BIAS_900_64[rxPowerBaseHigh]);
 				rangeBiasHigh <<= 1;
 				rangeBiasLow  = (rxPowerBaseLow < BIAS_900_64_ZERO ? -BIAS_900_64[rxPowerBaseLow] : BIAS_900_64[rxPowerBaseLow]);
@@ -1640,10 +1638,10 @@ namespace DWM1000 {
 			}
 		} else {
 			// 500 MHz receiver bandwidth
-			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+			if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 				rangeBiasHigh = (rxPowerBaseHigh < BIAS_500_16_ZERO ? -BIAS_500_16[rxPowerBaseHigh] : BIAS_500_16[rxPowerBaseHigh]);
 				rangeBiasLow  = (rxPowerBaseLow < BIAS_500_16_ZERO ? -BIAS_500_16[rxPowerBaseLow] : BIAS_500_16[rxPowerBaseLow]);
-			} else if(_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+			} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 				rangeBiasHigh = (rxPowerBaseHigh < BIAS_500_64_ZERO ? -BIAS_500_64[rxPowerBaseHigh] : BIAS_500_64[rxPowerBaseHigh]);
 				rangeBiasLow  = (rxPowerBaseLow < BIAS_500_64_ZERO ? -BIAS_500_64[rxPowerBaseLow] : BIAS_500_64[rxPowerBaseLow]);
 			} else {
@@ -1747,7 +1745,7 @@ namespace DWM1000 {
 		f3 = (uint16_t)fpAmpl3Bytes[0] | ((uint16_t)fpAmpl3Bytes[1] << 8);
 		N  = (((uint16_t)rxFrameInfo[2] >> 4) & 0xFF) | ((uint16_t)rxFrameInfo[3] << 4);
 
-		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+		if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 			A       = 113.77;
 			corrFac = 2.3334;
 		} else {
@@ -1775,7 +1773,7 @@ namespace DWM1000 {
 		C = (uint16_t)cirPwrBytes[0] | ((uint16_t)cirPwrBytes[1] << 8);
 		N = (((uint16_t)rxFrameInfo[2] >> 4) & 0xFF) | ((uint16_t)rxFrameInfo[3] << 4);
 
-		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+		if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 			A       = 113.77;
 			corrFac = 2.3334;
 		} else {

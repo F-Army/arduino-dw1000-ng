@@ -228,8 +228,7 @@ namespace DWM1000 {
 
 	@param[in] freq The PRF, encoded by the above defined constants.
 	*/
-	void setPulseFrequency(byte freq);
-	byte getPulseFrequency();
+	void setPulseFrequency(PulseFrequency frequency);
 
 	void setPreambleLength(byte prealen);
 

@@ -97,8 +97,10 @@ enum class DataRate : byte {
 
 /* transmission pulse frequency (TXPRF) - reg:0x08, bits:17,16
 * 0x00 is 4MHZ, but receiver in DWM1000 does not support it (!??) */
-constexpr byte TX_PULSE_FREQ_16MHZ = 0x01;
-constexpr byte TX_PULSE_FREQ_64MHZ = 0x02;
+enum class PulseFrequency : byte {
+    FREQ_16MHZ = 0x01,
+    FREQ_64MHZ
+};
 
 /* preamble length (PE + TXPSR) - reg:0x08, bits:21,20,19,18 - table 16 */
 constexpr byte TX_PREAMBLE_LEN_64   = 0x01;
