@@ -213,7 +213,7 @@ namespace DWM1000 {
 
 	@param[in] rate The data transmission rate, encoded by the above defined constants.
 	*/
-	void setDataRate(byte rate);
+	void setDataRate(DataRate data_rate);
 	
 	/** 
 	Specifies the pulse repetition frequency (PRF) of data transmissions with the DWM1000. Either
@@ -228,10 +228,9 @@ namespace DWM1000 {
 
 	@param[in] freq The PRF, encoded by the above defined constants.
 	*/
-	void setPulseFrequency(byte freq);
-	byte getPulseFrequency();
+	void setPulseFrequency(PulseFrequency frequency);
 
-	void setPreambleLength(byte prealen);
+	void setPreambleLength(PreambleLength preamble_length);
 
 	void setSFDMode(SFDMode mode);
 	
@@ -252,9 +251,9 @@ namespace DWM1000 {
 
 	@param[in] channel The Number of channel, encoded by the above defined constants.
 	 */
-	void setChannel(byte channel);
+	void setChannel(Channel channel);
 
-	void setPreambleCode(byte preamble_code);
+	void setPreambleCode(PreambleCode preamble_code);
 
 	void useSmartPower(boolean smartPower);
 
