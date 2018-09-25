@@ -300,7 +300,7 @@ namespace DWM1000 {
 	void interruptOnAutomaticAcknowledgeTrigger(boolean val);
 
 	/* Antenna delay calibration */
-	void setAntennaDelay(const uint16_t value);
+	void setAntennaDelay(uint16_t value);
 	uint16_t getAntennaDelay();
 
 	/* callback handler management. */

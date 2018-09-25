@@ -1269,7 +1269,7 @@ namespace DWM1000 {
 		DWM1000Utils::setBit(_sysmask, LEN_SYS_MASK, AAT_BIT, val);
 	}
 
-	void setAntennaDelay(const uint16_t value) {
+	void setAntennaDelay(uint16_t value) {
 		_antennaDelay.setTimestamp(value);
 		_writeAntennaDelayRegisters();
 	}
