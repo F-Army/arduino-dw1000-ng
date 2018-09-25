@@ -37,16 +37,21 @@ void setup() {
     Serial.println(F("DWM1000 initialized ..."));
     // general configuration
     DWM1000::newConfiguration();
+
+    /* Change according to test */
     DWM1000::setDeviceAddress(1);
     DWM1000::setNetworkId(10);
-    DWM1000::setChannel(CHANNEL_5);
-    DWM1000::enableMode(MODE_SHORTRANGE_HIGHPRF_MEDIUMPREAMBLE);
     DWM1000::setSFDMode(SFDMode::STANDARD_SFD);
-    DWM1000::setPreambleCode(PREAMBLE_CODE_64MHZ_9);
+    DWM1000::setChannel(CHANNEL_5);
+    DWM1000::setDataRate(TRX_RATE_850KBPS);
+    DWM1000::setPulseFrequency(TX_PULSE_FREQ_16MHZ);
+    DWM1000::setPreambleLength(TX_PREAMBLE_LEN_256);
+    DWM1000::setPreambleCode(PREAMBLE_CODE_16MHZ_3);
     DWM1000::useSmartPower(false);
-    DWM1000::setTXPower(0x25456585); /* Change according to test */
-    DWM1000::setTCPGDelay(0xC0); /* Change according to test */
+    DWM1000::setTXPower(0x25456585);
+    DWM1000::setTCPGDelay(0xC0);
     DWM1000::suppressFrameCheck(true);
+    
     DWM1000::commitConfiguration();
     Serial.println(F("Committed configuration ..."));
     

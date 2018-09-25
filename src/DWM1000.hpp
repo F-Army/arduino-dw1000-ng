@@ -256,7 +256,6 @@ namespace DWM1000 {
 	 */
 	void setChannel(byte channel);
 
-	void setPreambleCode();
 	void setPreambleCode(byte preamble_code);
 
 	void useSmartPower(boolean smartPower);
@@ -301,7 +300,7 @@ namespace DWM1000 {
 	void interruptOnAutomaticAcknowledgeTrigger(boolean val);
 
 	/* Antenna delay calibration */
-	void setAntennaDelay(const uint16_t value);
+	void setAntennaDelay(uint16_t value);
 	uint16_t getAntennaDelay();
 
 	/* callback handler management. */
@@ -331,38 +330,6 @@ namespace DWM1000 {
 	
 	// transmission state
 	void startTransmit(TransmitMode mode = TransmitMode::IMMEDIATE);
-		
-	/* ##### Operation mode selection ############################################ */
-	/** 
-	Specifies the mode of operation for the DWM1000. Modes of operation are pre-defined
-	combinations of data rate, pulse repetition frequency, preamble and channel settings
-	that properly go together. If you simply want the chips to work, choosing a mode is 
-	preferred over manual configuration.
-
-	The following modes are pre-configured and one of them needs to be chosen:
-	- `MODE_SHORTRANGE_LOWPRF_SHORTPREAMBLE` (basically this is 6,8 Mb/s data rate, 16 MHz PRF and short preambles)
-	- `MODE_SHORTRANGE_HIGHPRF_SHORTPREAMBLE` (basically this is 6,8 Mb/s data rate, 64 MHz PRF and short preambles)
-	- `MODE_SHORTRANGE_LOWPRF_MEDIUMPREAMBLE` (basically this is 6,8 Mb/s data rate, 16 MHz PRF and medium preambles)
-	- `MODE_SHORTRANGE_HIGHPRF_MEDIUMPREAMBLE` (basically this is 6,8 Mb/s data rate, 64 MHz PRF and medium preambles)
-	- `MODE_SHORTRANGE_LOWPRF_LONGPREAMBLE` (basically this is 6,8 Mb/s data rate, 16 MHz PRF and long preambles)
-	- `MODE_SHORTRANGE_HIGHPRF_LONGPREAMBLE` (basically this is 6,8 Mb/s data rate, 64 MHz PRF and long preambles)
-
-	- `MODE_MEDIUMRANGE_LOWPRF_SHORTPREAMBLE` (basically this is 850 kb/s data rate, 16 MHz PRF and short preambles)
-	- `MODE_MEDIUMRANGE_HIGHPRF_SHORTPREAMBLE` (basically this is 850 kb/s data rate, 64 MHz PRF and short preambles)
-	- `MODE_MEDIUMRANGE_LOWPRF_MEDIUMPREAMBLE` (basically this is 850 kb/s data rate, 16 MHz PRF and medium preambles)
-	- `MODE_MEDIUMRANGE_HIGHPRF_MEDIUMPREAMBLE` (basically this is 850 kb/s data rate, 64 MHz PRF and medium preambles)
-	- `MODE_MEDIUMRANGE_LOWPRF_LONGPREAMBLE` (basically this is 850 kb/s data rate, 16 MHz PRF and long preambles)
-	- `MODE_MEDIUMRANGE_HIGHPRF_LONGPREAMBLE` (basically this is 850 kb/s data rate, 64 MHz PRF and long preambles)
-
-	- `MODE_LONGRANGE_LOWPRF_SHORTPREAMBLE` (basically this is 110 kb/s data rate, 16 MHz PRF and short preambles)
-	- `MODE_LONGRANGE_HIGHPRF_SHORTPREAMBLE` (basically this is 110 kb/s data rate, 64 MHz PRF and short preambles)
-
-	Note that SHORTRANGE and SHORTPREAMBLE refers to the better power efficiency and improved transmission performance
-	of 16 MHZ and 64 MHZ PRF respectively (see `setPulseFrequency()`).
-
-	@param[in] mode The mode of operation, encoded by the above defined constants.
-	*/
-	void enableMode(const byte mode[]);
 	
 	/* host-initiated reading of temperature and battery voltage */
 	void getTemp(float& temp);

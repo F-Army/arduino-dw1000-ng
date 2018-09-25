@@ -111,9 +111,13 @@ void setup() {
 	DWM1000::interruptOnReceiveFailed(true);
 	DWM1000::interruptOnReceiveTimestampAvailable(false);
 	DWM1000::interruptOnAutomaticAcknowledgeTrigger(true);
+    DWM1000::setSFDMode(SFDMode::STANDARD_SFD);
 	DWM1000::setChannel(CHANNEL_5);
 	DWM1000::setAntennaDelay(16384);
-	DWM1000::enableMode(MODE_SHORTRANGE_LOWPRF_MEDIUMPREAMBLE);
+	DWM1000::setDataRate(TRX_RATE_850KBPS);
+    DWM1000::setPulseFrequency(TX_PULSE_FREQ_16MHZ);
+    DWM1000::setPreambleLength(TX_PREAMBLE_LEN_256);
+    DWM1000::setPreambleCode(PREAMBLE_CODE_16MHZ_3);
     DWM1000::setDeviceAddress(1);
     DWM1000::setNetworkId(10);
     DWM1000::setReceiverAutoReenable(true);

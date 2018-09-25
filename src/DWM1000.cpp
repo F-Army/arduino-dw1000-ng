@@ -65,12 +65,6 @@ namespace DWM1000 {
 		void (* _handleReceiveTimeout)(void)            = nullptr;
 		void (* _handleReceiveTimestampAvailable)(void) = nullptr;
 
-		/* SFD Mode */
-		void _useDecawaveSFD();
-		void _useStandardSFD();
-		void _useRecommendedSFD();
-		void (* _currentSFDMode)(void) = _useRecommendedSFD;
-
 		/* registers */
 		byte       _syscfg[LEN_SYS_CFG];
 		byte       _sysctrl[LEN_SYS_CTRL];
@@ -96,6 +90,7 @@ namespace DWM1000 {
 		boolean     _frameCheck;
 		boolean     _debounceClockEnabled = false;
 		boolean     _nlos = false;
+		boolean		_standardSFD = true;
 		boolean     _autoTXPower = true;
 		boolean     _autoTCPGDelay = true;
 		DWM1000Time _antennaDelay;
@@ -143,15 +138,27 @@ namespace DWM1000 {
 			writeBytes(AGC_TUNE, AGC_TUNE3_SUB, agctune3, LEN_AGC_TUNE3);
 		}
 
-		/* DRX_TUNE0b - reg:0x27, sub-reg:0x02 (already optimized according to Table 30 of user manual) */
+		/* DRX_TUNE0b - reg:0x27, sub-reg:0x02, table 30 */
 		void _drxtune0b() {
-			byte drxtune0b[LEN_DRX_TUNE0b];	
+			byte drxtune0b[LEN_DRX_TUNE0b];
 			if(_dataRate == TRX_RATE_110KBPS) {
-				DWM1000Utils::writeValueToBytes(drxtune0b, 0x0016, LEN_DRX_TUNE0b);
+				if(!_standardSFD) {
+					DWM1000Utils::writeValueToBytes(drxtune0b, 0x0016, LEN_DRX_TUNE0b);
+				} else {
+					DWM1000Utils::writeValueToBytes(drxtune0b, 0x000A, LEN_DRX_TUNE0b);
+				}
 			} else if(_dataRate == TRX_RATE_850KBPS) {
-				DWM1000Utils::writeValueToBytes(drxtune0b, 0x0006, LEN_DRX_TUNE0b);
+				if(!_standardSFD) {
+					DWM1000Utils::writeValueToBytes(drxtune0b, 0x0006, LEN_DRX_TUNE0b);
+				} else {
+					DWM1000Utils::writeValueToBytes(drxtune0b, 0x0001, LEN_DRX_TUNE0b);
+				}
 			} else if(_dataRate == TRX_RATE_6800KBPS) {
-				DWM1000Utils::writeValueToBytes(drxtune0b, 0x0001, LEN_DRX_TUNE0b);
+				if(!_standardSFD) {
+					DWM1000Utils::writeValueToBytes(drxtune0b, 0x0002, LEN_DRX_TUNE0b);
+				} else {
+					DWM1000Utils::writeValueToBytes(drxtune0b, 0x0001, LEN_DRX_TUNE0b);
+				}
 			} else {
 				// TODO proper error/warning handling
 			}
@@ -555,6 +562,70 @@ namespace DWM1000 {
 			_fsxtalt();
 		}
 
+		boolean _checkPreambleCodeValidity(byte preamble_code) {
+			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+				for (auto i = 0; i < 2; i++) {
+					if(preamble_code == preamble_validity_matrix_PRF16[(int) _channel][i])
+						return true;
+				}
+				return false;
+			} else if (_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+				for(auto i = 0; i < 4; i++) {
+					if(preamble_code == preamble_validity_matrix_PRF64[(int) _channel][i])
+						return true;
+				}
+				return false;
+			} else {
+				return false; //TODO Proper error handling
+			}
+		}
+
+		void _setValidPreambleCode() {
+			byte preacode;
+
+			switch(_channel) {
+				case CHANNEL_1:
+					preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_2 : PREAMBLE_CODE_64MHZ_10;
+					break;
+				case CHANNEL_3:
+					preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_6 : PREAMBLE_CODE_64MHZ_10;
+					break;
+				case CHANNEL_4:
+				case CHANNEL_7:
+					preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_8 : PREAMBLE_CODE_64MHZ_18;
+					break;
+				case CHANNEL_2:
+				case CHANNEL_5:
+					preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_3 : PREAMBLE_CODE_64MHZ_10;
+					break;
+				default:
+					return; //TODO Proper Error Handling
+			}
+
+			preacode &= 0x1F;
+			_chanctrl[2] &= 0x3F;
+			_chanctrl[2] |= ((preacode << 6) & 0xFF);
+			_chanctrl[3] = 0x00;
+			_chanctrl[3] = ((((preacode >> 2) & 0x07) | (preacode << 3)) & 0xFF);
+			_preambleCode = preacode;
+		}
+
+		void _setNonStandardSFDLength() {
+			switch(_dataRate) {
+				case TRX_RATE_6800KBPS:
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
+					break;
+				case TRX_RATE_850KBPS:
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10);
+					break;
+				case TRX_RATE_110KBPS:
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
+					break;
+				default:
+					return; //TODO Proper error handling
+			}
+		}
+
 		void _writeSystemConfigurationRegister() {
 			writeBytes(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
 		}
@@ -585,7 +656,6 @@ namespace DWM1000 {
 			_writeChannelControlRegister();
 			_writeTransmitFrameControlRegister();
 			_writeSystemEventMaskRegister();
-			_writeAntennaDelayRegisters();
 		}
 
 		void _manageLDE() {
@@ -613,70 +683,6 @@ namespace DWM1000 {
 			pmscctrl0[0] = 0x00;
 			pmscctrl0[1] &= 0x02;
 			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
-		}
-
-		void _useDecawaveSFD() {
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
-			switch(_dataRate) {
-				case TRX_RATE_6800KBPS:
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
-					break;
-				case TRX_RATE_850KBPS:
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10);
-					break;
-				case TRX_RATE_110KBPS:
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
-					break;
-				default:
-					return; //TODO Proper error handling
-			}
-		}
-
-		void _useStandardSFD() {
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
-			switch(_dataRate) {
-				case TRX_RATE_6800KBPS:
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
-					break;
-				case TRX_RATE_850KBPS:
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
-					break;
-				case TRX_RATE_110KBPS:
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
-					break;
-				default:
-					return; //TODO Proper error handling
-			}
-		}
-
-		void _useRecommendedSFD() {
-			/* SFD mode and types recommended by DW1000 User manual for optimal performance */
-			switch(_dataRate) {
-				case TRX_RATE_6800KBPS:
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
-					break;
-				case TRX_RATE_850KBPS:
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10);
-					break;
-				case TRX_RATE_110KBPS:
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
-					break;
-				default:
-					return; //TODO Error handling
-			}
 		}
 
 		void _enableClock(byte clock) {
@@ -1041,12 +1047,6 @@ namespace DWM1000 {
 		forceTRxOff();
 	}
 
-	void enableMode(const byte mode[]) {
-		setDataRate(mode[0]);
-		setPulseFrequency(mode[1]);
-		setPreambleLength(mode[2]);
-	}
-
 	/* ###########################################################################
 	* #### Pretty printed device information ####################################
 	* ######################################################################### */
@@ -1269,8 +1269,9 @@ namespace DWM1000 {
 		DWM1000Utils::setBit(_sysmask, LEN_SYS_MASK, AAT_BIT, val);
 	}
 
-	void setAntennaDelay(const uint16_t value) {
-		_antennaDelay.setTimestamp(value);
+	void setAntennaDelay(uint16_t value) {
+		_antennaDelay.setTimestamp(static_cast<int64_t>(value));
+		_writeAntennaDelayRegisters();
 	}
 
 	uint16_t getAntennaDelay() {
@@ -1311,6 +1312,12 @@ namespace DWM1000 {
 	}
 
 	void commitConfiguration() {
+		if(!_checkPreambleCodeValidity)
+			_setValidPreambleCode();
+		
+		if(!_standardSFD)
+			_setNonStandardSFDLength();
+
 		// writes configuration to registers
 		_writeConfiguration();
 		// tune according to configuration
@@ -1334,6 +1341,7 @@ namespace DWM1000 {
 		DWM1000Utils::setBit(_syscfg, LEN_SYS_CFG, DIS_STXP_BIT, !smartPower);
 		if(_smartPower) 
 			_autoTXPower = true;
+		_writeSystemConfigurationRegister();
 	}
 
 	void setTXPower(byte power[]) {
@@ -1365,6 +1373,7 @@ namespace DWM1000 {
 
 	void setTXPowerAuto() {
 		_autoTXPower = true;
+		_txpowertune();
 	}
 
 	void setTCPGDelay(byte tcpgdelay) {
@@ -1427,7 +1436,6 @@ namespace DWM1000 {
 			DWM1000Utils::setBit(_syscfg, LEN_SYS_CFG, RXM110K_BIT, false);
 		}
 		_dataRate = rate;
-		(*_currentSFDMode)();
 	}
 
 	void setPulseFrequency(byte freq) {
@@ -1437,7 +1445,6 @@ namespace DWM1000 {
 		_chanctrl[2] &= 0xF3;
 		_chanctrl[2] |= (byte)((freq << 2) & 0xFF);
 		_pulseFrequency = freq;
-		setPreambleCode();
 	}
 
 	byte getPulseFrequency() {
@@ -1472,23 +1479,24 @@ namespace DWM1000 {
 		_preambleLength = prealen;
 	}
 
+
 	void setSFDMode(SFDMode mode) {
 		switch(mode) {
 			case SFDMode::STANDARD_SFD:
-				_currentSFDMode = _useStandardSFD;
+				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
+				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
+				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+				_standardSFD = true;
 				break;
 			case SFDMode::DECAWAVE_SFD:
-				_currentSFDMode = _useDecawaveSFD;
-				break;
-			case SFDMode::RECOMMENDED_SFD:
-				_currentSFDMode = _useRecommendedSFD;
+				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
+				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
+				DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
+				_standardSFD = false;
 				break;
 			default:
 				return; //TODO Proper error handling
 		}
-
-		/* Sets new SFD parameters by calling the relative function */
-		(*_currentSFDMode)();
 	}
 
 	void useExtendedFrameLength(boolean val) {
@@ -1501,71 +1509,15 @@ namespace DWM1000 {
 		channel &= 0xF;
 		_chanctrl[0] = ((channel | (channel << 4)) & 0xFF);
 		_channel = channel;
-		setPreambleCode();
 	}
 
-	static boolean checkPreambleCodeValidity(byte preamble_code) {
-		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-			for (auto i = 0; i < 2; i++) {
-				if(preamble_code == preamble_validity_matrix_PRF16[(int) _channel][i])
-					return true;
-			}
-			return false;
-		} else if (_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
-			for(auto i = 0; i < 4; i++) {
-				if(preamble_code == preamble_validity_matrix_PRF64[(int) _channel][i])
-					return true;
-			}
-			return false;
-		} else {
-			return false; //TODO Proper error handling
-		}
-	}
-
-	void setPreambleCode() {
-		if(checkPreambleCodeValidity(_preambleCode)) 
-			return;
-		
-		byte preacode;
-
-		switch(_channel) {
-			case CHANNEL_1:
-				preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_2 : PREAMBLE_CODE_64MHZ_10;
-				break;
-			case CHANNEL_3:
-				preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_6 : PREAMBLE_CODE_64MHZ_10;
-				break;
-			case CHANNEL_4:
-			case CHANNEL_7:
-				preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_8 : PREAMBLE_CODE_64MHZ_18;
-				break;
-			case CHANNEL_2:
-			case CHANNEL_5:
-				preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_4 : PREAMBLE_CODE_64MHZ_10;
-				break;
-			default:
-				return; //TODO Proper Error Handling
-		}
-
+	void setPreambleCode(byte preacode) {
 		preacode &= 0x1F;
 		_chanctrl[2] &= 0x3F;
 		_chanctrl[2] |= ((preacode << 6) & 0xFF);
 		_chanctrl[3] = 0x00;
 		_chanctrl[3] = ((((preacode >> 2) & 0x07) | (preacode << 3)) & 0xFF);
 		_preambleCode = preacode;
-	}
-
-	void setPreambleCode(byte preacode) {
-		if(checkPreambleCodeValidity(preacode)) {
-			preacode &= 0x1F;
-			_chanctrl[2] &= 0x3F;
-			_chanctrl[2] |= ((preacode << 6) & 0xFF);
-			_chanctrl[3] = 0x00;
-			_chanctrl[3] = ((((preacode >> 2) & 0x07) | (preacode << 3)) & 0xFF);
-			_preambleCode = preacode;
-		} else {
-			return; //TODO Proper error handling
-		}
 	}
 
 	void setData(byte data[], uint16_t n) {
@@ -1875,7 +1827,7 @@ namespace DWM1000 {
 			SPI.transfer(header[i]); // send header
 		}
 		for(i = 0; i < n; i++) {
-			data[i] = SPI.transfer(JUNK); // read values
+			data[i] = SPI.transfer(0x00); // read values
 		}
 		delayMicroseconds(5);
 		digitalWrite(_ss, HIGH);
