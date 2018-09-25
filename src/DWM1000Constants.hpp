@@ -44,22 +44,24 @@
 #define LED_MODE 1
 
 /* preamble codes (CHAN_CTRL - RX & TX _CODE) - reg:0x1F, bits:31-27,26-22 */
-constexpr byte PREAMBLE_CODE_16MHZ_1  = 1;
-constexpr byte PREAMBLE_CODE_16MHZ_2  = 2;
-constexpr byte PREAMBLE_CODE_16MHZ_3  = 3;
-constexpr byte PREAMBLE_CODE_16MHZ_4  = 4;
-constexpr byte PREAMBLE_CODE_16MHZ_5  = 5;
-constexpr byte PREAMBLE_CODE_16MHZ_6  = 6;
-constexpr byte PREAMBLE_CODE_16MHZ_7  = 7;
-constexpr byte PREAMBLE_CODE_16MHZ_8  = 8;
-constexpr byte PREAMBLE_CODE_64MHZ_9  = 9;
-constexpr byte PREAMBLE_CODE_64MHZ_10 = 10;
-constexpr byte PREAMBLE_CODE_64MHZ_11 = 11;
-constexpr byte PREAMBLE_CODE_64MHZ_12 = 12;
-constexpr byte PREAMBLE_CODE_64MHZ_17 = 17;
-constexpr byte PREAMBLE_CODE_64MHZ_18 = 18;
-constexpr byte PREAMBLE_CODE_64MHZ_19 = 19;
-constexpr byte PREAMBLE_CODE_64MHZ_20 = 20;
+enum class PreambleCode : byte {
+    PREAMBLE_CODE_1 = 1,
+    PREAMBLE_CODE_2,
+    PREAMBLE_CODE_3,
+    PREAMBLE_CODE_4,
+    PREAMBLE_CODE_5,
+    PREAMBLE_CODE_6,
+    PREAMBLE_CODE_7,
+    PREAMBLE_CODE_8,
+    PREAMBLE_CODE_9,
+    PREAMBLE_CODE_10,
+    PREAMBLE_CODE_11,
+    PREAMBLE_CODE_12,
+    PREAMBLE_CODE_17 = 17,
+    PREAMBLE_CODE_18,
+    PREAMBLE_CODE_19,
+    PREAMBLE_CODE_20
+};
 
 /* Validity matrix for 16 MHz PRF preamble codes */
 constexpr byte preamble_validity_matrix_PRF16[8][2] = {

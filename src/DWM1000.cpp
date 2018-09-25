@@ -1511,7 +1511,8 @@ namespace DWM1000 {
 		_channel = channel;
 	}
 
-	void setPreambleCode(byte preacode) {
+	void setPreambleCode(PreambleCode preamble_code) {
+		byte preacode = static_cast<byte>(preamble_code);
 		preacode &= 0x1F;
 		_chanctrl[2] &= 0x3F;
 		_chanctrl[2] |= ((preacode << 6) & 0xFF);

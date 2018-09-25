@@ -254,7 +254,7 @@ namespace DWM1000 {
 	 */
 	void setChannel(byte channel);
 
-	void setPreambleCode(byte preamble_code);
+	void setPreambleCode(PreambleCode preamble_code);
 
 	void useSmartPower(boolean smartPower);
 
