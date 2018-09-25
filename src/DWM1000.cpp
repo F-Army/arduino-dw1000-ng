@@ -643,7 +643,7 @@ namespace DWM1000 {
 					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
 					break;
 				case TRX_RATE_850KBPS:
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x16);
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
 					break;
 				case TRX_RATE_110KBPS:
 					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
