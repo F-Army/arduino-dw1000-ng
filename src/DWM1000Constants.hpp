@@ -196,7 +196,7 @@ enum class TransmitMixerValue : byte {
     dB_15_5
 };
 
-enum class SFDMode {STANDARD_SFD, DECAWAVE_SFD, RECOMMENDED_SFD};
+enum class SFDMode {STANDARD_SFD, DECAWAVE_SFD};
 
 enum class TransmitMode {IMMEDIATE, DELAYED};
 

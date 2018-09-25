@@ -68,7 +68,6 @@ namespace DWM1000 {
 		/* SFD Mode */
 		void _useDecawaveSFD();
 		void _useStandardSFD();
-		void _useRecommendedSFD();
 		void (* _currentSFDMode)(void) = _useStandardSFD;
 
 		/* registers */
@@ -636,47 +635,8 @@ namespace DWM1000 {
 
 		void _useStandardSFD() {
 			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
-			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
-			switch(_dataRate) {
-				case TRX_RATE_6800KBPS:
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
-					break;
-				case TRX_RATE_850KBPS:
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
-					break;
-				case TRX_RATE_110KBPS:
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
-					break;
-				default:
-					return; //TODO Proper error handling
-			}
-		}
-
-		void _useRecommendedSFD() {
-			/* SFD mode and types recommended by DW1000 User manual for optimal performance */
-			switch(_dataRate) {
-				case TRX_RATE_6800KBPS:
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
-					break;
-				case TRX_RATE_850KBPS:
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10);
-					break;
-				case TRX_RATE_110KBPS:
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-					DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
-					break;
-				default:
-					return; //TODO Error handling
-			}
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
+			DWM1000Utils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
 		}
 
 		void _enableClock(byte clock) {
@@ -1475,9 +1435,6 @@ namespace DWM1000 {
 				break;
 			case SFDMode::DECAWAVE_SFD:
 				_currentSFDMode = _useDecawaveSFD;
-				break;
-			case SFDMode::RECOMMENDED_SFD:
-				_currentSFDMode = _useRecommendedSFD;
 				break;
 			default:
 				return; //TODO Proper error handling
