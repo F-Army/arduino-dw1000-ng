@@ -141,23 +141,23 @@ constexpr byte FRAME_LENGTH_EXTENDED = 0x03;
 
 /* Register is 6 bit, 7 = write, 6 = sub-adressing, 5-0 = register value
  * Total header with sub-adressing can be 15 bit. */
-const byte WRITE      = 0x80; // regular write
-const byte WRITE_SUB  = 0xC0; // write with sub address
-const byte READ       = 0x00; // regular read
-const byte READ_SUB   = 0x40; // read with sub address
-const byte RW_SUB_EXT = 0x80; // R/W with sub address extension
+constexpr byte WRITE      = 0x80; // regular write
+constexpr byte WRITE_SUB  = 0xC0; // write with sub address
+constexpr byte READ       = 0x00; // regular read
+constexpr byte READ_SUB   = 0x40; // read with sub address
+constexpr byte RW_SUB_EXT = 0x80; // R/W with sub address extension
 
 /* clocks available. */
-const byte SYS_AUTO_CLOCK = 0x00;
-const byte SYS_XTI_CLOCK  = 0x01;
-const byte SYS_PLL_CLOCK  = 0x02;
-const byte TX_PLL_CLOCK = 0x20;
+constexpr byte SYS_AUTO_CLOCK = 0x00;
+constexpr byte SYS_XTI_CLOCK  = 0x01;
+constexpr byte SYS_PLL_CLOCK  = 0x02;
+constexpr byte TX_PLL_CLOCK = 0x20;
 
 /* range bias tables (500/900 MHz band, 16/64 MHz PRF), -61 to -95 dBm. */
-const byte BIAS_500_16_ZERO = 10;
-const byte BIAS_500_64_ZERO = 8;
-const byte BIAS_900_16_ZERO = 7;
-const byte BIAS_900_64_ZERO = 7;
+constexpr byte BIAS_500_16_ZERO = 10;
+constexpr byte BIAS_500_64_ZERO = 8;
+constexpr byte BIAS_900_16_ZERO = 7;
+constexpr byte BIAS_900_64_ZERO = 7;
 
 /* range bias tables (500 MHz in [mm] and 900 MHz in [2mm] - to fit into bytes) */
 constexpr byte BIAS_500_16[] = {198, 187, 179, 163, 143, 127, 109, 84, 59, 31, 0, 36, 65, 84, 97, 106, 110, 112};
