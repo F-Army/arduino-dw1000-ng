@@ -562,6 +562,70 @@ namespace DWM1000 {
 			_fsxtalt();
 		}
 
+		boolean _checkPreambleCodeValidity(byte preamble_code) {
+			if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
+				for (auto i = 0; i < 2; i++) {
+					if(preamble_code == preamble_validity_matrix_PRF16[(int) _channel][i])
+						return true;
+				}
+				return false;
+			} else if (_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
+				for(auto i = 0; i < 4; i++) {
+					if(preamble_code == preamble_validity_matrix_PRF64[(int) _channel][i])
+						return true;
+				}
+				return false;
+			} else {
+				return false; //TODO Proper error handling
+			}
+		}
+
+		void _setValidPreambleCode() {
+			byte preacode;
+
+			switch(_channel) {
+				case CHANNEL_1:
+					preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_2 : PREAMBLE_CODE_64MHZ_10;
+					break;
+				case CHANNEL_3:
+					preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_6 : PREAMBLE_CODE_64MHZ_10;
+					break;
+				case CHANNEL_4:
+				case CHANNEL_7:
+					preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_8 : PREAMBLE_CODE_64MHZ_18;
+					break;
+				case CHANNEL_2:
+				case CHANNEL_5:
+					preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_3 : PREAMBLE_CODE_64MHZ_10;
+					break;
+				default:
+					return; //TODO Proper Error Handling
+			}
+
+			preacode &= 0x1F;
+			_chanctrl[2] &= 0x3F;
+			_chanctrl[2] |= ((preacode << 6) & 0xFF);
+			_chanctrl[3] = 0x00;
+			_chanctrl[3] = ((((preacode >> 2) & 0x07) | (preacode << 3)) & 0xFF);
+			_preambleCode = preacode;
+		}
+
+		void _setNonStandardSFDLength() {
+			switch(_dataRate) {
+				case TRX_RATE_6800KBPS:
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
+					break;
+				case TRX_RATE_850KBPS:
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10);
+					break;
+				case TRX_RATE_110KBPS:
+					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
+					break;
+				default:
+					return; //TODO Proper error handling
+			}
+		}
+
 		void _writeSystemConfigurationRegister() {
 			writeBytes(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
 		}
@@ -1248,21 +1312,12 @@ namespace DWM1000 {
 	}
 
 	void commitConfiguration() {
-		if(!_standardSFD) {
-			switch(_dataRate) {
-				case TRX_RATE_6800KBPS:
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
-					break;
-				case TRX_RATE_850KBPS:
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10);
-					break;
-				case TRX_RATE_110KBPS:
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
-					break;
-				default:
-					return; //TODO Proper error handling
-			}
-		}
+		if(!_checkPreambleCodeValidity)
+			_setValidPreambleCode();
+		
+		if(!_standardSFD)
+			_setNonStandardSFDLength();
+
 		// writes configuration to registers
 		_writeConfiguration();
 		// tune according to configuration
@@ -1390,7 +1445,6 @@ namespace DWM1000 {
 		_chanctrl[2] &= 0xF3;
 		_chanctrl[2] |= (byte)((freq << 2) & 0xFF);
 		_pulseFrequency = freq;
-		setPreambleCode();
 	}
 
 	byte getPulseFrequency() {
@@ -1455,71 +1509,15 @@ namespace DWM1000 {
 		channel &= 0xF;
 		_chanctrl[0] = ((channel | (channel << 4)) & 0xFF);
 		_channel = channel;
-		setPreambleCode();
 	}
 
-	static boolean checkPreambleCodeValidity(byte preamble_code) {
-		if(_pulseFrequency == TX_PULSE_FREQ_16MHZ) {
-			for (auto i = 0; i < 2; i++) {
-				if(preamble_code == preamble_validity_matrix_PRF16[(int) _channel][i])
-					return true;
-			}
-			return false;
-		} else if (_pulseFrequency == TX_PULSE_FREQ_64MHZ) {
-			for(auto i = 0; i < 4; i++) {
-				if(preamble_code == preamble_validity_matrix_PRF64[(int) _channel][i])
-					return true;
-			}
-			return false;
-		} else {
-			return false; //TODO Proper error handling
-		}
-	}
-
-	void setPreambleCode() {
-		if(checkPreambleCodeValidity(_preambleCode)) 
-			return;
-		
-		byte preacode;
-
-		switch(_channel) {
-			case CHANNEL_1:
-				preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_2 : PREAMBLE_CODE_64MHZ_10;
-				break;
-			case CHANNEL_3:
-				preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_6 : PREAMBLE_CODE_64MHZ_10;
-				break;
-			case CHANNEL_4:
-			case CHANNEL_7:
-				preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_8 : PREAMBLE_CODE_64MHZ_18;
-				break;
-			case CHANNEL_2:
-			case CHANNEL_5:
-				preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_3 : PREAMBLE_CODE_64MHZ_10;
-				break;
-			default:
-				return; //TODO Proper Error Handling
-		}
-
+	void setPreambleCode(byte preacode) {
 		preacode &= 0x1F;
 		_chanctrl[2] &= 0x3F;
 		_chanctrl[2] |= ((preacode << 6) & 0xFF);
 		_chanctrl[3] = 0x00;
 		_chanctrl[3] = ((((preacode >> 2) & 0x07) | (preacode << 3)) & 0xFF);
 		_preambleCode = preacode;
-	}
-
-	void setPreambleCode(byte preacode) {
-		if(checkPreambleCodeValidity(preacode)) {
-			preacode &= 0x1F;
-			_chanctrl[2] &= 0x3F;
-			_chanctrl[2] |= ((preacode << 6) & 0xFF);
-			_chanctrl[3] = 0x00;
-			_chanctrl[3] = ((((preacode >> 2) & 0x07) | (preacode << 3)) & 0xFF);
-			_preambleCode = preacode;
-		} else {
-			return; //TODO Proper error handling
-		}
 	}
 
 	void setData(byte data[], uint16_t n) {
