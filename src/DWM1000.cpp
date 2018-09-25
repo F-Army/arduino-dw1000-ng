@@ -1536,7 +1536,7 @@ namespace DWM1000 {
 				break;
 			case CHANNEL_2:
 			case CHANNEL_5:
-				preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_4 : PREAMBLE_CODE_64MHZ_10;
+				preacode = _pulseFrequency == TX_PULSE_FREQ_16MHZ ? PREAMBLE_CODE_16MHZ_3 : PREAMBLE_CODE_64MHZ_10;
 				break;
 			default:
 				return; //TODO Proper Error Handling
