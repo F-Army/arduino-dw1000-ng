@@ -71,7 +71,7 @@ namespace DW1000Ng {
 	@param[in] ss The chip select line/pin that connects the to-be-selected chip with the
 	Arduino.
 	*/
-	void select(uint8_t ss, uint8_t irq);
+	void select();
 
 	/** 
 	Tells the driver library that no communication to a DW1000Ng will be required anymore.
@@ -109,7 +109,7 @@ namespace DW1000Ng {
 	is preferred, although a soft reset of the currently selected one is executed if no 
 	reset pin has been specified (when using `begin(int)`, instead of `begin(int, int)`).
 	*/
-	void reset(uint8_t rst = 0xff);
+	void reset();
 	
 	/** 
 	Resets the currently selected DW1000Ng chip programmatically (via corresponding commands).
