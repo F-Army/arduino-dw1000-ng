@@ -1413,7 +1413,7 @@ namespace DW1000Ng {
 
 	void setDelay(byte futureTimeBytes[]) {
 		/* the least significant 9-bits are ignored in DX_TIME in functional modes */
-		writeBytes(DX_TIME, NO_SUB, delayBytes, LEN_DX_TIME);
+		writeBytes(DX_TIME, NO_SUB, futureTimeBytes, LEN_DX_TIME);
 	}
 
 	void setDataRate(DataRate data_rate) {
