@@ -1,5 +1,5 @@
 /*  
- *	Arduino-DWM1000 - Arduino library to use Decawave's DWM1000 module.
+ *	Arduino-DW1000Ng - Arduino library to use Decawave's DW1000Ng module.
  *	Copyright (C) 2018  Michele Biondi <michelebiondi01@gmail.com>, Andrea Salvatori <andrea.salvatori92@gmail.com>
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 /*
  * Copyright (c) 2015 by Thomas Trojer <thomas@trojer.net>
- * Decawave DWM1000 library for arduino.
+ * Decawave DW1000Ng library for arduino.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,8 +32,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @file DWM1000.h
- * Arduino driver library (header file) for the Decawave DWM1000 UWB transceiver Module.
+ * @file DW1000Ng.h
+ * Arduino driver library (header file) for the Decawave DW1000Ng UWB transceiver Module.
  */
 
 #pragma once
@@ -42,13 +42,13 @@
 #include <string.h>
 #include <Arduino.h>
 #include <SPI.h>
-#include "DWM1000Constants.hpp"
-#include "DWM1000Time.hpp"
+#include "DW1000NgConstants.hpp"
+#include "DW1000NgTime.hpp"
 
-namespace DWM1000 {
+namespace DW1000Ng {
 	/* ##### Init ################################################################ */
 	/** 
-	Initiates and starts a sessions with one or more DWM1000. If rst is not set or value 0xff, a soft resets (i.e. command
+	Initiates and starts a sessions with one or more DW1000Ng. If rst is not set or value 0xff, a soft resets (i.e. command
 	triggered) are used and it is assumed that no reset line is wired.
 	 
 	@param[in] irq The interrupt line/pin that connects the Arduino.
@@ -57,7 +57,7 @@ namespace DWM1000 {
 	void begin(uint8_t ss, uint8_t irq, uint8_t rst = 0xff);
 	
 	/** 
-	(Re-)selects a specific DWM1000 chip for communication. In case of a single DWM1000 chip in use
+	(Re-)selects a specific DW1000Ng chip for communication. In case of a single DW1000Ng chip in use
 	this call is not needed; only a call to `select()` has to be performed once at start up. Other 
 	than a call to `select()` this function does not perform an initial setup of the (again-)selected 
 	chips and assumes it to have a valid configuration loaded.
@@ -68,7 +68,7 @@ namespace DWM1000 {
 	void select(uint8_t ss, uint8_t irq);
 
 	/** 
-	Tells the driver library that no communication to a DWM1000 will be required anymore.
+	Tells the driver library that no communication to a DW1000Ng will be required anymore.
 	This basically just frees SPI and the previously used pins.
 	*/
 	void end();
@@ -99,14 +99,14 @@ namespace DWM1000 {
 	void spiWakeup();
 
 	/**
-	Resets all connected or the currently selected DWM1000 chip. A hard reset of all chips
+	Resets all connected or the currently selected DW1000Ng chip. A hard reset of all chips
 	is preferred, although a soft reset of the currently selected one is executed if no 
 	reset pin has been specified (when using `begin(int)`, instead of `begin(int, int)`).
 	*/
 	void reset(uint8_t rst = 0xff);
 	
 	/** 
-	Resets the currently selected DWM1000 chip programmatically (via corresponding commands).
+	Resets the currently selected DW1000Ng chip programmatically (via corresponding commands).
 	*/
 	void softReset();
 	
@@ -171,7 +171,7 @@ namespace DWM1000 {
 	
 	/* ##### General device configuration ######################################## */
 	/** 
-	Specifies whether the DWM1000 chip should, again, turn on its receiver in case that the
+	Specifies whether the DW1000Ng chip should, again, turn on its receiver in case that the
 	last reception failed. 
 
 	@param[in] val `true` to enable, `false` to disable receiver auto-reenable.
@@ -201,7 +201,7 @@ namespace DWM1000 {
 	void setNLOS(boolean val);
 	
 	/** 
-	Specifies the data transmission rate of the DWM1000 chip. One of the values
+	Specifies the data transmission rate of the DW1000Ng chip. One of the values
 	- `TRX_RATE_110KBPS` (i.e. 110 kb/s)
 	- `TRX_RATE_850KBPS` (i.e. 850 kb/s)
 	- `TRX_RATE_6800KBPS` (i.e. 6.8 Mb/s)
@@ -216,7 +216,7 @@ namespace DWM1000 {
 	void setDataRate(DataRate data_rate);
 	
 	/** 
-	Specifies the pulse repetition frequency (PRF) of data transmissions with the DWM1000. Either
+	Specifies the pulse repetition frequency (PRF) of data transmissions with the DW1000Ng. Either
 	- `TX_PULSE_FREQ_16MHZ` (i.e. 16 MHz)
 	- `TX_PULSE_FREQ_64MHZ` (i.e. 64 MHz)
 	has to be chosen.
@@ -235,7 +235,7 @@ namespace DWM1000 {
 	void setSFDMode(SFDMode mode);
 	
 	/*
-	Specifies the channel for transmitting and receiving to and from a DWM1000 module. Once of this values
+	Specifies the channel for transmitting and receiving to and from a DW1000Ng module. Once of this values
 	- `CHANNEL_1` (i.e. 3494.4 MHz, bandwidth ~500 MHz)
 	- `CHANNEL_2` (i.e. 3993.6 MHz, bandwidth ~500 MHz)
 	- `CHANNEL_3` (i.e. 4492.8 MHz, bandwidth ~500 MHz)
@@ -270,15 +270,15 @@ namespace DWM1000 {
 	
 	
 	/* transmit and receive configuration. */
-	DWM1000Time  setDelay(uint16_t delayUS);
+	DW1000NgTime  setDelay(uint16_t delayUS);
 	void         setData(byte data[], uint16_t n);
 	void         setData(const String& data);
 	void         getData(byte data[], uint16_t n);
 	void         getData(String& data);
 	uint16_t     getDataLength();
-	void         getTransmitTimestamp(DWM1000Time& time);
-	void         getReceiveTimestamp(DWM1000Time& time);
-	void         getSystemTimestamp(DWM1000Time& time);
+	void         getTransmitTimestamp(DW1000NgTime& time);
+	void         getReceiveTimestamp(DW1000NgTime& time);
+	void         getSystemTimestamp(DW1000NgTime& time);
 	void         getTransmitTimestamp(byte data[]);
 	void         getReceiveTimestamp(byte data[]);
 	void         getSystemTimestamp(byte data[]);
@@ -362,9 +362,9 @@ namespace DWM1000 {
 	boolean isClockProblem();
 	
 	/* timestamp correction. */
-	void correctTimestamp(DWM1000Time& timestamp);
+	void correctTimestamp(DW1000NgTime& timestamp);
 	
-	/* reading and writing bytes from and to DWM1000 module. */
+	/* reading and writing bytes from and to DW1000Ng module. */
 	void readBytes(byte cmd, uint16_t offset, byte data[], uint16_t n);
 	void readBytesOTP(uint16_t address, byte data[]);
 	void writeByte(byte cmd, uint16_t offset, byte data);

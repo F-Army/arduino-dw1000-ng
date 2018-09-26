@@ -1,14 +1,14 @@
 #######################################
-# Syntax Coloring Map For DWM1000
+# Syntax Coloring Map For DW1000-ng
 #######################################
 
 #######################################
 # Library (KEYWORD1)
 #######################################
 
-DWM1000	KEYWORD1
-DWM1000Time	KEYWORD1
-DWM1000Debug KEYWORD1
+DW1000Ng	KEYWORD1
+DW1000NgTime	KEYWORD1
+DW1000NgDebug KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)

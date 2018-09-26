@@ -1,5 +1,5 @@
 /*  
- *  Arduino-DWM1000 - Arduino library to use Decawave's DWM1000 module.
+ *  Arduino-DW1000Ng - Arduino library to use Decawave's DW1000Ng module.
  *	Copyright (C) 2018  Michele Biondi <michelebiondi01@gmail.com>, Andrea Salvatori <andrea.salvatori92@gmail.com>
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 /*
  * Copyright (c) 2015 by Thomas Trojer <thomas@trojer.net>
- * Decawave DWM1000 library for arduino.
+ * Decawave DW1000 library for arduino.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,15 +32,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @file DWM1000Utils.cpp
+ * @file DW1000.cpp
  * Helper functions.
  */
 
 #include <Arduino.h>
-#include "DWM1000Utils.hpp"
-#include "DWM1000Registers.hpp"
+#include "DW1000NgUtils.hpp"
+#include "DW1000NgRegisters.hpp"
 
-namespace DWM1000Utils {
+namespace DW1000NgUtils {
 	/*
 	* Set the value of a bit in an array of bytes that are considered
 	* consecutive and stored from MSB to LSB.

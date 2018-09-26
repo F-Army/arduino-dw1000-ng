@@ -1,5 +1,5 @@
 /*  
- *	Arduino-DWM1000 - Arduino library to use Decawave's DWM1000 module.
+ *	Arduino-DW1000Ng - Arduino library to use Decawave's DW1000Ng module.
  *	Copyright (C) 2018  Michele Biondi <michelebiondi01@gmail.com>, Andrea Salvatori <andrea.salvatori92@gmail.com>
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include "DWM1000Time.hpp"
+#include "DW1000NgTime.hpp"
 
-namespace DWM1000RangingUtils {
+namespace DW1000NgRangingUtils {
     /*
  * RANGING ALGORITHMS
  * ------------------
@@ -34,21 +34,21 @@ namespace DWM1000RangingUtils {
  */
 
 
-    DWM1000Time computeRangeAsymmetric(    
-                                        DWM1000Time &timePollSent, 
-                                        DWM1000Time &timePollReceived, 
-                                        DWM1000Time &timePollAckSent, 
-                                        DWM1000Time &timePollAckReceived,
-                                        DWM1000Time &timeRangeSent,
-                                        DWM1000Time &timeRangeReceived 
+    DW1000NgTime computeRangeAsymmetric(    
+                                        DW1000NgTime &timePollSent, 
+                                        DW1000NgTime &timePollReceived, 
+                                        DW1000NgTime &timePollAckSent, 
+                                        DW1000NgTime &timePollAckReceived,
+                                        DW1000NgTime &timeRangeSent,
+                                        DW1000NgTime &timeRangeReceived 
                                     );
 
-    DWM1000Time computeRangeSymmetric(    
-                                        DWM1000Time &timePollSent, 
-                                        DWM1000Time &timePollReceived, 
-                                        DWM1000Time &timePollAckSent, 
-                                        DWM1000Time &timePollAckReceived,
-                                        DWM1000Time &timeRangeSent,
-                                        DWM1000Time &timeRangeReceived 
+    DW1000NgTime computeRangeSymmetric(    
+                                        DW1000NgTime &timePollSent, 
+                                        DW1000NgTime &timePollReceived, 
+                                        DW1000NgTime &timePollAckSent, 
+                                        DW1000NgTime &timePollAckReceived,
+                                        DW1000NgTime &timeRangeSent,
+                                        DW1000NgTime &timeRangeReceived 
                                     );
 }

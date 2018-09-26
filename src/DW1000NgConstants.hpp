@@ -1,5 +1,5 @@
 /*  
- *  Arduino-DWM1000 - Arduino library to use Decawave's DWM1000 module.
+ *  Arduino-DW1000Ng - Arduino library to use Decawave's DW1000Ng module.
  *	Copyright (C) 2018  Michele Biondi <michelebiondi01@gmail.com>, Andrea Salvatori <andrea.salvatori92@gmail.com>
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -76,7 +76,7 @@ enum class DataRate : byte {
 };
 
 /* transmission pulse frequency (TXPRF) - reg:0x08, bits:17,16
-* 0x00 is 4MHZ, but receiver in DWM1000 does not support it (!??) */
+* 0x00 is 4MHZ, but receiver in DW1000Ng does not support it (!??) */
 enum class PulseFrequency : byte {
     FREQ_16MHZ = 0x01,
     FREQ_64MHZ

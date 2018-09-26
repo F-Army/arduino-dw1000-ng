@@ -1,5 +1,5 @@
 /*  
- *  Arduino-DWM1000 - Arduino library to use Decawave's DWM1000 module.
+ *  Arduino-DW1000Ng - Arduino library to use Decawave's DW1000Ng module.
  *	Copyright (C) 2018  Michele Biondi <michelebiondi01@gmail.com>, Andrea Salvatori <andrea.salvatori92@gmail.com>
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 /*
  * Copyright (c) 2015 by Thomas Trojer <thomas@trojer.net>
- * Decawave DWM1000 library for arduino.
+ * Decawave DW1000 library for arduino.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,19 +32,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @file DWM1000Utils.h
- * Helper functions.
+ * @file DW1000.h
+ * Debug utilities.
  */
 
 #pragma once
 
 #include <Arduino.h>
+#include "DW1000NgRegisters.hpp"
 
-namespace DWM1000Utils {
-    boolean getBit(byte data[], uint16_t n, uint16_t bit);
-    void setBit(byte data[], uint16_t n, uint16_t bit, boolean val);
-    void writeValueToBytes(byte data[], int32_t val, uint16_t n);
-    /* convert from char to 4 bits (hexadecimal) */
-	uint8_t nibbleFromChar(char c);
-	void convertToByte(char string[], byte* eui_byte);
+namespace DW1000NgDebug {
+    void getPrettyBytes(byte data[], char msgBuffer[], uint16_t n);
+    void getPrettyBytes(byte cmd, uint16_t offset, char msgBuffer[], uint16_t n);
 }

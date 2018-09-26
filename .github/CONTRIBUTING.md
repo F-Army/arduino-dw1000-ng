@@ -7,4 +7,4 @@ Code style
 
 3. Write comments for public API or class methods using Doxygen syntax.
 
-4. DWM1000 API should be written in a different file to let the user decide when to import them (Arduino is memory-constrained).
+4. DW1000Ng API should be written in a different file to let the user decide when to import them (Arduino is memory-constrained).

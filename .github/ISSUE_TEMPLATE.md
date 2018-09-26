@@ -19,7 +19,7 @@ END -->
 ### Step 2: Describe your environment
 <!-- Remove	not applicable points -->
  * Arduino IDE version or Toolchain: _____
- * dwm1000 Library version: _____
+ * dw1000ng Library version: _____
  * Arduino device: _____
  * Used adapter board: _____
   

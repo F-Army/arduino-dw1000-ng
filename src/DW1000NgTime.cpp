@@ -1,7 +1,7 @@
 /**
  * Copyright (c) 2015 by Thomas Trojer <thomas@trojer.net>
  * Copyright (c) 2016 by Ludwig Grill (www.rotzbua.de); refactored class
- * Decawave DWM1000 library for arduino.
+ * Decawave DW1000 library for arduino.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,34 +15,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @file DWM1000Time.cpp
+ * @file DW1000NgTime.cpp
  * Arduino driver library timestamp wrapper (source file) for the Decawave 
- * DWM1000 UWB transceiver module.
+ * DW1000Ng UWB transceiver module.
  */
 
 #include <Arduino.h>
-#include "DWM1000Time.hpp"
+#include "DW1000NgTime.hpp"
+#include "DW1000NgCompileOptions.hpp"
 
 /**
- * Initiates DWM1000Time with 0
+ * Initiates DW1000NgTime with 0
  */
-DWM1000Time::DWM1000Time() {
+DW1000NgTime::DW1000NgTime() {
 	_timestamp = 0;
 }
 
 /**
- * Initiates DWM1000Time with timestamp
+ * Initiates DW1000NgTime with timestamp
  * @param time timestamp with intervall 1 is approx. 15ps
  */
-DWM1000Time::DWM1000Time(int64_t time) {
+DW1000NgTime::DW1000NgTime(int64_t time) {
 	setTimestamp(time);
 }
 
 /**
- * Initiates DWM1000Time with timestamp
+ * Initiates DW1000NgTime with timestamp
  * @param data timestamp as byte array
  */
-DWM1000Time::DWM1000Time(byte data[]) {
+DW1000NgTime::DW1000NgTime(byte data[]) {
 	setTimestamp(data);
 }
 
@@ -50,7 +51,7 @@ DWM1000Time::DWM1000Time(byte data[]) {
  * Initiates DW100Time with another instance
  * @param copy other instance
  */
-DWM1000Time::DWM1000Time(const DWM1000Time& copy) {
+DW1000NgTime::DW1000NgTime(const DW1000NgTime& copy) {
 	setTimestamp(copy);
 }
 
@@ -59,7 +60,7 @@ DWM1000Time::DWM1000Time(const DWM1000Time& copy) {
  * @param timeUs time in micro seconds
  * @todo maybe replace by better function without float
  */
-DWM1000Time::DWM1000Time(float timeUs) {
+DW1000NgTime::DW1000NgTime(float timeUs) {
 	setTime(timeUs);
 }
 
@@ -69,20 +70,20 @@ DWM1000Time::DWM1000Time(float timeUs) {
  * @param factorUs multiply factor for time
  * @todo maybe replace by better function without float
  */
-DWM1000Time::DWM1000Time(int32_t value, float factorUs) {
+DW1000NgTime::DW1000NgTime(int32_t value, float factorUs) {
 	setTime(value, factorUs);
 }
 
 /**
  * Empty
  */
-DWM1000Time::~DWM1000Time() {}
+DW1000NgTime::~DW1000NgTime() {}
 
 /**
  * Set timestamp
  * @param value - timestamp with intervall 1 is approx. 15ps
  */
-void DWM1000Time::setTimestamp(int64_t value) {
+void DW1000NgTime::setTimestamp(int64_t value) {
 	_timestamp = value;
 }
 
@@ -90,7 +91,7 @@ void DWM1000Time::setTimestamp(int64_t value) {
  * Set timestamp
  * @param data timestamp as byte array
  */
-void DWM1000Time::setTimestamp(byte data[]) {
+void DW1000NgTime::setTimestamp(byte data[]) {
 	_timestamp = 0;
 	for(uint8_t i = 0; i < LENGTH_TIMESTAMP; i++) {
 		_timestamp |= ((int64_t)data[i] << (i*8));
@@ -101,7 +102,7 @@ void DWM1000Time::setTimestamp(byte data[]) {
  * Set timestamp from other instance
  * @param copy instance where the timestamp should be copied
  */
-void DWM1000Time::setTimestamp(const DWM1000Time& copy) {
+void DW1000NgTime::setTimestamp(const DW1000NgTime& copy) {
 	_timestamp = copy.getTimestamp();
 }
 
@@ -110,7 +111,7 @@ void DWM1000Time::setTimestamp(const DWM1000Time& copy) {
  * @param timeUs time in micro seconds
  * @todo maybe replace by better function without float
  */
-void DWM1000Time::setTime(float timeUs) {
+void DW1000NgTime::setTime(float timeUs) {
 	_timestamp = (int64_t)(timeUs*TIME_RES_INV);
 //	_timestamp %= TIME_OVERFLOW; // clean overflow
 }
@@ -121,7 +122,7 @@ void DWM1000Time::setTime(float timeUs) {
  * @param factorUs multiply factor for time
  * @todo maybe replace by better function without float
  */
-void DWM1000Time::setTime(int32_t value, float factorUs) {
+void DW1000NgTime::setTime(int32_t value, float factorUs) {
 	//float tsValue = value*factorUs;
 	//tsValue = fmod(tsValue, TIME_OVERFLOW);
 	//setTime(tsValue);
@@ -132,7 +133,7 @@ void DWM1000Time::setTime(int32_t value, float factorUs) {
  * Get timestamp as integer
  * @return timestamp as integer
  */
-int64_t DWM1000Time::getTimestamp() const {
+int64_t DW1000NgTime::getTimestamp() const {
 	return _timestamp;
 }
 
@@ -140,7 +141,7 @@ int64_t DWM1000Time::getTimestamp() const {
  * Get timestamp as byte array
  * @param data var where data should be written
  */
-void DWM1000Time::getTimestamp(byte data[]) const {
+void DW1000NgTime::getTimestamp(byte data[]) const {
 	memset(data, 0, LENGTH_TIMESTAMP);
 	for(uint8_t i = 0; i < LENGTH_TIMESTAMP; i++) {
 		data[i] = (byte)((_timestamp >> (i*8)) & 0xFF);
@@ -152,7 +153,7 @@ void DWM1000Time::getTimestamp(byte data[]) const {
  * @return time in micro seconds
  * @deprecated use getAsMicroSeconds()
  */
-float DWM1000Time::getAsFloat() const {
+float DW1000NgTime::getAsFloat() const {
 	//return fmod((float)_timestamp, TIME_OVERFLOW)*TIME_RES;
 	return getAsMicroSeconds();
 }
@@ -161,7 +162,7 @@ float DWM1000Time::getAsFloat() const {
  * Return real time in micro seconds
  * @return time in micro seconds
  */
-float DWM1000Time::getAsMicroSeconds() const {
+float DW1000NgTime::getAsMicroSeconds() const {
 	return (_timestamp%TIME_OVERFLOW)*TIME_RES;
 }
 
@@ -170,7 +171,7 @@ float DWM1000Time::getAsMicroSeconds() const {
  * this is useful for e.g. time of flight
  * @return distance in meters
  */
-float DWM1000Time::getAsMeters() const {
+float DW1000NgTime::getAsMeters() const {
 	//return fmod((float)_timestamp, TIME_OVERFLOW)*DISTANCE_OF_RADIO;
 	return (_timestamp%TIME_OVERFLOW)*DISTANCE_OF_RADIO;
 }
@@ -185,7 +186,7 @@ float DWM1000Time::getAsMeters() const {
  * Wrap calculation: -990 + 1000 = 10 -> correct time 
  * @return 
  */
-DWM1000Time& DWM1000Time::wrap() {
+DW1000NgTime& DW1000NgTime::wrap() {
 	if(_timestamp < 0) {
 		_timestamp += TIME_OVERFLOW;
 	}
@@ -193,15 +194,15 @@ DWM1000Time& DWM1000Time::wrap() {
 }
 
 /**
- * Check if timestamp is valid for usage with DWM1000 device
+ * Check if timestamp is valid for usage with DW1000Ng device
  * @return true if valid, false if negative or overflow (maybe after calculation)
  */
-bool DWM1000Time::isValidTimestamp() {
+bool DW1000NgTime::isValidTimestamp() {
 	return (0 <= _timestamp && _timestamp <= TIME_MAX);
 }
 
 // assign
-DWM1000Time& DWM1000Time::operator=(const DWM1000Time& assign) {
+DW1000NgTime& DW1000NgTime::operator=(const DW1000NgTime& assign) {
 	if(this == &assign) {
 		return *this;
 	}
@@ -210,82 +211,82 @@ DWM1000Time& DWM1000Time::operator=(const DWM1000Time& assign) {
 }
 
 // add
-DWM1000Time& DWM1000Time::operator+=(const DWM1000Time& add) {
+DW1000NgTime& DW1000NgTime::operator+=(const DW1000NgTime& add) {
 	_timestamp += add.getTimestamp();
 	return *this;
 }
 
-DWM1000Time DWM1000Time::operator+(const DWM1000Time& add) const {
-	return DWM1000Time(*this) += add;
+DW1000NgTime DW1000NgTime::operator+(const DW1000NgTime& add) const {
+	return DW1000NgTime(*this) += add;
 }
 
 // subtract
-DWM1000Time& DWM1000Time::operator-=(const DWM1000Time& sub) {
+DW1000NgTime& DW1000NgTime::operator-=(const DW1000NgTime& sub) {
 	_timestamp -= sub.getTimestamp();
 	return *this;
 }
 
-DWM1000Time DWM1000Time::operator-(const DWM1000Time& sub) const {
-	return DWM1000Time(*this) -= sub;
+DW1000NgTime DW1000NgTime::operator-(const DW1000NgTime& sub) const {
+	return DW1000NgTime(*this) -= sub;
 }
 
 // multiply
-DWM1000Time& DWM1000Time::operator*=(float factor) {
+DW1000NgTime& DW1000NgTime::operator*=(float factor) {
 	//float tsValue = (float)_timestamp*factor;
 	//_timestamp = (int64_t)tsValue;
 	_timestamp *= factor;
 	return *this;
 }
 
-DWM1000Time DWM1000Time::operator*(float factor) const {
-	return DWM1000Time(*this) *= factor;
+DW1000NgTime DW1000NgTime::operator*(float factor) const {
+	return DW1000NgTime(*this) *= factor;
 }
 
-DWM1000Time& DWM1000Time::operator*=(const DWM1000Time& factor) {
+DW1000NgTime& DW1000NgTime::operator*=(const DW1000NgTime& factor) {
 	_timestamp *= factor.getTimestamp();
 	return *this;
 }
 
-DWM1000Time DWM1000Time::operator*(const DWM1000Time& factor) const {
-	return DWM1000Time(*this) *= factor;
+DW1000NgTime DW1000NgTime::operator*(const DW1000NgTime& factor) const {
+	return DW1000NgTime(*this) *= factor;
 }
 
 // divide
-DWM1000Time& DWM1000Time::operator/=(float factor) {
+DW1000NgTime& DW1000NgTime::operator/=(float factor) {
 	//_timestamp *= (1.0f/factor);
 	_timestamp /= factor;
 	return *this;
 }
 
-DWM1000Time DWM1000Time::operator/(float factor) const {
-	return DWM1000Time(*this) /= factor;
+DW1000NgTime DW1000NgTime::operator/(float factor) const {
+	return DW1000NgTime(*this) /= factor;
 }
 
-DWM1000Time& DWM1000Time::operator/=(const DWM1000Time& factor) {
+DW1000NgTime& DW1000NgTime::operator/=(const DW1000NgTime& factor) {
 	_timestamp /= factor.getTimestamp();
 	return *this;
 }
 
-DWM1000Time DWM1000Time::operator/(const DWM1000Time& factor) const {
-	return DWM1000Time(*this) /= factor;
+DW1000NgTime DW1000NgTime::operator/(const DW1000NgTime& factor) const {
+	return DW1000NgTime(*this) /= factor;
 }
 
 // compare
-boolean DWM1000Time::operator==(const DWM1000Time& cmp) const {
+boolean DW1000NgTime::operator==(const DW1000NgTime& cmp) const {
 	return _timestamp == cmp.getTimestamp();
 }
 
-boolean DWM1000Time::operator!=(const DWM1000Time& cmp) const {
+boolean DW1000NgTime::operator!=(const DW1000NgTime& cmp) const {
 	//return !(*this == cmp); // seems not as intended
 	return _timestamp != cmp.getTimestamp();
 }
 
-#ifdef DWM1000TIME_H_PRINTABLE
+#ifdef DW1000NGTIME_H_PRINTABLE
 /**
  * For debuging, print timestamp pretty as integer with arduinos serial
  * @deprecated use Serial.print(object)
  */
-void DWM1000Time::print() {
+void DW1000NgTime::print() {
 	Serial.print(*this);
 	Serial.println();
 }
@@ -295,7 +296,7 @@ void DWM1000Time::print() {
  * @param p printer instance
  * @return size of printed chars
  */
-size_t DWM1000Time::printTo(Print& p) const {
+size_t DW1000NgTime::printTo(Print& p) const {
 	int64_t       number  = _timestamp;
 	unsigned char buf[21];
 	uint8_t       i       = 0;
@@ -321,4 +322,4 @@ size_t DWM1000Time::printTo(Print& p) const {
 	
 	return printed;
 }
-#endif // DWM1000Time_H_PRINTABLE
+#endif // DW1000NGTime_H_PRINTABLE

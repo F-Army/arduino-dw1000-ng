@@ -1,5 +1,5 @@
 /*  
- *	Arduino-DWM1000 - Arduino library to use Decawave's DWM1000 module.
+ *	Arduino-DW1000Ng - Arduino library to use Decawave's DW1000Ng module.
  *	Copyright (C) 2018  Michele Biondi <michelebiondi01@gmail.com>, Andrea Salvatori <andrea.salvatori92@gmail.com>
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 /*
  * Copyright (c) 2015 by Thomas Trojer <thomas@trojer.net>
- * Decawave DWM1000 library for arduino.
+ * Decawave DW1000Ng library for arduino.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@
  *
  * @file BasicReceiver.ino
  * Use this to test simple sender/receiver functionality with two
- * DWM1000:: Complements the "BasicSender" example sketch.
+ * DW1000Ng:: Complements the "BasicSender" example sketch.
  * 
  * @todo
  *  - move strings to flash (less RAM consumption)
@@ -42,7 +42,7 @@
  */
 
 #include <SPI.h>
-#include <DWM1000.hpp>
+#include <DW1000Ng.hpp>
 
 // connection pins
 const uint8_t PIN_RST = 9; // reset pin
@@ -58,51 +58,51 @@ String message;
 void setup() {
   // DEBUG monitoring
   Serial.begin(9600);
-  Serial.println(F("### DWM1000-arduino-receiver-test ###"));
+  Serial.println(F("### DW1000Ng-arduino-receiver-test ###"));
   // initialize the driver
-  DWM1000::begin(PIN_SS, PIN_IRQ, PIN_RST);
-  Serial.println(F("DWM1000 initialized ..."));
+  DW1000Ng::begin(PIN_SS, PIN_IRQ, PIN_RST);
+  Serial.println(F("DW1000Ng initialized ..."));
   // general configuration
-  DWM1000::newConfiguration();
-  DWM1000::useExtendedFrameLength(false);
-	DWM1000::useSmartPower(true);
-	DWM1000::suppressFrameCheck(false);
-	DWM1000::setFrameFilter(false);
-	DWM1000::interruptOnSent(true);
-	DWM1000::interruptOnReceived(true);
-	DWM1000::interruptOnReceiveFailed(true);
-	DWM1000::interruptOnReceiveTimestampAvailable(false);
-	DWM1000::interruptOnAutomaticAcknowledgeTrigger(true);
-  DWM1000::setSFDMode(SFDMode::STANDARD_SFD);
-	DWM1000::setChannel(Channel::CHANNEL_5);
-  DWM1000::setDataRate(DataRate::RATE_850KBPS);
-  DWM1000::setPulseFrequency(PulseFrequency::FREQ_16MHZ);
-  DWM1000::setPreambleLength(PreambleLength::LEN_128);
-  DWM1000::setPreambleCode(PreambleCode::CODE_3);
-  DWM1000::setReceiverAutoReenable(true);
-  DWM1000::commitConfiguration();
+  DW1000Ng::newConfiguration();
+  DW1000Ng::useExtendedFrameLength(false);
+	DW1000Ng::useSmartPower(true);
+	DW1000Ng::suppressFrameCheck(false);
+	DW1000Ng::setFrameFilter(false);
+	DW1000Ng::interruptOnSent(true);
+	DW1000Ng::interruptOnReceived(true);
+	DW1000Ng::interruptOnReceiveFailed(true);
+	DW1000Ng::interruptOnReceiveTimestampAvailable(false);
+	DW1000Ng::interruptOnAutomaticAcknowledgeTrigger(true);
+  DW1000Ng::setSFDMode(SFDMode::STANDARD_SFD);
+	DW1000Ng::setChannel(Channel::CHANNEL_5);
+  DW1000Ng::setDataRate(DataRate::RATE_850KBPS);
+  DW1000Ng::setPulseFrequency(PulseFrequency::FREQ_16MHZ);
+  DW1000Ng::setPreambleLength(PreambleLength::LEN_128);
+  DW1000Ng::setPreambleCode(PreambleCode::CODE_3);
+  DW1000Ng::setReceiverAutoReenable(true);
+  DW1000Ng::commitConfiguration();
 
-  DWM1000::setDeviceAddress(6);
-  DWM1000::setNetworkId(10);
+  DW1000Ng::setDeviceAddress(6);
+  DW1000Ng::setNetworkId(10);
 
-  DWM1000::setAntennaDelay(16384);
+  DW1000Ng::setAntennaDelay(16384);
   Serial.println(F("Committed configuration ..."));
   // DEBUG chip info and registers pretty printed
   char msg[128];
-  DWM1000::getPrintableDeviceIdentifier(msg);
+  DW1000Ng::getPrintableDeviceIdentifier(msg);
   Serial.print("Device ID: "); Serial.println(msg);
-  DWM1000::getPrintableExtendedUniqueIdentifier(msg);
+  DW1000Ng::getPrintableExtendedUniqueIdentifier(msg);
   Serial.print("Unique ID: "); Serial.println(msg);
-  DWM1000::getPrintableNetworkIdAndShortAddress(msg);
+  DW1000Ng::getPrintableNetworkIdAndShortAddress(msg);
   Serial.print("Network ID & Device Address: "); Serial.println(msg);
-  DWM1000::getPrintableDeviceMode(msg);
+  DW1000Ng::getPrintableDeviceMode(msg);
   Serial.print("Device mode: "); Serial.println(msg);
   // attach callback for (successfully) received messages
-  DWM1000::attachReceivedHandler(handleReceived);
-  DWM1000::attachReceiveFailedHandler(handleError);
-  DWM1000::attachErrorHandler(handleError);
+  DW1000Ng::attachReceivedHandler(handleReceived);
+  DW1000Ng::attachReceiveFailedHandler(handleError);
+  DW1000Ng::attachErrorHandler(handleError);
   // start reception
-  DWM1000::startReceive();
+  DW1000Ng::startReceive();
 }
 
 void handleReceived() {
@@ -120,17 +120,17 @@ void loop() {
     received = false;
     numReceived++;
     // get data as string
-    DWM1000::getData(message);
+    DW1000Ng::getData(message);
     Serial.print("Received message ... #"); Serial.println(numReceived);
     Serial.print("Data is ... "); Serial.println(message);
-    Serial.print("RX power is [dBm] ... "); Serial.println(DWM1000::getReceivePower());
-    Serial.print("Signal quality is ... "); Serial.println(DWM1000::getReceiveQuality());
-    DWM1000::startReceive();
+    Serial.print("RX power is [dBm] ... "); Serial.println(DW1000Ng::getReceivePower());
+    Serial.print("Signal quality is ... "); Serial.println(DW1000Ng::getReceiveQuality());
+    DW1000Ng::startReceive();
   }
   if (error) {
     error = false;
     Serial.println("Error receiving a message");
-    DWM1000::getData(message);
+    DW1000Ng::getData(message);
     Serial.print("Error data is ... "); Serial.println(message);
   }
 }
