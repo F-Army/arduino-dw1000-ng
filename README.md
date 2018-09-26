@@ -12,6 +12,10 @@
 <br/>
 
 
+Status
+------------
+This is still work in progress, expect breaking changes until the first release.
+
 Installation
 ------------
 **Requires c++11 support**, Arduino IDE >= 1.6.6 support c++11.
