@@ -53,6 +53,7 @@
 
 #include <SPI.h>
 #include <DW1000Ng.hpp>
+#include <DW1000NgTime.hpp>
 
 // connection pins
 const uint8_t PIN_RST = 9; // reset pin
@@ -166,8 +167,18 @@ void transmitPoll() {
 
 void transmitRange() {
     data[0] = RANGE;
-    // delay sending the message and remember expected future sent timestamp
-    timeRangeSent = DW1000Ng::setDelay(replyDelayTimeUS);
+
+    /* Calculation of future time */
+    byte delayBytes[5];
+	DW1000NgTime delayTime = DW1000NgTime(replyDelayTimeUS, DW1000NgTime::MICROSECONDS);
+	DW1000Ng::getSystemTimestamp(timeRangeSent);
+	timeRangeSent += delayTime;
+	timeRangeSent.getTimestamp(delayBytes);
+    DW1000Ng::setDelay(delayBytes);
+    DW1000NgTime antennaDelay;
+    antennaDelay.setTimestamp(DW1000Ng::getAntennaDelay());
+	timeRangeSent += antennaDelay;
+
     timePollSent.getTimestamp(data + 1);
     timePollAckReceived.getTimestamp(data + 6);
     timeRangeSent.getTimestamp(data + 11);
