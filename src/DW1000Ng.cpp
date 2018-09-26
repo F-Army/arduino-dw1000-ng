@@ -659,8 +659,8 @@ namespace DW1000Ng {
 		void _writeAntennaDelayRegisters() {
 			byte antennaTxDelayBytes[2];
 			byte antennaRxDelayBytes[2];
-			writeValueToBytes(antennaTxDelayBytes, _antennaTxDelay, LEN_TX_ANTD);
-			writeValueToBytes(antennaRxDelayBytes, _antennaRxDelay, LEN_LDE_RXANTD);
+			DW1000NgUtils::writeValueToBytes(antennaTxDelayBytes, _antennaTxDelay, LEN_TX_ANTD);
+			DW1000NgUtils::writeValueToBytes(antennaRxDelayBytes, _antennaRxDelay, LEN_LDE_RXANTD);
 			writeBytes(TX_ANTD, NO_SUB, antennaTxDelayBytes, LEN_TX_ANTD);
 			writeBytes(LDE_IF, LDE_RXANTD_SUB, antennaRxDelayBytes, LEN_LDE_RXANTD);
 		}
