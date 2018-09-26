@@ -26,7 +26,7 @@
 #include "DW1000NgDeviceConfiguration.hpp"
 #include "DW1000NgConstants.hpp"
 
-namespace DW1000NgDeviceConfigurationProfiles{
+namespace DW1000NgDeviceConfigurationProfiles {
     
     device_configuration_t DEFAULT_CONFIGURATION = {
         false,
@@ -57,15 +57,11 @@ namespace DW1000NgDeviceConfigurationProfiles{
     };
 }
 
-DW1000NgDeviceConfiguration::DW1000NgDeviceConfiguration() {
-    setProfile(DW1000NgDeviceConfigurationProfiles::DEFAULT_CONFIGURATION);
-}
-
 DW1000NgDeviceConfiguration::DW1000NgDeviceConfiguration(boolean nlos) {
     if(nlos) {
-        setProfile(DW1000NgDeviceConfigurationProfiles::DEFAULT_CONFIGURATION);
-    } else {
         setProfile(DW1000NgDeviceConfigurationProfiles::NLOS_CONF);
+    } else {
+        setProfile(DW1000NgDeviceConfigurationProfiles::DEFAULT_CONFIGURATION);
     }
 }
 
