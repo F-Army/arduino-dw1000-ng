@@ -1411,6 +1411,11 @@ namespace DW1000Ng {
         writeBytes(DIG_DIAG, DIAG_TMC_SUB, diagnosticBytes, LEN_DIAG_TMC);
     }
 
+	void setDelay(byte delayBytes[]) {
+		/* the least significant 9-bits are ignored in DX_TIME in functional modes */
+		writeBytes(DX_TIME, NO_SUB, delayBytes, LEN_DX_TIME);
+	}
+
 	DW1000NgTime setDelay(uint16_t delayUS) {
 		byte delayBytes[LEN_DX_TIME];
 		DW1000NgTime futureTime;
