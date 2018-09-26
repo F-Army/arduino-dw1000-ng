@@ -22,6 +22,11 @@
 #pragma once
 
 /**
+ * Optimizes code for the DWM1000 Module
+ */
+#define DWM1000_OPTIMIZED false
+
+/**
  * Printable DW1000NgTime object costs about: rom: 490 byte ; ram: 58 byte
  * This option is needed because compiler can not optimize unused codes from inheritanced methods 
  * Some examples or debug code use this
@@ -29,7 +34,7 @@
  */
 #define DW1000NGTIME_H_PRINTABLE true
 
-/*
+/**
  * Printable DW1000NgDeviceConfiguration about: rom:2494 byte ; ram 256 byte
  * This option is needed because compiler can not optimize unused codes from inheritanced methods 
  * Some examples or debug code use this
