@@ -26,29 +26,126 @@
 #include "DW1000NgDeviceConfiguration.hpp"
 #include "DW1000NgConstants.hpp"
 
+namespace DW1000NgDeviceConfigurationProfiles{
+    
+    device_configuration_t DEFAULT_CONFIGURATION = {
+        false,
+        true,
+        true,
+        true,
+        false,
+        SFDMode::STANDARD_SFD,
+        Channel::CHANNEL_5,
+        DataRate::RATE_850KBPS,
+        PulseFrequency::FREQ_16MHZ,
+        PreambleLength::LEN_256,
+        PreambleCode::CODE_3
+    };
+
+    device_configuration_t NLOS_CONF = {
+            false,
+            true,
+            true,
+            true,
+            true,
+            SFDMode::STANDARD_SFD,
+            Channel::CHANNEL_5,
+            DataRate::RATE_850KBPS,
+            PulseFrequency::FREQ_16MHZ,
+            PreambleLength::LEN_256,
+            PreambleCode::CODE_3
+    };
+}
 
 DW1000NgDeviceConfiguration::DW1000NgDeviceConfiguration() {
-    setProfile(&DW1000NgDeviceConfigurationProfiles::DEFAULT_CONF);
+    setProfile(DW1000NgDeviceConfigurationProfiles::DEFAULT_CONFIGURATION);
 }
 
 DW1000NgDeviceConfiguration::DW1000NgDeviceConfiguration(boolean nlos) {
-    setProfile(nlos ? &DW1000NgDeviceConfigurationProfiles::NLOS_CONF : &DW1000NgDeviceConfigurationProfiles::DEFAULT_CONF);
+    if(nlos) {
+        setProfile(DW1000NgDeviceConfigurationProfiles::DEFAULT_CONFIGURATION);
+    } else {
+        setProfile(DW1000NgDeviceConfigurationProfiles::NLOS_CONF);
+    }
 }
 
-DW1000NgDeviceConfiguration::DW1000NgDeviceConfiguration(device_configuration_t* conf) {
+DW1000NgDeviceConfiguration::DW1000NgDeviceConfiguration(device_configuration_t conf) {
     setProfile(conf);
 }
 
-void DW1000NgDeviceConfiguration::setProfile(device_configuration_t* profile) {
-    _extendedFrameLength = profile->extendedFrameLength;
-    _receiverAutoReenable = profile->receiverAutoReenable;
-    _smartPower = profile->smartPower;
-    _frameCheck = profile->frameCheck;
-    _nlos = profile->nlos;
-    _sfd = profile->sfd;
-    _channel = profile->channel;
-    _dataRate = profile->dataRate;
-    _pulseFreq = profile->pulseFreq;
-    _preambleLen = profile->preambleLen;
-    _preaCode = profile->preaCode;
+#if DW1000NGDEVICECONFIGURATION_H_PRINTABLE
+    size_t DW1000NgDeviceConfiguration::printTo(Print& p) const {
+        String message = "";
+        message += "Extended Frame Length:"; message += _extendedFrameLength;
+        message += "\nReceiver Auto reenable:"; message += _receiverAutoReenable;
+        message += "\nSmart Power:"; message += _smartPower;
+        message += "\nFrame check:"; message += _frameCheck;
+        message += "\nNlos:"; message += _nlos;
+        message += "\nSfd:"; 
+        if(_sfd == SFDMode::STANDARD_SFD) {
+            message += "Standard";
+        } else {
+            message += "Decawave";
+        }
+        message += "\nChannel:"; message += static_cast<byte>(_channel);  
+        message += "\nDataRate:";
+        if(_dataRate == DataRate::RATE_110KBPS) {
+            message += "110Kbps";
+        } else if(_dataRate == DataRate::RATE_850KBPS) {
+            message += "850Kbps";
+        } else {
+            message += "6800Kbps";
+        }
+        message += "\nPRF:";
+        if(_pulseFreq == PulseFrequency::FREQ_16MHZ) {
+            message += "16Mhz";
+        } else {
+            message += "64Mhz";
+        }
+        message += "\nPreamble Length:";
+        switch(_preambleLen) {
+            case PreambleLength::LEN_64:
+                message += "64";
+                break;
+            case PreambleLength::LEN_128:
+                message += "128";
+                break;
+            case PreambleLength::LEN_256:
+                message += "256";
+                break;
+            case PreambleLength::LEN_512:
+                message += "512";
+                break;
+            case PreambleLength::LEN_1024:
+                message += "1024";
+                break;
+            case PreambleLength::LEN_1536:
+                message += "1536";
+                break;
+            case PreambleLength::LEN_2048:
+                message += "2048";
+                break;
+            case PreambleLength::LEN_4096:
+                message += "4096";
+                break;
+        }
+        message += "\nPreamble Code:"; message += static_cast<byte>(_preaCode);
+
+        p.print(message);
+        return message.length();      
+    }
+#endif
+
+void DW1000NgDeviceConfiguration::setProfile(device_configuration_t profile) {
+    _extendedFrameLength = profile.extendedFrameLength;
+    _receiverAutoReenable = profile.receiverAutoReenable;
+    _smartPower = profile.smartPower;
+    _frameCheck = profile.frameCheck;
+    _nlos = profile.nlos;
+    _sfd = profile.sfd;
+    _channel = profile.channel;
+    _dataRate = profile.dataRate;
+    _pulseFreq = profile.pulseFreq;
+    _preambleLen = profile.preambleLen;
+    _preaCode = profile.preaCode;
 }

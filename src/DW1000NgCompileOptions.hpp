@@ -28,3 +28,5 @@
  * Set false if you do not need it and have to save some space
  */
 #define DW1000NGTIME_H_PRINTABLE true
+
+#define DW1000NGDEVICECONFIGURATION_H_PRINTABLE true

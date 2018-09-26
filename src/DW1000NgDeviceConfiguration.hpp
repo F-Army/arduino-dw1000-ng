@@ -26,15 +26,38 @@
 
 #include <Arduino.h>
 #include "DW1000NgConstants.hpp"
-#include "DW1000NgDeviceConfigurationTemplate.hpp"
+#include "DW1000NgCompileOptions.hpp"
 
+typedef struct device_configuration_t {
+    boolean extendedFrameLength;
+    boolean receiverAutoReenable;
+    boolean smartPower;
+    boolean frameCheck;
+    boolean nlos;
+    SFDMode sfd;
+    Channel channel;
+    DataRate dataRate;
+    PulseFrequency pulseFreq;
+    PreambleLength preambleLen;
+    PreambleCode preaCode;
+} device_configuration_t;
+
+#if DW1000NGDEVICECONFIGURATION_H_PRINTABLE
+class DW1000NgDeviceConfiguration : public Printable {
+#else
 class DW1000NgDeviceConfiguration {
+#endif
+
 public:
     DW1000NgDeviceConfiguration();
     DW1000NgDeviceConfiguration(boolean nlos);
-    DW1000NgDeviceConfiguration(device_configuration_t* conf);
+    DW1000NgDeviceConfiguration(device_configuration_t conf);
 
-    void setProfile(device_configuration_t* profile);
+#if DW1000NGDEVICECONFIGURATION_H_PRINTABLE
+    size_t printTo(Print& p) const;
+#endif
+
+    void setProfile(device_configuration_t profile);
 
 private:
     boolean _extendedFrameLength;
