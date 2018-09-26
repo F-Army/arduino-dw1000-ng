@@ -17,7 +17,6 @@ env:
     - PLATFORMIO_CI_SRC=examples/TimestampUsageTest/TimestampUsageTest.ino
     - PLATFORMIO_CI_SRC=examples/SimpleAntennaCalibration/SimpleAntennaCalibration.ino
     - PLATFORMIO_CI_SRC=examples/TransmitSpectrumPowerCalibrationTest/TransmitSpectrumPowerCalibrationTest.ino
-    - PLATFORMIO_CI_SRC=examples/DeviceConfigurationTest/DeviceConfigurationTest.ino
 
 install:
     - pip install -U platformio
