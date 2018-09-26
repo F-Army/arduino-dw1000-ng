@@ -167,7 +167,6 @@ void transmitPoll() {
 
 void transmitRange() {
     data[0] = RANGE;
-    // delay sending the message and remember expected future sent timestamp
 
     /* Calculation of future time */
     byte delayBytes[5];
