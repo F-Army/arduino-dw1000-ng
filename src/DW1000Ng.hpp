@@ -276,7 +276,6 @@ namespace DW1000Ng {
 	
 	
 	/* transmit and receive configuration. */
-	DW1000NgTime  setDelay(uint16_t delayUS);
 	void         setDelay(byte delayBytes[]);
 	void         setData(byte data[], uint16_t n);
 	void         setData(const String& data);

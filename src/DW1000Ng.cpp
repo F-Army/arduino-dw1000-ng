@@ -1416,23 +1416,6 @@ namespace DW1000Ng {
 		writeBytes(DX_TIME, NO_SUB, delayBytes, LEN_DX_TIME);
 	}
 
-	DW1000NgTime setDelay(uint16_t delayUS) {
-		byte delayBytes[LEN_DX_TIME];
-		DW1000NgTime futureTime;
-		DW1000NgTime delayTime = DW1000NgTime(delayUS, DW1000NgTime::MICROSECONDS);
-		getSystemTimestamp(futureTime);
-		futureTime += delayTime;
-		futureTime.getTimestamp(delayBytes);
-		/* the least significant 9-bits are ignored in DX_TIME in functional modes */
-		delayBytes[0] = 0;
-		delayBytes[1] &= 0xFE;
-		writeBytes(DX_TIME, NO_SUB, delayBytes, LEN_DX_TIME);
-		// adjust expected time with configured antenna delay
-		futureTime.setTimestamp(delayBytes);
-		futureTime += _antennaDelay;
-		return futureTime;
-	}
-
 	void setDataRate(DataRate data_rate) {
 		byte rate = static_cast<byte>(data_rate);
 		rate &= 0x03;
