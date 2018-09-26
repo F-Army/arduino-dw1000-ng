@@ -100,8 +100,8 @@ namespace DW1000Ng {
 		boolean			_standardSFD = true;
 		boolean     	_autoTXPower = true;
 		boolean     	_autoTCPGDelay = true;
-		uint16_t  		_antennaTxDelay;
-		uint16_t    	_antennaRxDelay;
+		uint16_t		_antennaTxDelay;
+		uint16_t		_antennaRxDelay;
 
 		/* SPI relative variables */
 		const SPISettings  _fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
