@@ -304,7 +304,11 @@ namespace DW1000Ng {
 
 	/* Antenna delay calibration */
 	void setAntennaDelay(uint16_t value);
-	uint16_t getAntennaDelay();
+	void setTxAntennaDelay(uint16_t value);
+	void setRxAntennaDelay(uint16_t value);
+
+	uint16_t getTxAntennaDelay();
+	uint16_t getRxAntennaDelay();
 
 	/* callback handler management. */
 	void attachErrorHandler(void (* handleError)(void));

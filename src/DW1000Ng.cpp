@@ -100,7 +100,8 @@ namespace DW1000Ng {
 		boolean			_standardSFD = true;
 		boolean     	_autoTXPower = true;
 		boolean     	_autoTCPGDelay = true;
-		DW1000NgTime 	_antennaDelay;
+		uint16_t  		_antennaTxDelay;
+		uint16_t    	_antennaRxDelay;
 
 		/* SPI relative variables */
 		const SPISettings  _fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
@@ -656,10 +657,12 @@ namespace DW1000Ng {
 		}
 
 		void _writeAntennaDelayRegisters() {
-			byte antennaDelayBytes[DW1000NgTime::LENGTH_TIMESTAMP];
-			_antennaDelay.getTimestamp(antennaDelayBytes);
-			writeBytes(TX_ANTD, NO_SUB, antennaDelayBytes, LEN_TX_ANTD);
-			writeBytes(LDE_IF, LDE_RXANTD_SUB, antennaDelayBytes, LEN_LDE_RXANTD);
+			byte antennaTxDelayBytes[2];
+			byte antennaRxDelayBytes[2];
+			writeValueToBytes(antennaTxDelayBytes, _antennaTxDelay, LEN_TX_ANTD);
+			writeValueToBytes(antennaRxDelayBytes, _antennaRxDelay, LEN_LDE_RXANTD);
+			writeBytes(TX_ANTD, NO_SUB, antennaTxDelayBytes, LEN_TX_ANTD);
+			writeBytes(LDE_IF, LDE_RXANTD_SUB, antennaRxDelayBytes, LEN_LDE_RXANTD);
 		}
 
 		void _writeConfiguration() {
@@ -1274,12 +1277,25 @@ namespace DW1000Ng {
 	}
 
 	void setAntennaDelay(uint16_t value) {
-		_antennaDelay.setTimestamp(static_cast<int64_t>(value));
+		_antennaTxDelay = value;
+		_antennaRxDelay = value;
 		_writeAntennaDelayRegisters();
 	}
 
-	uint16_t getAntennaDelay() {
-		return static_cast<uint16_t>(_antennaDelay.getTimestamp());
+	void setTxAntennaDelay(uint16_t value) {
+		_antennaTxDelay = value;
+		_writeAntennaDelayRegisters();	
+	}
+	void setRxAntennaDelay(uint16_t value) {
+		_antennaRxDelay = value;
+		_writeAntennaDelayRegisters();
+	}
+
+	uint16_t getTxAntennaDelay() {
+		return _antennaTxDelay;
+	}
+	uint16_t getRxAntennaDelay() {
+		return _antennaRxDelay;
 	}
 
 	void forceTRxOff() {
