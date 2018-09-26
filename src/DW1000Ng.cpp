@@ -919,7 +919,7 @@ namespace DW1000Ng {
 		_tmeas23C = buf_otp[0];
 	}
 
-	void select(uint8_t ss, uint8_t irq) {
+	void select() {
 		SPI.usingInterrupt(digitalPinToInterrupt(_irq));
 		pinMode(_ss, OUTPUT);
 		digitalWrite(_ss, HIGH);
