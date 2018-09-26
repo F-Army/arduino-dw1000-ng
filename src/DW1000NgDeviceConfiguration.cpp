@@ -22,30 +22,33 @@
  * SOFTWARE.
 */
 
-#pragma once
-
 #include <Arduino.h>
+#include "DW1000NgDeviceConfiguration.hpp"
 #include "DW1000NgConstants.hpp"
-#include "DW1000NgDeviceConfigurationTemplate.hpp"
 
-class DW1000NgDeviceConfiguration {
-public:
-    DW1000NgDeviceConfiguration();
-    DW1000NgDeviceConfiguration(boolean nlos);
-    DW1000NgDeviceConfiguration(device_configuration_t* conf);
 
-    void setProfile(device_configuration_t* profile);
+DW1000NgDeviceConfiguration::DW1000NgDeviceConfiguration() {
+    setProfile(&DW1000NgDeviceConfigurationProfiles::DEFAULT_CONF);
+}
 
-private:
-    boolean _extendedFrameLength;
-    boolean _receiverAutoReenable;
-    boolean _smartPower;
-    boolean _frameCheck;
-    boolean _nlos;
-    SFDMode _sfd;
-    Channel _channel;
-    DataRate _dataRate;
-    PulseFrequency _pulseFreq;
-    PreambleLength _preambleLen;
-    PreambleCode _preaCode;
-};
+DW1000NgDeviceConfiguration::DW1000NgDeviceConfiguration(boolean nlos) {
+    setProfile(nlos ? &DW1000NgDeviceConfigurationProfiles::NLOS_CONF : &DW1000NgDeviceConfigurationProfiles::DEFAULT_CONF);
+}
+
+DW1000NgDeviceConfiguration::DW1000NgDeviceConfiguration(device_configuration_t* conf) {
+    setProfile(conf);
+}
+
+void DW1000NgDeviceConfiguration::setProfile(device_configuration_t* profile) {
+    _extendedFrameLength = profile->extendedFrameLength;
+    _receiverAutoReenable = profile->receiverAutoReenable;
+    _smartPower = profile->smartPower;
+    _frameCheck = profile->frameCheck;
+    _nlos = profile->nlos;
+    _sfd = profile->sfd;
+    _channel = profile->channel;
+    _dataRate = profile->dataRate;
+    _pulseFreq = profile->pulseFreq;
+    _preambleLen = profile->preambleLen;
+    _preaCode = profile->preaCode;
+}

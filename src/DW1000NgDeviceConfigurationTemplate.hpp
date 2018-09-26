@@ -25,27 +25,52 @@
 #pragma once
 
 #include <Arduino.h>
-#include "DW1000NgConstants.hpp"
-#include "DW1000NgDeviceConfigurationTemplate.hpp"
 
-class DW1000NgDeviceConfiguration {
-public:
-    DW1000NgDeviceConfiguration();
-    DW1000NgDeviceConfiguration(boolean nlos);
-    DW1000NgDeviceConfiguration(device_configuration_t* conf);
+/* TEMPLATE */
 
-    void setProfile(device_configuration_t* profile);
+typedef struct {
+    boolean extendedFrameLength;
+    boolean receiverAutoReenable;
+    boolean smartPower;
+    boolean frameCheck;
+    boolean nlos;
+    SFDMode sfd;
+    Channel channel;
+    DataRate dataRate;
+    PulseFrequency pulseFreq;
+    PreambleLength preambleLen;
+    PreambleCode preaCode;
+} device_configuration_t;
 
-private:
-    boolean _extendedFrameLength;
-    boolean _receiverAutoReenable;
-    boolean _smartPower;
-    boolean _frameCheck;
-    boolean _nlos;
-    SFDMode _sfd;
-    Channel _channel;
-    DataRate _dataRate;
-    PulseFrequency _pulseFreq;
-    PreambleLength _preambleLen;
-    PreambleCode _preaCode;
-};
+/* PROFILES */
+namespace DW1000NgDeviceConfigurationProfiles {
+
+    device_configuration_t DEFAULT_CONF = {
+        false,
+        true,
+        true,
+        true,
+        false,
+        SFDMode::STANDARD_SFD,
+        Channel::CHANNEL_5,
+        DataRate::RATE_850KBPS,
+        PulseFrequency::FREQ_16MHZ,
+        PreambleLength::LEN_256,
+        PreambleCode::CODE_3
+    };
+    
+    device_configuration_t NLOS_CONF = {
+        false,
+        true,
+        true,
+        true,
+        true,
+        SFDMode::STANDARD_SFD,
+        Channel::CHANNEL_5,
+        DataRate::RATE_850KBPS,
+        PulseFrequency::FREQ_16MHZ,
+        PreambleLength::LEN_256,
+        PreambleCode::CODE_3
+    };
+
+}
