@@ -62,6 +62,7 @@ namespace DW1000Ng {
 		/* SPI select pin and interrupt pin*/
 		uint8_t _ss = 0xff;
 		uint8_t _irq = 0xff;
+		uint8_t _rst = 0xff;
 
 		/* IRQ callbacks */
 		void (* _handleSent)(void)                      = nullptr;
@@ -870,25 +871,26 @@ namespace DW1000Ng {
 	void begin(uint8_t ss, uint8_t irq, uint8_t rst) {
 		// generous initial init/wake-up-idle delay
 		delay(5);
+		_ss = ss;
+		_irq = irq;
 		// start SPI
 		SPI.begin();
 		// pin and basic member setup
 		// attach interrupt
 		// TODO throw error if pin is not a interrupt pin
-		attachInterrupt(digitalPinToInterrupt(irq), _handleInterrupt, RISING);
-		uint8_t oldSS = _ss;
-		uint8_t oldIRQ = _irq;
-		select(ss, irq);
+		attachInterrupt(digitalPinToInterrupt(_irq), _handleInterrupt, RISING);
+		select();
 		// try locking clock at PLL speed (should be done already,
 		// but just to be sure)
 		_enableClock(SYS_AUTO_CLOCK);
 		delay(5);
 		// reset chip (either soft or hard)
 		if(rst != 0xff) {
+			_rst = rst;
 			// DW1000Ng data sheet v2.08 §5.6.1 page 20, the RSTn pin should not be driven high but left floating.
-			pinMode(rst, INPUT);
+			pinMode(_rst, INPUT);
 		}
-		reset(rst);
+		reset();
 		// default network and node id
 		DW1000NgUtils::writeValueToBytes(_networkAndAddress, 0xFF, LEN_PANADR);
 
@@ -915,16 +917,10 @@ namespace DW1000Ng {
 		_vmeas3v3 = buf_otp[0];
 		readBytesOTP(0x009, buf_otp); // the stored 23C reading
 		_tmeas23C = buf_otp[0];
-
-		/* Selects old device if any */
-		if(oldSS != 0xff)
-			select(oldSS, oldIRQ);
 	}
 
 	void select(uint8_t ss, uint8_t irq) {
-		_ss = ss;
-		_irq = irq;
-		SPI.usingInterrupt(digitalPinToInterrupt(irq));
+		SPI.usingInterrupt(digitalPinToInterrupt(_irq));
 		pinMode(_ss, OUTPUT);
 		digitalWrite(_ss, HIGH);
 	}
@@ -1028,15 +1024,15 @@ namespace DW1000Ng {
 	}
 
 
-	void reset(uint8_t rst) {
-		if(rst == 0xff) {
+	void reset() {
+		if(_rst == 0xff) {
 			softReset();
 		} else {
 			// DW1000Ng data sheet v2.08 §5.6.1 page 20, the RSTn pin should not be driven high but left floating.
-			pinMode(rst, OUTPUT);
-			digitalWrite(rst, LOW);
+			pinMode(_rst, OUTPUT);
+			digitalWrite(_rst, LOW);
 			delay(2);  // DW1000Ng data sheet v2.08 §5.6.1 page 20: nominal 50ns, to be safe take more time
-			pinMode(rst, INPUT);
+			pinMode(_rst, INPUT);
 			delay(10); // dw1000Ng data sheet v1.2 page 5: nominal 3 ms, to be safe take more time
 			// force into idle mode (although it should be already after reset)
 			forceTRxOff();
