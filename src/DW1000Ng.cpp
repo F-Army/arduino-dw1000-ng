@@ -1343,9 +1343,9 @@ namespace DW1000Ng {
 	void useSmartPower(boolean smartPower) {
 		_smartPower = smartPower;
 		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, DIS_STXP_BIT, !smartPower);
-		if(_smartPower) 
-			_autoTXPower = true;
 		_writeSystemConfigurationRegister();
+		if(_autoTXPower)
+			_txpowertune();
 	}
 
 	void setTXPower(byte power[]) {
