@@ -30,10 +30,6 @@ void setup() {
     DW1000NgDeviceConfiguration conf;
     Serial.print(conf);
     Serial.println("\n");
-    Serial.println("NLOS Configuration:");
-    DW1000NgDeviceConfiguration nlos_conf(true);
-    Serial.print(nlos_conf);
-    Serial.println("\n");
 }
 
 void loop() { }
