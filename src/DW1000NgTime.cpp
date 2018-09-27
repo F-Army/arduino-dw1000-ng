@@ -281,7 +281,7 @@ boolean DW1000NgTime::operator!=(const DW1000NgTime& cmp) const {
 	return _timestamp != cmp.getTimestamp();
 }
 
-#ifdef DW1000NGTIME_H_PRINTABLE
+#if DW1000NGTIME_H_PRINTABLE
 /**
  * For debuging, print timestamp pretty as integer with arduinos serial
  * @deprecated use Serial.print(object)

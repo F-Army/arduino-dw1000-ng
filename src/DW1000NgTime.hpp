@@ -126,7 +126,7 @@ public:
 	boolean operator==(const DW1000NgTime& cmp) const;
 	boolean operator!=(const DW1000NgTime& cmp) const;
 
-#ifdef DW1000NGTIME_H_PRINTABLE
+#if DW1000NGTIME_H_PRINTABLE
 	// print to serial for debug
 	DEPRECATED_MSG("use Serial.print(object)")
 	void print();
