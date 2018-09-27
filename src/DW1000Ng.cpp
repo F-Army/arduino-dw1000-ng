@@ -1434,6 +1434,10 @@ namespace DW1000Ng {
 
 	void setNLOS(boolean val) {
 		_nlos = val;
+		if(_nlos) {
+			_ldecfg1();
+			_ldecfg2();
+		}
 	}
 
 	void useSmartPower(boolean smartPower) {
