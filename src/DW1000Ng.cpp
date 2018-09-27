@@ -1351,7 +1351,6 @@ namespace DW1000Ng {
 	void setTXPower(byte power[]) {
 		//TODO Check byte length
 		writeBytes(TX_POWER, NO_SUB, power, LEN_TX_POWER);
-		useSmartPower(false);
 		_autoTXPower = false;
 	}
 
