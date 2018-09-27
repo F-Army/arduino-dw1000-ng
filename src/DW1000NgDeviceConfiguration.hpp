@@ -42,6 +42,11 @@ typedef struct device_configuration_t {
     PreambleCode preaCode;
 } device_configuration_t;
 
+enum class DeviceConfigurationProfile {
+    DEFAULT_PROFILE,
+    DEFAULT_NLOS_PROFILE
+};
+
 #if DW1000NGDEVICECONFIGURATION_H_PRINTABLE
 class DW1000NgDeviceConfiguration : public Printable {
 #else
@@ -49,14 +54,15 @@ class DW1000NgDeviceConfiguration {
 #endif
 
 public:
-    DW1000NgDeviceConfiguration(boolean nlos = false);
+    DW1000NgDeviceConfiguration(DeviceConfigurationProfile profile = DeviceConfigurationProfile::DEFAULT_PROFILE);
     DW1000NgDeviceConfiguration(device_configuration_t conf);
 
 #if DW1000NGDEVICECONFIGURATION_H_PRINTABLE
     size_t printTo(Print& p) const;
 #endif
 
-    void setProfile(device_configuration_t profile);
+    void setConfiguration(device_configuration_t config);
+    void setConfiguration(DeviceConfigurationProfile profile);
 
 private:
     boolean _extendedFrameLength;

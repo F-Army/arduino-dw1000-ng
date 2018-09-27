@@ -57,16 +57,12 @@ namespace DW1000NgDeviceConfigurationProfiles {
     };
 }
 
-DW1000NgDeviceConfiguration::DW1000NgDeviceConfiguration(boolean nlos) {
-    if(nlos) {
-        setProfile(DW1000NgDeviceConfigurationProfiles::NLOS_CONF);
-    } else {
-        setProfile(DW1000NgDeviceConfigurationProfiles::DEFAULT_CONFIGURATION);
-    }
+DW1000NgDeviceConfiguration::DW1000NgDeviceConfiguration(DeviceConfigurationProfile profile) {
+    setConfiguration(profile);
 }
 
 DW1000NgDeviceConfiguration::DW1000NgDeviceConfiguration(device_configuration_t conf) {
-    setProfile(conf);
+    setConfiguration(conf);
 }
 
 #if DW1000NGDEVICECONFIGURATION_H_PRINTABLE
@@ -132,16 +128,26 @@ DW1000NgDeviceConfiguration::DW1000NgDeviceConfiguration(device_configuration_t 
     }
 #endif
 
-void DW1000NgDeviceConfiguration::setProfile(device_configuration_t profile) {
-    _extendedFrameLength = profile.extendedFrameLength;
-    _receiverAutoReenable = profile.receiverAutoReenable;
-    _smartPower = profile.smartPower;
-    _frameCheck = profile.frameCheck;
-    _nlos = profile.nlos;
-    _sfd = profile.sfd;
-    _channel = profile.channel;
-    _dataRate = profile.dataRate;
-    _pulseFreq = profile.pulseFreq;
-    _preambleLen = profile.preambleLen;
-    _preaCode = profile.preaCode;
+void DW1000NgDeviceConfiguration::setConfiguration(device_configuration_t config) {
+    _extendedFrameLength = config.extendedFrameLength;
+    _receiverAutoReenable = config.receiverAutoReenable;
+    _smartPower = config.smartPower;
+    _frameCheck = config.frameCheck;
+    _nlos = config.nlos;
+    _sfd = config.sfd;
+    _channel = config.channel;
+    _dataRate = config.dataRate;
+    _pulseFreq = config.pulseFreq;
+    _preambleLen = config.preambleLen;
+    _preaCode = config.preaCode;
+}
+
+void DW1000NgDeviceConfiguration::setConfiguration(DeviceConfigurationProfile profile) {
+    if(profile == DeviceConfigurationProfile::DEFAULT_PROFILE) {
+        setConfiguration(DW1000NgDeviceConfigurationProfiles::DEFAULT_CONFIGURATION);
+    } else if(profile == DeviceConfigurationProfile::DEFAULT_NLOS_PROFILE) {
+        setConfiguration(DW1000NgDeviceConfigurationProfiles::NLOS_CONF);
+    } else {
+        //TODO error handler
+    }
 }
