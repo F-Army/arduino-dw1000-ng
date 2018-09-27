@@ -27,12 +27,16 @@ void setup() {
     Serial.begin(115200);
     Serial.println("Default Configuration:");
     DW1000NgDeviceConfiguration conf;
+    #if DW1000NGDEVICECONFIGURATION_H_PRINTABLE
     Serial.print(conf);
+    #endif
     Serial.println("\n");
 
     Serial.println("NLOS Configuration:");
     DW1000NgDeviceConfiguration nlos_conf(true);
+    #if DW1000NGDEVICECONFIGURATION_H_PRINTABLE
     Serial.print(nlos_conf);
+    #endif
     Serial.println("\n");
 }
 void loop() { } 
