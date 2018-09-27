@@ -91,7 +91,7 @@ void setup() {
   DW1000Ng::setDeviceAddress(6);
   DW1000Ng::setNetworkId(10);
 
-  DW1000Ng::setAntennaDelay(16384);
+  DW1000Ng::setAntennaDelay(16436);
   Serial.println(F("Committed configuration ..."));
   // DEBUG chip info and registers pretty printed
   char msg[128];
