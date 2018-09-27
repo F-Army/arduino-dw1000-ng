@@ -54,8 +54,7 @@ class DW1000NgDeviceConfiguration {
 #endif
 
 public:
-    DW1000NgDeviceConfiguration(boolean nlos = false);
-    DW1000NgDeviceConfiguration(DeviceConfigurationProfile profile);
+    DW1000NgDeviceConfiguration(DeviceConfigurationProfile profile = DeviceConfigurationProfile::DEFAULT_PROFILE);
     DW1000NgDeviceConfiguration(device_configuration_t conf);
 
 #if DW1000NGDEVICECONFIGURATION_H_PRINTABLE
