@@ -59,10 +59,14 @@ namespace DW1000NgDeviceConfigurationProfiles {
 
 DW1000NgDeviceConfiguration::DW1000NgDeviceConfiguration(boolean nlos) {
     if(nlos) {
-        setConfiguration(DW1000NgDeviceConfigurationProfiles::NLOS_CONF);
+        setConfiguration(DeviceConfigurationProfile::DEFAULT_PROFILE);
     } else {
-        setConfiguration(DW1000NgDeviceConfigurationProfiles::DEFAULT_CONFIGURATION);
+        setConfiguration(DeviceConfigurationProfile::DEFAULT_NLOS_PROFILE);
     }
+}
+
+DW1000NgDeviceConfiguration::DW1000NgDeviceConfiguration(DeviceConfigurationProfile profile) {
+    setConfiguration(profile);
 }
 
 DW1000NgDeviceConfiguration::DW1000NgDeviceConfiguration(device_configuration_t conf) {
