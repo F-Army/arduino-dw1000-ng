@@ -56,7 +56,7 @@
  * Some examples or debug code use this
  * Set false if you do not need it and have to save some space
  */
-#define DW1000NGTIME_H_PRINTABLE true
+#define DW1000NGTIME_H_PRINTABLE false
 
 /**
  * Printable DW1000NgDeviceConfiguration about: rom:2494 byte ; ram 256 byte
@@ -64,4 +64,4 @@
  * Some examples or debug code use this
  * Set false if you do not need it and have to save some space
  */
-#define DW1000NGDEVICECONFIGURATION_H_PRINTABLE true
+#define DW1000NGDEVICECONFIGURATION_H_PRINTABLE false
