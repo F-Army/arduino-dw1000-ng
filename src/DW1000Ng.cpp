@@ -1387,6 +1387,7 @@ namespace DW1000Ng {
 	}
 
 	void setTCPGDelayAuto() {
+		_tcpgdelaytune();
 		_autoTCPGDelay = true;
 	}
 
