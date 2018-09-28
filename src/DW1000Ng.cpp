@@ -1103,7 +1103,7 @@ namespace DW1000Ng {
 
 	void spiWakeup(){
 		digitalWrite(_ss, LOW);
-		delay(2);
+		delay(5);
 		digitalWrite(_ss, HIGH);
 		setTxAntennaDelay(_antennaTxDelay);
 		if (_debounceClockEnabled){
