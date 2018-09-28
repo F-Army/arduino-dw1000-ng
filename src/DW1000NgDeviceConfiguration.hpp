@@ -64,16 +64,8 @@ public:
     void setConfiguration(device_configuration_t config);
     void setConfiguration(DeviceConfigurationProfile profile);
 
+    device_configuration_t getConfiguration();
+
 private:
-    boolean _extendedFrameLength;
-    boolean _receiverAutoReenable;
-    boolean _smartPower;
-    boolean _frameCheck;
-    boolean _nlos;
-    SFDMode _sfd;
-    Channel _channel;
-    DataRate _dataRate;
-    PulseFrequency _pulseFreq;
-    PreambleLength _preambleLen;
-    PreambleCode _preaCode;
+    device_configuration_t _config;
 };
