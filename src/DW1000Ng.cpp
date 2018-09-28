@@ -1083,10 +1083,10 @@ namespace DW1000Ng {
 		byte aon_cfg0[LEN_AON_CFG0];
 		memset(aon_cfg0, 0, LEN_AON_CFG0);
 		readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, SLEEP_EN_BIT, true);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_PIN_BIT, true);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_SPI_BIT, true);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, false);
+		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, SLEEP_EN_BIT, true);
 		writeBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 
 		byte aon_ctrl[LEN_AON_CTRL];
@@ -1101,6 +1101,7 @@ namespace DW1000Ng {
 			digitalWrite(_ss, LOW);
 			delay(2);
 			digitalWrite(_ss, HIGH);
+			setTxAntennaDelay(_antennaTxDelay);
 			if (_debounceClockEnabled){
 					enableDebounceClock();
 			}
