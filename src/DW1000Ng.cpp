@@ -63,6 +63,7 @@ namespace DW1000Ng {
 		uint8_t _ss = 0xff;
 		uint8_t _irq = 0xff;
 		uint8_t _rst = 0xff;
+		uint8_t _wakeup = 0xff;
 
 		/* IRQ callbacks */
 		void (* _handleSent)(void)                      = nullptr;
@@ -1098,15 +1099,24 @@ namespace DW1000Ng {
 	}
 
 	void spiWakeup(){
-			digitalWrite(_ss, LOW);
-			delay(2);
-			digitalWrite(_ss, HIGH);
-			setTxAntennaDelay(_antennaTxDelay);
-			if (_debounceClockEnabled){
-					enableDebounceClock();
-			}
+		digitalWrite(_ss, LOW);
+		delay(2);
+		digitalWrite(_ss, HIGH);
+		setTxAntennaDelay(_antennaTxDelay);
+		if (_debounceClockEnabled){
+				enableDebounceClock();
+		}
 	}
 
+	void pinWakeup() {
+		digitalWrite(_wakeup, LOW);
+		delay(2); // Generous time
+		digitalWrite(_wakeup, HIGH);
+		setTxAntennaDelay(_antennaTxDelay);
+		if (_debounceClockEnabled){
+				enableDebounceClock();
+		}
+	}
 
 	void reset() {
 		if(_rst == 0xff) {
