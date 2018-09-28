@@ -41,13 +41,21 @@ typedef struct device_interrupt_map_t {
 
 class DW1000NgDevice {
 public:
-    DW1000NgDevice(uint8_t ss,  uint8_t irq, uint8_t rst = 0xff);
-    DW1000NgDevice(DW1000NgDeviceConfiguration config, uint8_t ss,  uint8_t irq, uint8_t rst = 0xff);
-    DW1000NgDevice(device_interrupt_map_t int_map, uint8_t ss,  uint8_t irq, uint8_t rst = 0xff);
-    DW1000NgDevice(DW1000NgDeviceConfiguration config, device_interrupt_map_t int_map, uint8_t ss,  uint8_t irq, uint8_t rst = 0xff);
 
+    /* CONSTRUCTORS */
+    DW1000NgDevice(DW1000NgDeviceConfiguration config, device_interrupt_map_t int_map, uint8_t ss,  uint8_t irq, uint8_t rst);
+    DW1000NgDevice(DW1000NgDeviceConfiguration config, device_interrupt_map_t int_map, uint8_t ss,  uint8_t irq);
+    DW1000NgDevice(DW1000NgDeviceConfiguration config, uint8_t ss,  uint8_t irq, uint8_t rst);
+    DW1000NgDevice(DW1000NgDeviceConfiguration config, uint8_t ss,  uint8_t irq);
+    DW1000NgDevice(device_interrupt_map_t int_map, uint8_t ss,  uint8_t irq, uint8_t rst);
+    DW1000NgDevice(device_interrupt_map_t int_map, uint8_t ss,  uint8_t irq);
+    DW1000NgDevice(uint8_t ss,  uint8_t irq, uint8_t rst);
+    DW1000NgDevice(uint8_t ss,  uint8_t irq);
+
+    /* DESTRUCTORS */
     ~DW1000NgDevice();
 
+    /* METHODS */
     void select();
     void end();
 
@@ -65,7 +73,7 @@ public:
 
     void forceIdle();
 
-    /* Getters and setters */
+    /* GETTERS AND SETTERS */
     DW1000NgDeviceConfiguration getConfiguration();
     void setConfiguration(DW1000NgDeviceConfiguration config);
     void setConfiguration(DeviceConfigurationProfile profile);
