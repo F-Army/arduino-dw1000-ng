@@ -35,6 +35,8 @@ device_interrupt_map_t default_interrupt_map {
     true
 };
 
+DW1000NgDeviceConfiguration default_config;
+
 /* CONSTRUCTORS */
 
 DW1000NgDevice::DW1000NgDevice(DW1000NgDeviceConfiguration config, device_interrupt_map_t int_map, uint8_t ss,  uint8_t irq, uint8_t rst) {
@@ -67,7 +69,7 @@ DW1000NgDevice::DW1000NgDevice(DW1000NgDeviceConfiguration config, device_interr
 DW1000NgDevice::DW1000NgDevice(DW1000NgDeviceConfiguration config, uint8_t ss,  uint8_t irq, uint8_t rst) : DW1000NgDevice(config, default_interrupt_map, ss,  irq, rst) { }
 DW1000NgDevice::DW1000NgDevice(DW1000NgDeviceConfiguration config, uint8_t ss,  uint8_t irq) : DW1000NgDevice(config, ss, irq, 0xff) { }
 
-DW1000NgDevice::DW1000NgDevice(device_interrupt_map_t int_map, uint8_t ss,  uint8_t irq, uint8_t rst) : DW1000NgDevice(_config, int_map, ss, irq, rst) { }
+DW1000NgDevice::DW1000NgDevice(device_interrupt_map_t int_map, uint8_t ss,  uint8_t irq, uint8_t rst) : DW1000NgDevice(default_config, int_map, ss, irq, rst) { }
 DW1000NgDevice::DW1000NgDevice(device_interrupt_map_t int_map, uint8_t ss,  uint8_t irq) : DW1000NgDevice(int_map, ss, irq, 0xff) { }
 
 DW1000NgDevice::DW1000NgDevice(uint8_t ss,  uint8_t irq, uint8_t rst) : DW1000NgDevice(default_interrupt_map, ss, irq, rst) { }
@@ -77,5 +79,25 @@ DW1000NgDevice::DW1000NgDevice(uint8_t ss,  uint8_t irq) : DW1000NgDevice(ss, ir
 DW1000NgDevice::~DW1000NgDevice() { }
 
 /* METHODS */
-void select() { DW1000Ng::select(); }
-void end() { DW1000Ng::end(); }
+void DW1000NgDevice::select() { DW1000Ng::select(); }
+void DW1000NgDevice::end() { DW1000Ng::end(); }
+
+void DW1000NgDevice::transmit(byte data[], size_t size) {
+    DW1000Ng::setData(data, size);
+    DW1000Ng::startTransmit(TransmitMode::IMMEDIATE);
+}
+
+void DW1000NgDevice::forceTransmit(byte data[], size_t size) {
+    DW1000Ng::forceTRxOff();
+    transmit(data, size);
+}
+
+void DW1000NgDevice::transmit(const String& data) {
+    DW1000Ng::setData(data);
+    DW1000Ng::startTransmit(TransmitMode::IMMEDIATE);
+}
+
+void DW1000NgDevice::forceTransmit(const String& data) {
+    DW1000Ng::forceTRxOff();
+    transmit(data);
+}

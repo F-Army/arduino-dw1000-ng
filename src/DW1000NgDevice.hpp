@@ -59,10 +59,14 @@ public:
     void select();
     void end();
 
-    void transmit(byte data[], uint16_t length);
+    void transmit(byte data[], size_t size);
+    void forceTransmit(byte data[], size_t size);
     void transmit(const String& data);
-    void transmitDelayed(byte data[], uint16_t length, uint16_t delayMicroSeconds);
-    void transmitDelayed(const String& data, uint16_t delayMicroSeconds);
+    void forceTransmit(const String& data);
+    DW1000NgTime transmitDelayed(byte data[], size_t size, uint16_t delayMicroSeconds);
+    DW1000NgTime forceTransmitDelayed(byte data[], size_t size, uint16_t delayMicroSeconds);
+    DW1000NgTime transmitDelayed(const String& data, uint16_t delayMicroSeconds);
+    DW1000NgTime forceTransmitDelayed(const String& data, uint16_t delayMicroSeconds);
     DW1000NgTime retrieveLastTransmitTimestamp();
 
     void receive();
