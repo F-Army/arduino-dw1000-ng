@@ -35,6 +35,8 @@ device_interrupt_map_t default_interrupt_map {
     true
 };
 
+/* CONSTRUCTORS */
+
 DW1000NgDevice::DW1000NgDevice(DW1000NgDeviceConfiguration config, device_interrupt_map_t int_map, uint8_t ss,  uint8_t irq, uint8_t rst) {
     _config.setConfiguration(config.getConfiguration());
     _interrupt_map = int_map;
@@ -71,4 +73,9 @@ DW1000NgDevice::DW1000NgDevice(device_interrupt_map_t int_map, uint8_t ss,  uint
 DW1000NgDevice::DW1000NgDevice(uint8_t ss,  uint8_t irq, uint8_t rst) : DW1000NgDevice(default_interrupt_map, ss, irq, rst) { }
 DW1000NgDevice::DW1000NgDevice(uint8_t ss,  uint8_t irq) : DW1000NgDevice(ss, irq, 0xff) { }
 
+/* DESTRUCTORS */
 DW1000NgDevice::~DW1000NgDevice() { }
+
+/* METHODS */
+void select() { DW1000Ng::select(); }
+void end() { DW1000Ng::end(); }
