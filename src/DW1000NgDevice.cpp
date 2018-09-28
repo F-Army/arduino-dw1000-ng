@@ -164,3 +164,18 @@ void DW1000NgDevice::forceReceiveDelayed(uint16_t delayMicroSeconds) {
     DW1000Ng::forceTRxOff();
     receiveDelayed(delayMicroSeconds);
 }
+
+//byte* DW1000NgDevice::retrieveReceivedData();
+
+String DW1000NgDevice::retrieveReceivedData() {
+    String receivedData;
+    DW1000Ng::getData(receivedData);
+    return receivedData;
+}
+
+DW1000NgTime DW1000NgDevice::retrieveLastReceiveTimestamp() {
+    DW1000NgTime lastReceive;
+    DW1000Ng::getReceiveTimestamp(lastReceive);
+    return lastReceive;
+}
+
