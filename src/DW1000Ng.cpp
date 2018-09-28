@@ -994,6 +994,9 @@ namespace DW1000Ng {
 		_enableClock(SYS_AUTO_CLOCK);
 		delay(5);
 		
+		/* Cleared AON:CFG1(0x2C:0x0A) for proper operation of deepSleep */
+		writeBytes(AON, AON_CFG1_SUB, 0x00, LEN_AON_CFG1);
+
 		// read the temp and vbat readings from OTP that were recorded during production test
 		// see 6.3.1 OTP memory map
 		byte buf_otp[4];
