@@ -105,11 +105,6 @@ namespace DW1000Ng {
 	void spiWakeup();
 	
 	/**
-	Wake-up from deep sleep by toggle Wakeup pin
-	*/
-	void pinWakeup();
-	
-	/**
 	Resets all connected or the currently selected DW1000Ng chip. A hard reset of all chips
 	is preferred, although a soft reset of the currently selected one is executed if no 
 	reset pin has been specified (when using `begin(int)`, instead of `begin(int, int)`).
