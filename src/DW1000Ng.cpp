@@ -1073,7 +1073,7 @@ namespace DW1000Ng {
 		memset(aon_wcfg, 0, LEN_AON_WCFG);
 		readBytes(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LDC_BIT, true);
-		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_PRES_SLEEP_BIT, true);
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_PRES_SLEEP_BIT, false);
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LLDE_BIT, true);
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LDD0_BIT, true);
 		writeBytes(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
@@ -1083,23 +1083,24 @@ namespace DW1000Ng {
 		readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_PIN_BIT, true);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_SPI_BIT, true);
-		//DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, false); //Wakeup with timer
+		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, false);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, SLEEP_EN_BIT, true);
 		writeBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 
 		byte aon_ctrl[LEN_AON_CTRL];
 		memset(aon_ctrl, 0, LEN_AON_CTRL);
 		readBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
-		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, SAVE_BIT, true);
 		//DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, UPL_CFG_BIT, true);
+		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, SAVE_BIT, true);
 		writeBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
 	}
 
 	void spiWakeup(){
 		byte deviceId[LEN_DEV_ID];
-		byte expectedDeviceId[] = {0x30, 0x01, 0xCA, 0xDE};
+		byte expectedDeviceId[LEN_DEV_ID];
+		DW1000NgUtils::writeValueToBytes(expectedDeviceId, 0xDECA0130, LEN_DEV_ID);
 		readBytes(DEV_ID, NO_SUB, deviceId, LEN_DEV_ID);
-		if (memcmp(deviceId, expectedDeviceId, sizeof(expectedDeviceId))) {
+		if (memcmp(deviceId, expectedDeviceId, LEN_DEV_ID)) {
 			digitalWrite(_ss, LOW);
 			delay(1);
 			digitalWrite(_ss, HIGH);
@@ -1108,8 +1109,7 @@ namespace DW1000Ng {
 			if (_debounceClockEnabled){
 					enableDebounceClock();
 			}
-		} else 
-			//TODO proper handleError
+		}
 	}
 
 	void reset() {
