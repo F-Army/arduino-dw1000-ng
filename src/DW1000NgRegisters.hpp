@@ -246,22 +246,25 @@ constexpr uint16_t LEN_FS_XTALT = 1;
 
 // AON
 constexpr uint16_t AON = 0x2C;
+
 constexpr uint16_t AON_WCFG_SUB = 0x00;
-constexpr uint16_t LEN_AON_WCFG = 2;
 constexpr uint16_t ONW_LDC_BIT = 6;
 constexpr uint16_t ONW_LDD0_BIT = 12;
+constexpr uint16_t LEN_AON_WCFG = 2;
+
 constexpr uint16_t AON_CTRL_SUB = 0x02;
-constexpr uint16_t LEN_AON_CTRL = 1;
 constexpr uint16_t RESTORE_BIT = 0;
 constexpr uint16_t SAVE_BIT = 1;
 constexpr uint16_t UPL_CFG_BIT = 2;
+constexpr uint16_t LEN_AON_CTRL = 1;
 
 constexpr uint16_t AON_CFG0_SUB = 0x06;
-constexpr uint16_t LEN_AON_CFG0 = 4;
 constexpr uint16_t SLEEP_EN_BIT = 0;
 constexpr uint16_t WAKE_PIN_BIT = 1;
 constexpr uint16_t WAKE_SPI_BIT = 2;
 constexpr uint16_t WAKE_CNT_BIT = 3;
+constexpr uint16_t LPDIV_EN_BIT = 4;
+constexpr uint16_t LEN_AON_CFG0 = 4;
 
 // PMSC
 constexpr uint16_t PMSC = 0x36;
