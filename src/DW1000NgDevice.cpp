@@ -35,37 +35,30 @@ device_interrupt_map_t default_interrupt_map {
     true
 };
 
-namespace {
-
-    void setupConfiguration(DW1000NgDeviceConfiguration _config, device_interrupt_map_t _interrupt_map) {
-        DW1000Ng::newConfiguration();
-        DW1000Ng::setFrameFilter(false);
-        DW1000Ng::interruptOnSent(_interrupt_map.interruptOnSent);
-        DW1000Ng::interruptOnReceived(_interrupt_map.interruptOnReceived);
-        DW1000Ng::interruptOnReceiveFailed(_interrupt_map.interruptOnReceiveFailed);
-        DW1000Ng::interruptOnReceiveTimestampAvailable(_interrupt_map.interruptOnReceiveTimestampAvailable);
-        DW1000Ng::interruptOnAutomaticAcknowledgeTrigger(_interrupt_map.interruptOnAutomaticAcknowledgeTrigger);
-        DW1000Ng::useExtendedFrameLength(_config.getConfiguration().extendedFrameLength);
-        DW1000Ng::useSmartPower(_config.getConfiguration().smartPower);
-        DW1000Ng::suppressFrameCheck(!(_config.getConfiguration().frameCheck));
-        DW1000Ng::setSFDMode(_config.getConfiguration().sfd);
-        DW1000Ng::setChannel(_config.getConfiguration().channel);
-        DW1000Ng::setDataRate(_config.getConfiguration().dataRate);
-        DW1000Ng::setPulseFrequency(_config.getConfiguration().pulseFreq);
-        DW1000Ng::setPreambleLength(_config.getConfiguration().preambleLen);
-        DW1000Ng::setPreambleCode(_config.getConfiguration().preaCode);
-        DW1000Ng::setNLOS(_config.getConfiguration().nlos);
-        DW1000Ng::setReceiverAutoReenable(_config.getConfiguration().receiverAutoReenable);
-        DW1000Ng::commitConfiguration();
-    }
-}
-
 DW1000NgDevice::DW1000NgDevice(DW1000NgDeviceConfiguration config, device_interrupt_map_t int_map, uint8_t ss,  uint8_t irq, uint8_t rst) {
     _config.setConfiguration(config.getConfiguration());
     _interrupt_map = int_map;
 
     DW1000Ng::begin(ss, irq, rst);
-    setupConfiguration(_config, _interrupt_map);
+    DW1000Ng::newConfiguration();
+    DW1000Ng::setFrameFilter(false);
+    DW1000Ng::interruptOnSent(_interrupt_map.interruptOnSent);
+    DW1000Ng::interruptOnReceived(_interrupt_map.interruptOnReceived);
+    DW1000Ng::interruptOnReceiveFailed(_interrupt_map.interruptOnReceiveFailed);
+    DW1000Ng::interruptOnReceiveTimestampAvailable(_interrupt_map.interruptOnReceiveTimestampAvailable);
+    DW1000Ng::interruptOnAutomaticAcknowledgeTrigger(_interrupt_map.interruptOnAutomaticAcknowledgeTrigger);
+    DW1000Ng::useExtendedFrameLength(_config.getConfiguration().extendedFrameLength);
+    DW1000Ng::useSmartPower(_config.getConfiguration().smartPower);
+    DW1000Ng::suppressFrameCheck(!(_config.getConfiguration().frameCheck));
+    DW1000Ng::setSFDMode(_config.getConfiguration().sfd);
+    DW1000Ng::setChannel(_config.getConfiguration().channel);
+    DW1000Ng::setDataRate(_config.getConfiguration().dataRate);
+    DW1000Ng::setPulseFrequency(_config.getConfiguration().pulseFreq);
+    DW1000Ng::setPreambleLength(_config.getConfiguration().preambleLen);
+    DW1000Ng::setPreambleCode(_config.getConfiguration().preaCode);
+    DW1000Ng::setNLOS(_config.getConfiguration().nlos);
+    DW1000Ng::setReceiverAutoReenable(_config.getConfiguration().receiverAutoReenable);
+    DW1000Ng::commitConfiguration();
 }
 DW1000NgDevice::DW1000NgDevice(DW1000NgDeviceConfiguration config, device_interrupt_map_t int_map, uint8_t ss,  uint8_t irq) : DW1000NgDevice(config, int_map, ss,  irq, 0xff) { }
 
