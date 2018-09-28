@@ -29,15 +29,7 @@
 #include "DW1000NgRegisters.hpp"
 #include "DW1000NgTime.hpp"
 #include "DW1000NgDeviceConfiguration.hpp"
-
-typedef struct device_interrupt_map_t {
-    boolean interruptOnSent;
-    boolean interruptOnReceived;
-    boolean interruptOnReceiveFailed;
-    boolean interruptOnReceiveTimeout;
-    boolean interruptOnReceiveTimestampAvailable;
-    boolean interruptOnAutomaticAcknowledgeTrigger;
-} device_interrupt_map_t;
+#include "DW1000NgDeviceInterruptMap.hpp"
 
 class DW1000NgDevice {
 public:

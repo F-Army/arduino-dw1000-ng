@@ -25,8 +25,9 @@
 #include "DW1000Ng.hpp"
 #include "DW1000NgDevice.hpp"
 #include "DW1000NgDeviceConfiguration.hpp"
+#include "DW1000NgDeviceInterruptMap.hpp"
 
-device_interrupt_map_t default_interrupt_map {
+device_interrupt_map_t default_interrupt_map = {
     true,
     true,
     true,
@@ -179,3 +180,6 @@ DW1000NgTime DW1000NgDevice::retrieveLastReceiveTimestamp() {
     return lastReceive;
 }
 
+void DW1000NgDevice::forceIdle() {
+    DW1000Ng::forceTRxOff();
+}
