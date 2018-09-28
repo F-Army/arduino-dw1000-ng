@@ -143,3 +143,24 @@ DW1000NgTime DW1000NgDevice::retrieveLastTransmitTimestamp() {
     DW1000Ng::getTransmitTimestamp(lastTransmit);
     return lastTransmit;
 }
+
+void DW1000NgDevice::receive() {
+    DW1000Ng::startReceive();
+}
+
+void DW1000NgDevice::forceReceive() {
+    DW1000Ng::forceTRxOff();
+    receive();
+}
+
+void DW1000NgDevice::receiveDelayed(uint16_t delayMicroSeconds) {
+    byte delayBytes[DW1000NgTime::LENGTH_TIMESTAMP];
+    calculateFutureTime(delayBytes, delayMicroSeconds);
+    DW1000Ng::setDelay(delayBytes);
+    DW1000Ng::startReceive(ReceiveMode::DELAYED);
+}
+
+void DW1000NgDevice::forceReceiveDelayed(uint16_t delayMicroSeconds) {
+    DW1000Ng::forceTRxOff();
+    receiveDelayed(delayMicroSeconds);
+}
