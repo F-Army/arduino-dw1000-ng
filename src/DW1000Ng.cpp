@@ -1104,14 +1104,12 @@ namespace DW1000Ng {
 			delay(1);
 			digitalWrite(_ss, HIGH);
 			delay(5);
-			//setEUI("CIAOCIAO"); // EUI was resetted to default with sleep
 			setTxAntennaDelay(_antennaTxDelay);
-			Serial.println("DW1000 is NOW AWAKE");
 			if (_debounceClockEnabled){
 					enableDebounceClock();
 			}
 		} else 
-		Serial.println("IS AWAKE");
+			//TODO proper handleError
 	}
 
 	void reset() {
