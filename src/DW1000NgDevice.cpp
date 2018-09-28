@@ -37,6 +37,16 @@ device_interrupt_map_t default_interrupt_map {
 
 DW1000NgDeviceConfiguration default_config;
 
+namespace {
+    void calculateFutureTime(byte delayBytes[], uint16_t delayMicroSeconds) {
+        DW1000NgTime transmitTime;
+	    DW1000NgTime delayTime = DW1000NgTime(delayMicroSeconds, DW1000NgTime::MICROSECONDS);
+	    DW1000Ng::getSystemTimestamp(transmitTime);
+	    transmitTime += delayTime;
+	    transmitTime.getTimestamp(delayBytes);
+    }
+}
+
 /* CONSTRUCTORS */
 
 DW1000NgDevice::DW1000NgDevice(DW1000NgDeviceConfiguration config, device_interrupt_map_t int_map, uint8_t ss,  uint8_t irq, uint8_t rst) {
@@ -100,4 +110,30 @@ void DW1000NgDevice::transmit(const String& data) {
 void DW1000NgDevice::forceTransmit(const String& data) {
     DW1000Ng::forceTRxOff();
     transmit(data);
+}
+
+void DW1000NgDevice::transmitDelayed(byte data[], size_t size, uint16_t delayMicroSeconds) {
+    DW1000Ng::setData(data, size);
+    byte delayBytes[DW1000NgTime::LENGTH_TIMESTAMP];
+    calculateFutureTime(delayBytes, delayMicroSeconds);
+    DW1000Ng::setDelay(delayBytes);
+    DW1000Ng::startTransmit(TransmitMode::DELAYED);
+}
+
+void DW1000NgDevice::forceTransmitDelayed(byte data[], size_t size, uint16_t delayMicroSeconds) {
+    DW1000Ng::forceTRxOff();
+    transmitDelayed(data, size, delayMicroSeconds);
+}
+
+void DW1000NgDevice::transmitDelayed(const String& data, uint16_t delayMicroSeconds) {
+    DW1000Ng::setData(data);
+    byte delayBytes[DW1000NgTime::LENGTH_TIMESTAMP];
+    calculateFutureTime(delayBytes, delayMicroSeconds);
+    DW1000Ng::setDelay(delayBytes);
+    DW1000Ng::startTransmit(TransmitMode::DELAYED);
+}
+
+void DW1000NgDevice::forceTransmitDelayed(const String& data, uint16_t delayMicroSeconds) {
+    DW1000Ng::forceTRxOff();
+    transmitDelayed(data, delayMicroSeconds);
 }
