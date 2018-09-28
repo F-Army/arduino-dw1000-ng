@@ -70,7 +70,9 @@ public:
     DW1000NgTime retrieveLastTransmitTimestamp();
 
     void receive();
+    void forceReceive();
     void receiveDelayed(uint16_t delayMicroSeconds);
+    void forceReceiveDelayed(uint16_t delayMicroSeconds);
     void retrieveReceivedData(byte data[], uint16_t n);
     void retrieveReceivedData(String& data);
     DW1000NgTime retrieveLastReceiveTimestamp();

@@ -137,3 +137,9 @@ void DW1000NgDevice::forceTransmitDelayed(const String& data, uint16_t delayMicr
     DW1000Ng::forceTRxOff();
     transmitDelayed(data, delayMicroSeconds);
 }
+
+DW1000NgTime DW1000NgDevice::retrieveLastTransmitTimestamp() {
+    DW1000NgTime lastTransmit;
+    DW1000Ng::getTransmitTimestamp(lastTransmit);
+    return lastTransmit;
+}
