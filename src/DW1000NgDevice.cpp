@@ -22,5 +22,42 @@
  * SOFTWARE.
 */
 
+#include "DW1000Ng.hpp"
 #include "DW1000NgDevice.hpp"
 #include "DW1000NgDeviceConfiguration.hpp"
+
+device_interrupt_map_t default_interrupt_map {
+    true,
+    true,
+    true,
+    true,
+    false,
+    true
+};
+
+DW1000NgDevice::DW1000NgDevice(uint8_t ss,  uint8_t irq, uint8_t rst = 0xff) {
+    
+    DW1000Ng::begin(ss, irq, rst);
+    _config.setConfiguration(DeviceConfigurationProfile::DEFAULT_PROFILE);
+    _interrupt_map = default_interrupt_map;
+
+    DW1000Ng::newConfiguration();
+	DW1000Ng::setFrameFilter(false);
+	DW1000Ng::interruptOnSent(_interrupt_map.interruptOnSent);
+	DW1000Ng::interruptOnReceived(_interrupt_map.interruptOnReceived);
+	DW1000Ng::interruptOnReceiveFailed(_interrupt_map.interruptOnReceiveFailed);
+	DW1000Ng::interruptOnReceiveTimestampAvailable(_interrupt_map.interruptOnReceiveTimestampAvailable);
+	DW1000Ng::interruptOnAutomaticAcknowledgeTrigger(_interrupt_map.interruptOnAutomaticAcknowledgeTrigger);
+    DW1000Ng::useExtendedFrameLength(_config.getConfiguration().extendedFrameLength);
+    DW1000Ng::useSmartPower(_config.getConfiguration().smartPower);
+    DW1000Ng::suppressFrameCheck(!(_config.getConfiguration().frameCheck));
+    DW1000Ng::setSFDMode(_config.getConfiguration().sfd);
+	DW1000Ng::setChannel(_config.getConfiguration().channel);
+	DW1000Ng::setDataRate(_config.getConfiguration().dataRate);
+    DW1000Ng::setPulseFrequency(_config.getConfiguration().pulseFreq);
+    DW1000Ng::setPreambleLength(_config.getConfiguration().preambleLen);
+    DW1000Ng::setPreambleCode(_config.getConfiguration().preaCode);
+    DW1000Ng::setNLOS(_config.getConfiguration().nlos);
+    DW1000Ng::setReceiverAutoReenable(_config.getConfiguration().receiverAutoReenable);
+    DW1000Ng::commitConfiguration();
+}
