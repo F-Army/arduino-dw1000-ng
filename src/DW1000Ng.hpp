@@ -204,7 +204,7 @@ namespace DW1000Ng {
 
 	@param[in] val `true` to set nlos optimizations, `false` otherwise.
 	*/
-	void setNLOS(boolean val);
+	void setNlosOptimization(boolean val);
 	
 	/** 
 	Specifies the data transmission rate of the DW1000Ng chip. One of the values

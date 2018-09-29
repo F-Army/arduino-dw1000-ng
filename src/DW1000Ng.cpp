@@ -1437,7 +1437,7 @@ namespace DW1000Ng {
 		_frameCheck = !val;
 	}
 
-	void setNLOS(boolean val) {
+	void setNlosOptimization(boolean val) {
 		_nlos = val;
 		if(_nlos) {
 			_ldecfg1();
