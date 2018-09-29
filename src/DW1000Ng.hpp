@@ -116,42 +116,6 @@ namespace DW1000Ng {
 	*/
 	void softReset();
 	
-	/* ##### Print device id, address, etc. ###################################### */
-	/** 
-	Generates a String representation of the device identifier of the chip. That usually 
-	are the letters "DECA" plus the	version and revision numbers of the chip.
-
-	@param[out] msgBuffer The String buffer to be filled with printable device information.
-		Provide 128 bytes, this should be sufficient.
-	*/
-	void getPrintableDeviceIdentifier(char msgBuffer[]);
-	
-	/** 
-	Generates a String representation of the extended unique identifier (EUI) of the chip.
-
-	@param[out] msgBuffer The String buffer to be filled with printable device information.
-		Provide 128 bytes, this should be sufficient.
-	*/
-	void getPrintableExtendedUniqueIdentifier(char msgBuffer[]);
-	
-	/** 
-	Generates a String representation of the short address and network identifier currently
-	defined for the respective chip.
-
-	@param[out] msgBuffer The String buffer to be filled with printable device information.
-		Provide 128 bytes, this should be sufficient.
-	*/
-	void getPrintableNetworkIdAndShortAddress(char msgBuffer[]);
-	
-	/** 
-	Generates a String representation of the main operational settings of the chip. This
-	includes data rate, pulse repetition frequency, preamble and channel settings.
-
-	@param[out] msgBuffer The String buffer to be filled with printable device information.
-		Provide 128 bytes, this should be sufficient.
-	*/
-	void getPrintableDeviceMode(char msgBuffer[]);
-	
 	/* ##### Device address management, filters ################################## */
 	/** 
 	(Re-)set the network identifier which the selected chip should be associated with. This
@@ -159,8 +123,6 @@ namespace DW1000Ng {
 
 	@param[in] val An arbitrary numeric network identifier.
 	*/
-	
-	
 	void setNetworkId(uint16_t val);
 	
 	/** 
@@ -364,6 +326,45 @@ namespace DW1000Ng {
 	void useExtendedFrameLength(boolean val);
 	// TODO is implemented, but needs testing
 	void waitForResponse(boolean val);
+
+	#if DW1000NG_PRINTABLE
+
+	/* ##### Print device id, address, etc. ###################################### */
+	/** 
+	Generates a String representation of the device identifier of the chip. That usually 
+	are the letters "DECA" plus the	version and revision numbers of the chip.
+
+	@param[out] msgBuffer The String buffer to be filled with printable device information.
+		Provide 128 bytes, this should be sufficient.
+	*/
+	void getPrintableDeviceIdentifier(char msgBuffer[]);
+	
+	/** 
+	Generates a String representation of the extended unique identifier (EUI) of the chip.
+
+	@param[out] msgBuffer The String buffer to be filled with printable device information.
+		Provide 128 bytes, this should be sufficient.
+	*/
+	void getPrintableExtendedUniqueIdentifier(char msgBuffer[]);
+	
+	/** 
+	Generates a String representation of the short address and network identifier currently
+	defined for the respective chip.
+
+	@param[out] msgBuffer The String buffer to be filled with printable device information.
+		Provide 128 bytes, this should be sufficient.
+	*/
+	void getPrintableNetworkIdAndShortAddress(char msgBuffer[]);
+	
+	/** 
+	Generates a String representation of the main operational settings of the chip. This
+	includes data rate, pulse repetition frequency, preamble and channel settings.
+
+	@param[out] msgBuffer The String buffer to be filled with printable device information.
+		Provide 128 bytes, this should be sufficient.
+	*/
+	void getPrintableDeviceMode(char msgBuffer[]);
+	#endif
 
 	#if DW1000NG_DEBUG
 	void getPrettyBytes(byte data[], char msgBuffer[], uint16_t n);

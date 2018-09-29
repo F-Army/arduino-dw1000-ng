@@ -46,6 +46,11 @@
 #pragma once
 
 /**
+ * Adds printing functions to base driver
+ * 
+*/
+#define DW1000NG_PRINTABLE true
+/**
  * Adds debug functionalities
  * 
 */
