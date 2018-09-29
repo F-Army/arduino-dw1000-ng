@@ -126,7 +126,7 @@ void loop() {
     received = false;
     numReceived++;
     // get data as string
-    DW1000Ng::getData(message);
+    DW1000Ng::getReceivedData(message);
     Serial.print("Received message ... #"); Serial.println(numReceived);
     Serial.print("Data is ... "); Serial.println(message);
     Serial.print("RX power is [dBm] ... "); Serial.println(DW1000Ng::getReceivePower());
@@ -136,7 +136,7 @@ void loop() {
   if (error) {
     error = false;
     Serial.println("Error receiving a message");
-    DW1000Ng::getData(message);
+    DW1000Ng::getReceivedData(message);
     Serial.print("Error data is ... "); Serial.println(message);
   }
 }

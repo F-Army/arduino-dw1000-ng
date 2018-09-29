@@ -46,6 +46,17 @@
 #pragma once
 
 /**
+ * Adds printing functions to base driver
+ * 
+*/
+#define DW1000NG_PRINTABLE true
+/**
+ * Adds debug functionalities
+ * 
+*/
+#define DW1000NG_DEBUG false
+
+/**
  * Optimizes code for the DWM1000 Module
  */
 #define DWM1000_OPTIMIZED false

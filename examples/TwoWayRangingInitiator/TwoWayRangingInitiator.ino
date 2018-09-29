@@ -161,7 +161,7 @@ void handleReceived() {
 
 void transmitPoll() {
     data[0] = POLL;
-    DW1000Ng::setData(data, LEN_DATA);
+    DW1000Ng::setTransmitData(data, LEN_DATA);
     DW1000Ng::startTransmit();
 }
 
@@ -174,7 +174,7 @@ void transmitRange() {
 	DW1000Ng::getSystemTimestamp(timeRangeSent);
 	timeRangeSent += delayTime;
 	timeRangeSent.getTimestamp(delayBytes);
-    DW1000Ng::setDelay(delayBytes);
+    DW1000Ng::setDelayedTRX(delayBytes);
     DW1000NgTime antennaDelay;
     antennaDelay.setTimestamp(DW1000Ng::getTxAntennaDelay());
     timeRangeSent += antennaDelay;
@@ -182,7 +182,7 @@ void transmitRange() {
     timePollSent.getTimestamp(data + 1);
     timePollAckReceived.getTimestamp(data + 6);
     timeRangeSent.getTimestamp(data + 11);
-    DW1000Ng::setData(data, LEN_DATA);
+    DW1000Ng::setTransmitData(data, LEN_DATA);
     DW1000Ng::startTransmit(TransmitMode::DELAYED);
     //Serial.print("Expect RANGE to be sent @ "); Serial.println(timeRangeSent.getAsFloat());
 }
@@ -211,7 +211,7 @@ void loop() {
     if (receivedAck) {
         receivedAck = false;
         // get message and parse
-        DW1000Ng::getData(data, LEN_DATA);
+        DW1000Ng::getReceivedData(data, LEN_DATA);
         byte msgId = data[0];
         if (msgId != expectedMsgId) {
             // unexpected message, start over again

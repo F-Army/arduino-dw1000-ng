@@ -185,7 +185,7 @@ void handleReceived() {
 
 void transmitPollAck() {
     data[0] = POLL_ACK;
-    DW1000Ng::setData(data, LEN_DATA);
+    DW1000Ng::setTransmitData(data, LEN_DATA);
     DW1000Ng::startTransmit();
 }
 
@@ -193,13 +193,13 @@ void transmitRangeReport(float curRange) {
     data[0] = RANGE_REPORT;
     // write final ranging result
     memcpy(data + 1, &curRange, 4);
-    DW1000Ng::setData(data, LEN_DATA);
+    DW1000Ng::setTransmitData(data, LEN_DATA);
     DW1000Ng::startTransmit();
 }
 
 void transmitRangeFailed() {
     data[0] = RANGE_FAILED;
-    DW1000Ng::setData(data, LEN_DATA);
+    DW1000Ng::setTransmitData(data, LEN_DATA);
     DW1000Ng::startTransmit();
 }
 
@@ -267,7 +267,7 @@ void loop() {
     if (receivedAck) {
         receivedAck = false;
         // get message and parse
-        DW1000Ng::getData(data, LEN_DATA);
+        DW1000Ng::getReceivedData(data, LEN_DATA);
         byte msgId = data[0];
         if (msgId != expectedMsgId) {
             // unexpected message, start over again (except if already POLL)

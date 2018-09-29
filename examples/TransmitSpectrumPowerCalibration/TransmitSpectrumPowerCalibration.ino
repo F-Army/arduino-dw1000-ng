@@ -62,7 +62,7 @@ void setup() {
     Serial.println(F("Committed configuration ..."));
     
     DW1000Ng::enableTransmitPowerSpectrumTestMode(124800); /* Approx 1ms long transmissions */
-    DW1000Ng::setData(data);
+    DW1000Ng::setTransmitData(data);
     DW1000Ng::startTransmit();
 
     delay(120000); /* 2 minutes */

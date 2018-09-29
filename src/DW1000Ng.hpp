@@ -116,42 +116,6 @@ namespace DW1000Ng {
 	*/
 	void softReset();
 	
-	/* ##### Print device id, address, etc. ###################################### */
-	/** 
-	Generates a String representation of the device identifier of the chip. That usually 
-	are the letters "DECA" plus the	version and revision numbers of the chip.
-
-	@param[out] msgBuffer The String buffer to be filled with printable device information.
-		Provide 128 bytes, this should be sufficient.
-	*/
-	void getPrintableDeviceIdentifier(char msgBuffer[]);
-	
-	/** 
-	Generates a String representation of the extended unique identifier (EUI) of the chip.
-
-	@param[out] msgBuffer The String buffer to be filled with printable device information.
-		Provide 128 bytes, this should be sufficient.
-	*/
-	void getPrintableExtendedUniqueIdentifier(char msgBuffer[]);
-	
-	/** 
-	Generates a String representation of the short address and network identifier currently
-	defined for the respective chip.
-
-	@param[out] msgBuffer The String buffer to be filled with printable device information.
-		Provide 128 bytes, this should be sufficient.
-	*/
-	void getPrintableNetworkIdAndShortAddress(char msgBuffer[]);
-	
-	/** 
-	Generates a String representation of the main operational settings of the chip. This
-	includes data rate, pulse repetition frequency, preamble and channel settings.
-
-	@param[out] msgBuffer The String buffer to be filled with printable device information.
-		Provide 128 bytes, this should be sufficient.
-	*/
-	void getPrintableDeviceMode(char msgBuffer[]);
-	
 	/* ##### Device address management, filters ################################## */
 	/** 
 	(Re-)set the network identifier which the selected chip should be associated with. This
@@ -159,8 +123,6 @@ namespace DW1000Ng {
 
 	@param[in] val An arbitrary numeric network identifier.
 	*/
-	
-	
 	void setNetworkId(uint16_t val);
 	
 	/** 
@@ -204,7 +166,7 @@ namespace DW1000Ng {
 
 	@param[in] val `true` to set nlos optimizations, `false` otherwise.
 	*/
-	void setNLOS(boolean val);
+	void setNlosOptimization(boolean val);
 	
 	/** 
 	Specifies the data transmission rate of the DW1000Ng chip. One of the values
@@ -276,12 +238,12 @@ namespace DW1000Ng {
 	
 	
 	/* transmit and receive configuration. */
-	void         setDelay(byte futureTimeBytes[]);
-	void         setData(byte data[], uint16_t n);
-	void         setData(const String& data);
-	void         getData(byte data[], uint16_t n);
-	void         getData(String& data);
-	uint16_t     getDataLength();
+	void         setDelayedTRX(byte futureTimeBytes[]);
+	void         setTransmitData(byte data[], uint16_t n);
+	void         setTransmitData(const String& data);
+	void         getReceivedData(byte data[], uint16_t n);
+	void         getReceivedData(String& data);
+	uint16_t     getReceivedDataLength();
 	void         getTransmitTimestamp(DW1000NgTime& time);
 	void         getReceiveTimestamp(DW1000NgTime& time);
 	void         getSystemTimestamp(DW1000NgTime& time);
@@ -322,6 +284,8 @@ namespace DW1000Ng {
 	void attachReceiveTimeoutHandler(void (* handleReceiveTimeout)(void));
 	
 	void attachReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void));
+
+	void pollForEvents();
 	
 	/* device state management. */
 	// force idle state
@@ -339,9 +303,9 @@ namespace DW1000Ng {
 	void startTransmit(TransmitMode mode = TransmitMode::IMMEDIATE);
 	
 	/* host-initiated reading of temperature and battery voltage */
-	void getTemp(float& temp);
-	void getVbat(float& vbat);
-	void getTempAndVbat(float& temp, float& vbat);
+	void getTemperature(float& temp);
+	void getBatteryVoltage(float& vbat);
+	void getTemperatureAndBatteryVoltage(float& temp, float& vbat);
 
 	
 	/* Allow MAC frame filtering */
@@ -362,21 +326,48 @@ namespace DW1000Ng {
 	void useExtendedFrameLength(boolean val);
 	// TODO is implemented, but needs testing
 	void waitForResponse(boolean val);
+
+	#if DW1000NG_PRINTABLE
+
+	/* ##### Print device id, address, etc. ###################################### */
+	/** 
+	Generates a String representation of the device identifier of the chip. That usually 
+	are the letters "DECA" plus the	version and revision numbers of the chip.
+
+	@param[out] msgBuffer The String buffer to be filled with printable device information.
+		Provide 128 bytes, this should be sufficient.
+	*/
+	void getPrintableDeviceIdentifier(char msgBuffer[]);
 	
-	/* device status flags */
-	boolean isReceiveTimestampAvailable();
-	boolean isTransmitDone();
-	boolean isReceiveDone();
-	boolean isReceiveFailed();
-	boolean isReceiveTimeout();
-	boolean isClockProblem();
+	/** 
+	Generates a String representation of the extended unique identifier (EUI) of the chip.
+
+	@param[out] msgBuffer The String buffer to be filled with printable device information.
+		Provide 128 bytes, this should be sufficient.
+	*/
+	void getPrintableExtendedUniqueIdentifier(char msgBuffer[]);
 	
-	/* timestamp correction. */
-	void correctTimestamp(DW1000NgTime& timestamp);
+	/** 
+	Generates a String representation of the short address and network identifier currently
+	defined for the respective chip.
+
+	@param[out] msgBuffer The String buffer to be filled with printable device information.
+		Provide 128 bytes, this should be sufficient.
+	*/
+	void getPrintableNetworkIdAndShortAddress(char msgBuffer[]);
 	
-	/* reading and writing bytes from and to DW1000Ng module. */
-	void readBytes(byte cmd, uint16_t offset, byte data[], uint16_t n);
-	void readBytesOTP(uint16_t address, byte data[]);
-	void writeByte(byte cmd, uint16_t offset, byte data);
-	void writeBytes(byte cmd, uint16_t offset, byte data[], uint16_t n);
+	/** 
+	Generates a String representation of the main operational settings of the chip. This
+	includes data rate, pulse repetition frequency, preamble and channel settings.
+
+	@param[out] msgBuffer The String buffer to be filled with printable device information.
+		Provide 128 bytes, this should be sufficient.
+	*/
+	void getPrintableDeviceMode(char msgBuffer[]);
+	#endif
+
+	#if DW1000NG_DEBUG
+	void getPrettyBytes(byte data[], char msgBuffer[], uint16_t n);
+    void getPrettyBytes(byte cmd, uint16_t offset, char msgBuffer[], uint16_t n);
+	#endif
 };
