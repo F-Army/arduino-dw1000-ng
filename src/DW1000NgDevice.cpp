@@ -230,3 +230,11 @@ String DW1000NgDevice::getEUI() {
     String euiString(_eui);
     return euiString;
 }
+
+device_interrupt_map_t DW1000NgDevice::getInterruptMap() {
+    return _interrupt_map;
+}
+
+void DW1000NgDevice::setInterruptMap(device_interrupt_map_t int_map) {
+    _interrupt_map = int_map;
+}
