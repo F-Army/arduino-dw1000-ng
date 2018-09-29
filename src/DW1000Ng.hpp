@@ -322,6 +322,8 @@ namespace DW1000Ng {
 	void attachReceiveTimeoutHandler(void (* handleReceiveTimeout)(void));
 	
 	void attachReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void));
+
+	void pollForEvents();
 	
 	/* device state management. */
 	// force idle state

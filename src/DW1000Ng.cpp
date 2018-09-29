@@ -937,41 +937,6 @@ namespace DW1000Ng {
 			return false;
 		}
 
-		void _handleInterrupt() {
-			// read current status and handle via callbacks
-			_readSystemEventStatusRegister();
-			if(_isClockProblem() /* TODO and others */ && _handleError != 0) {
-				(*_handleError)();
-			}
-			if(_isTransmitDone()) {
-				_clearTransmitStatus();
-				if(_handleSent != nullptr)
-					(*_handleSent)();
-			}
-			if(_isReceiveTimestampAvailable()) {
-				_clearReceiveTimestampAvailableStatus();
-				if(_handleReceiveTimestampAvailable != nullptr)
-					(*_handleReceiveTimestampAvailable)();
-			}
-			if(_isReceiveFailed()) {
-				_clearReceiveFailedStatus();
-				forceTRxOff();
-				_resetReceiver();
-				if(_handleReceiveFailed != nullptr)
-					(*_handleReceiveFailed)();
-			} else if(_isReceiveTimeout()) {
-				_clearReceiveTimeoutStatus();
-				forceTRxOff();
-				_resetReceiver();
-				if(_handleReceiveTimeout != nullptr)
-					(*_handleReceiveTimeout)();
-			} else if(_isReceiveDone()) {
-				_clearReceiveStatus();
-				if(_handleReceived != nullptr)
-					(*_handleReceived)();
-			}
-		}
-
 		void _setInterruptPolarity(boolean val) {
 			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, HIRQ_POL_BIT, val);
 		}
@@ -1003,7 +968,7 @@ namespace DW1000Ng {
 		// pin and basic member setup
 		// attach interrupt
 		// TODO throw error if pin is not a interrupt pin
-		attachInterrupt(digitalPinToInterrupt(_irq), _handleInterrupt, RISING);
+		attachInterrupt(digitalPinToInterrupt(_irq), pollForEvents, RISING);
 		select();
 		// try locking clock at PLL speed (should be done already,
 		// but just to be sure)
@@ -1080,6 +1045,41 @@ namespace DW1000Ng {
 	
 	void attachReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void)) {
 		_handleReceiveTimestampAvailable = handleReceiveTimestampAvailable;
+	}
+
+	void pollForEvents() {
+		// read current status and handle via callbacks
+		_readSystemEventStatusRegister();
+		if(_isClockProblem() /* TODO and others */ && _handleError != 0) {
+			(*_handleError)();
+		}
+		if(_isTransmitDone()) {
+			_clearTransmitStatus();
+			if(_handleSent != nullptr)
+				(*_handleSent)();
+		}
+		if(_isReceiveTimestampAvailable()) {
+			_clearReceiveTimestampAvailableStatus();
+			if(_handleReceiveTimestampAvailable != nullptr)
+				(*_handleReceiveTimestampAvailable)();
+		}
+		if(_isReceiveFailed()) {
+			_clearReceiveFailedStatus();
+			forceTRxOff();
+			_resetReceiver();
+			if(_handleReceiveFailed != nullptr)
+				(*_handleReceiveFailed)();
+		} else if(_isReceiveTimeout()) {
+			_clearReceiveTimeoutStatus();
+			forceTRxOff();
+			_resetReceiver();
+			if(_handleReceiveTimeout != nullptr)
+				(*_handleReceiveTimeout)();
+		} else if(_isReceiveDone()) {
+			_clearReceiveStatus();
+			if(_handleReceived != nullptr)
+				(*_handleReceived)();
+		}
 	}
 
 	void enableDebounceClock() {
@@ -1973,6 +1973,7 @@ namespace DW1000Ng {
 	* 		the register).
 	*/
 	// TODO offset really bigger than byte?
+
 	void writeBytes(byte cmd, uint16_t offset, byte data[], uint16_t data_size) {
 		byte header[3];
 		uint8_t  headerLen = 1;
