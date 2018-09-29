@@ -64,4 +64,4 @@
  * Some examples or debug code use this
  * Set false if you do not need it and have to save some space
  */
-#define DW1000NGDEVICECONFIGURATION_H_PRINTABLE false
+#define DW1000NGCONFIGURATION_H_PRINTABLE true

@@ -42,38 +42,30 @@ typedef struct device_configuration_t {
     PreambleCode preaCode;
 } device_configuration_t;
 
-enum class DeviceConfigurationProfile {
+enum class ConfigurationProfile {
     DEFAULT_PROFILE,
     DEFAULT_NLOS_PROFILE
 };
 
-#if DW1000NGDEVICECONFIGURATION_H_PRINTABLE
-class DW1000NgDeviceConfiguration : public Printable {
+#if DW1000NGCONFIGURATION_H_PRINTABLE
+class DW1000NgConfiguration : public Printable {
 #else
-class DW1000NgDeviceConfiguration {
+class DW1000NgConfiguration {
 #endif
 
 public:
-    DW1000NgDeviceConfiguration(DeviceConfigurationProfile profile = DeviceConfigurationProfile::DEFAULT_PROFILE);
-    DW1000NgDeviceConfiguration(device_configuration_t conf);
+    DW1000NgConfiguration(ConfigurationProfile profile = ConfigurationProfile::DEFAULT_PROFILE);
+    DW1000NgConfiguration(device_configuration_t conf);
 
-#if DW1000NGDEVICECONFIGURATION_H_PRINTABLE
+#if DW1000NGCONFIGURATION_H_PRINTABLE
     size_t printTo(Print& p) const;
 #endif
 
     void setConfiguration(device_configuration_t config);
-    void setConfiguration(DeviceConfigurationProfile profile);
+    void setConfiguration(ConfigurationProfile profile);
+
+    device_configuration_t getConfiguration();
 
 private:
-    boolean _extendedFrameLength;
-    boolean _receiverAutoReenable;
-    boolean _smartPower;
-    boolean _frameCheck;
-    boolean _nlos;
-    SFDMode _sfd;
-    Channel _channel;
-    DataRate _dataRate;
-    PulseFrequency _pulseFreq;
-    PreambleLength _preambleLen;
-    PreambleCode _preaCode;
+    device_configuration_t _config;
 };
