@@ -26,7 +26,7 @@
 #include "DW1000NgConfiguration.hpp"
 #include "DW1000NgConstants.hpp"
 
-namespace DW1000NgConfigurationProfiles {
+namespace {
     
     device_configuration_t DEFAULT_CONFIGURATION = {
         false,
@@ -144,9 +144,9 @@ void DW1000NgConfiguration::setConfiguration(device_configuration_t config) {
 
 void DW1000NgConfiguration::setConfiguration(ConfigurationProfile profile) {
     if(profile == ConfigurationProfile::DEFAULT_PROFILE) {
-        setConfiguration(DW1000NgConfigurationProfiles::DEFAULT_CONFIGURATION);
+        setConfiguration(DEFAULT_CONFIGURATION);
     } else if(profile == ConfigurationProfile::DEFAULT_NLOS_PROFILE) {
-        setConfiguration(DW1000NgConfigurationProfiles::NLOS_CONF);
+        setConfiguration(NLOS_CONF);
     } else {
         //TODO error handler
     }
