@@ -277,8 +277,8 @@ namespace DW1000Ng {
 	
 	/* transmit and receive configuration. */
 	void         setDelayedTRX(byte futureTimeBytes[]);
-	void         setData(byte data[], uint16_t n);
-	void         setData(const String& data);
+	void         setTransmitData(byte data[], uint16_t n);
+	void         setTransmitData(const String& data);
 	void         getData(byte data[], uint16_t n);
 	void         getData(String& data);
 	uint16_t     getDataLength();

@@ -161,7 +161,7 @@ void handleReceived() {
 
 void transmitPoll() {
     data[0] = POLL;
-    DW1000Ng::setData(data, LEN_DATA);
+    DW1000Ng::setTransmitData(data, LEN_DATA);
     DW1000Ng::startTransmit();
 }
 
@@ -182,7 +182,7 @@ void transmitRange() {
     timePollSent.getTimestamp(data + 1);
     timePollAckReceived.getTimestamp(data + 6);
     timeRangeSent.getTimestamp(data + 11);
-    DW1000Ng::setData(data, LEN_DATA);
+    DW1000Ng::setTransmitData(data, LEN_DATA);
     DW1000Ng::startTransmit(TransmitMode::DELAYED);
     //Serial.print("Expect RANGE to be sent @ "); Serial.println(timeRangeSent.getAsFloat());
 }

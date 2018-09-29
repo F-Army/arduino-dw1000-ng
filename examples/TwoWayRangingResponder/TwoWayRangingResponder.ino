@@ -177,7 +177,7 @@ void handleReceived() {
 
 void transmitPollAck() {
     data[0] = POLL_ACK;
-    DW1000Ng::setData(data, LEN_DATA);
+    DW1000Ng::setTransmitData(data, LEN_DATA);
     DW1000Ng::startTransmit();
 }
 
@@ -185,13 +185,13 @@ void transmitRangeReport(float curRange) {
     data[0] = RANGE_REPORT;
     // write final ranging result
     memcpy(data + 1, &curRange, 4);
-    DW1000Ng::setData(data, LEN_DATA);
+    DW1000Ng::setTransmitData(data, LEN_DATA);
     DW1000Ng::startTransmit();
 }
 
 void transmitRangeFailed() {
     data[0] = RANGE_FAILED;
-    DW1000Ng::setData(data, LEN_DATA);
+    DW1000Ng::setTransmitData(data, LEN_DATA);
     DW1000Ng::startTransmit();
 }
 

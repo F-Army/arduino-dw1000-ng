@@ -1620,7 +1620,7 @@ namespace DW1000Ng {
 		_preambleCode = preamble_code;
 	}
 
-	void setData(byte data[], uint16_t n) {
+	void setTransmitData(byte data[], uint16_t n) {
 		if(_frameCheck) {
 			n += 2; // two bytes CRC-16
 		}
@@ -1640,11 +1640,11 @@ namespace DW1000Ng {
 		_writeTransmitFrameControlRegister();
 	}
 
-	void setData(const String& data) {
+	void setTransmitData(const String& data) {
 		uint16_t n = data.length()+1;
 		byte* dataBytes = (byte*)malloc(n);
 		data.getBytes(dataBytes, n);
-		setData(dataBytes, n);
+		setTransmitData(dataBytes, n);
 		free(dataBytes);
 	}
 
