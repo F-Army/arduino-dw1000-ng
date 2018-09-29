@@ -22,19 +22,19 @@
  * SOFTWARE.
 */
 #include <SPI.h>
-#include "DW1000NgDeviceConfiguration.hpp"
+#include "DW1000NgConfiguration.hpp"
 void setup() {
     Serial.begin(115200);
     Serial.println("Default Configuration:");
-    DW1000NgDeviceConfiguration conf;
-    #if DW1000NGDEVICECONFIGURATION_H_PRINTABLE
+    DW1000NgConfiguration conf;
+    #if DW1000NGCONFIGURATION_H_PRINTABLE
     Serial.print(conf);
     #endif
     Serial.println("\n");
 
     Serial.println("NLOS Configuration:");
-    DW1000NgDeviceConfiguration nlos_conf(DeviceConfigurationProfile::DEFAULT_NLOS_PROFILE);
-    #if DW1000NGDEVICECONFIGURATION_H_PRINTABLE
+    DW1000NgConfiguration nlos_conf(ConfigurationProfile::DEFAULT_NLOS_PROFILE);
+    #if DW1000NGCONFIGURATION_H_PRINTABLE
     Serial.print(nlos_conf);
     #endif
     Serial.println("\n");
