@@ -109,14 +109,128 @@ namespace DW1000Ng {
 		const SPISettings* _currentSPI = &_fastSPI;
 
 		/* ############################# PRIVATE METHODS ################################### */
+		/*
+		* Write bytes to the DW1000Ng. Single bytes can be written to registers via sub-addressing.
+		* @param cmd
+		* 		The register address (see Chapter 7 in the DW1000Ng user manual).
+		* @param offset
+		*		The offset to select register sub-parts for writing, or 0x00 to disable
+		* 		sub-adressing.
+		* @param data
+		*		The data array to be written.
+		* @param data_size
+		*		The number of bytes to be written (take care not to go out of bounds of
+		* 		the register).
+		*/
+		// TODO offset really bigger than byte?
 
+		void _writeBytes(byte cmd, uint16_t offset, byte data[], uint16_t data_size) {
+			byte header[3];
+			uint8_t  headerLen = 1;
+			uint16_t  i = 0;
+			
+			// TODO proper error handling: address out of bounds
+			// build SPI header
+			if(offset == NO_SUB) {
+				header[0] = WRITE | cmd;
+			} else {
+				header[0] = WRITE_SUB | cmd;
+				if(offset < 128) {
+					header[1] = (byte)offset;
+					headerLen++;
+				} else {
+					header[1] = RW_SUB_EXT | (byte)offset;
+					header[2] = (byte)(offset >> 7);
+					headerLen += 2;
+				}
+			}
+			SPI.beginTransaction(*_currentSPI);
+			digitalWrite(_ss, LOW);
+			for(i = 0; i < headerLen; i++) {
+				SPI.transfer(header[i]); // send header
+			}
+			for(i = 0; i < data_size; i++) {
+				SPI.transfer(data[i]); // write values
+			}
+			delayMicroseconds(5);
+			digitalWrite(_ss, HIGH);
+			SPI.endTransaction();
+		}
+
+		// Helper to set a single register
+		void _writeByte(byte cmd, uint16_t offset, byte data) {
+			_writeBytes(cmd, offset, &data, 1);
+		}
+		
+		/*
+		* Read bytes from the DW1000Ng. Number of bytes depend on register length.
+		* @param cmd
+		* 		The register address (see Chapter 7 in the DW1000Ng user manual).
+		* @param data
+		*		The data array to be read into.
+		* @param n
+		*		The number of bytes expected to be received.
+		*/
+		// TODO incomplete doc
+		void _readBytes(byte cmd, uint16_t offset, byte data[], uint16_t n) {
+			byte header[3];
+			uint8_t headerLen = 1;
+			uint16_t i = 0;
+			
+			// build SPI header
+			if(offset == NO_SUB) {
+				header[0] = READ | cmd;
+			} else {
+				header[0] = READ_SUB | cmd;
+				if(offset < 128) {
+					header[1] = (byte)offset;
+					headerLen++;
+				} else {
+					header[1] = RW_SUB_EXT | (byte)offset;
+					header[2] = (byte)(offset >> 7);
+					headerLen += 2;
+				}
+			}
+			SPI.beginTransaction(*_currentSPI);
+			digitalWrite(_ss, LOW);
+			for(i = 0; i < headerLen; i++) {
+				SPI.transfer(header[i]); // send header
+			}
+			for(i = 0; i < n; i++) {
+				data[i] = SPI.transfer(0x00); // read values
+			}
+			delayMicroseconds(5);
+			digitalWrite(_ss, HIGH);
+			SPI.endTransaction();
+		}
+
+		// always 4 bytes
+		// TODO why always 4 bytes? can be different, see p. 58 table 10 otp memory map
+		void _readBytesOTP(uint16_t address, byte data[]) {
+			byte addressBytes[LEN_OTP_ADDR];
+			
+			// p60 - 6.3.3 Reading a value from OTP memory
+			// bytes of address
+			addressBytes[0] = (address & 0xFF);
+			addressBytes[1] = ((address >> 8) & 0xFF);
+			// set address
+			_writeBytes(OTP_IF, OTP_ADDR_SUB, addressBytes, LEN_OTP_ADDR);
+			// switch into read mode
+			_writeByte(OTP_IF, OTP_CTRL_SUB, 0x03); // OTPRDEN | OTPREAD
+			_writeByte(OTP_IF, OTP_CTRL_SUB, 0x01); // OTPRDEN
+			// read value/block - 4 bytes
+			_readBytes(OTP_IF, OTP_RDAT_SUB, data, LEN_OTP_RDAT);
+			// end read mode
+			_writeByte(OTP_IF, OTP_CTRL_SUB, 0x00);
+		}
+		
 		/* Steps used to get Temp and Voltage */
 		void _vbatAndTempSteps() {
-			byte step1 = 0x80; writeBytes(RF_CONF, 0x11, &step1, 1);
-			byte step2 = 0x0A; writeBytes(RF_CONF, 0x12, &step2, 1);
-			byte step3 = 0x0F; writeBytes(RF_CONF, 0x12, &step3, 1);
-			byte step4 = 0x01; writeBytes(TX_CAL, NO_SUB, &step4, 1);
-			byte step5 = 0x00; writeBytes(TX_CAL, NO_SUB, &step5, 1);
+			byte step1 = 0x80; _writeBytes(RF_CONF, 0x11, &step1, 1);
+			byte step2 = 0x0A; _writeBytes(RF_CONF, 0x12, &step2, 1);
+			byte step3 = 0x0F; _writeBytes(RF_CONF, 0x12, &step3, 1);
+			byte step4 = 0x01; _writeBytes(TX_CAL, NO_SUB, &step4, 1);
+			byte step5 = 0x00; _writeBytes(TX_CAL, NO_SUB, &step5, 1);
 		}
 
 		/* AGC_TUNE1 - reg:0x23, sub-reg:0x04, table 24 */
@@ -129,21 +243,21 @@ namespace DW1000Ng {
 			} else {
 				// TODO proper error/warning handling
 			}
-			writeBytes(AGC_TUNE, AGC_TUNE1_SUB, agctune1, LEN_AGC_TUNE1);
+			_writeBytes(AGC_TUNE, AGC_TUNE1_SUB, agctune1, LEN_AGC_TUNE1);
 		}
 
 		/* AGC_TUNE2 - reg:0x23, sub-reg:0x0C, table 25 */
 		void _agctune2() {
 			byte agctune2[LEN_AGC_TUNE2];
 			DW1000NgUtils::writeValueToBytes(agctune2, 0x2502A907L, LEN_AGC_TUNE2);
-			writeBytes(AGC_TUNE, AGC_TUNE2_SUB, agctune2, LEN_AGC_TUNE2);
+			_writeBytes(AGC_TUNE, AGC_TUNE2_SUB, agctune2, LEN_AGC_TUNE2);
 		}
 
 		/* AGC_TUNE3 - reg:0x23, sub-reg:0x12, table 26 */
 		void _agctune3() {
 			byte agctune3[LEN_AGC_TUNE3];
 			DW1000NgUtils::writeValueToBytes(agctune3, 0x0035, LEN_AGC_TUNE3);
-			writeBytes(AGC_TUNE, AGC_TUNE3_SUB, agctune3, LEN_AGC_TUNE3);
+			_writeBytes(AGC_TUNE, AGC_TUNE3_SUB, agctune3, LEN_AGC_TUNE3);
 		}
 
 		/* DRX_TUNE0b - reg:0x27, sub-reg:0x02, table 30 */
@@ -170,7 +284,7 @@ namespace DW1000Ng {
 			} else {
 				// TODO proper error/warning handling
 			}
-			writeBytes(DRX_TUNE, DRX_TUNE0b_SUB, drxtune0b, LEN_DRX_TUNE0b);
+			_writeBytes(DRX_TUNE, DRX_TUNE0b_SUB, drxtune0b, LEN_DRX_TUNE0b);
 		}
 
 		/* DRX_TUNE1a - reg:0x27, sub-reg:0x04, table 31 */
@@ -183,7 +297,7 @@ namespace DW1000Ng {
 			} else {
 				// TODO proper error/warning handling
 			}
-			writeBytes(DRX_TUNE, DRX_TUNE1a_SUB, drxtune1a, LEN_DRX_TUNE1a);
+			_writeBytes(DRX_TUNE, DRX_TUNE1a_SUB, drxtune1a, LEN_DRX_TUNE1a);
 		}
 
 		/* DRX_TUNE1b - reg:0x27, sub-reg:0x06, table 32 */
@@ -209,7 +323,7 @@ namespace DW1000Ng {
 					// TODO proper error/warning handling
 				}
 			}
-			writeBytes(DRX_TUNE, DRX_TUNE1b_SUB, drxtune1b, LEN_DRX_TUNE1b);
+			_writeBytes(DRX_TUNE, DRX_TUNE1b_SUB, drxtune1b, LEN_DRX_TUNE1b);
 		}
 
 		/* DRX_TUNE2 - reg:0x27, sub-reg:0x08, table 33 */
@@ -250,7 +364,7 @@ namespace DW1000Ng {
 			} else {
 				// TODO proper error/warning handling
 			}
-			writeBytes(DRX_TUNE, DRX_TUNE2_SUB, drxtune2, LEN_DRX_TUNE2);
+			_writeBytes(DRX_TUNE, DRX_TUNE2_SUB, drxtune2, LEN_DRX_TUNE2);
 		}
 
 		/* DRX_TUNE4H - reg:0x27, sub-reg:0x26, table 34 */
@@ -261,14 +375,14 @@ namespace DW1000Ng {
 			} else {
 				DW1000NgUtils::writeValueToBytes(drxtune4H, 0x0028, LEN_DRX_TUNE4H);
 			}
-			writeBytes(DRX_TUNE, DRX_TUNE4H_SUB, drxtune4H, LEN_DRX_TUNE4H);
+			_writeBytes(DRX_TUNE, DRX_TUNE4H_SUB, drxtune4H, LEN_DRX_TUNE4H);
 		}
 
 		/* LDE_CFG1 - reg 0x2E, sub-reg:0x0806 */
 		void _ldecfg1() {
 			byte ldecfg1[LEN_LDE_CFG1];
 			_nlos == true ? DW1000NgUtils::writeValueToBytes(ldecfg1, 0x7, LEN_LDE_CFG1) : DW1000NgUtils::writeValueToBytes(ldecfg1, 0xD, LEN_LDE_CFG1);
-			writeBytes(LDE_IF, LDE_CFG1_SUB, ldecfg1, LEN_LDE_CFG1);
+			_writeBytes(LDE_IF, LDE_CFG1_SUB, ldecfg1, LEN_LDE_CFG1);
 		}
 
 		/* LDE_CFG2 - reg 0x2E, sub-reg:0x1806, table 50 */
@@ -281,7 +395,7 @@ namespace DW1000Ng {
 			} else {
 				// TODO proper error/warning handling
 			}
-			writeBytes(LDE_IF, LDE_CFG2_SUB, ldecfg2, LEN_LDE_CFG2);
+			_writeBytes(LDE_IF, LDE_CFG2_SUB, ldecfg2, LEN_LDE_CFG2);
 		}
 
 		/* LDE_REPC - reg 0x2E, sub-reg:0x2804, table 51 */
@@ -363,7 +477,7 @@ namespace DW1000Ng {
 				// TODO proper error/warning handling
 			}
 			
-			writeBytes(LDE_IF, LDE_REPC_SUB, lderepc, LEN_LDE_REPC);
+			_writeBytes(LDE_IF, LDE_REPC_SUB, lderepc, LEN_LDE_REPC);
 		}
 
 		/* TX_POWER (enabled smart transmit power control) - reg:0x1E, tables 19-20
@@ -533,7 +647,7 @@ namespace DW1000Ng {
 			} else {
 				// TODO proper error/warning handling
 			}
-			writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
+			_writeBytes(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
 		}
 
 		/* RF_RXCTRLH - reg:0x28, sub-reg:0x0B, table 37 */
@@ -544,7 +658,7 @@ namespace DW1000Ng {
 			} else {
 				DW1000NgUtils::writeValueToBytes(rfrxctrlh, 0xBC, LEN_RF_RXCTRLH);
 			}
-			writeBytes(RF_CONF, RF_RXCTRLH_SUB, rfrxctrlh, LEN_RF_RXCTRLH);
+			_writeBytes(RF_CONF, RF_RXCTRLH_SUB, rfrxctrlh, LEN_RF_RXCTRLH);
 		}
 
 		/* RX_TXCTRL - reg:0x28, sub-reg:0x0C */
@@ -565,7 +679,7 @@ namespace DW1000Ng {
 			} else {
 				// TODO proper error/warning handling
 			}
-			writeBytes(RF_CONF, RF_TXCTRL_SUB, rftxctrl, LEN_RF_TXCTRL);
+			_writeBytes(RF_CONF, RF_TXCTRL_SUB, rftxctrl, LEN_RF_TXCTRL);
 		}
 
 		/* TC_PGDELAY - reg:0x2A, sub-reg:0x0B, table 40 */
@@ -586,7 +700,7 @@ namespace DW1000Ng {
 			} else {
 				// TODO proper error/warning handling
 			}
-			writeBytes(TX_CAL, TC_PGDELAY_SUB, tcpgdelay, LEN_TC_PGDELAY);
+			_writeBytes(TX_CAL, TC_PGDELAY_SUB, tcpgdelay, LEN_TC_PGDELAY);
 		}
 
 		// FS_PLLCFG and FS_PLLTUNE - reg:0x2B, sub-reg:0x07-0x0B, tables 43-44
@@ -608,8 +722,8 @@ namespace DW1000Ng {
 			} else {
 				// TODO proper error/warning handling
 			}
-			writeBytes(FS_CTRL, FS_PLLTUNE_SUB, fsplltune, LEN_FS_PLLTUNE);
-			writeBytes(FS_CTRL, FS_PLLCFG_SUB, fspllcfg, LEN_FS_PLLCFG);
+			_writeBytes(FS_CTRL, FS_PLLTUNE_SUB, fsplltune, LEN_FS_PLLTUNE);
+			_writeBytes(FS_CTRL, FS_PLLCFG_SUB, fspllcfg, LEN_FS_PLLCFG);
 		}
 
 		/* Crystal calibration from OTP (if available)
@@ -618,7 +732,7 @@ namespace DW1000Ng {
 		void _fsxtalt() {
 			byte fsxtalt[LEN_FS_XTALT];
 			byte buf_otp[4];
-			readBytesOTP(0x01E, buf_otp); //0x01E -> byte[0]=XTAL_Trim
+			_readBytesOTP(0x01E, buf_otp); //0x01E -> byte[0]=XTAL_Trim
 			if (buf_otp[0] == 0) {
 				// No trim value available from OTP, use midrange value of 0x10
 				DW1000NgUtils::writeValueToBytes(fsxtalt, ((0x10 & 0x1F) | 0x60), LEN_FS_XTALT);
@@ -626,7 +740,7 @@ namespace DW1000Ng {
 				DW1000NgUtils::writeValueToBytes(fsxtalt, ((buf_otp[0] & 0x1F) | 0x60), LEN_FS_XTALT);
 			}
 			// write configuration back to chip
-			writeBytes(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
+			_writeBytes(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
 		}
 
 		void _tune() {
@@ -703,13 +817,13 @@ namespace DW1000Ng {
 		void _setNonStandardSFDLength() {
 			switch(_dataRate) {
 				case DataRate::RATE_6800KBPS:
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
+					_writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
 					break;
 				case DataRate::RATE_850KBPS:
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10);
+					_writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10);
 					break;
 				case DataRate::RATE_110KBPS:
-					writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
+					_writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
 					break;
 				default:
 					return; //TODO Proper error handling
@@ -717,23 +831,23 @@ namespace DW1000Ng {
 		}
 
 		void _writeNetworkIdAndDeviceAddress() {
-			writeBytes(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
+			_writeBytes(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
 		}
 
 		void _writeSystemConfigurationRegister() {
-			writeBytes(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
+			_writeBytes(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
 		}
 
 		void _writeChannelControlRegister() {
-			writeBytes(CHAN_CTRL, NO_SUB, _chanctrl, LEN_CHAN_CTRL);
+			_writeBytes(CHAN_CTRL, NO_SUB, _chanctrl, LEN_CHAN_CTRL);
 		}
 
 		void _writeTransmitFrameControlRegister() {
-			writeBytes(TX_FCTRL, NO_SUB, _txfctrl, LEN_TX_FCTRL);
+			_writeBytes(TX_FCTRL, NO_SUB, _txfctrl, LEN_TX_FCTRL);
 		}
 
 		void _writeSystemEventMaskRegister() {
-			writeBytes(SYS_MASK, NO_SUB, _sysmask, LEN_SYS_MASK);
+			_writeBytes(SYS_MASK, NO_SUB, _sysmask, LEN_SYS_MASK);
 		}
 
 		void _writeAntennaDelayRegisters() {
@@ -741,8 +855,8 @@ namespace DW1000Ng {
 			byte antennaRxDelayBytes[2];
 			DW1000NgUtils::writeValueToBytes(antennaTxDelayBytes, _antennaTxDelay, LEN_TX_ANTD);
 			DW1000NgUtils::writeValueToBytes(antennaRxDelayBytes, _antennaRxDelay, LEN_LDE_RXANTD);
-			writeBytes(TX_ANTD, NO_SUB, antennaTxDelayBytes, LEN_TX_ANTD);
-			writeBytes(LDE_IF, LDE_RXANTD_SUB, antennaRxDelayBytes, LEN_LDE_RXANTD);
+			_writeBytes(TX_ANTD, NO_SUB, antennaTxDelayBytes, LEN_TX_ANTD);
+			_writeBytes(LDE_IF, LDE_RXANTD_SUB, antennaRxDelayBytes, LEN_LDE_RXANTD);
 		}
 
 		void _writeConfiguration() {
@@ -756,7 +870,7 @@ namespace DW1000Ng {
 		void _manageLDE() {
 			// transfer any ldo tune values
 			byte ldoTune[LEN_OTP_RDAT];
-			readBytesOTP(0x04, ldoTune); // TODO #define
+			_readBytesOTP(0x04, ldoTune); // TODO #define
 			if(ldoTune[0] != 0) {
 				// TODO tuning available, copy over to RAM: use OTP_LDO bit
 			}
@@ -766,24 +880,24 @@ namespace DW1000Ng {
 			byte otpctrl[LEN_OTP_CTRL];
 			memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
 			memset(otpctrl, 0, LEN_OTP_CTRL);
-			readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-			readBytes(OTP_IF, OTP_CTRL_SUB, otpctrl, LEN_OTP_CTRL);
+			_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			_readBytes(OTP_IF, OTP_CTRL_SUB, otpctrl, LEN_OTP_CTRL);
 			pmscctrl0[0] = 0x01;
 			pmscctrl0[1] = 0x03;
 			otpctrl[0]   = 0x00;
 			otpctrl[1]   = 0x80;
-			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
-			writeBytes(OTP_IF, OTP_CTRL_SUB, otpctrl, 2);
+			_writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
+			_writeBytes(OTP_IF, OTP_CTRL_SUB, otpctrl, 2);
 			delay(5);
 			pmscctrl0[0] = 0x00;
 			pmscctrl0[1] &= 0x02;
-			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
+			_writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
 		}
 
 		void _enableClock(byte clock) {
 			byte pmscctrl0[LEN_PMSC_CTRL0];
 			memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
-			readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 			/* SYSCLKS */
 			if(clock == SYS_AUTO_CLOCK) {
 				_currentSPI = &_fastSPI;
@@ -804,7 +918,7 @@ namespace DW1000Ng {
 			} else {
 				// TODO deliver proper warning
 			}
-			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
+			_writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
 		}
 		
 		/* interrupt state handling */
@@ -816,7 +930,7 @@ namespace DW1000Ng {
 		void _clearAllStatus() {
 			//Latched bits in status register are reset by writing 1 to them
 			memset(_sysstatus, 0xff, LEN_SYS_STATUS);
-			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+			_writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
 		void _clearReceiveStatus() {
@@ -827,17 +941,17 @@ namespace DW1000Ng {
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXSFDD_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXPHD_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, LDEDONE_BIT, true);
-			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+			_writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
 		void _clearReceiveTimestampAvailableStatus() {
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, LDEDONE_BIT, true);
-			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+			_writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
 		void _clearReceiveTimeoutStatus() {
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXRFTO_BIT, true);
-			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+			_writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
 		void _clearReceiveFailedStatus() {
@@ -847,7 +961,7 @@ namespace DW1000Ng {
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXSFDTO_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, AFFREJ_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT, true);
-			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+			_writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
 		void _clearTransmitStatus() {
@@ -857,42 +971,42 @@ namespace DW1000Ng {
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, TXPRS_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, TXPHS_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, TXFRS_BIT, true);
-			writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+			_writeBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
 		void _resetReceiver() {
 			byte pmscctrl0[LEN_PMSC_CTRL0];
-			readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 			pmscctrl0[3] = 0xE0;
-			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			_writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 			pmscctrl0[3] = 0xF0;
-			writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			_writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 		}
 
 		/* Internal helpers to read configuration */
 
 		void _readSystemConfigurationRegister() {
-			readBytes(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
+			_readBytes(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
 		}
 
 		void _readSystemEventStatusRegister() {
-			readBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+			_readBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
 		void _readNetworkIdAndDeviceAddress() {
-			readBytes(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
+			_readBytes(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
 		}
 
 		void _readSystemEventMaskRegister() {
-			readBytes(SYS_MASK, NO_SUB, _sysmask, LEN_SYS_MASK);
+			_readBytes(SYS_MASK, NO_SUB, _sysmask, LEN_SYS_MASK);
 		}
 
 		void _readChannelControlRegister() {
-			readBytes(CHAN_CTRL, NO_SUB, _chanctrl, LEN_CHAN_CTRL);
+			_readBytes(CHAN_CTRL, NO_SUB, _chanctrl, LEN_CHAN_CTRL);
 		}
 
 		void _readTransmitFrameControlRegister() {
-			readBytes(TX_FCTRL, NO_SUB, _txfctrl, LEN_TX_FCTRL);
+			_readBytes(TX_FCTRL, NO_SUB, _txfctrl, LEN_TX_FCTRL);
 		}
 
 		boolean _isTransmitDone() {
@@ -945,7 +1059,7 @@ namespace DW1000Ng {
             _enableClock(SYS_XTI_CLOCK);
             byte zero[2];
             DW1000NgUtils::writeValueToBytes(zero, 0x0000, 2);
-            writeBytes(PMSC, PMSC_CTRL1_SUB, zero, 2); // To re-enable write 0xE7
+            _writeBytes(PMSC, PMSC_CTRL1_SUB, zero, 2); // To re-enable write 0xE7
         }
 
 		// TODO check function, different type violations between byte and int
@@ -1006,7 +1120,7 @@ namespace DW1000Ng {
 			/* Enabled TXFEN, PLLFEN, LDOFEN and set TXRXSW to TX */
             byte enable_mask[4];
             DW1000NgUtils::writeValueToBytes(enable_mask, 0x005FFF00, LEN_RX_CONF_SUB);
-            writeBytes(RF_CONF, RF_CONF_SUB, enable_mask, LEN_RX_CONF_SUB);
+            _writeBytes(RF_CONF, RF_CONF_SUB, enable_mask, LEN_RX_CONF_SUB);
         }
 	}
 
@@ -1055,14 +1169,14 @@ namespace DW1000Ng {
 		delay(5);
 		
 		/* Cleared AON:CFG1(0x2C:0x0A) for proper operation of deepSleep */
-		writeBytes(AON, AON_CFG1_SUB, 0x00, LEN_AON_CFG1);
+		_writeBytes(AON, AON_CFG1_SUB, 0x00, LEN_AON_CFG1);
 
 		// read the temp and vbat readings from OTP that were recorded during production test
 		// see 6.3.1 OTP memory map
 		byte buf_otp[4];
-		readBytesOTP(0x008, buf_otp); // the stored 3.3 V reading
+		_readBytesOTP(0x008, buf_otp); // the stored 3.3 V reading
 		_vmeas3v3 = buf_otp[0];
-		readBytesOTP(0x009, buf_otp); // the stored 23C reading
+		_readBytesOTP(0x009, buf_otp); // the stored 23C reading
 		_tmeas23C = buf_otp[0];
 	}
 
@@ -1139,63 +1253,63 @@ namespace DW1000Ng {
 	void enableDebounceClock() {
 		byte pmscctrl0[LEN_PMSC_CTRL0];
 		memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
-		readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+		_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 		DW1000NgUtils::setBit(pmscctrl0, LEN_PMSC_CTRL0, GPDCE_BIT, 1);
 		DW1000NgUtils::setBit(pmscctrl0, LEN_PMSC_CTRL0, KHZCLKEN_BIT, 1);
-		writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+		_writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 			_debounceClockEnabled = true;
 	}
 
 	void enableLedBlinking() {
 		byte pmscledc[LEN_PMSC_LEDC];
 		memset(pmscledc, 0, LEN_PMSC_LEDC);
-		readBytes(PMSC, PMSC_LEDC_SUB, pmscledc, LEN_PMSC_LEDC);
+		_readBytes(PMSC, PMSC_LEDC_SUB, pmscledc, LEN_PMSC_LEDC);
 		DW1000NgUtils::setBit(pmscledc, LEN_PMSC_LEDC, BLNKEN, 1);
-		writeBytes(PMSC, PMSC_LEDC_SUB, pmscledc, LEN_PMSC_LEDC);
+		_writeBytes(PMSC, PMSC_LEDC_SUB, pmscledc, LEN_PMSC_LEDC);
 	}
 
 	void setGPIOMode(uint8_t msgp, uint8_t mode) {
 		byte gpiomode[LEN_GPIO_MODE];
 		memset(gpiomode, 0, LEN_GPIO_MODE);
-		readBytes(GPIO_CTRL, GPIO_MODE_SUB, gpiomode, LEN_GPIO_MODE);
+		_readBytes(GPIO_CTRL, GPIO_MODE_SUB, gpiomode, LEN_GPIO_MODE);
 		for (char i = 0; i < 2; i++){
 			DW1000NgUtils::setBit(gpiomode, LEN_GPIO_MODE, msgp + i, (mode >> i) & 1);
 		}
-		writeBytes(GPIO_CTRL, GPIO_MODE_SUB, gpiomode, LEN_GPIO_MODE);
+		_writeBytes(GPIO_CTRL, GPIO_MODE_SUB, gpiomode, LEN_GPIO_MODE);
 	}
 
 	void deepSleep() {
 		byte aon_wcfg[LEN_AON_WCFG];
 		memset(aon_wcfg, 0, LEN_AON_WCFG);
-		readBytes(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
+		_readBytes(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LDC_BIT, true);
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_PRES_SLEEP_BIT, false);
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LLDE_BIT, true);
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LDD0_BIT, true);
-		writeBytes(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
+		_writeBytes(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
 
 		byte aon_cfg0[LEN_AON_CFG0];
 		memset(aon_cfg0, 0, LEN_AON_CFG0);
-		readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
+		_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_PIN_BIT, true);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_SPI_BIT, true);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, false);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, SLEEP_EN_BIT, true);
-		writeBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
+		_writeBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 
 		byte aon_ctrl[LEN_AON_CTRL];
 		memset(aon_ctrl, 0, LEN_AON_CTRL);
-		readBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
+		_readBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
 		//DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, UPL_CFG_BIT, true);
 		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, SAVE_BIT, true);
-		writeBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
+		_writeBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
 	}
 
 	void spiWakeup(){
 		byte deviceId[LEN_DEV_ID];
 		byte expectedDeviceId[LEN_DEV_ID];
 		DW1000NgUtils::writeValueToBytes(expectedDeviceId, 0xDECA0130, LEN_DEV_ID);
-		readBytes(DEV_ID, NO_SUB, deviceId, LEN_DEV_ID);
+		_readBytes(DEV_ID, NO_SUB, deviceId, LEN_DEV_ID);
 		if (memcmp(deviceId, expectedDeviceId, LEN_DEV_ID)) {
 			digitalWrite(_ss, LOW);
 			delay(1);
@@ -1225,15 +1339,15 @@ namespace DW1000Ng {
 
 	void softReset() {
 		byte pmscctrl0[LEN_PMSC_CTRL0];
-		readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+		_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 		pmscctrl0[0] = 0x01;
-		writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+		_writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 		pmscctrl0[3] = 0x00;
-		writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+		_writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 		delay(10);
 		pmscctrl0[0] = 0x00;
 		pmscctrl0[3] = 0xF0;
-		writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+		_writeBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 		// force into idle mode
 		forceTRxOff();
 	}
@@ -1245,21 +1359,21 @@ namespace DW1000Ng {
 
 	void getPrintableDeviceIdentifier(char msgBuffer[]) {
 		byte data[LEN_DEV_ID];
-		readBytes(DEV_ID, NO_SUB, data, LEN_DEV_ID);
+		_readBytes(DEV_ID, NO_SUB, data, LEN_DEV_ID);
 		sprintf(msgBuffer, "%02X - model: %d, version: %d, revision: %d",
 						(uint16_t)((data[3] << 8) | data[2]), data[1], (data[0] >> 4) & 0x0F, data[0] & 0x0F);
 	}
 
 	void getPrintableExtendedUniqueIdentifier(char msgBuffer[]) {
 		byte data[LEN_EUI];
-		readBytes(EUI, NO_SUB, data, LEN_EUI);
+		_readBytes(EUI, NO_SUB, data, LEN_EUI);
 		sprintf(msgBuffer, "%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X",
 						data[7], data[6], data[5], data[4], data[3], data[2], data[1], data[0]);
 	}
 
 	void getPrintableNetworkIdAndShortAddress(char msgBuffer[]) {
 		byte data[LEN_PANADR];
-		readBytes(PANADR, NO_SUB, data, LEN_PANADR);
+		_readBytes(PANADR, NO_SUB, data, LEN_PANADR);
 		sprintf(msgBuffer, "PAN: %02X, Short Address: %02X",
 						(uint16_t)((data[3] << 8) | data[2]), (uint16_t)((data[1] << 8) | data[0]));
 	}
@@ -1272,8 +1386,8 @@ namespace DW1000Ng {
 		uint8_t ch;
 		byte chan_ctrl[LEN_CHAN_CTRL];
 		byte tx_fctrl[LEN_TX_FCTRL];
-		readBytes(CHAN_CTRL, NO_SUB, chan_ctrl, LEN_CHAN_CTRL);
-		readBytes(TX_FCTRL, NO_SUB, tx_fctrl, LEN_TX_FCTRL);
+		_readBytes(CHAN_CTRL, NO_SUB, chan_ctrl, LEN_CHAN_CTRL);
+		_readBytes(TX_FCTRL, NO_SUB, tx_fctrl, LEN_TX_FCTRL);
 		/* Data Rate from 0x08 bits:13-14(tx_fctrl) */
 		dr = (uint16_t)(tx_fctrl[1] >> 5 & 0x3);
 		switch(dr) {
@@ -1364,26 +1478,26 @@ namespace DW1000Ng {
 		for(uint8_t i    = 0; i < size; i++) {
 			*(reverseEUI+i) = *(eui+size-i-1);
 		}
-		writeBytes(EUI, NO_SUB, reverseEUI, LEN_EUI);
+		_writeBytes(EUI, NO_SUB, reverseEUI, LEN_EUI);
 	}
 
 	void getTemperature(float& temp) {
 		_vbatAndTempSteps();
-		byte sar_ltemp = 0; readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
+		byte sar_ltemp = 0; _readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
 		temp = (sar_ltemp - _tmeas23C) * 1.14f + 23.0f;
 	}
 
 	void getBatteryVoltage(float& vbat) {
 		_vbatAndTempSteps();
-		byte sar_lvbat = 0; readBytes(TX_CAL, 0x03, &sar_lvbat, 1);
+		byte sar_lvbat = 0; _readBytes(TX_CAL, 0x03, &sar_lvbat, 1);
 		vbat = (sar_lvbat - _vmeas3v3) / 173.0f + 3.3f;
 	}
 
 	void getTemperatureAndBatteryVoltage(float& temp, float& vbat) {
 		// follow the procedure from section 6.4 of the User Manual
 		_vbatAndTempSteps();
-		byte sar_lvbat = 0; readBytes(TX_CAL, 0x03, &sar_lvbat, 1);
-		byte sar_ltemp = 0; readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
+		byte sar_lvbat = 0; _readBytes(TX_CAL, 0x03, &sar_lvbat, 1);
+		byte sar_ltemp = 0; _readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
 		
 		// calculate voltage and temperature
 		vbat = (sar_lvbat - _vmeas3v3) / 173.0f + 3.3f;
@@ -1482,7 +1596,7 @@ namespace DW1000Ng {
 	void forceTRxOff() {
 		memset(_sysctrl, 0, LEN_SYS_CTRL);
 		DW1000NgUtils::setBit(_sysctrl, LEN_SYS_CTRL, TRXOFF_BIT, true);
-		writeBytes(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
+		_writeBytes(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
 	}
 
 	void startReceive(ReceiveMode mode) {
@@ -1491,7 +1605,7 @@ namespace DW1000Ng {
 		if(mode == ReceiveMode::DELAYED)
 			DW1000NgUtils::setBit(_sysctrl, LEN_SYS_CTRL, RXDLYS_BIT, true);
 		DW1000NgUtils::setBit(_sysctrl, LEN_SYS_CTRL, RXENAB_BIT, true);
-		writeBytes(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
+		_writeBytes(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
 	}
 
 	void startTransmit(TransmitMode mode) {
@@ -1500,7 +1614,7 @@ namespace DW1000Ng {
 		if(mode == TransmitMode::DELAYED)
 			DW1000NgUtils::setBit(_sysctrl, LEN_SYS_CTRL, TXDLYS_BIT, true);
 		DW1000NgUtils::setBit(_sysctrl, LEN_SYS_CTRL, TXSTRT_BIT, true);
-		writeBytes(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
+		_writeBytes(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
 	}
 
 	void newConfiguration() {
@@ -1551,7 +1665,7 @@ namespace DW1000Ng {
 
 	void setTXPower(byte power[]) {
 		//TODO Check byte length
-		writeBytes(TX_POWER, NO_SUB, power, LEN_TX_POWER);
+		_writeBytes(TX_POWER, NO_SUB, power, LEN_TX_POWER);
 		_autoTXPower = false;
 	}
 
@@ -1583,7 +1697,7 @@ namespace DW1000Ng {
 	void setTCPGDelay(byte tcpgdelay) {
 		byte tcpgBytes[LEN_TC_PGDELAY];
 		DW1000NgUtils::writeValueToBytes(tcpgBytes, tcpgdelay, LEN_TC_PGDELAY);
-		writeBytes(TX_CAL, TC_PGDELAY_SUB, tcpgBytes, LEN_TC_PGDELAY);
+		_writeBytes(TX_CAL, TC_PGDELAY_SUB, tcpgBytes, LEN_TC_PGDELAY);
 		_autoTCPGDelay = false;
 	}
 
@@ -1604,17 +1718,17 @@ namespace DW1000Ng {
 		/* In diagnostic transmit power  mode (set next) the bytes 31:0 only are used for DX_TIME register */
         byte delayBytes[4];
         DW1000NgUtils::writeValueToBytes(delayBytes, repeat_interval, 4);
-        writeBytes(DX_TIME, NO_SUB, delayBytes, 4);
+        _writeBytes(DX_TIME, NO_SUB, delayBytes, 4);
 
 		/* Enable Transmit Power Spectrum Test Mode */
         byte diagnosticBytes[2];
         DW1000NgUtils::writeValueToBytes(diagnosticBytes, 0x0010, LEN_DIAG_TMC);
-        writeBytes(DIG_DIAG, DIAG_TMC_SUB, diagnosticBytes, LEN_DIAG_TMC);
+        _writeBytes(DIG_DIAG, DIAG_TMC_SUB, diagnosticBytes, LEN_DIAG_TMC);
     }
 
 	void setDelayedTRX(byte futureTimeBytes[]) {
 		/* the least significant 9-bits are ignored in DX_TIME in functional modes */
-		writeBytes(DX_TIME, NO_SUB, futureTimeBytes, LEN_DX_TIME);
+		_writeBytes(DX_TIME, NO_SUB, futureTimeBytes, LEN_DX_TIME);
 	}
 
 	void setDataRate(DataRate data_rate) {
@@ -1727,7 +1841,7 @@ namespace DW1000Ng {
 			return; // TODO proper error handling: frame/buffer size
 		}
 		// transmit data and length
-		writeBytes(TX_BUFFER, NO_SUB, data, n);
+		_writeBytes(TX_BUFFER, NO_SUB, data, n);
 		
 		/* Sets up transmit frame control length based on data length */
 		_txfctrl[0] = (byte)(n & 0xFF); // 1 byte (regular length + 1 bit)
@@ -1750,7 +1864,7 @@ namespace DW1000Ng {
 
 		// 10 bits of RX frame control register
 		byte rxFrameInfo[LEN_RX_FINFO];
-		readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
+		_readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
 		len = ((((uint16_t)rxFrameInfo[1] << 8) | (uint16_t)rxFrameInfo[0]) & 0x03FF);
 		
 		if(_frameCheck && len > 2) {
@@ -1763,7 +1877,7 @@ namespace DW1000Ng {
 		if(n <= 0) {
 			return;
 		}
-		readBytes(RX_BUFFER, NO_SUB, data, n);
+		_readBytes(RX_BUFFER, NO_SUB, data, n);
 	}
 
 	void getReceivedData(String& data) {
@@ -1786,13 +1900,13 @@ namespace DW1000Ng {
 
 	void getTransmitTimestamp(DW1000NgTime& time) {
 		byte txTimeBytes[LEN_TX_STAMP];
-		readBytes(TX_TIME, TX_STAMP_SUB, txTimeBytes, LEN_TX_STAMP);
+		_readBytes(TX_TIME, TX_STAMP_SUB, txTimeBytes, LEN_TX_STAMP);
 		time.setTimestamp(txTimeBytes);
 	}
 
 	void getReceiveTimestamp(DW1000NgTime& time) {
 		byte rxTimeBytes[LEN_RX_STAMP];
-		readBytes(RX_TIME, RX_STAMP_SUB, rxTimeBytes, LEN_RX_STAMP);
+		_readBytes(RX_TIME, RX_STAMP_SUB, rxTimeBytes, LEN_RX_STAMP);
 		time.setTimestamp(rxTimeBytes);
 		// correct timestamp (i.e. consider range bias)
 		_correctTimestamp(time);
@@ -1800,28 +1914,28 @@ namespace DW1000Ng {
 
 	void getSystemTimestamp(DW1000NgTime& time) {
 		byte sysTimeBytes[LEN_SYS_TIME];
-		readBytes(SYS_TIME, NO_SUB, sysTimeBytes, LEN_SYS_TIME);
+		_readBytes(SYS_TIME, NO_SUB, sysTimeBytes, LEN_SYS_TIME);
 		time.setTimestamp(sysTimeBytes);
 	}
 
 	void getTransmitTimestamp(byte data[]) {
-		readBytes(TX_TIME, TX_STAMP_SUB, data, LEN_TX_STAMP);
+		_readBytes(TX_TIME, TX_STAMP_SUB, data, LEN_TX_STAMP);
 	}
 
 	void getReceiveTimestamp(byte data[]) {
-		readBytes(RX_TIME, RX_STAMP_SUB, data, LEN_RX_STAMP);
+		_readBytes(RX_TIME, RX_STAMP_SUB, data, LEN_RX_STAMP);
 	}
 
 	void getSystemTimestamp(byte data[]) {
-		readBytes(SYS_TIME, NO_SUB, data, LEN_SYS_TIME);
+		_readBytes(SYS_TIME, NO_SUB, data, LEN_SYS_TIME);
 	}
 
 	float getReceiveQuality() {
 		byte         noiseBytes[LEN_STD_NOISE];
 		byte         fpAmpl2Bytes[LEN_FP_AMPL2];
 		uint16_t     noise, f2;
-		readBytes(RX_FQUAL, STD_NOISE_SUB, noiseBytes, LEN_STD_NOISE);
-		readBytes(RX_FQUAL, FP_AMPL2_SUB, fpAmpl2Bytes, LEN_FP_AMPL2);
+		_readBytes(RX_FQUAL, STD_NOISE_SUB, noiseBytes, LEN_STD_NOISE);
+		_readBytes(RX_FQUAL, FP_AMPL2_SUB, fpAmpl2Bytes, LEN_FP_AMPL2);
 		noise = (uint16_t)noiseBytes[0] | ((uint16_t)noiseBytes[1] << 8);
 		f2    = (uint16_t)fpAmpl2Bytes[0] | ((uint16_t)fpAmpl2Bytes[1] << 8);
 		return (float)f2/noise;
@@ -1834,10 +1948,10 @@ namespace DW1000Ng {
 		byte         rxFrameInfo[LEN_RX_FINFO];
 		uint16_t     f1, f2, f3, N;
 		float        A, corrFac;
-		readBytes(RX_TIME, FP_AMPL1_SUB, fpAmpl1Bytes, LEN_FP_AMPL1);
-		readBytes(RX_FQUAL, FP_AMPL2_SUB, fpAmpl2Bytes, LEN_FP_AMPL2);
-		readBytes(RX_FQUAL, FP_AMPL3_SUB, fpAmpl3Bytes, LEN_FP_AMPL3);
-		readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
+		_readBytes(RX_TIME, FP_AMPL1_SUB, fpAmpl1Bytes, LEN_FP_AMPL1);
+		_readBytes(RX_FQUAL, FP_AMPL2_SUB, fpAmpl2Bytes, LEN_FP_AMPL2);
+		_readBytes(RX_FQUAL, FP_AMPL3_SUB, fpAmpl3Bytes, LEN_FP_AMPL3);
+		_readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
 		f1 = (uint16_t)fpAmpl1Bytes[0] | ((uint16_t)fpAmpl1Bytes[1] << 8);
 		f2 = (uint16_t)fpAmpl2Bytes[0] | ((uint16_t)fpAmpl2Bytes[1] << 8);
 		f3 = (uint16_t)fpAmpl3Bytes[0] | ((uint16_t)fpAmpl3Bytes[1] << 8);
@@ -1866,8 +1980,8 @@ namespace DW1000Ng {
 		uint32_t twoPower17 = 131072;
 		uint16_t C, N;
 		float    A, corrFac;
-		readBytes(RX_FQUAL, CIR_PWR_SUB, cirPwrBytes, LEN_CIR_PWR);
-		readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
+		_readBytes(RX_FQUAL, CIR_PWR_SUB, cirPwrBytes, LEN_CIR_PWR);
+		_readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
 		C = (uint16_t)cirPwrBytes[0] | ((uint16_t)cirPwrBytes[1] << 8);
 		N = (((uint16_t)rxFrameInfo[2] >> 4) & 0xFF) | ((uint16_t)rxFrameInfo[3] << 4);
 
@@ -1888,122 +2002,54 @@ namespace DW1000Ng {
 		return estRxPwr;
 	}
 
-	/* ###########################################################################
-	* #### Helper functions #####################################################
-	* ######################################################################### */
+	#if DW1000NG_DEBUG
+	void getPrettyBytes(byte data[], char msgBuffer[], uint16_t n) {
+        uint16_t i, j, b;
+        b = sprintf(msgBuffer, "Data, bytes: %d\nB: 7 6 5 4 3 2 1 0\n", n); // TODO - type
+        for(i = 0; i < n; i++) {
+            byte curByte = data[i];
+            snprintf(&msgBuffer[b++], 2, "%d", (i+1));
+            msgBuffer[b++] = (char)((i+1) & 0xFF);
+            msgBuffer[b++] = ':';
+            msgBuffer[b++] = ' ';
+            for(j = 0; j < 8; j++) {
+                msgBuffer[b++] = ((curByte >> (7-j)) & 0x01) ? '1' : '0';
+                if(j < 7) {
+                    msgBuffer[b++] = ' ';
+                } else if(i < n-1) {
+                    msgBuffer[b++] = '\n';
+                } else {
+                    msgBuffer[b++] = '\0';
+                }
+            }
+        }
+        msgBuffer[b++] = '\0';
+    }
 
-	/*
-	* Read bytes from the DW1000Ng. Number of bytes depend on register length.
-	* @param cmd
-	* 		The register address (see Chapter 7 in the DW1000Ng user manual).
-	* @param data
-	*		The data array to be read into.
-	* @param n
-	*		The number of bytes expected to be received.
-	*/
-	// TODO incomplete doc
-	void readBytes(byte cmd, uint16_t offset, byte data[], uint16_t n) {
-		byte header[3];
-		uint8_t headerLen = 1;
-		uint16_t i = 0;
-		
-		// build SPI header
-		if(offset == NO_SUB) {
-			header[0] = READ | cmd;
-		} else {
-			header[0] = READ_SUB | cmd;
-			if(offset < 128) {
-				header[1] = (byte)offset;
-				headerLen++;
-			} else {
-				header[1] = RW_SUB_EXT | (byte)offset;
-				header[2] = (byte)(offset >> 7);
-				headerLen += 2;
-			}
-		}
-		SPI.beginTransaction(*_currentSPI);
-		digitalWrite(_ss, LOW);
-		for(i = 0; i < headerLen; i++) {
-			SPI.transfer(header[i]); // send header
-		}
-		for(i = 0; i < n; i++) {
-			data[i] = SPI.transfer(0x00); // read values
-		}
-		delayMicroseconds(5);
-		digitalWrite(_ss, HIGH);
-		SPI.endTransaction();
-	}
-
-	// always 4 bytes
-	// TODO why always 4 bytes? can be different, see p. 58 table 10 otp memory map
-	void readBytesOTP(uint16_t address, byte data[]) {
-		byte addressBytes[LEN_OTP_ADDR];
-		
-		// p60 - 6.3.3 Reading a value from OTP memory
-		// bytes of address
-		addressBytes[0] = (address & 0xFF);
-		addressBytes[1] = ((address >> 8) & 0xFF);
-		// set address
-		writeBytes(OTP_IF, OTP_ADDR_SUB, addressBytes, LEN_OTP_ADDR);
-		// switch into read mode
-		writeByte(OTP_IF, OTP_CTRL_SUB, 0x03); // OTPRDEN | OTPREAD
-		writeByte(OTP_IF, OTP_CTRL_SUB, 0x01); // OTPRDEN
-		// read value/block - 4 bytes
-		readBytes(OTP_IF, OTP_RDAT_SUB, data, LEN_OTP_RDAT);
-		// end read mode
-		writeByte(OTP_IF, OTP_CTRL_SUB, 0x00);
-	}
-
-	// Helper to set a single register
-	void writeByte(byte cmd, uint16_t offset, byte data) {
-		writeBytes(cmd, offset, &data, 1);
-	}
-
-	/*
-	* Write bytes to the DW1000Ng. Single bytes can be written to registers via sub-addressing.
-	* @param cmd
-	* 		The register address (see Chapter 7 in the DW1000Ng user manual).
-	* @param offset
-	*		The offset to select register sub-parts for writing, or 0x00 to disable
-	* 		sub-adressing.
-	* @param data
-	*		The data array to be written.
-	* @param data_size
-	*		The number of bytes to be written (take care not to go out of bounds of
-	* 		the register).
-	*/
-	// TODO offset really bigger than byte?
-
-	void writeBytes(byte cmd, uint16_t offset, byte data[], uint16_t data_size) {
-		byte header[3];
-		uint8_t  headerLen = 1;
-		uint16_t  i = 0;
-		
-		// TODO proper error handling: address out of bounds
-		// build SPI header
-		if(offset == NO_SUB) {
-			header[0] = WRITE | cmd;
-		} else {
-			header[0] = WRITE_SUB | cmd;
-			if(offset < 128) {
-				header[1] = (byte)offset;
-				headerLen++;
-			} else {
-				header[1] = RW_SUB_EXT | (byte)offset;
-				header[2] = (byte)(offset >> 7);
-				headerLen += 2;
-			}
-		}
-		SPI.beginTransaction(*_currentSPI);
-		digitalWrite(_ss, LOW);
-		for(i = 0; i < headerLen; i++) {
-			SPI.transfer(header[i]); // send header
-		}
-		for(i = 0; i < data_size; i++) {
-			SPI.transfer(data[i]); // write values
-		}
-		delayMicroseconds(5);
-		digitalWrite(_ss, HIGH);
-		SPI.endTransaction();
-	}
+    void getPrettyBytes(byte cmd, uint16_t offset, char msgBuffer[], uint16_t n) {
+        uint16_t i, j, b;
+        byte* readBuf = (byte*)malloc(n);
+        _readBytes(cmd, offset, readBuf, n);
+        b     = sprintf(msgBuffer, "Reg: 0x%02x, bytes: %d\nB: 7 6 5 4 3 2 1 0\n", cmd, n);  // TODO - tpye
+        for(i = 0; i < n; i++) {
+            byte curByte = readBuf[i];
+            snprintf(&msgBuffer[b++], 2, "%d", (i+1));
+            msgBuffer[b++] = (char)((i+1) & 0xFF);
+            msgBuffer[b++] = ':';
+            msgBuffer[b++] = ' ';
+            for(j = 0; j < 8; j++) {
+                msgBuffer[b++] = ((curByte >> (7-j)) & 0x01) ? '1' : '0';
+                if(j < 7) {
+                    msgBuffer[b++] = ' ';
+                } else if(i < n-1) {
+                    msgBuffer[b++] = '\n';
+                } else {
+                    msgBuffer[b++] = '\0';
+                }
+            }
+        }
+        msgBuffer[b++] = '\0';
+        free(readBuf);
+    }
+	#endif
 }

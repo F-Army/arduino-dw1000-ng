@@ -46,6 +46,12 @@
 #pragma once
 
 /**
+ * Adds debug functionalities
+ * 
+*/
+#define DW1000NG_DEBUG false
+
+/**
  * Optimizes code for the DWM1000 Module
  */
 #define DWM1000_OPTIMIZED false

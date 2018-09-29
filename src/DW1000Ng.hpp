@@ -364,10 +364,9 @@ namespace DW1000Ng {
 	void useExtendedFrameLength(boolean val);
 	// TODO is implemented, but needs testing
 	void waitForResponse(boolean val);
-	
-	/* reading and writing bytes from and to DW1000Ng module. */
-	void readBytes(byte cmd, uint16_t offset, byte data[], uint16_t n);
-	void readBytesOTP(uint16_t address, byte data[]);
-	void writeByte(byte cmd, uint16_t offset, byte data);
-	void writeBytes(byte cmd, uint16_t offset, byte data[], uint16_t n);
+
+	#if DW1000NG_DEBUG
+	void getPrettyBytes(byte data[], char msgBuffer[], uint16_t n);
+    void getPrettyBytes(byte cmd, uint16_t offset, char msgBuffer[], uint16_t n);
+	#endif
 };
