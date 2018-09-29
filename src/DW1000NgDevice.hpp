@@ -87,6 +87,11 @@ public:
 
     void setEUI(char eui[]);
     String getEUI();
+
+    void setAntennaDelay(uint16_t antennaDelay);
+    void setAntennaDelay(uint16_t txAntennaDelay, uint16_t rxAntennaDelay);
+    uint16_t getTransmissionAntennaDelay();
+    uint16_t getReceiveAntennaDelay();
     
     device_interrupt_map_t getInterruptMap();
     void setInterruptMap(device_interrupt_map_t int_map);

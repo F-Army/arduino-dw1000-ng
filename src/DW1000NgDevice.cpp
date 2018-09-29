@@ -244,6 +244,22 @@ String DW1000NgDevice::getEUI() {
     return euiString;
 }
 
+void DW1000NgDevice::setAntennaDelay(uint16_t antennaDelay) {
+    DW1000Ng::setAntennaDelay(antennaDelay);
+}
+
+void DW1000NgDevice::setAntennaDelay(uint16_t txAntennaDelay, uint16_t rxAntennaDelay) {
+    DW1000Ng::setTxAntennaDelay(txAntennaDelay);
+    DW1000Ng::setRxAntennaDelay(rxAntennaDelay);
+}
+uint16_t DW1000NgDevice::getTransmissionAntennaDelay() {
+    return DW1000Ng::getTxAntennaDelay();
+}
+
+uint16_t DW1000NgDevice::getReceiveAntennaDelay() {
+    return DW1000Ng::getRxAntennaDelay();
+}
+
 device_interrupt_map_t DW1000NgDevice::getInterruptMap() {
     return _interrupt_map;
 }
