@@ -1649,7 +1649,7 @@ namespace DW1000Ng {
 	}
 
 	// TODO reorder
-	uint16_t getDataLength() {
+	uint16_t getReceivedDataLength() {
 		uint16_t len = 0;
 
 		// 10 bits of RX frame control register
@@ -1663,21 +1663,21 @@ namespace DW1000Ng {
 		return len;
 	}
 
-	void getData(byte data[], uint16_t n) {
+	void getReceivedData(byte data[], uint16_t n) {
 		if(n <= 0) {
 			return;
 		}
 		readBytes(RX_BUFFER, NO_SUB, data, n);
 	}
 
-	void getData(String& data) {
+	void getReceivedData(String& data) {
 		uint16_t i;
-		uint16_t n = getDataLength(); // number of bytes w/o the two FCS ones
+		uint16_t n = getReceivedDataLength(); // number of bytes w/o the two FCS ones
 		if(n <= 0) { // TODO
 			return;
 		}
 		byte* dataBytes = (byte*)malloc(n);
-		getData(dataBytes, n);
+		getReceivedData(dataBytes, n);
 		// clear string
 		data.remove(0);
 		data  = "";

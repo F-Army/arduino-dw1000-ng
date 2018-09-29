@@ -279,9 +279,9 @@ namespace DW1000Ng {
 	void         setDelayedTRX(byte futureTimeBytes[]);
 	void         setTransmitData(byte data[], uint16_t n);
 	void         setTransmitData(const String& data);
-	void         getData(byte data[], uint16_t n);
-	void         getData(String& data);
-	uint16_t     getDataLength();
+	void         getReceivedData(byte data[], uint16_t n);
+	void         getReceivedData(String& data);
+	uint16_t     getReceivedDataLength();
 	void         getTransmitTimestamp(DW1000NgTime& time);
 	void         getReceiveTimestamp(DW1000NgTime& time);
 	void         getSystemTimestamp(DW1000NgTime& time);

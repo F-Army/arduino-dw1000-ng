@@ -267,7 +267,7 @@ void loop() {
     if (receivedAck) {
         receivedAck = false;
         // get message and parse
-        DW1000Ng::getData(data, LEN_DATA);
+        DW1000Ng::getReceivedData(data, LEN_DATA);
         byte msgId = data[0];
         if (msgId != expectedMsgId) {
             // unexpected message, start over again (except if already POLL)
