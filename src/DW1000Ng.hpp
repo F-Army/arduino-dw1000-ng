@@ -363,14 +363,6 @@ namespace DW1000Ng {
 	// TODO is implemented, but needs testing
 	void waitForResponse(boolean val);
 	
-	/* device status flags */
-	boolean isReceiveTimestampAvailable();
-	boolean isTransmitDone();
-	boolean isReceiveDone();
-	boolean isReceiveFailed();
-	boolean isReceiveTimeout();
-	boolean isClockProblem();
-	
 	/* timestamp correction. */
 	void correctTimestamp(DW1000NgTime& timestamp);
 	

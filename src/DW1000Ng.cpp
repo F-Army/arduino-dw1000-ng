@@ -895,35 +895,77 @@ namespace DW1000Ng {
 			readBytes(TX_FCTRL, NO_SUB, _txfctrl, LEN_TX_FCTRL);
 		}
 
+		boolean _isTransmitDone() {
+			return DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, TXFRS_BIT);
+		}
+
+		boolean _isReceiveTimestampAvailable() {
+			return DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, LDEDONE_BIT);
+		}
+
+		boolean _isReceiveDone() {
+			if(_frameCheck) {
+				return DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXFCG_BIT);
+			}
+			return DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXDFR_BIT);
+		}
+
+		boolean _isReceiveFailed() {
+			boolean ldeErr, rxCRCErr, rxHeaderErr, rxDecodeErr;
+			ldeErr      = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT);
+			rxCRCErr    = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXFCE_BIT);
+			rxHeaderErr = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXPHE_BIT);
+			rxDecodeErr = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT);
+			if(ldeErr || rxCRCErr || rxHeaderErr || rxDecodeErr) {
+				return true;
+			}
+			return false;
+		}
+
+		//Checks to see any of the three timeout bits in sysstatus are high (RXRFTO (Frame Wait timeout), RXPTO (Preamble timeout), RXSFDTO (Start frame delimiter(?) timeout).
+		boolean _isReceiveTimeout() {
+			return (DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXRFTO_BIT) | DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXPTO_BIT) | DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXSFDTO_BIT));
+		}
+
+		boolean _isClockProblem() {
+			boolean clkllErr, rfllErr;
+			clkllErr = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, CLKPLL_LL_BIT);
+			rfllErr  = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RFPLL_LL_BIT);
+			if(clkllErr || rfllErr) {
+				return true;
+			}
+			return false;
+		}
+
 		void _handleInterrupt() {
 			// read current status and handle via callbacks
 			_readSystemEventStatusRegister();
-			if(isClockProblem() /* TODO and others */ && _handleError != 0) {
+			if(_isClockProblem() /* TODO and others */ && _handleError != 0) {
 				(*_handleError)();
 			}
-			if(isTransmitDone()) {
+			if(_isTransmitDone()) {
 				_clearTransmitStatus();
 				if(_handleSent != nullptr)
 					(*_handleSent)();
 			}
-			if(isReceiveTimestampAvailable()) {
+			if(_isReceiveTimestampAvailable()) {
 				_clearReceiveTimestampAvailableStatus();
 				if(_handleReceiveTimestampAvailable != nullptr)
 					(*_handleReceiveTimestampAvailable)();
 			}
-			if(isReceiveFailed()) {
+			if(_isReceiveFailed()) {
 				_clearReceiveFailedStatus();
 				forceTRxOff();
 				_resetReceiver();
 				if(_handleReceiveFailed != nullptr)
 					(*_handleReceiveFailed)();
-			} else if(isReceiveTimeout()) {
+			} else if(_isReceiveTimeout()) {
 				_clearReceiveTimeoutStatus();
 				forceTRxOff();
 				_resetReceiver();
 				if(_handleReceiveTimeout != nullptr)
 					(*_handleReceiveTimeout)();
-			} else if(isReceiveDone()) {
+			} else if(_isReceiveDone()) {
 				_clearReceiveStatus();
 				if(_handleReceived != nullptr)
 					(*_handleReceived)();
@@ -1772,48 +1814,6 @@ namespace DW1000Ng {
 
 	void getSystemTimestamp(byte data[]) {
 		readBytes(SYS_TIME, NO_SUB, data, LEN_SYS_TIME);
-	}
-
-	boolean isTransmitDone() {
-		return DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, TXFRS_BIT);
-	}
-
-	boolean isReceiveTimestampAvailable() {
-		return DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, LDEDONE_BIT);
-	}
-
-	boolean isReceiveDone() {
-		if(_frameCheck) {
-			return DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXFCG_BIT);
-		}
-		return DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXDFR_BIT);
-	}
-
-	boolean isReceiveFailed() {
-		boolean ldeErr, rxCRCErr, rxHeaderErr, rxDecodeErr;
-		ldeErr      = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT);
-		rxCRCErr    = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXFCE_BIT);
-		rxHeaderErr = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXPHE_BIT);
-		rxDecodeErr = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT);
-		if(ldeErr || rxCRCErr || rxHeaderErr || rxDecodeErr) {
-			return true;
-		}
-		return false;
-	}
-
-	//Checks to see any of the three timeout bits in sysstatus are high (RXRFTO (Frame Wait timeout), RXPTO (Preamble timeout), RXSFDTO (Start frame delimiter(?) timeout).
-	boolean isReceiveTimeout() {
-		return (DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXRFTO_BIT) | DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXPTO_BIT) | DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXSFDTO_BIT));
-	}
-
-	boolean isClockProblem() {
-		boolean clkllErr, rfllErr;
-		clkllErr = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, CLKPLL_LL_BIT);
-		rfllErr  = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RFPLL_LL_BIT);
-		if(clkllErr || rfllErr) {
-			return true;
-		}
-		return false;
 	}
 
 	float getReceiveQuality() {
