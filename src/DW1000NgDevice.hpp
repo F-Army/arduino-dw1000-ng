@@ -71,6 +71,9 @@ public:
 
     void forceIdle();
 
+    void hardwareReset();
+    void softwareReset();
+
     /* GETTERS AND SETTERS */
     DW1000NgDeviceConfiguration getConfiguration();
     void setConfiguration(DW1000NgDeviceConfiguration config);
@@ -96,10 +99,8 @@ public:
 	void setReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void));
 
     /* //TODO
-        void sleep();
         void deepSleep();
-        void hardwareReset();
-        void softwareReset();
+        
         void getBatteryVoltage();
         void getTemperature();
     */

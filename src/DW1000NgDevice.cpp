@@ -184,6 +184,13 @@ void DW1000NgDevice::forceIdle() {
     DW1000Ng::forceTRxOff();
 }
 
+void DW1000NgDevice::hardwareReset() {
+    DW1000Ng::reset();
+}
+void DW1000NgDevice::softwareReset() {
+    DW1000Ng::softReset();
+}
+
 DW1000NgDeviceConfiguration DW1000NgDevice::getConfiguration() {
     return _config;
 }
