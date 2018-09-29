@@ -183,3 +183,16 @@ DW1000NgTime DW1000NgDevice::retrieveLastReceiveTimestamp() {
 void DW1000NgDevice::forceIdle() {
     DW1000Ng::forceTRxOff();
 }
+
+DW1000NgDeviceConfiguration DW1000NgDevice::getConfiguration() {
+    return _config;
+}
+
+void DW1000NgDevice::setConfiguration(DW1000NgDeviceConfiguration config) {
+    _config.setConfiguration(config.getConfiguration());
+}
+
+void DW1000NgDevice::setConfiguration(DeviceConfigurationProfile profile) {
+    _config.setConfiguration(profile);
+}
+
