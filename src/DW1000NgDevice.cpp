@@ -262,3 +262,23 @@ void DW1000NgDevice::setReceiveTimeoutHandler(void (* handleReceiveTimeout)(void
 void DW1000NgDevice::setReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void)) {
     DW1000Ng::attachReceiveTimestampAvailableHandler(handleReceiveTimestampAvailable);
 }
+
+void DW1000NgDevice::sleep() {
+    DW1000Ng::deepSleep();
+}
+
+void DW1000NgDevice::wake() {
+    DW1000Ng::spiWakeup();
+}
+
+float DW1000NgDevice::getBatteryVoltage(){
+    float volt;
+    DW1000Ng::getVbat(volt);
+    return volt;
+}
+
+float DW1000NgDevice::getTemperature(){
+    float temp;
+    DW1000Ng::getTemp(temp);
+    return temp;
+}

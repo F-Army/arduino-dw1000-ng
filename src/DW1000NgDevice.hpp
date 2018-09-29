@@ -98,12 +98,11 @@ public:
 	void setReceiveTimeoutHandler(void (* handleReceiveTimeout)(void));
 	void setReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void));
 
-    /* //TODO
-        void deepSleep();
+    void sleep();
+    void wake();
         
-        void getBatteryVoltage();
-        void getTemperature();
-    */
+    float getBatteryVoltage();
+    float getTemperature();
 
 private:
     DW1000NgDeviceConfiguration _config;
