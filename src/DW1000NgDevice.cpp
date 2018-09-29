@@ -220,3 +220,13 @@ void DW1000NgDevice::setPanId(uint16_t panId) {
 uint16_t DW1000NgDevice::getPanId() {
     return _panId;
 }
+
+void DW1000NgDevice::setEUI(char eui[]) {
+    memcpy(_eui, eui, LEN_EUI);
+    setEUI(_eui);
+}
+
+String DW1000NgDevice::getEUI() {
+    String euiString(_eui);
+    return euiString;
+}
