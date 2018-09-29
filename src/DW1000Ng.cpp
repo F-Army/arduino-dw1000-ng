@@ -993,6 +993,9 @@ namespace DW1000Ng {
 		_enableClock(SYS_AUTO_CLOCK);
 		delay(5);
 		
+		/* Cleared AON:CFG1(0x2C:0x0A) for proper operation of deepSleep */
+		writeBytes(AON, AON_CFG1_SUB, 0x00, LEN_AON_CFG1);
+
 		// read the temp and vbat readings from OTP that were recorded during production test
 		// see 6.3.1 OTP memory map
 		byte buf_otp[4];
@@ -1070,21 +1073,16 @@ namespace DW1000Ng {
 		memset(aon_wcfg, 0, LEN_AON_WCFG);
 		readBytes(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LDC_BIT, true);
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_PRES_SLEEP_BIT, false);
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LLDE_BIT, true);
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LDD0_BIT, true);
 		writeBytes(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
-
-		byte pmsc_ctrl1[LEN_PMSC_CTRL1];
-		memset(pmsc_ctrl1, 0, LEN_PMSC_CTRL1);
-		readBytes(PMSC, PMSC_CTRL1_SUB, pmsc_ctrl1, LEN_PMSC_CTRL1);
-		DW1000NgUtils::setBit(pmsc_ctrl1, LEN_PMSC_CTRL1, ATXSLP_BIT, false);
-		DW1000NgUtils::setBit(pmsc_ctrl1, LEN_PMSC_CTRL1, ARXSLP_BIT, false);
-		writeBytes(PMSC, PMSC_CTRL1_SUB, pmsc_ctrl1, LEN_PMSC_CTRL1);
 
 		byte aon_cfg0[LEN_AON_CFG0];
 		memset(aon_cfg0, 0, LEN_AON_CFG0);
 		readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_SPI_BIT, true);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_PIN_BIT, true);
+		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_SPI_BIT, true);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, false);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, SLEEP_EN_BIT, true);
 		writeBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
@@ -1092,20 +1090,27 @@ namespace DW1000Ng {
 		byte aon_ctrl[LEN_AON_CTRL];
 		memset(aon_ctrl, 0, LEN_AON_CTRL);
 		readBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
-		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, UPL_CFG_BIT, true);
+		//DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, UPL_CFG_BIT, true);
 		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, SAVE_BIT, true);
 		writeBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
 	}
 
 	void spiWakeup(){
+		byte deviceId[LEN_DEV_ID];
+		byte expectedDeviceId[LEN_DEV_ID];
+		DW1000NgUtils::writeValueToBytes(expectedDeviceId, 0xDECA0130, LEN_DEV_ID);
+		readBytes(DEV_ID, NO_SUB, deviceId, LEN_DEV_ID);
+		if (memcmp(deviceId, expectedDeviceId, LEN_DEV_ID)) {
 			digitalWrite(_ss, LOW);
-			delay(2);
+			delay(1);
 			digitalWrite(_ss, HIGH);
+			delay(5);
+			setTxAntennaDelay(_antennaTxDelay);
 			if (_debounceClockEnabled){
 					enableDebounceClock();
 			}
+		}
 	}
-
 
 	void reset() {
 		if(_rst == 0xff) {
