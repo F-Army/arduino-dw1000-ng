@@ -203,3 +203,11 @@ void DW1000NgDevice::setConfiguration(DeviceConfigurationProfile profile) {
     _config.setConfiguration(profile);
 }
 
+void DW1000NgDevice::setShortAddress(uint16_t shortAddress) {
+    _shortAddress = shortAddress;
+    DW1000Ng::setDeviceAddress(_shortAddress);
+}
+
+uint16_t DW1000NgDevice::getShortAddress() {
+    return _shortAddress;
+}
