@@ -339,9 +339,9 @@ namespace DW1000Ng {
 	void startTransmit(TransmitMode mode = TransmitMode::IMMEDIATE);
 	
 	/* host-initiated reading of temperature and battery voltage */
-	void getTemp(float& temp);
-	void getVbat(float& vbat);
-	void getTempAndVbat(float& temp, float& vbat);
+	void getTemperature(float& temp);
+	void getBatteryVoltage(float& vbat);
+	void getTemperatureAndBatteryVoltage(float& temp, float& vbat);
 
 	
 	/* Allow MAC frame filtering */

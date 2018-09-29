@@ -1271,19 +1271,19 @@ namespace DW1000Ng {
 		writeBytes(EUI, NO_SUB, reverseEUI, LEN_EUI);
 	}
 
-	void getTemp(float& temp) {
+	void getTemperature(float& temp) {
 		_vbatAndTempSteps();
 		byte sar_ltemp = 0; readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
 		temp = (sar_ltemp - _tmeas23C) * 1.14f + 23.0f;
 	}
 
-	void getVbat(float& vbat) {
+	void getBatteryVoltage(float& vbat) {
 		_vbatAndTempSteps();
 		byte sar_lvbat = 0; readBytes(TX_CAL, 0x03, &sar_lvbat, 1);
 		vbat = (sar_lvbat - _vmeas3v3) / 173.0f + 3.3f;
 	}
 
-	void getTempAndVbat(float& temp, float& vbat) {
+	void getTemperatureAndBatteryVoltage(float& temp, float& vbat) {
 		// follow the procedure from section 6.4 of the User Manual
 		_vbatAndTempSteps();
 		byte sar_lvbat = 0; readBytes(TX_CAL, 0x03, &sar_lvbat, 1);
