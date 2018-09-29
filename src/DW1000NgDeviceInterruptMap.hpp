@@ -25,47 +25,12 @@
 #pragma once
 
 #include <Arduino.h>
-#include "DW1000NgConstants.hpp"
-#include "DW1000NgCompileOptions.hpp"
 
-typedef struct device_configuration_t {
-    boolean extendedFrameLength;
-    boolean receiverAutoReenable;
-    boolean smartPower;
-    boolean frameCheck;
-    boolean nlos;
-    SFDMode sfd;
-    Channel channel;
-    DataRate dataRate;
-    PulseFrequency pulseFreq;
-    PreambleLength preambleLen;
-    PreambleCode preaCode;
-} device_configuration_t;
-
-enum class DeviceConfigurationProfile {
-    DEFAULT_PROFILE,
-    DEFAULT_NLOS_PROFILE
-};
-
-#if DW1000NGDEVICECONFIGURATION_H_PRINTABLE
-class DW1000NgDeviceConfiguration : public Printable {
-#else
-class DW1000NgDeviceConfiguration {
-#endif
-
-public:
-    DW1000NgDeviceConfiguration(DeviceConfigurationProfile profile = DeviceConfigurationProfile::DEFAULT_PROFILE);
-    DW1000NgDeviceConfiguration(device_configuration_t conf);
-
-#if DW1000NGDEVICECONFIGURATION_H_PRINTABLE
-    size_t printTo(Print& p) const;
-#endif
-
-    void setConfiguration(device_configuration_t config);
-    void setConfiguration(DeviceConfigurationProfile profile);
-
-    device_configuration_t getConfiguration();
-
-private:
-    device_configuration_t _config;
-};
+typedef struct device_interrupt_map_t {
+    boolean interruptOnSent;
+    boolean interruptOnReceived;
+    boolean interruptOnReceiveFailed;
+    boolean interruptOnReceiveTimeout;
+    boolean interruptOnReceiveTimestampAvailable;
+    boolean interruptOnAutomaticAcknowledgeTrigger;
+} device_interrupt_map_t;
