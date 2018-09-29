@@ -948,6 +948,60 @@ namespace DW1000Ng {
             writeBytes(PMSC, PMSC_CTRL1_SUB, zero, 2); // To re-enable write 0xE7
         }
 
+		// TODO check function, different type violations between byte and int
+		void _correctTimestamp(DW1000NgTime& timestamp) {
+			// base line dBm, which is -61, 2 dBm steps, total 18 data points (down to -95 dBm)
+			float rxPowerBase     = -(getReceivePower()+61.0f)*0.5f;
+			int16_t   rxPowerBaseLow  = (int16_t)rxPowerBase; // TODO check type
+			int16_t   rxPowerBaseHigh = rxPowerBaseLow+1; // TODO check type
+			if(rxPowerBaseLow <= 0) {
+				rxPowerBaseLow  = 0;
+				rxPowerBaseHigh = 0;
+			} else if(rxPowerBaseHigh >= 17) {
+				rxPowerBaseLow  = 17;
+				rxPowerBaseHigh = 17;
+			}
+			// select range low/high values from corresponding table
+			int16_t rangeBiasHigh;
+			int16_t rangeBiasLow;
+			if(_channel == Channel::CHANNEL_4 || _channel == Channel::CHANNEL_7) {
+				// 900 MHz receiver bandwidth
+				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
+					rangeBiasHigh = (rxPowerBaseHigh < BIAS_900_16_ZERO ? -BIAS_900_16[rxPowerBaseHigh] : BIAS_900_16[rxPowerBaseHigh]);
+					rangeBiasHigh <<= 1;
+					rangeBiasLow  = (rxPowerBaseLow < BIAS_900_16_ZERO ? -BIAS_900_16[rxPowerBaseLow] : BIAS_900_16[rxPowerBaseLow]);
+					rangeBiasLow <<= 1;
+				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
+					rangeBiasHigh = (rxPowerBaseHigh < BIAS_900_64_ZERO ? -BIAS_900_64[rxPowerBaseHigh] : BIAS_900_64[rxPowerBaseHigh]);
+					rangeBiasHigh <<= 1;
+					rangeBiasLow  = (rxPowerBaseLow < BIAS_900_64_ZERO ? -BIAS_900_64[rxPowerBaseLow] : BIAS_900_64[rxPowerBaseLow]);
+					rangeBiasLow <<= 1;
+				} else {
+					// TODO proper error handling
+					return;
+				}
+			} else {
+				// 500 MHz receiver bandwidth
+				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
+					rangeBiasHigh = (rxPowerBaseHigh < BIAS_500_16_ZERO ? -BIAS_500_16[rxPowerBaseHigh] : BIAS_500_16[rxPowerBaseHigh]);
+					rangeBiasLow  = (rxPowerBaseLow < BIAS_500_16_ZERO ? -BIAS_500_16[rxPowerBaseLow] : BIAS_500_16[rxPowerBaseLow]);
+				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
+					rangeBiasHigh = (rxPowerBaseHigh < BIAS_500_64_ZERO ? -BIAS_500_64[rxPowerBaseHigh] : BIAS_500_64[rxPowerBaseHigh]);
+					rangeBiasLow  = (rxPowerBaseLow < BIAS_500_64_ZERO ? -BIAS_500_64[rxPowerBaseLow] : BIAS_500_64[rxPowerBaseLow]);
+				} else {
+					// TODO proper error handling
+					return;
+				}
+			}
+			// linear interpolation of bias values
+			float      rangeBias = rangeBiasLow+(rxPowerBase-rxPowerBaseLow)*(rangeBiasHigh-rangeBiasLow);
+			// range bias [mm] to timestamp modification value conversion
+			DW1000NgTime adjustmentTime;
+			adjustmentTime.setTimestamp((int16_t)(rangeBias*DW1000NgTime::DISTANCE_OF_RADIO_INV*0.001f));
+			// apply correction
+			timestamp -= adjustmentTime;
+		}
+
         void _configureRFTransmitPowerSpectrumTestMode() {
 			/* Enabled TXFEN, PLLFEN, LDOFEN and set TXRXSW to TX */
             byte enable_mask[4];
@@ -1741,61 +1795,7 @@ namespace DW1000Ng {
 		readBytes(RX_TIME, RX_STAMP_SUB, rxTimeBytes, LEN_RX_STAMP);
 		time.setTimestamp(rxTimeBytes);
 		// correct timestamp (i.e. consider range bias)
-		correctTimestamp(time);
-	}
-
-	// TODO check function, different type violations between byte and int
-	void correctTimestamp(DW1000NgTime& timestamp) {
-		// base line dBm, which is -61, 2 dBm steps, total 18 data points (down to -95 dBm)
-		float rxPowerBase     = -(getReceivePower()+61.0f)*0.5f;
-		int16_t   rxPowerBaseLow  = (int16_t)rxPowerBase; // TODO check type
-		int16_t   rxPowerBaseHigh = rxPowerBaseLow+1; // TODO check type
-		if(rxPowerBaseLow <= 0) {
-			rxPowerBaseLow  = 0;
-			rxPowerBaseHigh = 0;
-		} else if(rxPowerBaseHigh >= 17) {
-			rxPowerBaseLow  = 17;
-			rxPowerBaseHigh = 17;
-		}
-		// select range low/high values from corresponding table
-		int16_t rangeBiasHigh;
-		int16_t rangeBiasLow;
-		if(_channel == Channel::CHANNEL_4 || _channel == Channel::CHANNEL_7) {
-			// 900 MHz receiver bandwidth
-			if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
-				rangeBiasHigh = (rxPowerBaseHigh < BIAS_900_16_ZERO ? -BIAS_900_16[rxPowerBaseHigh] : BIAS_900_16[rxPowerBaseHigh]);
-				rangeBiasHigh <<= 1;
-				rangeBiasLow  = (rxPowerBaseLow < BIAS_900_16_ZERO ? -BIAS_900_16[rxPowerBaseLow] : BIAS_900_16[rxPowerBaseLow]);
-				rangeBiasLow <<= 1;
-			} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
-				rangeBiasHigh = (rxPowerBaseHigh < BIAS_900_64_ZERO ? -BIAS_900_64[rxPowerBaseHigh] : BIAS_900_64[rxPowerBaseHigh]);
-				rangeBiasHigh <<= 1;
-				rangeBiasLow  = (rxPowerBaseLow < BIAS_900_64_ZERO ? -BIAS_900_64[rxPowerBaseLow] : BIAS_900_64[rxPowerBaseLow]);
-				rangeBiasLow <<= 1;
-			} else {
-				// TODO proper error handling
-				return;
-			}
-		} else {
-			// 500 MHz receiver bandwidth
-			if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
-				rangeBiasHigh = (rxPowerBaseHigh < BIAS_500_16_ZERO ? -BIAS_500_16[rxPowerBaseHigh] : BIAS_500_16[rxPowerBaseHigh]);
-				rangeBiasLow  = (rxPowerBaseLow < BIAS_500_16_ZERO ? -BIAS_500_16[rxPowerBaseLow] : BIAS_500_16[rxPowerBaseLow]);
-			} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
-				rangeBiasHigh = (rxPowerBaseHigh < BIAS_500_64_ZERO ? -BIAS_500_64[rxPowerBaseHigh] : BIAS_500_64[rxPowerBaseHigh]);
-				rangeBiasLow  = (rxPowerBaseLow < BIAS_500_64_ZERO ? -BIAS_500_64[rxPowerBaseLow] : BIAS_500_64[rxPowerBaseLow]);
-			} else {
-				// TODO proper error handling
-				return;
-			}
-		}
-		// linear interpolation of bias values
-		float      rangeBias = rangeBiasLow+(rxPowerBase-rxPowerBaseLow)*(rangeBiasHigh-rangeBiasLow);
-		// range bias [mm] to timestamp modification value conversion
-		DW1000NgTime adjustmentTime;
-		adjustmentTime.setTimestamp((int16_t)(rangeBias*DW1000NgTime::DISTANCE_OF_RADIO_INV*0.001f));
-		// apply correction
-		timestamp -= adjustmentTime;
+		_correctTimestamp(time);
 	}
 
 	void getSystemTimestamp(DW1000NgTime& time) {

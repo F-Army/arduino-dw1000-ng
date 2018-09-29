@@ -365,9 +365,6 @@ namespace DW1000Ng {
 	// TODO is implemented, but needs testing
 	void waitForResponse(boolean val);
 	
-	/* timestamp correction. */
-	void correctTimestamp(DW1000NgTime& timestamp);
-	
 	/* reading and writing bytes from and to DW1000Ng module. */
 	void readBytes(byte cmd, uint16_t offset, byte data[], uint16_t n);
 	void readBytesOTP(uint16_t address, byte data[]);
