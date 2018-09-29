@@ -238,3 +238,27 @@ device_interrupt_map_t DW1000NgDevice::getInterruptMap() {
 void DW1000NgDevice::setInterruptMap(device_interrupt_map_t int_map) {
     _interrupt_map = int_map;
 }
+
+void DW1000NgDevice::setErrorHandler(void (* handleError)(void)) {
+    DW1000Ng::attachErrorHandler(handleError);
+}
+
+void DW1000NgDevice::setSentHandler(void (* handleSent)(void)) {
+    DW1000Ng::attachSentHandler(handleSent);
+}
+
+void DW1000NgDevice::setReceivedHandler(void (* handleReceived)(void)) {
+    DW1000Ng::attachReceivedHandler(handleReceived);
+}
+
+void DW1000NgDevice::setReceiveFailedHandler(void (* handleReceiveFailed)(void)) {
+    DW1000Ng::attachReceiveFailedHandler(handleReceiveFailed);
+}
+
+void DW1000NgDevice::setReceiveTimeoutHandler(void (* handleReceiveTimeout)(void)) {
+    DW1000Ng::attachReceiveTimeoutHandler(handleReceiveTimeout);
+}
+
+void DW1000NgDevice::setReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void)) {
+    DW1000Ng::attachReceiveTimestampAvailableHandler(handleReceiveTimestampAvailable);
+}
