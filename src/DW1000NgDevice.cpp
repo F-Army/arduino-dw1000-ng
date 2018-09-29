@@ -211,3 +211,12 @@ void DW1000NgDevice::setShortAddress(uint16_t shortAddress) {
 uint16_t DW1000NgDevice::getShortAddress() {
     return _shortAddress;
 }
+
+void DW1000NgDevice::setPanId(uint16_t panId) {
+    _panId = panId;
+    DW1000Ng::setNetworkId(panId);
+}
+
+uint16_t DW1000NgDevice::getPanId() {
+    return _panId;
+}
