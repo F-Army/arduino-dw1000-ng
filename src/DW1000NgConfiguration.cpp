@@ -58,44 +58,44 @@ namespace {
 }
 
 DW1000NgConfiguration::DW1000NgConfiguration(ConfigurationProfile profile) {
-    setConfiguration(profile);
+    this->setConfiguration(profile);
 }
 
 DW1000NgConfiguration::DW1000NgConfiguration(device_configuration_t conf) {
-    setConfiguration(conf);
+    this->setConfiguration(conf);
 }
 
 #if DW1000NGCONFIGURATION_H_PRINTABLE
     size_t DW1000NgConfiguration::printTo(Print& p) const {
         String message = "";
-        message += "Extended Frame Length:"; message += _config.extendedFrameLength;
-        message += "\nReceiver Auto reenable:"; message += _config.receiverAutoReenable;
-        message += "\nSmart Power:"; message += _config.smartPower;
-        message += "\nFrame check:"; message += _config.frameCheck;
-        message += "\nNlos:"; message += _config.nlos;
+        message += "Extended Frame Length:"; message += this->_config.extendedFrameLength;
+        message += "\nReceiver Auto reenable:"; message += this->_config.receiverAutoReenable;
+        message += "\nSmart Power:"; message += this->_config.smartPower;
+        message += "\nFrame check:"; message += this->_config.frameCheck;
+        message += "\nNlos:"; message += this->_config.nlos;
         message += "\nSfd:"; 
-        if(_config.sfd == SFDMode::STANDARD_SFD) {
+        if(this->_config.sfd == SFDMode::STANDARD_SFD) {
             message += "Standard";
         } else {
             message += "Decawave";
         }
-        message += "\nChannel:"; message += static_cast<byte>(_config.channel);  
+        message += "\nChannel:"; message += static_cast<byte>(this->_config.channel);  
         message += "\nDataRate:";
-        if(_config.dataRate == DataRate::RATE_110KBPS) {
+        if(this->_config.dataRate == DataRate::RATE_110KBPS) {
             message += "110Kbps";
-        } else if(_config.dataRate == DataRate::RATE_850KBPS) {
+        } else if(this->_config.dataRate == DataRate::RATE_850KBPS) {
             message += "850Kbps";
         } else {
             message += "6800Kbps";
         }
         message += "\nPRF:";
-        if(_config.pulseFreq == PulseFrequency::FREQ_16MHZ) {
+        if(this->_config.pulseFreq == PulseFrequency::FREQ_16MHZ) {
             message += "16Mhz";
         } else {
             message += "64Mhz";
         }
         message += "\nPreamble Length:";
-        switch(_config.preambleLen) {
+        switch(this->_config.preambleLen) {
             case PreambleLength::LEN_64:
                 message += "64";
                 break;
@@ -121,7 +121,7 @@ DW1000NgConfiguration::DW1000NgConfiguration(device_configuration_t conf) {
                 message += "4096";
                 break;
         }
-        message += "\nPreamble Code:"; message += static_cast<byte>(_config.preaCode);
+        message += "\nPreamble Code:"; message += static_cast<byte>(this->_config.preaCode);
 
         p.print(message);
         return message.length();      
@@ -129,29 +129,29 @@ DW1000NgConfiguration::DW1000NgConfiguration(device_configuration_t conf) {
 #endif
 
 void DW1000NgConfiguration::setConfiguration(device_configuration_t config) {
-    _config.extendedFrameLength = config.extendedFrameLength;
-    _config.receiverAutoReenable = config.receiverAutoReenable;
-    _config.smartPower = config.smartPower;
-    _config.frameCheck = config.frameCheck;
-    _config.nlos = config.nlos;
-    _config.sfd = config.sfd;
-    _config.channel = config.channel;
-    _config.dataRate = config.dataRate;
-    _config.pulseFreq = config.pulseFreq;
-    _config.preambleLen = config.preambleLen;
-    _config.preaCode = config.preaCode;
+    this->_config.extendedFrameLength = config.extendedFrameLength;
+    this->_config.receiverAutoReenable = config.receiverAutoReenable;
+    this->_config.smartPower = config.smartPower;
+    this->_config.frameCheck = config.frameCheck;
+    this->_config.nlos = config.nlos;
+    this->_config.sfd = config.sfd;
+    this->_config.channel = config.channel;
+    this->_config.dataRate = config.dataRate;
+    this->_config.pulseFreq = config.pulseFreq;
+    this->_config.preambleLen = config.preambleLen;
+    this->_config.preaCode = config.preaCode;
 }
 
 void DW1000NgConfiguration::setConfiguration(ConfigurationProfile profile) {
     if(profile == ConfigurationProfile::DEFAULT_PROFILE) {
-        setConfiguration(DEFAULT_CONFIGURATION);
+        this->setConfiguration(DEFAULT_CONFIGURATION);
     } else if(profile == ConfigurationProfile::DEFAULT_NLOS_PROFILE) {
-        setConfiguration(NLOS_CONF);
+        this->setConfiguration(NLOS_CONF);
     } else {
         //TODO error handler
     }
 }
 
 device_configuration_t DW1000NgConfiguration::getConfiguration() {
-    return _config;
+    return this->_config;
 }
