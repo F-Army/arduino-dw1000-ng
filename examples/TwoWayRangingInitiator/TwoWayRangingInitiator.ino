@@ -174,7 +174,7 @@ void transmitRange() {
 	DW1000Ng::getSystemTimestamp(timeRangeSent);
 	timeRangeSent += delayTime;
 	timeRangeSent.getTimestamp(delayBytes);
-    DW1000Ng::setDelay(delayBytes);
+    DW1000Ng::setDelayedTRX(delayBytes);
     DW1000NgTime antennaDelay;
     antennaDelay.setTimestamp(DW1000Ng::getTxAntennaDelay());
     timeRangeSent += antennaDelay;

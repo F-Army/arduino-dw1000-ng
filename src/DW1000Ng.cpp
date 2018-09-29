@@ -1516,7 +1516,7 @@ namespace DW1000Ng {
         writeBytes(DIG_DIAG, DIAG_TMC_SUB, diagnosticBytes, LEN_DIAG_TMC);
     }
 
-	void setDelay(byte futureTimeBytes[]) {
+	void setDelayedTRX(byte futureTimeBytes[]) {
 		/* the least significant 9-bits are ignored in DX_TIME in functional modes */
 		writeBytes(DX_TIME, NO_SUB, futureTimeBytes, LEN_DX_TIME);
 	}
