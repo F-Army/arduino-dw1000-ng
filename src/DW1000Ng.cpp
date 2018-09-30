@@ -1350,13 +1350,12 @@ namespace DW1000Ng {
         _writeToRegister(AON, AON_WCFG_SUB, 0x00, LEN_AON_WCFG);
         _writeToRegister(AON, AON_CFG0_SUB, 0x00, LEN_AON_CFG0);
         _writeToRegister(AON, AON_CTRL_SUB, 0x02, LEN_AON_CTRL);
+		 /* Reset TX,RX and PMSC */
+        byte pmscctrl0[LEN_PMSC_CTRL0];
+        _readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+        pmscctrl0[3] = 0x00;
+        _writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 
-		byte pmscctrl0[LEN_PMSC_CTRL0];
-		_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-		pmscctrl0[0] = 0x01;
-		_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-		pmscctrl0[3] = 0x00;
-		_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 		delay(10);
 		pmscctrl0[0] = 0x00;
 		pmscctrl0[3] = 0xF0;
