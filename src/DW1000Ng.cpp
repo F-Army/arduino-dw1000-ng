@@ -1346,6 +1346,10 @@ namespace DW1000Ng {
 	void softReset() {
 		/* Sets SYS_XTI_CLOCK and write PMSC to all zero */
         _disableSequencing(); 
+ 		/* Clear AON and WakeUp configuration */
+        _writeToRegister(AON, AON_WCFG_SUB, 0x00, LEN_AON_WCFG);
+        _writeToRegister(AON, AON_CFG0_SUB, 0x00, LEN_AON_CFG0);
+        _writeToRegister(AON, AON_CTRL_SUB, 0x02, LEN_AON_CTRL);
 
 		byte pmscctrl0[LEN_PMSC_CTRL0];
 		_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
