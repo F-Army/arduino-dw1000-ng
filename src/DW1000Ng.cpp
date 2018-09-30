@@ -1357,8 +1357,8 @@ namespace DW1000Ng {
         _writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 
 		delay(5);
-
-		pmscctrl0[0] = 0x00;
+		
+		/* Reset to all one SOFTRESET. Clock remain to SYS_XTI_CLOCK */
 		pmscctrl0[3] = 0xF0;
 		_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 	}
