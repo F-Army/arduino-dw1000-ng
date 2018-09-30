@@ -48,7 +48,6 @@
 #include <string.h>
 #include "DW1000NgUtils.hpp"
 #include "DW1000NgConstants.hpp"
-#include "DW1000NgConfiguration.hpp"
 #include "DW1000NgRegisters.hpp"
 #include "DW1000Ng.hpp"
 #include "DW1000NgTime.hpp"

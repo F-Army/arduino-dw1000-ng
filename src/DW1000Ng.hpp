@@ -49,6 +49,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include "DW1000NgConstants.hpp"
+#include "DW1000NgConfiguration.hpp"
 #include "DW1000NgTime.hpp"
 
 namespace DW1000Ng {
@@ -295,6 +296,8 @@ namespace DW1000Ng {
 	void newConfiguration();
 
 	void commitConfiguration();
+
+	void applyConfiguration(device_configuration_t config);
 	
 	// reception state
 	void startReceive(ReceiveMode mode = ReceiveMode::IMMEDIATE);
