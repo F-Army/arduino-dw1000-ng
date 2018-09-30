@@ -1144,39 +1144,26 @@ namespace DW1000Ng {
 		// TODO throw error if pin is not a interrupt pin
 		attachInterrupt(digitalPinToInterrupt(_irq), pollForEvents, RISING);
 		select();
-		// try locking clock at PLL speed (should be done already,
-		// but just to be sure)
-		_enableClock(SYS_AUTO_CLOCK);
-		delay(5);
 		// reset chip (either soft or hard)
 		if(rst != 0xff) {
 			_rst = rst;
 			// DW1000Ng data sheet v2.08 §5.6.1 page 20, the RSTn pin should not be driven high but left floating.
 			pinMode(_rst, INPUT);
 		}
-		reset();
-		// default network and node id
-		DW1000NgUtils::writeValueToBytes(_networkAndAddress, 0xFF, LEN_PANADR);
-
 		// mimic default system configuration inside the DW1000Ng
 		memset(_syscfg, 0, LEN_SYS_CFG);
 		setDoubleBuffering(false);
 		_setInterruptPolarity(true);
-
 		// mimic default interrupt mask, i.e. no interrupts
 		_clearInterrupts();
 
-		// load LDE micro-code
+		softReset();
+
 		_enableClock(SYS_XTI_CLOCK);
 		delay(5);
+		// load LDE micro-code
 		_manageLDE();
 		delay(5);
-		_enableClock(SYS_AUTO_CLOCK);
-		delay(5);
-		
-		/* Cleared AON:CFG1(0x2C:0x0A) for proper operation of deepSleep */
-		_writeToRegister(AON, AON_CFG1_SUB, 0x00, LEN_AON_CFG1);
-
 		// read the temp and vbat readings from OTP that were recorded during production test
 		// see 6.3.1 OTP memory map
 		byte buf_otp[4];
@@ -1184,6 +1171,14 @@ namespace DW1000Ng {
 		_vmeas3v3 = buf_otp[0];
 		_readBytesOTP(0x009, buf_otp); // the stored 23C reading
 		_tmeas23C = buf_otp[0];
+
+		_enableClock(SYS_AUTO_CLOCK);
+		delay(5);
+
+		// default network and node id
+		DW1000NgUtils::writeValueToBytes(_networkAndAddress, 0xFF, LEN_PANADR);
+		/* Cleared AON:CFG1(0x2C:0x0A) for proper operation of deepSleep */
+		_writeToRegister(AON, AON_CFG1_SUB, 0x00, LEN_AON_CFG1);
 	}
 
 	void select() {
@@ -1356,7 +1351,6 @@ namespace DW1000Ng {
 		pmscctrl0[3] = 0x00;
 		_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 		delay(5);
-
 		/* Reset to all one SOFTRESET. Clock remain to SYS_XTI_CLOCK */
 		pmscctrl0[3] = 0xF0;
 		_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
