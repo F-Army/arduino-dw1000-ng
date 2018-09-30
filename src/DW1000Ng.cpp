@@ -1356,12 +1356,11 @@ namespace DW1000Ng {
         pmscctrl0[3] = 0x00;
         _writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 
-		delay(10);
+		delay(5);
+
 		pmscctrl0[0] = 0x00;
 		pmscctrl0[3] = 0xF0;
 		_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-		// force into idle mode
-		forceTRxOff();
 	}
 
 	/* ###########################################################################
