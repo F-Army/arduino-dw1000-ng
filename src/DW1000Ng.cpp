@@ -1344,6 +1344,9 @@ namespace DW1000Ng {
 	}
 
 	void softReset() {
+		/* Sets SYS_XTI_CLOCK and write PMSC to all zero */
+        _disableSequencing(); 
+
 		byte pmscctrl0[LEN_PMSC_CTRL0];
 		_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 		pmscctrl0[0] = 0x01;
