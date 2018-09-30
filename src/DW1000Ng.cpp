@@ -1645,6 +1645,21 @@ namespace DW1000Ng {
 		_tune();
 	}
 
+	void applyConfiguration(device_configuration_t config) {
+		setFrameFilter(config.frameFiltering);
+		useExtendedFrameLength(config.extendedFrameLength);
+		setReceiverAutoReenable(config.receiverAutoReenable);
+		useSmartPower(config.smartPower);
+		suppressFrameCheck(config.frameCheck);
+		setNlosOptimization(config.nlos);
+		setSFDMode(config.sfd);
+		setChannel(config.channel);
+		setDataRate(config.dataRate);
+		setPulseFrequency(config.pulseFreq);
+		setPreambleLength(config.preambleLen);
+		setPreambleCode(config.preaCode);
+	}
+
 	void waitForResponse(boolean val) {
 		DW1000NgUtils::setBit(_sysctrl, LEN_SYS_CTRL, WAIT4RESP_BIT, val);
 	}
