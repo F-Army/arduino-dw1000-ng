@@ -249,9 +249,9 @@ void loop() {
             timeRangeReceived = DW1000Ng::getReceiveTimestamp();
             expectedMsgId = POLL;
             if (!protocolFailed) {
-                DW1000NgUtils::writeValueToBytes(data + 1, timePollSent, LENGTH_TIMESTAMP);
-                DW1000NgUtils::writeValueToBytes(data + 6, timePollAckReceived, LENGTH_TIMESTAMP);
-                DW1000NgUtils::writeValueToBytes(data + 11, timeRangeSent, LENGTH_TIMESTAMP);
+                timePollSent = DW1000NgUtils::bytesAsValue(data + 1, LENGTH_TIMESTAMP);
+                timePollAckReceived = DW1000NgUtils::bytesAsValue(data + 6, LENGTH_TIMESTAMP);
+                timeRangeSent = DW1000NgUtils::bytesAsValue(data + 11, LENGTH_TIMESTAMP);
                 // (re-)compute range as two-way ranging is done
                 double distance = DW1000NgRangingUtils::computeRangeAsymmetric(timePollSent,
                                                             timePollReceived, 
