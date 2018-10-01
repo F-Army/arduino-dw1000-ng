@@ -1928,12 +1928,7 @@ namespace DW1000Ng {
 		byte data[LEN_RX_STAMP];
 		memset(data, 0, LEN_RX_STAMP);
 		_readBytes(RX_TIME, RX_STAMP_SUB, data, LEN_RX_STAMP);
-		uint64_t prima = DW1000NgUtils::bytesAsValue(data, LEN_RX_STAMP);
 		_correctTimestamp(data);
-		uint64_t dopo = DW1000NgUtils::bytesAsValue(data, LEN_RX_STAMP);
-		if(prima == dopo) {
-			Serial.println("Ci e qualquadra che non cosa, mirko cosa ciera in quella ceres?");
-		}
 		return DW1000NgUtils::bytesAsValue(data, LEN_RX_STAMP);
 	}
 
