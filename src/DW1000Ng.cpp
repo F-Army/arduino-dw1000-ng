@@ -1650,7 +1650,7 @@ namespace DW1000Ng {
 		useExtendedFrameLength(config.extendedFrameLength);
 		setReceiverAutoReenable(config.receiverAutoReenable);
 		useSmartPower(config.smartPower);
-		suppressFrameCheck(config.frameCheck);
+		suppressFrameCheck(!config.frameCheck);
 		setNlosOptimization(config.nlos);
 		setSFDMode(config.sfd);
 		setChannel(config.channel);

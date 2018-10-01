@@ -98,6 +98,21 @@ uint16_t successRangingCount = 0;
 uint32_t rangingCountPeriod = 0;
 float samplingRate = 0;
 
+device_configuration_t DEFAULT_CONFIG = {
+            false,
+            false,
+            true,
+            true,
+            true,
+            false,
+            SFDMode::STANDARD_SFD,
+            Channel::CHANNEL_5,
+            DataRate::RATE_850KBPS,
+            PulseFrequency::FREQ_16MHZ,
+            PreambleLength::LEN_256,
+            PreambleCode::CODE_3
+        };
+
 void setup() {
     // DEBUG monitoring
     Serial.begin(115200);
@@ -108,6 +123,7 @@ void setup() {
     Serial.println(F("DW1000Ng initialized ..."));
     // general configuration
     DW1000Ng::newConfiguration();
+    DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
     DW1000Ng::setFrameFilter(false);
 	DW1000Ng::useExtendedFrameLength(false);
 	DW1000Ng::setReceiverAutoReenable(true);

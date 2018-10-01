@@ -85,6 +85,21 @@ uint32_t resetPeriod = 250;
 // reply times (same on both sides for symm. ranging)
 uint16_t replyDelayTimeUS = 3000;
 
+device_configuration_t DEFAULT_CONFIG = {
+            false,
+            false,
+            true,
+            true,
+            true,
+            false,
+            SFDMode::STANDARD_SFD,
+            Channel::CHANNEL_5,
+            DataRate::RATE_850KBPS,
+            PulseFrequency::FREQ_16MHZ,
+            PreambleLength::LEN_256,
+            PreambleCode::CODE_3
+        };
+
 void setup() {
     // DEBUG monitoring
     Serial.begin(115200);
@@ -94,6 +109,7 @@ void setup() {
     Serial.println("DW1000Ng initialized ...");
     // general configuration
     DW1000Ng::newConfiguration();
+    DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
     DW1000Ng::setFrameFilter(false);
 	DW1000Ng::useExtendedFrameLength(false);
 	DW1000Ng::setReceiverAutoReenable(true);
