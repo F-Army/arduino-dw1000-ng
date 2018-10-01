@@ -26,6 +26,7 @@
 #include "DW1000NgTime.hpp"
 
 namespace DW1000NgRangingUtils {
+    /*
 
     DW1000NgTime computeRangeAsymmetric(    
                                         DW1000NgTime &timePollSent, 
@@ -65,5 +66,6 @@ namespace DW1000NgRangingUtils {
         timeComputedRange.setTimestamp(tof);
         return timeComputedRange;
     }
+    */
 
 }

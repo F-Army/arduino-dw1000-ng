@@ -24,6 +24,7 @@
 
 #pragma once
 
+
 #include "DW1000NgTime.hpp"
 
 namespace DW1000NgRangingUtils {
@@ -39,7 +40,7 @@ namespace DW1000NgRangingUtils {
  * are capable of symmetric ranging (and of asymmetric ranging anyway).
  */
 
-
+    /*
     DW1000NgTime computeRangeAsymmetric(    
                                         DW1000NgTime &timePollSent, 
                                         DW1000NgTime &timePollReceived, 
@@ -57,4 +58,5 @@ namespace DW1000NgRangingUtils {
                                         DW1000NgTime &timeRangeSent,
                                         DW1000NgTime &timeRangeReceived 
                                     );
+    */
 }
