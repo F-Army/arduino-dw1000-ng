@@ -1461,7 +1461,7 @@ namespace DW1000Ng {
 	}
 
 	void reset() {
-		if(_rst == 0xff) {
+		if(_rst == 0xff) { /* Fallback to Software Reset */
 			softReset();
 		} else {
 			// DW1000Ng data sheet v2.08 §5.6.1 page 20, the RSTn pin should not be driven high but left floating.
@@ -1470,8 +1470,6 @@ namespace DW1000Ng {
 			delay(2);  // DW1000Ng data sheet v2.08 §5.6.1 page 20: nominal 50ns, to be safe take more time
 			pinMode(_rst, INPUT);
 			delay(10); // dw1000Ng data sheet v1.2 page 5: nominal 3 ms, to be safe take more time
-			// force into idle mode (although it should be already after reset)
-			forceTRxOff();
 		}
 	}
 
