@@ -1469,7 +1469,7 @@ namespace DW1000Ng {
 			digitalWrite(_rst, LOW);
 			delay(2);  // DW1000Ng data sheet v2.08 §5.6.1 page 20: nominal 50ns, to be safe take more time
 			pinMode(_rst, INPUT);
-			delay(10); // dw1000Ng data sheet v1.2 page 5: nominal 3 ms, to be safe take more time
+			delay(5); // dw1000Ng data sheet v1.2 page 5: nominal 3 ms, to be safe take more time
 		}
 	}
 
