@@ -1289,7 +1289,7 @@ namespace DW1000Ng {
 		select();
 		// reset chip (either soft or hard)
 		
-		softReset();
+		softwareReset();
 		
 		_enableClock(SYS_XTI_CLOCK);
 		delay(5);
@@ -1462,7 +1462,7 @@ namespace DW1000Ng {
 
 	void reset() {
 		if(_rst == 0xff) { /* Fallback to Software Reset */
-			softReset();
+			softwareReset();
 		} else {
 			// DW1000Ng data sheet v2.08 §5.6.1 page 20, the RSTn pin should not be driven high but left floating.
 			pinMode(_rst, OUTPUT);
@@ -1473,7 +1473,7 @@ namespace DW1000Ng {
 		}
 	}
 
-	void softReset() {
+	void softwareReset() {
 		/* Sets SYS_XTI_CLOCK and write PMSC to all zero */
 		_disableSequencing(); 
 		/* Clear AON and WakeUp configuration */
@@ -1486,7 +1486,7 @@ namespace DW1000Ng {
 		pmscctrl0[3] = 0x00;
 		_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 		delay(5);
-		/* Reset to all one SOFTRESET. Clock remain to SYS_XTI_CLOCK */
+		/* Reset to all one softwareReset. Clock remain to SYS_XTI_CLOCK */
 		pmscctrl0[3] = 0xF0;
 		_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 	}

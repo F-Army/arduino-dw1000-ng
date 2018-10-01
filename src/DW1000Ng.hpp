@@ -55,7 +55,7 @@
 namespace DW1000Ng {
 	/* ##### Init ################################################################ */
 	/** 
-	Initiates and starts a sessions with one or more DW1000Ng. If rst is not set or value 0xff, a soft resets (i.e. command
+	Initiates and starts a sessions with one or more DW1000. If rst is not set or value 0xff, a soft resets (i.e. command
 	triggered) are used and it is assumed that no reset line is wired.
 	 
 	@param[in] irq The interrupt line/pin that connects the Arduino.
@@ -64,7 +64,7 @@ namespace DW1000Ng {
 	void begin(uint8_t ss, uint8_t irq, uint8_t rst = 0xff);
 	
 	/** 
-	(Re-)selects a specific DW1000Ng chip for communication. In case of a single DW1000Ng chip in use
+	(Re-)selects a specific DW1000 chip for communication. In case of a single DW1000Ng chip in use
 	this call is not needed; only a call to `select()` has to be performed once at start up. Other 
 	than a call to `select()` this function does not perform an initial setup of the (again-)selected 
 	chips and assumes it to have a valid configuration loaded.
@@ -75,7 +75,7 @@ namespace DW1000Ng {
 	void select();
 
 	/** 
-	Tells the driver library that no communication to a DW1000Ng will be required anymore.
+	Tells the driver library that no communication to a DW1000 will be required anymore.
 	This basically just frees SPI and the previously used pins.
 	*/
 	void end();
@@ -106,16 +106,16 @@ namespace DW1000Ng {
 	void spiWakeup();
 	
 	/**
-	Resets all connected or the currently selected DW1000Ng chip. A hard reset of all chips
+	Resets all connected or the currently selected DW1000 chip. A hard reset of all chips
 	is preferred, although a soft reset of the currently selected one is executed if no 
 	reset pin has been specified (when using `begin(int)`, instead of `begin(int, int)`).
 	*/
 	void reset();
 	
 	/** 
-	Resets the currently selected DW1000Ng chip programmatically (via corresponding commands).
+	Resets the currently selected DW1000 chip programmatically (via corresponding commands).
 	*/
-	void softReset();
+	void softwareReset();
 	
 	/* ##### Device address management, filters ################################## */
 	/** 
