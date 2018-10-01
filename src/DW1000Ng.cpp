@@ -770,6 +770,42 @@ namespace DW1000Ng {
 			_fsxtalt();
 		}
 
+		void _writeNetworkIdAndDeviceAddress() {
+			_writeBytesToRegister(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
+		}
+
+		void _writeSystemConfigurationRegister() {
+			_writeBytesToRegister(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
+		}
+
+		void _writeChannelControlRegister() {
+			_writeBytesToRegister(CHAN_CTRL, NO_SUB, _chanctrl, LEN_CHAN_CTRL);
+		}
+
+		void _writeTransmitFrameControlRegister() {
+			_writeBytesToRegister(TX_FCTRL, NO_SUB, _txfctrl, LEN_TX_FCTRL);
+		}
+
+		void _writeSystemEventMaskRegister() {
+			_writeBytesToRegister(SYS_MASK, NO_SUB, _sysmask, LEN_SYS_MASK);
+		}
+
+		void _writeAntennaDelayRegisters() {
+			byte antennaTxDelayBytes[2];
+			byte antennaRxDelayBytes[2];
+			DW1000NgUtils::writeValueToBytes(antennaTxDelayBytes, _antennaTxDelay, LEN_TX_ANTD);
+			DW1000NgUtils::writeValueToBytes(antennaRxDelayBytes, _antennaRxDelay, LEN_LDE_RXANTD);
+			_writeBytesToRegister(TX_ANTD, NO_SUB, antennaTxDelayBytes, LEN_TX_ANTD);
+			_writeBytesToRegister(LDE_IF, LDE_RXANTD_SUB, antennaRxDelayBytes, LEN_LDE_RXANTD);
+		}
+
+		void _writeConfiguration() {
+			// write all configurations back to device
+			_writeSystemConfigurationRegister();
+			_writeChannelControlRegister();
+			_writeTransmitFrameControlRegister();
+		}
+
 		void _setFrameFilter(boolean val) {
 			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFEN_BIT, val);
 		}
@@ -960,42 +996,6 @@ namespace DW1000Ng {
 				default:
 					return; //TODO Proper error handling
 			}
-		}
-
-		void _writeNetworkIdAndDeviceAddress() {
-			_writeBytesToRegister(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
-		}
-
-		void _writeSystemConfigurationRegister() {
-			_writeBytesToRegister(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
-		}
-
-		void _writeChannelControlRegister() {
-			_writeBytesToRegister(CHAN_CTRL, NO_SUB, _chanctrl, LEN_CHAN_CTRL);
-		}
-
-		void _writeTransmitFrameControlRegister() {
-			_writeBytesToRegister(TX_FCTRL, NO_SUB, _txfctrl, LEN_TX_FCTRL);
-		}
-
-		void _writeSystemEventMaskRegister() {
-			_writeBytesToRegister(SYS_MASK, NO_SUB, _sysmask, LEN_SYS_MASK);
-		}
-
-		void _writeAntennaDelayRegisters() {
-			byte antennaTxDelayBytes[2];
-			byte antennaRxDelayBytes[2];
-			DW1000NgUtils::writeValueToBytes(antennaTxDelayBytes, _antennaTxDelay, LEN_TX_ANTD);
-			DW1000NgUtils::writeValueToBytes(antennaRxDelayBytes, _antennaRxDelay, LEN_LDE_RXANTD);
-			_writeBytesToRegister(TX_ANTD, NO_SUB, antennaTxDelayBytes, LEN_TX_ANTD);
-			_writeBytesToRegister(LDE_IF, LDE_RXANTD_SUB, antennaRxDelayBytes, LEN_LDE_RXANTD);
-		}
-
-		void _writeConfiguration() {
-			// write all configurations back to device
-			_writeSystemConfigurationRegister();
-			_writeChannelControlRegister();
-			_writeTransmitFrameControlRegister();
 		}
 
 		void _manageLDE() {
