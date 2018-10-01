@@ -27,18 +27,8 @@
 #include <Arduino.h>
 
 namespace DW1000NgRangingUtils {
-    /*
- * RANGING ALGORITHMS
- * ------------------
- * Either of the below functions can be used for range computation (see line "CHOSEN
- * RANGING ALGORITHM" in the code).
- * - Asymmetric is more computation intense but least error prone
- * - Symmetric is less computation intense but more error prone to clock drifts
- *
- * The anchors and tags of this reference example use the same reply delay times, hence
- * are capable of symmetric ranging (and of asymmetric ranging anyway).
- */
 
+    /* asymmetric two-way ranging (more computation intense, less error prone) */
     double computeRangeAsymmetric(    
                                         uint64_t timePollSent, 
                                         uint64_t timePollReceived, 
@@ -46,15 +36,7 @@ namespace DW1000NgRangingUtils {
                                         uint64_t timePollAckReceived,
                                         uint64_t timeRangeSent,
                                         uint64_t timeRangeReceived 
-                                    );
-    /*
-    float computeRangeSymmetric(    
-                                        uint64_t timePollSent, 
-                                        uint64_t timePollReceived, 
-                                        uint64_t timePollAckSent, 
-                                        uint64_t timePollAckReceived,
-                                        uint64_t timeRangeSent,
-                                        uint64_t timeRangeReceived 
-                                    );
-    */
+                                 );
+    
+    //TODO Symmetric
 }

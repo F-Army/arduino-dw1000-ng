@@ -38,15 +38,6 @@ namespace DW1000NgRangingUtils {
                                     uint64_t timeRangeReceived
                                 )
     {
-        #if defined(__AVR__)
-        double round1 = (double) (timePollAckReceived - timePollSent);
-        double reply1 = (double) (timePollAckSent - timePollReceived);
-        double round2 = (double) (timeRangeReceived - timePollAckSent);
-        double reply2 = (double) (timeRangeSent - timePollAckReceived);
-
-        double tof_uwb = (round1 * round2 - reply1 * reply2) / (round1 + round2 + reply1 + reply2);
-        double distance = tof_uwb * DISTANCE_OF_RADIO;
-        #else
         uint32_t timePollSent_32 = (uint32_t) timePollSent;
         uint32_t timePollReceived_32 = (uint32_t) timePollReceived;
         uint32_t timePollAckSent_32 = (uint32_t) timePollAckSent;
@@ -61,7 +52,6 @@ namespace DW1000NgRangingUtils {
 
         int64_t tof_uwb = (int64_t) (round1 * round2 - reply1 * reply2) / (round1 + round2 + reply1 + reply2);
         double distance = tof_uwb * DISTANCE_OF_RADIO;
-        #endif
     
         return distance;
     }
