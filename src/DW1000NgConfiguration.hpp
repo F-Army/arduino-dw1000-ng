@@ -26,9 +26,9 @@
 
 #include <Arduino.h>
 #include "DW1000NgConstants.hpp"
-#include "DW1000NgCompileOptions.hpp"
 
 typedef struct device_configuration_t {
+    boolean frameFiltering;
     boolean extendedFrameLength;
     boolean receiverAutoReenable;
     boolean smartPower;
@@ -42,30 +42,11 @@ typedef struct device_configuration_t {
     PreambleCode preaCode;
 } device_configuration_t;
 
-enum class ConfigurationProfile {
-    DEFAULT_PROFILE,
-    DEFAULT_NLOS_PROFILE
-};
-
-#if DW1000NGCONFIGURATION_H_PRINTABLE
-class DW1000NgConfiguration : public Printable {
-#else
-class DW1000NgConfiguration {
-#endif
-
-public:
-    DW1000NgConfiguration(ConfigurationProfile profile = ConfigurationProfile::DEFAULT_PROFILE);
-    DW1000NgConfiguration(device_configuration_t conf);
-
-#if DW1000NGCONFIGURATION_H_PRINTABLE
-    size_t printTo(Print& p) const;
-#endif
-
-    void setConfiguration(device_configuration_t config);
-    void setConfiguration(ConfigurationProfile profile);
-
-    device_configuration_t getConfiguration();
-
-private:
-    device_configuration_t _config;
-};
+typedef struct interrupt_configuration_t {
+    boolean interruptOnSent;
+    boolean interruptOnReceived;
+    boolean interruptOnReceiveFailed;
+    boolean interruptOnReceiveTimeout;
+    boolean interruptOnReceiveTimestampAvailable;
+    boolean interruptOnAutomaticAcknowledgeTrigger;
+} interrupt_configuration_t;
