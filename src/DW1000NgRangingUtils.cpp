@@ -41,20 +41,24 @@ namespace DW1000NgRangingUtils {
                                 )
     {
         uint32_t timePollSent_32 = (uint32_t) timePollSent;
+
+        Serial.print("Aldo master\n");
         uint32_t timePollReceived_32 = (uint32_t) timePollReceived;
+        Serial.println(timePollReceived_32);
         uint32_t timePollAckSent_32 = (uint32_t) timePollAckSent;
+        Serial.println(timePollAckSent_32);
         uint32_t timePollAckReceived_32 = (uint32_t) timePollAckReceived;
+        Serial.println(timePollAckReceived_32);
         uint32_t timeRangeSent_32 = (uint32_t) timeRangeSent;
+        Serial.println(timeRangeSent_32);
         uint32_t timeRangeReceived_32 = (uint32_t) timeRangeReceived;
-        Serial.print("aldo\n");
+        Serial.println(timeRangeReceived_32);
+        Serial.print("End of aldo master");
+
         double round1 = (double) (timePollAckReceived_32 - timePollSent_32);
-        Serial.println(round1);
         double reply1 = (double) (timePollAckSent_32 - timePollReceived_32);
-        Serial.println(reply1);
         double round2 = (double) (timeRangeReceived_32 - timePollAckSent_32);
-        Serial.println(round2);
         double reply2 = (double) (timeRangeSent_32 - timePollAckReceived_32);
-        Serial.println(reply2);
         int64_t tof_uwb = (int64_t) (round1 * round2 - reply1 * reply2) / (round1 + round2 + reply1 + reply2);
         double distance = tof_uwb * DISTANCE_OF_RADIO;
         return distance;
