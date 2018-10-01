@@ -29,6 +29,28 @@
 #define GPIO_MODE 0
 #define LED_MODE 1
 
+
+	constexpr float TIME_RES     = 0.000015650040064103f;
+	constexpr float TIME_RES_INV = 63897.6f;
+	
+	/* Speed of radio waves (light) [m/s] * timestamp resolution [~15.65ps] of DW1000Ng */
+	constexpr float DISTANCE_OF_RADIO     = 0.0046917639786159f;
+	constexpr float DISTANCE_OF_RADIO_INV = 213.139451293f;
+	
+	// timestamp byte length - 40 bit -> 5 byte
+	constexpr uint8_t LENGTH_TIMESTAMP = 5;
+	
+	// timer/counter overflow (40 bits) -> 4overflow approx. every 17.2 seconds
+	constexpr int64_t TIME_OVERFLOW = 0x10000000000; //1099511627776LL
+	constexpr int64_t TIME_MAX      = 0xffffffffff;
+	
+	// time factors (relative to [us]) for setting delayed transceive
+	// TODO use non float
+	constexpr float SECONDS      = 1e6;
+	constexpr float MILLISECONDS = 1e3;
+	constexpr float MICROSECONDS = 1;
+	constexpr float NANOSECONDS  = 1e-3;
+
 /* preamble codes (CHAN_CTRL - RX & TX _CODE) - reg:0x1F, bits:31-27,26-22 */
 
 enum class PreambleCode : byte {

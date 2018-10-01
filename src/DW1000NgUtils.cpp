@@ -107,6 +107,14 @@ namespace DW1000NgUtils {
 		}
 	}
 
+	uint64_t bytesAsValue(byte data[], uint8_t n) {
+		uint64_t value = 0;
+		for(auto i = 0; i < n; i++) {	
+			value |= ((uint64_t)data[i] << (i*8));
+		}
+		return value;
+	}
+
 	uint8_t nibbleFromChar(char c) {
 		if(c >= '0' && c <= '9') {
 			return c-'0';
