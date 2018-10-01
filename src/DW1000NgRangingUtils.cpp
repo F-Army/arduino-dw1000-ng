@@ -48,10 +48,13 @@ namespace DW1000NgRangingUtils {
                                     uint64_t timeRangeReceived 
                                 ) 
     {
+        String values = "Valori:";
         int64_t round1 = overflowCorrectedValue((int64_t)timePollAckReceived - (int64_t)timePollSent);
         int64_t reply1 = overflowCorrectedValue((int64_t)timePollAckSent - (int64_t)timePollReceived);
         int64_t round2 = overflowCorrectedValue((int64_t)timeRangeReceived - (int64_t)timePollAckSent);
         int64_t reply2 = overflowCorrectedValue((int64_t)timeRangeSent - (int64_t)timePollAckReceived);
+        values += round1; values+="\n"; values +=reply1; values+="\n"; values += round2; values+="\n"; values+=reply2; values+="\n";
+        Serial.println(values);
         int64_t tof = (round1 * round2 - reply1 * reply2) / (round1 + round2 + reply1 + reply2);
         return ((float) ( (tof%TIME_OVERFLOW) * DISTANCE_OF_RADIO));
     }
