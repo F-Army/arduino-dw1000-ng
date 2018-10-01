@@ -51,6 +51,7 @@ namespace DW1000NgUtils {
     void setBit(byte data[], uint16_t n, uint16_t bit, boolean val);
     void writeValueToBytes(byte data[], uint64_t val, uint8_t n);
     uint64_t bytesAsValue(byte data[], uint8_t n);
+    uint64_t microsecondsToUWBTime(uint64_t microSeconds);
     /* convert from char to 4 bits (hexadecimal) */
 	uint8_t nibbleFromChar(char c);
 	void convertToByte(char string[], byte* eui_byte);

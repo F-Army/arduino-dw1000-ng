@@ -44,6 +44,7 @@
 
 #include <Arduino.h>
 #include "DW1000NgUtils.hpp"
+#include "DW1000NgConstants.hpp"
 #include "DW1000NgRegisters.hpp"
 
 namespace DW1000NgUtils {
@@ -113,6 +114,10 @@ namespace DW1000NgUtils {
 			value |= ((uint64_t)data[i] << (i*8));
 		}
 		return value;
+	}
+
+	uint64_t microsecondsToUWBTime(uint64_t microSeconds) {
+		return ((uint64_t) (microSconds * TIME_RES_INV))
 	}
 
 	uint8_t nibbleFromChar(char c) {

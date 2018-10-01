@@ -178,7 +178,7 @@ void transmitRange() {
 
     /* Calculation of future time */
     byte delayBytes[5];
-    uint64_t delayTime = (uint64_t) (replyDelayTimeUS * TIME_RES_INV);
+    uint64_t delayTime = DW1000NgUtils::microsecondsToUWBTime(replyDelayTimeUS);
 	timeRangeSent = DW1000Ng::getSystemTimestamp();
 	timeRangeSent += delayTime;
     DW1000NgUtils::writeValueToBytes(delayBytes, timeRangeSent, LENGTH_TIMESTAMP);
