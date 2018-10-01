@@ -137,94 +137,6 @@ namespace DW1000Ng {
 	
 	void setEUI(char eui[]);
 	void setEUI(byte eui[]);
-	
-	/* ##### General device configuration ######################################## */
-	/** 
-	Specifies whether the DW1000Ng chip should, again, turn on its receiver in case that the
-	last reception failed. 
-
-	@param[in] val `true` to enable, `false` to disable receiver auto-reenable.
-	*/
-	void setReceiverAutoReenable(boolean val);
-	
-	/** 
-	Specifies whether to suppress any frame check measures while sending or receiving messages.
-	If suppressed, no 2-byte checksum is appended to the message before sending and this 
-	checksum is also not expected at receiver side. Note that when suppressing frame checks, 
-	the error event handler	(attached via `attachReceiveErrorHandler()`) will not be triggered 
-	if received data is corrupted.
-
-	@param[in] val `true` to suppress frame check on sender and receiver side, `false` otherwise.
-	*/
-	void suppressFrameCheck(boolean val);
-
-	/* 
-	Set internal helper for better tuning of values in NLOS applications 
-	You should use PRF at 16 Mhz and preamble code length of 1024 or greater as stated by application notes.
-	   
-	With NLOS optimized values you have a higher chance of incorrect readings (~5%)
-	For further information consult DW1000 Application notes APS006 - Part 2
-
-	@param[in] val `true` to set nlos optimizations, `false` otherwise.
-	*/
-	void setNlosOptimization(boolean val);
-	
-	/** 
-	Specifies the data transmission rate of the DW1000Ng chip. One of the values
-	- `TRX_RATE_110KBPS` (i.e. 110 kb/s)
-	- `TRX_RATE_850KBPS` (i.e. 850 kb/s)
-	- `TRX_RATE_6800KBPS` (i.e. 6.8 Mb/s)
-	has to be provided.
-
-	(see chapters 9.1/2/3/4 DW1000 user manual)
-
-	WARNING: It resets SFD configuration to recommended in table 21 of DW1000 User manual.
-
-	@param[in] rate The data transmission rate, encoded by the above defined constants.
-	*/
-	void setDataRate(DataRate data_rate);
-	
-	/** 
-	Specifies the pulse repetition frequency (PRF) of data transmissions with the DW1000Ng. Either
-	- `TX_PULSE_FREQ_16MHZ` (i.e. 16 MHz)
-	- `TX_PULSE_FREQ_64MHZ` (i.e. 64 MHz)
-	has to be chosen.
-
-	Note that the 16 MHz setting is more power efficient, while the 64 MHz setting requires more
-	power, but also delivers slightly better transmission performance (i.e. on communication range and 
-	timestamp accuracy) 
-	(see chapters 9.1/2/3/4 DW1000 user manual).
-
-	@param[in] freq The PRF, encoded by the above defined constants.
-	*/
-	void setPulseFrequency(PulseFrequency frequency);
-
-	void setPreambleLength(PreambleLength preamble_length);
-
-	void setSFDMode(SFDMode mode);
-	
-	/*
-	Specifies the channel for transmitting and receiving to and from a DW1000Ng module. Once of this values
-	- `CHANNEL_1` (i.e. 3494.4 MHz, bandwidth ~500 MHz)
-	- `CHANNEL_2` (i.e. 3993.6 MHz, bandwidth ~500 MHz)
-	- `CHANNEL_3` (i.e. 4492.8 MHz, bandwidth ~500 MHz)
-	- `CHANNEL_4` (i.e. 3993.6 MHz, bandwidth ~1332 MHz)
-	- `CHANNEL_5` (i.e. 6489.6 MHz, bandwidth ~500 MHz)
-	- `CHANNEL_7` (i.e. 6489.6 MHz, bandwidth ~1082 MHz)
-	has to be chosen.
-	
-	Channels 4 and 7 have a wider bandwidth. Operating at a wider bandwidth increases range but also increases power consumption.
-	Channels 4 and 7 in reception have a maximum receive bandwidth of 900 MHz.
-	The Operating range also varies depending on the channel centre frequency and channel bandwidth selected 
-	(see chapters 9.1/2/3/4 DW1000 user manual)
-
-	@param[in] channel The Number of channel, encoded by the above defined constants.
-	 */
-	void setChannel(Channel channel);
-
-	void setPreambleCode(PreambleCode preamble_code);
-
-	void useSmartPower(boolean smartPower);
 
 	void setTXPower(byte power[]);
 	void setTXPower(int32_t power);
@@ -236,7 +148,6 @@ namespace DW1000Ng {
 
 	/* Used for Transmit Power regulatory testing */
 	void enableTransmitPowerSpectrumTestMode(int32_t repeat_interval);
-	
 	
 	/* transmit and receive configuration. */
 	void         setDelayedTRX(byte futureTimeBytes[]);
