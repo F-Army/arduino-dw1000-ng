@@ -1173,6 +1173,12 @@ namespace DW1000Ng {
 		delay(5);
 		_enableClock(SYS_AUTO_CLOCK);
 		delay(5);
+
+		_readNetworkIdAndDeviceAddress();
+		_readSystemConfigurationRegister();
+		_readChannelControlRegister();
+		_readTransmitFrameControlRegister();
+		_readSystemEventMaskRegister();
 		
 		/* Cleared AON:CFG1(0x2C:0x0A) for proper operation of deepSleep */
 		_writeToRegister(AON, AON_CFG1_SUB, 0x00, LEN_AON_CFG1);
@@ -1624,7 +1630,6 @@ namespace DW1000Ng {
 	}
 
 	void newConfiguration() {
-		forceTRxOff();
 		_readNetworkIdAndDeviceAddress();
 		_readSystemConfigurationRegister();
 		_readChannelControlRegister();
@@ -1646,6 +1651,8 @@ namespace DW1000Ng {
 	}
 
 	void applyConfiguration(device_configuration_t config) {
+		forceTRxOff();
+
 		setFrameFilter(config.frameFiltering);
 		useExtendedFrameLength(config.extendedFrameLength);
 		setReceiverAutoReenable(config.receiverAutoReenable);
@@ -1661,6 +1668,8 @@ namespace DW1000Ng {
 	}
 
 	void applyInterruptConfiguration(interrupt_configuration_t interrupt_config) {
+		forceTRxOff();
+
 		interruptOnSent(interrupt_config.interruptOnSent);
 		interruptOnReceived(interrupt_config.interruptOnReceived);
 		interruptOnReceiveFailed(interrupt_config.interruptOnReceiveFailed);

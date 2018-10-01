@@ -116,7 +116,6 @@ void setup() {
     DW1000Ng::begin(PIN_SS, PIN_IRQ, PIN_RST);
     Serial.println("DW1000Ng initialized ...");
     // general configuration
-    DW1000Ng::newConfiguration();
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
     DW1000Ng::commitConfiguration();
