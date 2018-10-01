@@ -1928,7 +1928,11 @@ namespace DW1000Ng {
 		byte data[LEN_RX_STAMP];
 		memset(data, 0, LEN_RX_STAMP);
 		_readBytes(RX_TIME, RX_STAMP_SUB, data, LEN_RX_STAMP);
+		Serial.print("Prima:");
+		Serial.println(DW1000NgUtils::bytesAsValue(data, LEN_RX_STAMP));
 		_correctTimestamp(data);
+		Serial.print("Dopo:");
+		Serial.println(DW1000NgUtils::bytesAsValue(data, LEN_RX_STAMP));
 		return DW1000NgUtils::bytesAsValue(data, LEN_RX_STAMP);
 	}
 

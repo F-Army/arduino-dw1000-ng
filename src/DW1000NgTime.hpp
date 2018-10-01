@@ -42,28 +42,6 @@ class DW1000NgTime : public Printable {
 class DW1000NgTime {
 #endif // DW1000NgTime_H_PRINTABLE
 public:
-	// Time resolution in micro-seconds of time based registers/values.
-	// Each bit in a timestamp counts for a period of approx. 15.65ps
-	static constexpr float TIME_RES     = 0.000015650040064103f;
-	static constexpr float TIME_RES_INV = 63897.6f;
-	
-	/* Speed of radio waves (light) [m/s] * timestamp resolution [~15.65ps] of DW1000Ng */
-	static constexpr float DISTANCE_OF_RADIO     = 0.0046917639786159f;
-	static constexpr float DISTANCE_OF_RADIO_INV = 213.139451293f;
-	
-	// timestamp byte length - 40 bit -> 5 byte
-	static constexpr uint8_t LENGTH_TIMESTAMP = 5;
-	
-	// timer/counter overflow (40 bits) -> 4overflow approx. every 17.2 seconds
-	static constexpr int64_t TIME_OVERFLOW = 0x10000000000; //1099511627776LL
-	static constexpr int64_t TIME_MAX      = 0xffffffffff;
-	
-	// time factors (relative to [us]) for setting delayed transceive
-	// TODO use non float
-	static constexpr float SECONDS      = 1e6;
-	static constexpr float MILLISECONDS = 1e3;
-	static constexpr float MICROSECONDS = 1;
-	static constexpr float NANOSECONDS  = 1e-3;
 	
 	// constructor
 	DW1000NgTime();
