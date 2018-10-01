@@ -219,7 +219,6 @@ namespace DW1000Ng {
 	void getBatteryVoltage(float& vbat);
 	void getTemperatureAndBatteryVoltage(float& temp, float& vbat);
 
-	
 	/* Allow MAC frame filtering */
 	// TODO auto-acknowledge
 	void setFrameFilter(boolean val);

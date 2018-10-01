@@ -239,132 +239,6 @@ namespace DW1000Ng {
 			byte step5 = 0x00; _writeBytesToRegister(TX_CAL, NO_SUB, &step5, 1);
 		}
 
-		void _setFrameFilter(boolean val) {
-			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFEN_BIT, val);
-		}
-
-		void _useExtendedFrameLength(boolean val) {
-			_extendedFrameLength = (val ? FRAME_LENGTH_EXTENDED : FRAME_LENGTH_NORMAL);
-			_syscfg[2] &= 0xFC;
-			_syscfg[2] |= _extendedFrameLength;
-		}
-
-		void _setReceiverAutoReenable(boolean val) {
-			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXAUTR_BIT, val);
-		}
-
-		void _suppressFrameCheck(boolean val) {
-			_frameCheck = !val;
-		}
-
-		void _setNlosOptimization(boolean val) {
-			_nlos = val;
-			if(_nlos) {
-				_ldecfg1();
-				_ldecfg2();
-			}
-		}
-
-		void _useSmartPower(boolean smartPower) {
-			_smartPower = smartPower;
-			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, DIS_STXP_BIT, !smartPower);
-			_writeSystemConfigurationRegister();
-			if(_autoTXPower)
-				_txpowertune();
-		}
-
-		void _setSFDMode(SFDMode mode) {
-			switch(mode) {
-				case SFDMode::STANDARD_SFD:
-					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
-					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
-					_standardSFD = true;
-					break;
-				case SFDMode::DECAWAVE_SFD:
-					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
-					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
-					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
-					_standardSFD = false;
-					break;
-				default:
-					return; //TODO Proper error handling
-			}
-		}
-
-		void _setChannel(Channel channel) {
-			byte chan = static_cast<byte>(channel);
-			chan &= 0xF;
-			_chanctrl[0] = ((chan | (chan << 4)) & 0xFF);
-
-			_channel = channel;
-		}
-
-		void _setDataRate(DataRate data_rate) {
-			byte rate = static_cast<byte>(data_rate);
-			rate &= 0x03;
-			_txfctrl[1] &= 0x83;
-			_txfctrl[1] |= (byte)((rate << 5) & 0xFF);
-			// special 110kbps flag
-			if(data_rate == DataRate::RATE_110KBPS) {
-				DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXM110K_BIT, true);
-			} else {
-				DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXM110K_BIT, false);
-			}
-			_dataRate = data_rate;
-		}
-
-		void _setPulseFrequency(PulseFrequency frequency) {
-			byte freq = static_cast<byte>(frequency);
-			freq &= 0x03;
-			_txfctrl[2] &= 0xFC;
-			_txfctrl[2] |= (byte)(freq & 0xFF);
-			_chanctrl[2] &= 0xF3;
-			_chanctrl[2] |= (byte)((freq << 2) & 0xFF);
-
-			_pulseFrequency = frequency;
-		}
-
-		void _setPreambleLength(PreambleLength preamble_length) {
-			byte prealen = static_cast<byte>(preamble_length);
-			prealen &= 0x0F;
-			_txfctrl[2] &= 0xC3;
-			_txfctrl[2] |= (byte)((prealen << 2) & 0xFF);
-			
-			switch(preamble_length) {
-				case PreambleLength::LEN_64:
-					_pacSize = PacSize::SIZE_8;
-					break;
-				case PreambleLength::LEN_128:
-					_pacSize = PacSize::SIZE_8;
-					break;
-				case PreambleLength::LEN_256:
-					_pacSize = PacSize::SIZE_16;
-					break;
-				case PreambleLength::LEN_512:
-					_pacSize = PacSize::SIZE_16;
-					break;
-				case PreambleLength::LEN_1024:
-					_pacSize = PacSize::SIZE_32;
-					break;
-				default:
-					_pacSize = PacSize::SIZE_64; // In case of 1536, 2048 or 4096 preamble length.
-			}
-			
-			_preambleLength = preamble_length;
-		}
-
-		void _setPreambleCode(PreambleCode preamble_code) {
-			byte preacode = static_cast<byte>(preamble_code);
-			preacode &= 0x1F;
-			_chanctrl[2] &= 0x3F;
-			_chanctrl[2] |= ((preacode << 6) & 0xFF);
-			_chanctrl[3] = 0x00;
-			_chanctrl[3] = ((((preacode >> 2) & 0x07) | (preacode << 3)) & 0xFF);
-
-			_preambleCode = preamble_code;
-		}
-
 		/* AGC_TUNE1 - reg:0x23, sub-reg:0x04, table 24 */
 		void _agctune1() {
 			byte agctune1[LEN_AGC_TUNE1];
@@ -894,6 +768,132 @@ namespace DW1000Ng {
 			if(_autoTCPGDelay) _tcpgdelaytune();
 			_fspll();
 			_fsxtalt();
+		}
+
+		void _setFrameFilter(boolean val) {
+			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFEN_BIT, val);
+		}
+
+		void _useExtendedFrameLength(boolean val) {
+			_extendedFrameLength = (val ? FRAME_LENGTH_EXTENDED : FRAME_LENGTH_NORMAL);
+			_syscfg[2] &= 0xFC;
+			_syscfg[2] |= _extendedFrameLength;
+		}
+
+		void _setReceiverAutoReenable(boolean val) {
+			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXAUTR_BIT, val);
+		}
+
+		void _suppressFrameCheck(boolean val) {
+			_frameCheck = !val;
+		}
+
+		void _setNlosOptimization(boolean val) {
+			_nlos = val;
+			if(_nlos) {
+				_ldecfg1();
+				_ldecfg2();
+			}
+		}
+
+		void _useSmartPower(boolean smartPower) {
+			_smartPower = smartPower;
+			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, DIS_STXP_BIT, !smartPower);
+			_writeSystemConfigurationRegister();
+			if(_autoTXPower)
+				_txpowertune();
+		}
+
+		void _setSFDMode(SFDMode mode) {
+			switch(mode) {
+				case SFDMode::STANDARD_SFD:
+					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
+					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
+					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+					_standardSFD = true;
+					break;
+				case SFDMode::DECAWAVE_SFD:
+					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
+					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
+					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
+					_standardSFD = false;
+					break;
+				default:
+					return; //TODO Proper error handling
+			}
+		}
+
+		void _setChannel(Channel channel) {
+			byte chan = static_cast<byte>(channel);
+			chan &= 0xF;
+			_chanctrl[0] = ((chan | (chan << 4)) & 0xFF);
+
+			_channel = channel;
+		}
+
+		void _setDataRate(DataRate data_rate) {
+			byte rate = static_cast<byte>(data_rate);
+			rate &= 0x03;
+			_txfctrl[1] &= 0x83;
+			_txfctrl[1] |= (byte)((rate << 5) & 0xFF);
+			// special 110kbps flag
+			if(data_rate == DataRate::RATE_110KBPS) {
+				DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXM110K_BIT, true);
+			} else {
+				DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXM110K_BIT, false);
+			}
+			_dataRate = data_rate;
+		}
+
+		void _setPulseFrequency(PulseFrequency frequency) {
+			byte freq = static_cast<byte>(frequency);
+			freq &= 0x03;
+			_txfctrl[2] &= 0xFC;
+			_txfctrl[2] |= (byte)(freq & 0xFF);
+			_chanctrl[2] &= 0xF3;
+			_chanctrl[2] |= (byte)((freq << 2) & 0xFF);
+
+			_pulseFrequency = frequency;
+		}
+
+		void _setPreambleLength(PreambleLength preamble_length) {
+			byte prealen = static_cast<byte>(preamble_length);
+			prealen &= 0x0F;
+			_txfctrl[2] &= 0xC3;
+			_txfctrl[2] |= (byte)((prealen << 2) & 0xFF);
+			
+			switch(preamble_length) {
+				case PreambleLength::LEN_64:
+					_pacSize = PacSize::SIZE_8;
+					break;
+				case PreambleLength::LEN_128:
+					_pacSize = PacSize::SIZE_8;
+					break;
+				case PreambleLength::LEN_256:
+					_pacSize = PacSize::SIZE_16;
+					break;
+				case PreambleLength::LEN_512:
+					_pacSize = PacSize::SIZE_16;
+					break;
+				case PreambleLength::LEN_1024:
+					_pacSize = PacSize::SIZE_32;
+					break;
+				default:
+					_pacSize = PacSize::SIZE_64; // In case of 1536, 2048 or 4096 preamble length.
+			}
+			
+			_preambleLength = preamble_length;
+		}
+
+		void _setPreambleCode(PreambleCode preamble_code) {
+			byte preacode = static_cast<byte>(preamble_code);
+			preacode &= 0x1F;
+			_chanctrl[2] &= 0x3F;
+			_chanctrl[2] |= ((preacode << 6) & 0xFF);
+			_chanctrl[3] = 0x00;
+			_chanctrl[3] = ((((preacode >> 2) & 0x07) | (preacode << 3)) & 0xFF);
+
+			_preambleCode = preamble_code;
 		}
 
 		boolean _checkPreambleCodeValidity() {
