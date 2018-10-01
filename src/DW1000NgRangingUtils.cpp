@@ -38,13 +38,16 @@ namespace DW1000NgRangingUtils {
                                     uint64_t timeRangeReceived 
                                 ) 
     {
+        Serial.println("Aldo check");
         uint64_t round1 = timePollAckReceived - timePollSent;
+        Serial.println(round1);
         uint64_t reply1 = timePollAckSent - timePollReceived;
+        Serial.println(reply1);
         uint64_t round2 = timeRangeReceived - timePollAckSent;
+        Serial.println(round2);
         uint64_t reply2 = timeRangeSent - timePollAckReceived;
+        Serial.println(reply2);
         uint64_t tof = (round1 * round2 - reply1 * reply2) / (round1 + round2 + reply1 + reply2);
-        Serial.print("ALDOMIOALDO:");
-        Serial.println(tof * DISTANCE_OF_RADIO);
         return ((float) (tof * DISTANCE_OF_RADIO));
     }
 
