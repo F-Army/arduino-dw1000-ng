@@ -291,11 +291,6 @@ namespace DW1000Ng {
 	/* device state management. */
 	// force idle state
 	void forceTRxOff();
-	
-	// general configuration state
-	void newConfiguration();
-
-	void commitConfiguration();
 
 	void applyConfiguration(device_configuration_t config);
 	void applyInterruptConfiguration(interrupt_configuration_t interrupt_config);

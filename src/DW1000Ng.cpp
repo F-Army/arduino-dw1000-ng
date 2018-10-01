@@ -1628,27 +1628,6 @@ namespace DW1000Ng {
 		_writeBytesToRegister(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
 	}
 
-	void newConfiguration() {
-		_readNetworkIdAndDeviceAddress();
-		_readSystemConfigurationRegister();
-		_readChannelControlRegister();
-		_readTransmitFrameControlRegister();
-		_readSystemEventMaskRegister();
-	}
-
-	void commitConfiguration() {
-		if(!_checkPreambleCodeValidity())
-			_setValidPreambleCode();
-
-		if(!_standardSFD)
-			_setNonStandardSFDLength();
-
-		// writes configuration to registers
-		_writeConfiguration();
-		// tune according to configuration
-		_tune();
-	}
-
 	void applyConfiguration(device_configuration_t config) {
 		forceTRxOff();
 
@@ -1664,7 +1643,7 @@ namespace DW1000Ng {
 		setPulseFrequency(config.pulseFreq);
 		setPreambleLength(config.preambleLen);
 		setPreambleCode(config.preaCode);
-		
+
 		if(!_checkPreambleCodeValidity())
 			_setValidPreambleCode();
 
