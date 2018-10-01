@@ -62,10 +62,8 @@ void setup() {
   DW1000Ng::initialize(PIN_SS, PIN_IRQ, PIN_RST);
   Serial.println(F("DW1000Ng initialized ..."));
   // general configuration
-  DW1000Ng::newConfiguration();
   DW1000Ng::setDeviceAddress(5);
   DW1000Ng::setNetworkId(10);
-  DW1000Ng::commitConfiguration();
   Serial.println(F("Committed configuration ..."));
   // wait a bit
   delay(1000);
