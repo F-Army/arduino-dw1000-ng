@@ -43,18 +43,11 @@ namespace DW1000NgRangingUtils {
         uint32_t timePollSent_32 = (uint32_t) timePollSent;
 
         /*
-        Serial.print("Aldo master\n");
         uint32_t timePollReceived_32 = (uint32_t) timePollReceived;
-        Serial.println(timePollReceived_32);
         uint32_t timePollAckSent_32 = (uint32_t) timePollAckSent;
-        Serial.println(timePollAckSent_32);
         uint32_t timePollAckReceived_32 = (uint32_t) timePollAckReceived;
-        Serial.println(timePollAckReceived_32);
         uint32_t timeRangeSent_32 = (uint32_t) timeRangeSent;
-        Serial.println(timeRangeSent_32);
         uint32_t timeRangeReceived_32 = (uint32_t) timeRangeReceived;
-        Serial.println(timeRangeReceived_32);
-        Serial.print("End of aldo master");
         */
 
         double round1 = (double) (timePollAckReceived - timePollSent);
