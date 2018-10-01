@@ -54,7 +54,6 @@
 #include <SPI.h>
 #include <DW1000Ng.hpp>
 #include <DW1000NgUtils.hpp>
-#include <DW1000NgTime.hpp>
 #include <DW1000NgConstants.hpp>
 
 // connection pins
