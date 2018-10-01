@@ -24,6 +24,8 @@
 
 #pragma once
 
+#include <Arduino.h>
+
 namespace DW1000NgRangingUtils {
     /*
  * RANGING ALGORITHMS
@@ -37,25 +39,21 @@ namespace DW1000NgRangingUtils {
  * are capable of symmetric ranging (and of asymmetric ranging anyway).
  */
 
-
-
-    /*
-    DW1000NgTime computeRangeAsymmetric(    
-                                        DW1000NgTime &timePollSent, 
-                                        DW1000NgTime &timePollReceived, 
-                                        DW1000NgTime &timePollAckSent, 
-                                        DW1000NgTime &timePollAckReceived,
-                                        DW1000NgTime &timeRangeSent,
-                                        DW1000NgTime &timeRangeReceived 
+    float computeRangeAsymmetric(    
+                                        uint64_t timePollSent, 
+                                        uint64_t timePollReceived, 
+                                        uint64_t timePollAckSent, 
+                                        uint64_t timePollAckReceived,
+                                        uint64_t timeRangeSent,
+                                        uint64_t timeRangeReceived 
                                     );
 
-    DW1000NgTime computeRangeSymmetric(    
-                                        DW1000NgTime &timePollSent, 
-                                        DW1000NgTime &timePollReceived, 
-                                        DW1000NgTime &timePollAckSent, 
-                                        DW1000NgTime &timePollAckReceived,
-                                        DW1000NgTime &timeRangeSent,
-                                        DW1000NgTime &timeRangeReceived 
+    float computeRangeSymmetric(    
+                                        uint64_t timePollSent, 
+                                        uint64_t timePollReceived, 
+                                        uint64_t timePollAckSent, 
+                                        uint64_t timePollAckReceived,
+                                        uint64_t timeRangeSent,
+                                        uint64_t timeRangeReceived 
                                     );
-    */
 }
