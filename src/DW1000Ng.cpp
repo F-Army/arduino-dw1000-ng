@@ -1056,10 +1056,6 @@ namespace DW1000Ng {
 			return false;
 		}
 
-		void _setInterruptPolarity(boolean val) {
-			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, HIRQ_POL_BIT, val);
-		}
-
 		void _disableSequencing() {
             _enableClock(SYS_XTI_CLOCK);
             byte zero[2];
@@ -1626,6 +1622,11 @@ namespace DW1000Ng {
 			DW1000NgUtils::setBit(_sysctrl, LEN_SYS_CTRL, TXDLYS_BIT, true);
 		DW1000NgUtils::setBit(_sysctrl, LEN_SYS_CTRL, TXSTRT_BIT, true);
 		_writeBytesToRegister(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
+	}
+
+	void setInterruptPolarity(boolean val) {
+		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, HIRQ_POL_BIT, val);
+		_writeSystemConfigurationRegister();
 	}
 
 	void applyConfiguration(device_configuration_t config) {

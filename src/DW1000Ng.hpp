@@ -292,6 +292,8 @@ namespace DW1000Ng {
 	// force idle state
 	void forceTRxOff();
 
+	void setInterruptPolarity(boolean val);
+
 	void applyConfiguration(device_configuration_t config);
 	void applyInterruptConfiguration(interrupt_configuration_t interrupt_config);
 	
