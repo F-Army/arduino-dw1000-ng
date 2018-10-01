@@ -1664,7 +1664,17 @@ namespace DW1000Ng {
 		setPulseFrequency(config.pulseFreq);
 		setPreambleLength(config.preambleLen);
 		setPreambleCode(config.preaCode);
-		commitConfiguration();
+		
+		if(!_checkPreambleCodeValidity())
+			_setValidPreambleCode();
+
+		if(!_standardSFD)
+			_setNonStandardSFDLength();
+
+		// writes configuration to registers
+		_writeConfiguration();
+		// tune according to configuration
+		_tune();
 	}
 
 	void applyInterruptConfiguration(interrupt_configuration_t interrupt_config) {
