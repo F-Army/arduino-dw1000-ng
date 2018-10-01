@@ -26,7 +26,6 @@
 
 #include <Arduino.h>
 #include "DW1000NgConstants.hpp"
-#include "DW1000NgCompileOptions.hpp"
 
 typedef struct device_configuration_t {
     boolean frameFiltering;
@@ -42,12 +41,3 @@ typedef struct device_configuration_t {
     PreambleLength preambleLen;
     PreambleCode preaCode;
 } device_configuration_t;
-
-namespace DW1000NgConfiguration {
-    device_configuration_t defaultConfig();
-    device_configuration_t defaultNlosConfig();
-
-    #if DW1000NGCONFIGURATION_H_PRINTABLE
-    void printConfig(device_configuration_t config);
-    #endif
-}
