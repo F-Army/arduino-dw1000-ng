@@ -228,7 +228,7 @@ void loop() {
             return;
         }
         if (msgId == POLL_ACK) {
-            timePollAckReceived = DW1000Ng::getReceiveTimestamp();
+            timePollAckReceived = DW1000Ng::getReceiveTimestampUnbiased();
             expectedMsgId = RANGE_REPORT;
             transmitRange();
             noteActivity();

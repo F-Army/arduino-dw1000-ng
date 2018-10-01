@@ -159,6 +159,7 @@ namespace DW1000Ng {
 	
 	uint64_t     getTransmitTimestamp();
 	uint64_t     getReceiveTimestamp();
+	uint64_t     getReceiveTimestampUnbiased();
 	uint64_t     getSystemTimestamp();
 	
 	/* receive quality information. (RX_FSQUAL) - reg:0x12 */

@@ -37,6 +37,8 @@ namespace DW1000NgRangingUtils {
  * are capable of symmetric ranging (and of asymmetric ranging anyway).
  */
 
+
+
     /*
     DW1000NgTime computeRangeAsymmetric(    
                                         DW1000NgTime &timePollSent, 
