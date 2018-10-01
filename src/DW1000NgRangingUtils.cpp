@@ -52,8 +52,10 @@ namespace DW1000NgRangingUtils {
         int64_t reply1 = overflowCorrectedValue((int64_t)timePollAckSent - (int64_t)timePollReceived);
         int64_t round2 = overflowCorrectedValue((int64_t)timeRangeReceived - (int64_t)timePollAckSent);
         int64_t reply2 = overflowCorrectedValue((int64_t)timeRangeSent - (int64_t)timePollAckReceived);
+        if(round1 == 0 || reply1 == 0 || round2 == 0 || reply2 == 0) {
+            Serial.print("ESSELU MIRKO CERES");
+        }
         int64_t tof = (round1 * round2 - reply1 * reply2) / (round1 + round2 + reply1 + reply2);
-        if(tof == 0) {Serial.print("My Prontera");}
         return ((float) ( (tof%TIME_OVERFLOW) * DISTANCE_OF_RADIO));
     }
 
