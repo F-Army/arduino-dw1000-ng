@@ -1205,7 +1205,7 @@ namespace DW1000Ng {
         }
 
 		// TODO check function, different type violations between byte and int
-		void _correctTimestamp(byte data) {
+		void _correctTimestamp(byte data[]) {
 			// base line dBm, which is -61, 2 dBm steps, total 18 data points (down to -95 dBm)
 			float rxPowerBase     = -(getReceivePower()+61.0f)*0.5f;
 			int16_t   rxPowerBaseLow  = (int16_t)rxPowerBase; // TODO check type
@@ -1910,7 +1910,7 @@ namespace DW1000Ng {
 
 	void getReceiveTimestamp(byte data[]) {
 		_readBytes(RX_TIME, RX_STAMP_SUB, data, LEN_RX_STAMP);
-		_correctTimestamp(data);
+		//correctTimestamp(data);
 	}
 
 	void getSystemTimestamp(byte data[]) {
@@ -1918,16 +1918,25 @@ namespace DW1000Ng {
 	}
 
 	uint64_t getTransmitTimestamp() {
-		byte transmitTS[LENGTH_TIMESTAMP];
-		memset(transmitTS, 0 , LENGTH_TIMESTAMP);
-		_readBytes(TX_TIME, TX_STAMP_SUB, transmitTS, LEN_TX_STAMP);
-		return DW1000NgUtils::bytesAsValue(transmitTS);
+		byte data[LENGTH_TIMESTAMP];
+		memset(data, 0 , LENGTH_TIMESTAMP);
+		_readBytes(TX_TIME, TX_STAMP_SUB, data, LEN_TX_STAMP);
+		return DW1000NgUtils::bytesAsValue(data, LEN_TX_STAMP);
 	}
+
 	uint64_t getReceiveTimestamp() {
-
+		byte data[LEN_RX_STAMP];
+		memset(data, 0, LEN_RX_STAMP);
+		_readBytes(RX_TIME, RX_STAMP_SUB, data, LEN_RX_STAMP);
+		_correctTimestamp(data);
+		return DW1000NgUtils::bytesAsValue(data, LEN_RX_STAMP);
 	}
-	uint64_t getSystemTimestamp() {
 
+	uint64_t getSystemTimestamp() {
+		byte data[LEN_SYS_TIME];
+		memset(data, 0, LEN_SYS_TIME);
+		_readBytes(SYS_TIME, NO_SUB, data, LEN_SYS_TIME);
+		return DW1000NgUtils::bytesAsValue(data, LEN_SYS_TIME);		
 	}
 
 	float getReceiveQuality() {

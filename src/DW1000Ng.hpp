@@ -50,6 +50,7 @@
 #include <SPI.h>
 #include "DW1000NgConstants.hpp"
 #include "DW1000NgConfiguration.hpp"
+#include "DW1000NgCompileOptions.hpp"
 
 namespace DW1000Ng {
 	/* ##### Init ################################################################ */
