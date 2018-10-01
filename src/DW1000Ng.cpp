@@ -1080,12 +1080,6 @@ namespace DW1000Ng {
 			_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
 		}
 
-		void _clearAllStatus() {
-			//Latched bits in status register are reset by writing 1 to them
-			memset(_sysstatus, 0xff, LEN_SYS_STATUS);
-			_writeBytesToRegister(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
-		}
-
 		void _clearReceiveStatus() {
 			// clear latched RX bits (i.e. write 1 to clear)
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXDFR_BIT, true);
