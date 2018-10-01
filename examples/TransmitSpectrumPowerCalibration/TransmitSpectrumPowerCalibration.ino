@@ -75,7 +75,7 @@ void setup() {
 
     Serial.println(F("End of transmission"));
     /* used to stop transmission */
-    DW1000Ng::softReset();
+    DW1000Ng::softwareReset();
 }
 
 void loop() {

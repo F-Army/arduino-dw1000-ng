@@ -1274,6 +1274,12 @@ namespace DW1000Ng {
 		delay(5);
 		_ss = ss;
 		_irq = irq;
+		_rst = rst;
+
+		if(rst != 0xff) {
+			// DW1000 data sheet v2.08 §5.6.1 page 20, the RSTn pin should not be driven high but left floating.
+			pinMode(_rst, INPUT);
+		}
 		// start SPI
 		SPI.begin();
 		// pin and basic member setup
@@ -1281,33 +1287,15 @@ namespace DW1000Ng {
 		// TODO throw error if pin is not a interrupt pin
 		attachInterrupt(digitalPinToInterrupt(_irq), pollForEvents, RISING);
 		select();
-		// try locking clock at PLL speed (should be done already,
-		// but just to be sure)
-		_enableClock(SYS_AUTO_CLOCK);
-		delay(5);
 		// reset chip (either soft or hard)
-		if(rst != 0xff) {
-			_rst = rst;
-			// DW1000Ng data sheet v2.08 §5.6.1 page 20, the RSTn pin should not be driven high but left floating.
-			pinMode(_rst, INPUT);
-		}
-		reset();
+		
+		softwareReset();
 		
 		_enableClock(SYS_XTI_CLOCK);
 		delay(5);
+		// load LDE micro-code
 		_manageLDE();
 		delay(5);
-		_enableClock(SYS_AUTO_CLOCK);
-		delay(5);
-
-		_readNetworkIdAndDeviceAddress();
-		_readSystemConfigurationRegister();
-		_readChannelControlRegister();
-		_readTransmitFrameControlRegister();
-		_readSystemEventMaskRegister();
-		
-		/* Cleared AON:CFG1(0x2C:0x0A) for proper operation of deepSleep */
-		_writeToRegister(AON, AON_CFG1_SUB, 0x00, LEN_AON_CFG1);
 
 		// read the temp and vbat readings from OTP that were recorded during production test
 		// see 6.3.1 OTP memory map
@@ -1316,6 +1304,18 @@ namespace DW1000Ng {
 		_vmeas3v3 = buf_otp[0];
 		_readBytesOTP(0x009, buf_otp); // the stored 23C reading
 		_tmeas23C = buf_otp[0];
+
+		_enableClock(SYS_AUTO_CLOCK);
+		delay(5);
+
+		_readNetworkIdAndDeviceAddress();
+		_readSystemConfigurationRegister();
+		_readChannelControlRegister();
+		_readTransmitFrameControlRegister();
+		_readSystemEventMaskRegister();
+
+		/* Cleared AON:CFG1(0x2C:0x0A) for proper operation of deepSleep */
+		_writeToRegister(AON, AON_CFG1_SUB, 0x00, LEN_AON_CFG1);
 	}
 
 	void select() {
@@ -1461,33 +1461,34 @@ namespace DW1000Ng {
 	}
 
 	void reset() {
-		if(_rst == 0xff) {
-			softReset();
+		if(_rst == 0xff) { /* Fallback to Software Reset */
+			softwareReset();
 		} else {
 			// DW1000Ng data sheet v2.08 §5.6.1 page 20, the RSTn pin should not be driven high but left floating.
 			pinMode(_rst, OUTPUT);
 			digitalWrite(_rst, LOW);
 			delay(2);  // DW1000Ng data sheet v2.08 §5.6.1 page 20: nominal 50ns, to be safe take more time
 			pinMode(_rst, INPUT);
-			delay(10); // dw1000Ng data sheet v1.2 page 5: nominal 3 ms, to be safe take more time
-			// force into idle mode (although it should be already after reset)
-			forceTRxOff();
+			delay(5); // dw1000Ng data sheet v1.2 page 5: nominal 3 ms, to be safe take more time
 		}
 	}
 
-	void softReset() {
+	void softwareReset() {
+		/* Sets SYS_XTI_CLOCK and write PMSC to all zero */
+		_disableSequencing(); 
+		/* Clear AON and WakeUp configuration */
+		_writeToRegister(AON, AON_WCFG_SUB, 0x00, LEN_AON_WCFG);
+		_writeToRegister(AON, AON_CFG0_SUB, 0x00, LEN_AON_CFG0);
+		_writeToRegister(AON, AON_CTRL_SUB, 0x02, LEN_AON_CTRL);
+		/* Reset TX,RX and PMSC */
 		byte pmscctrl0[LEN_PMSC_CTRL0];
 		_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-		pmscctrl0[0] = 0x01;
-		_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 		pmscctrl0[3] = 0x00;
 		_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-		delay(10);
-		pmscctrl0[0] = 0x00;
+		delay(5);
+		/* Reset to all one softwareReset. Clock remain to SYS_XTI_CLOCK */
 		pmscctrl0[3] = 0xF0;
 		_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-		// force into idle mode
-		forceTRxOff();
 	}
 
 	/* ###########################################################################
