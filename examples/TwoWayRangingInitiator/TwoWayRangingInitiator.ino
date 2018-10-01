@@ -54,6 +54,7 @@
 #include <SPI.h>
 #include <DW1000Ng.hpp>
 #include <DW1000NgTime.hpp>
+#include <DW1000NgConfiguration.hpp>
 
 // connection pins
 const uint8_t PIN_RST = 9; // reset pin
@@ -94,22 +95,12 @@ void setup() {
     Serial.println("DW1000Ng initialized ...");
     // general configuration
     DW1000Ng::newConfiguration();
-    DW1000Ng::useExtendedFrameLength(false);
-	DW1000Ng::useSmartPower(true);
-	DW1000Ng::suppressFrameCheck(false);
-	DW1000Ng::setFrameFilter(false);
+    DW1000Ng::applyConfiguration(DW1000NgConfiguration::defaultConfig());
 	DW1000Ng::interruptOnSent(true);
 	DW1000Ng::interruptOnReceived(true);
 	DW1000Ng::interruptOnReceiveFailed(true);
 	DW1000Ng::interruptOnReceiveTimestampAvailable(false);
 	DW1000Ng::interruptOnAutomaticAcknowledgeTrigger(true);
-    DW1000Ng::setSFDMode(SFDMode::STANDARD_SFD);
-	DW1000Ng::setChannel(Channel::CHANNEL_5);
-	DW1000Ng::setDataRate(DataRate::RATE_850KBPS);
-    DW1000Ng::setPulseFrequency(PulseFrequency::FREQ_16MHZ);
-    DW1000Ng::setPreambleLength(PreambleLength::LEN_256);
-    DW1000Ng::setPreambleCode(PreambleCode::CODE_3);
-    DW1000Ng::setReceiverAutoReenable(true);
     DW1000Ng::commitConfiguration();
 
     DW1000Ng::setDeviceAddress(2);
