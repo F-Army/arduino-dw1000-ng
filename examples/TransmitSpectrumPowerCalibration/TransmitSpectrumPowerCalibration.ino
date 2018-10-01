@@ -65,6 +65,7 @@ void setup() {
     DW1000Ng::setTCPGDelay(0xC0);
 
     Serial.println(F("Committed configuration ..."));
+    Serial.println(F("Transmitting for calibration...."))
     
     DW1000Ng::enableTransmitPowerSpectrumTestMode(124800); /* Approx 1ms long transmissions */
     DW1000Ng::setTransmitData(data, sizeof(data));
@@ -72,6 +73,7 @@ void setup() {
 
     delay(120000); /* 2 minutes */
 
+    Serial.println(F("End of transmission"));
     /* used to stop transmission */
     DW1000Ng::softReset();
 }
