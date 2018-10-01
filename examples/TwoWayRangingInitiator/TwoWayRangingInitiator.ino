@@ -85,6 +85,29 @@ uint32_t resetPeriod = 250;
 // reply times (same on both sides for symm. ranging)
 uint16_t replyDelayTimeUS = 3000;
 
+device_configuration_t DEFAULT_CONFIG = {
+    false,
+    false,
+    true,
+    true,
+    true,
+    false,
+    SFDMode::STANDARD_SFD,
+    Channel::CHANNEL_5,
+    DataRate::RATE_850KBPS,
+    PulseFrequency::FREQ_16MHZ,
+    PreambleLength::LEN_256,
+    PreambleCode::CODE_3
+};
+
+interrupt_configuration_t DEFAULT_INTERRUPT_CONFIG = {
+    true,
+    true,
+    true,
+    false,
+    true
+};
+
 void setup() {
     // DEBUG monitoring
     Serial.begin(115200);
@@ -93,24 +116,8 @@ void setup() {
     DW1000Ng::begin(PIN_SS, PIN_IRQ, PIN_RST);
     Serial.println("DW1000Ng initialized ...");
     // general configuration
-    DW1000Ng::newConfiguration();
-    DW1000Ng::useExtendedFrameLength(false);
-	DW1000Ng::useSmartPower(true);
-	DW1000Ng::suppressFrameCheck(false);
-	DW1000Ng::setFrameFilter(false);
-	DW1000Ng::interruptOnSent(true);
-	DW1000Ng::interruptOnReceived(true);
-	DW1000Ng::interruptOnReceiveFailed(true);
-	DW1000Ng::interruptOnReceiveTimestampAvailable(false);
-	DW1000Ng::interruptOnAutomaticAcknowledgeTrigger(true);
-    DW1000Ng::setSFDMode(SFDMode::STANDARD_SFD);
-	DW1000Ng::setChannel(Channel::CHANNEL_5);
-	DW1000Ng::setDataRate(DataRate::RATE_850KBPS);
-    DW1000Ng::setPulseFrequency(PulseFrequency::FREQ_16MHZ);
-    DW1000Ng::setPreambleLength(PreambleLength::LEN_256);
-    DW1000Ng::setPreambleCode(PreambleCode::CODE_3);
-    DW1000Ng::setReceiverAutoReenable(true);
-    DW1000Ng::commitConfiguration();
+    DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
+	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
 
     DW1000Ng::setDeviceAddress(2);
     DW1000Ng::setNetworkId(10);

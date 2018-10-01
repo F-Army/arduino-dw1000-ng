@@ -770,6 +770,168 @@ namespace DW1000Ng {
 			_fsxtalt();
 		}
 
+		void _writeNetworkIdAndDeviceAddress() {
+			_writeBytesToRegister(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
+		}
+
+		void _writeSystemConfigurationRegister() {
+			_writeBytesToRegister(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
+		}
+
+		void _writeChannelControlRegister() {
+			_writeBytesToRegister(CHAN_CTRL, NO_SUB, _chanctrl, LEN_CHAN_CTRL);
+		}
+
+		void _writeTransmitFrameControlRegister() {
+			_writeBytesToRegister(TX_FCTRL, NO_SUB, _txfctrl, LEN_TX_FCTRL);
+		}
+
+		void _writeSystemEventMaskRegister() {
+			_writeBytesToRegister(SYS_MASK, NO_SUB, _sysmask, LEN_SYS_MASK);
+		}
+
+		void _writeAntennaDelayRegisters() {
+			byte antennaTxDelayBytes[2];
+			byte antennaRxDelayBytes[2];
+			DW1000NgUtils::writeValueToBytes(antennaTxDelayBytes, _antennaTxDelay, LEN_TX_ANTD);
+			DW1000NgUtils::writeValueToBytes(antennaRxDelayBytes, _antennaRxDelay, LEN_LDE_RXANTD);
+			_writeBytesToRegister(TX_ANTD, NO_SUB, antennaTxDelayBytes, LEN_TX_ANTD);
+			_writeBytesToRegister(LDE_IF, LDE_RXANTD_SUB, antennaRxDelayBytes, LEN_LDE_RXANTD);
+		}
+
+		void _writeConfiguration() {
+			// write all configurations back to device
+			_writeSystemConfigurationRegister();
+			_writeChannelControlRegister();
+			_writeTransmitFrameControlRegister();
+		}
+
+		void _setFrameFilter(boolean val) {
+			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFEN_BIT, val);
+		}
+
+		void _useExtendedFrameLength(boolean val) {
+			_extendedFrameLength = (val ? FRAME_LENGTH_EXTENDED : FRAME_LENGTH_NORMAL);
+			_syscfg[2] &= 0xFC;
+			_syscfg[2] |= _extendedFrameLength;
+		}
+
+		void _setReceiverAutoReenable(boolean val) {
+			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXAUTR_BIT, val);
+		}
+
+		void _useFrameCheck(boolean val) {
+			_frameCheck = val;
+		}
+
+		void _setNlosOptimization(boolean val) {
+			_nlos = val;
+			if(_nlos) {
+				_ldecfg1();
+				_ldecfg2();
+			}
+		}
+
+		void _useSmartPower(boolean smartPower) {
+			_smartPower = smartPower;
+			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, DIS_STXP_BIT, !smartPower);
+			_writeSystemConfigurationRegister();
+			if(_autoTXPower)
+				_txpowertune();
+		}
+
+		void _setSFDMode(SFDMode mode) {
+			switch(mode) {
+				case SFDMode::STANDARD_SFD:
+					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
+					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
+					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
+					_standardSFD = true;
+					break;
+				case SFDMode::DECAWAVE_SFD:
+					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
+					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
+					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
+					_standardSFD = false;
+					break;
+				default:
+					return; //TODO Proper error handling
+			}
+		}
+
+		void _setChannel(Channel channel) {
+			byte chan = static_cast<byte>(channel);
+			chan &= 0xF;
+			_chanctrl[0] = ((chan | (chan << 4)) & 0xFF);
+
+			_channel = channel;
+		}
+
+		void _setDataRate(DataRate data_rate) {
+			byte rate = static_cast<byte>(data_rate);
+			rate &= 0x03;
+			_txfctrl[1] &= 0x83;
+			_txfctrl[1] |= (byte)((rate << 5) & 0xFF);
+			// special 110kbps flag
+			if(data_rate == DataRate::RATE_110KBPS) {
+				DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXM110K_BIT, true);
+			} else {
+				DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXM110K_BIT, false);
+			}
+			_dataRate = data_rate;
+		}
+
+		void _setPulseFrequency(PulseFrequency frequency) {
+			byte freq = static_cast<byte>(frequency);
+			freq &= 0x03;
+			_txfctrl[2] &= 0xFC;
+			_txfctrl[2] |= (byte)(freq & 0xFF);
+			_chanctrl[2] &= 0xF3;
+			_chanctrl[2] |= (byte)((freq << 2) & 0xFF);
+
+			_pulseFrequency = frequency;
+		}
+
+		void _setPreambleLength(PreambleLength preamble_length) {
+			byte prealen = static_cast<byte>(preamble_length);
+			prealen &= 0x0F;
+			_txfctrl[2] &= 0xC3;
+			_txfctrl[2] |= (byte)((prealen << 2) & 0xFF);
+			
+			switch(preamble_length) {
+				case PreambleLength::LEN_64:
+					_pacSize = PacSize::SIZE_8;
+					break;
+				case PreambleLength::LEN_128:
+					_pacSize = PacSize::SIZE_8;
+					break;
+				case PreambleLength::LEN_256:
+					_pacSize = PacSize::SIZE_16;
+					break;
+				case PreambleLength::LEN_512:
+					_pacSize = PacSize::SIZE_16;
+					break;
+				case PreambleLength::LEN_1024:
+					_pacSize = PacSize::SIZE_32;
+					break;
+				default:
+					_pacSize = PacSize::SIZE_64; // In case of 1536, 2048 or 4096 preamble length.
+			}
+			
+			_preambleLength = preamble_length;
+		}
+
+		void _setPreambleCode(PreambleCode preamble_code) {
+			byte preacode = static_cast<byte>(preamble_code);
+			preacode &= 0x1F;
+			_chanctrl[2] &= 0x3F;
+			_chanctrl[2] |= ((preacode << 6) & 0xFF);
+			_chanctrl[3] = 0x00;
+			_chanctrl[3] = ((((preacode >> 2) & 0x07) | (preacode << 3)) & 0xFF);
+
+			_preambleCode = preamble_code;
+		}
+
 		boolean _checkPreambleCodeValidity() {
 			byte preacode = static_cast<byte>(_preambleCode);
 			if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
@@ -836,41 +998,32 @@ namespace DW1000Ng {
 			}
 		}
 
-		void _writeNetworkIdAndDeviceAddress() {
-			_writeBytesToRegister(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
+		void _interruptOnSent(boolean val) {
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, TXFRS_BIT, val);
 		}
 
-		void _writeSystemConfigurationRegister() {
-			_writeBytesToRegister(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
+		void _interruptOnReceived(boolean val) {
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, RXDFR_BIT, val);
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, RXFCG_BIT, val);
 		}
 
-		void _writeChannelControlRegister() {
-			_writeBytesToRegister(CHAN_CTRL, NO_SUB, _chanctrl, LEN_CHAN_CTRL);
+		void _interruptOnReceiveFailed(boolean val) {
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, LDEERR_BIT, val);
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXFCE_BIT, val);
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXPHE_BIT, val);
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXRFSL_BIT, val);
 		}
 
-		void _writeTransmitFrameControlRegister() {
-			_writeBytesToRegister(TX_FCTRL, NO_SUB, _txfctrl, LEN_TX_FCTRL);
+		void _interruptOnReceiveTimeout(boolean val) {
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, RXRFTO_BIT, val);
 		}
 
-		void _writeSystemEventMaskRegister() {
-			_writeBytesToRegister(SYS_MASK, NO_SUB, _sysmask, LEN_SYS_MASK);
+		void _interruptOnReceiveTimestampAvailable(boolean val) {
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, LDEDONE_BIT, val);
 		}
 
-		void _writeAntennaDelayRegisters() {
-			byte antennaTxDelayBytes[2];
-			byte antennaRxDelayBytes[2];
-			DW1000NgUtils::writeValueToBytes(antennaTxDelayBytes, _antennaTxDelay, LEN_TX_ANTD);
-			DW1000NgUtils::writeValueToBytes(antennaRxDelayBytes, _antennaRxDelay, LEN_LDE_RXANTD);
-			_writeBytesToRegister(TX_ANTD, NO_SUB, antennaTxDelayBytes, LEN_TX_ANTD);
-			_writeBytesToRegister(LDE_IF, LDE_RXANTD_SUB, antennaRxDelayBytes, LEN_LDE_RXANTD);
-		}
-
-		void _writeConfiguration() {
-			// write all configurations back to device
-			_writeSystemConfigurationRegister();
-			_writeChannelControlRegister();
-			_writeTransmitFrameControlRegister();
-			_writeSystemEventMaskRegister();
+		void _interruptOnAutomaticAcknowledgeTrigger(boolean val) {
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, AAT_BIT, val);
 		}
 
 		void _manageLDE() {
@@ -925,18 +1078,6 @@ namespace DW1000Ng {
 				// TODO deliver proper warning
 			}
 			_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
-		}
-		
-		/* interrupt state handling */
-		
-		void _clearInterrupts() {
-			memset(_sysmask, 0, LEN_SYS_MASK);
-		}
-
-		void _clearAllStatus() {
-			//Latched bits in status register are reset by writing 1 to them
-			memset(_sysstatus, 0xff, LEN_SYS_STATUS);
-			_writeBytesToRegister(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
 		void _clearReceiveStatus() {
@@ -1057,10 +1198,6 @@ namespace DW1000Ng {
 			return false;
 		}
 
-		void _setInterruptPolarity(boolean val) {
-			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, HIRQ_POL_BIT, val);
-		}
-
 		void _disableSequencing() {
             _enableClock(SYS_XTI_CLOCK);
             byte zero[2];
@@ -1137,6 +1274,12 @@ namespace DW1000Ng {
 		delay(5);
 		_ss = ss;
 		_irq = irq;
+		_rst = rst;
+
+		if(rst != 0xff) {
+			// DW1000 data sheet v2.08 §5.6.1 page 20, the RSTn pin should not be driven high but left floating.
+			pinMode(_rst, INPUT);
+		}
 		// start SPI
 		SPI.begin();
 		// pin and basic member setup
@@ -1145,25 +1288,15 @@ namespace DW1000Ng {
 		attachInterrupt(digitalPinToInterrupt(_irq), pollForEvents, RISING);
 		select();
 		// reset chip (either soft or hard)
-		if(rst != 0xff) {
-			_rst = rst;
-			// DW1000Ng data sheet v2.08 §5.6.1 page 20, the RSTn pin should not be driven high but left floating.
-			pinMode(_rst, INPUT);
-		}
-		// mimic default system configuration inside the DW1000Ng
-		memset(_syscfg, 0, LEN_SYS_CFG);
-		setDoubleBuffering(false);
-		_setInterruptPolarity(true);
-		// mimic default interrupt mask, i.e. no interrupts
-		_clearInterrupts();
-
+		
 		softReset();
-
+		
 		_enableClock(SYS_XTI_CLOCK);
 		delay(5);
 		// load LDE micro-code
 		_manageLDE();
 		delay(5);
+
 		// read the temp and vbat readings from OTP that were recorded during production test
 		// see 6.3.1 OTP memory map
 		byte buf_otp[4];
@@ -1175,8 +1308,12 @@ namespace DW1000Ng {
 		_enableClock(SYS_AUTO_CLOCK);
 		delay(5);
 
-		// default network and node id
-		DW1000NgUtils::writeValueToBytes(_networkAndAddress, 0xFF, LEN_PANADR);
+		_readNetworkIdAndDeviceAddress();
+		_readSystemConfigurationRegister();
+		_readChannelControlRegister();
+		_readTransmitFrameControlRegister();
+		_readSystemEventMaskRegister();
+
 		/* Cleared AON:CFG1(0x2C:0x0A) for proper operation of deepSleep */
 		_writeToRegister(AON, AON_CFG1_SUB, 0x00, LEN_AON_CFG1);
 	}
@@ -1508,12 +1645,6 @@ namespace DW1000Ng {
 		temp = (sar_ltemp - _tmeas23C) * 1.14f + 23.0f;
 	}
 
-
-	//Frame Filtering BIT in the SYS_CFG register
-	void setFrameFilter(boolean val) {
-		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFEN_BIT, val);
-	}
-
 	void setFrameFilterBehaveCoordinator(boolean val) {
 		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFBC_BIT, val);
 	}
@@ -1541,38 +1672,6 @@ namespace DW1000Ng {
 
 	void setDoubleBuffering(boolean val) {
 		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, DIS_DRXB_BIT, !val);
-	}
-
-	void setReceiverAutoReenable(boolean val) {
-		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXAUTR_BIT, val);
-	}
-
-	void interruptOnSent(boolean val) {
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, TXFRS_BIT, val);
-	}
-
-	void interruptOnReceived(boolean val) {
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, RXDFR_BIT, val);
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, RXFCG_BIT, val);
-	}
-
-	void interruptOnReceiveFailed(boolean val) {
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, LDEERR_BIT, val);
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXFCE_BIT, val);
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXPHE_BIT, val);
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXRFSL_BIT, val);
-	}
-
-	void interruptOnReceiveTimeout(boolean val) {
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, RXRFTO_BIT, val);
-	}
-
-	void interruptOnReceiveTimestampAvailable(boolean val) {
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, LDEDONE_BIT, val);
-	}
-
-	void interruptOnAutomaticAcknowledgeTrigger(boolean val) {
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, AAT_BIT, val);
 	}
 
 	void setAntennaDelay(uint16_t value) {
@@ -1621,16 +1720,27 @@ namespace DW1000Ng {
 		_writeBytesToRegister(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
 	}
 
-	void newConfiguration() {
-		forceTRxOff();
-		_readNetworkIdAndDeviceAddress();
-		_readSystemConfigurationRegister();
-		_readChannelControlRegister();
-		_readTransmitFrameControlRegister();
-		_readSystemEventMaskRegister();
+	void setInterruptPolarity(boolean val) {
+		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, HIRQ_POL_BIT, val);
+		_writeSystemConfigurationRegister();
 	}
 
-	void commitConfiguration() {
+	void applyConfiguration(device_configuration_t config) {
+		forceTRxOff();
+
+		_setFrameFilter(config.frameFiltering);
+		_useExtendedFrameLength(config.extendedFrameLength);
+		_setReceiverAutoReenable(config.receiverAutoReenable);
+		_useSmartPower(config.smartPower);
+		_useFrameCheck(config.frameCheck);
+		_setNlosOptimization(config.nlos);
+		_setSFDMode(config.sfd);
+		_setChannel(config.channel);
+		_setDataRate(config.dataRate);
+		_setPulseFrequency(config.pulseFreq);
+		_setPreambleLength(config.preambleLen);
+		_setPreambleCode(config.preaCode);
+
 		if(!_checkPreambleCodeValidity())
 			_setValidPreambleCode();
 
@@ -1643,28 +1753,21 @@ namespace DW1000Ng {
 		_tune();
 	}
 
+	void applyInterruptConfiguration(interrupt_configuration_t interrupt_config) {
+		forceTRxOff();
+
+		_interruptOnSent(interrupt_config.interruptOnSent);
+		_interruptOnReceived(interrupt_config.interruptOnReceived);
+		_interruptOnReceiveFailed(interrupt_config.interruptOnReceiveFailed);
+		_interruptOnReceiveTimeout(interrupt_config.interruptOnReceiveTimeout);
+		_interruptOnReceiveTimestampAvailable(interrupt_config.interruptOnReceiveTimestampAvailable);
+		_interruptOnAutomaticAcknowledgeTrigger(interrupt_config.interruptOnAutomaticAcknowledgeTrigger);
+
+		_writeSystemEventMaskRegister();
+	}
+
 	void waitForResponse(boolean val) {
 		DW1000NgUtils::setBit(_sysctrl, LEN_SYS_CTRL, WAIT4RESP_BIT, val);
-	}
-
-	void suppressFrameCheck(boolean val) {
-		_frameCheck = !val;
-	}
-
-	void setNlosOptimization(boolean val) {
-		_nlos = val;
-		if(_nlos) {
-			_ldecfg1();
-			_ldecfg2();
-		}
-	}
-
-	void useSmartPower(boolean smartPower) {
-		_smartPower = smartPower;
-		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, DIS_STXP_BIT, !smartPower);
-		_writeSystemConfigurationRegister();
-		if(_autoTXPower)
-			_txpowertune();
 	}
 
 	void setTXPower(byte power[]) {
@@ -1733,105 +1836,6 @@ namespace DW1000Ng {
 	void setDelayedTRX(byte futureTimeBytes[]) {
 		/* the least significant 9-bits are ignored in DX_TIME in functional modes */
 		_writeBytesToRegister(DX_TIME, NO_SUB, futureTimeBytes, LEN_DX_TIME);
-	}
-
-	void setDataRate(DataRate data_rate) {
-		byte rate = static_cast<byte>(data_rate);
-		rate &= 0x03;
-		_txfctrl[1] &= 0x83;
-		_txfctrl[1] |= (byte)((rate << 5) & 0xFF);
-		// special 110kbps flag
-		if(data_rate == DataRate::RATE_110KBPS) {
-			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXM110K_BIT, true);
-		} else {
-			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXM110K_BIT, false);
-		}
-		_dataRate = data_rate;
-	}
-
-	void setPulseFrequency(PulseFrequency frequency) {
-		byte freq = static_cast<byte>(frequency);
-		freq &= 0x03;
-		_txfctrl[2] &= 0xFC;
-		_txfctrl[2] |= (byte)(freq & 0xFF);
-		_chanctrl[2] &= 0xF3;
-		_chanctrl[2] |= (byte)((freq << 2) & 0xFF);
-
-		_pulseFrequency = frequency;
-	}
-
-	void setPreambleLength(PreambleLength preamble_length) {
-		byte prealen = static_cast<byte>(preamble_length);
-		prealen &= 0x0F;
-		_txfctrl[2] &= 0xC3;
-		_txfctrl[2] |= (byte)((prealen << 2) & 0xFF);
-		
-		switch(preamble_length) {
-			case PreambleLength::LEN_64:
-				_pacSize = PacSize::SIZE_8;
-				break;
-			case PreambleLength::LEN_128:
-				_pacSize = PacSize::SIZE_8;
-				break;
-			case PreambleLength::LEN_256:
-				_pacSize = PacSize::SIZE_16;
-				break;
-			case PreambleLength::LEN_512:
-				_pacSize = PacSize::SIZE_16;
-				break;
-			case PreambleLength::LEN_1024:
-				_pacSize = PacSize::SIZE_32;
-				break;
-			default:
-				_pacSize = PacSize::SIZE_64; // In case of 1536, 2048 or 4096 preamble length.
-		}
-		
-		_preambleLength = preamble_length;
-	}
-
-
-	void setSFDMode(SFDMode mode) {
-		switch(mode) {
-			case SFDMode::STANDARD_SFD:
-				DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
-				DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, false);
-				DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, false);
-				_standardSFD = true;
-				break;
-			case SFDMode::DECAWAVE_SFD:
-				DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, true);
-				DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, TNSSFD_BIT, true);
-				DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, RNSSFD_BIT, true);
-				_standardSFD = false;
-				break;
-			default:
-				return; //TODO Proper error handling
-		}
-	}
-
-	void useExtendedFrameLength(boolean val) {
-		_extendedFrameLength = (val ? FRAME_LENGTH_EXTENDED : FRAME_LENGTH_NORMAL);
-		_syscfg[2] &= 0xFC;
-		_syscfg[2] |= _extendedFrameLength;
-	}
-
-	void setChannel(Channel channel) {
-		byte chan = static_cast<byte>(channel);
-		chan &= 0xF;
-		_chanctrl[0] = ((chan | (chan << 4)) & 0xFF);
-
-		_channel = channel;
-	}
-
-	void setPreambleCode(PreambleCode preamble_code) {
-		byte preacode = static_cast<byte>(preamble_code);
-		preacode &= 0x1F;
-		_chanctrl[2] &= 0x3F;
-		_chanctrl[2] |= ((preacode << 6) & 0xFF);
-		_chanctrl[3] = 0x00;
-		_chanctrl[3] = ((((preacode >> 2) & 0x07) | (preacode << 3)) & 0xFF);
-
-		_preambleCode = preamble_code;
 	}
 
 	void setTransmitData(byte data[], uint16_t n) {
