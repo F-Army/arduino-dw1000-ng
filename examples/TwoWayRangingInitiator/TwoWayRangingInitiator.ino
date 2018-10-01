@@ -54,7 +54,6 @@
 #include <SPI.h>
 #include <DW1000Ng.hpp>
 #include <DW1000NgTime.hpp>
-#include <DW1000NgConfiguration.hpp>
 
 // connection pins
 const uint8_t PIN_RST = 9; // reset pin
@@ -86,6 +85,8 @@ uint32_t resetPeriod = 250;
 // reply times (same on both sides for symm. ranging)
 uint16_t replyDelayTimeUS = 3000;
 
+device_configuration_t defaultConf = DW1000NgConfiguration::defaultConfig();
+
 void setup() {
     // DEBUG monitoring
     Serial.begin(115200);
@@ -95,7 +96,7 @@ void setup() {
     Serial.println("DW1000Ng initialized ...");
     // general configuration
     DW1000Ng::newConfiguration();
-    DW1000Ng::applyConfiguration(DW1000NgConfiguration::defaultConfig());
+    DW1000Ng::applyConfiguration(defaultConf);
 	DW1000Ng::interruptOnSent(true);
 	DW1000Ng::interruptOnReceived(true);
 	DW1000Ng::interruptOnReceiveFailed(true);
