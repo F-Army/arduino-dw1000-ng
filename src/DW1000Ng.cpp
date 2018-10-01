@@ -925,12 +925,6 @@ namespace DW1000Ng {
 			}
 			_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
 		}
-		
-		/* interrupt state handling */
-		
-		void _clearInterrupts() {
-			memset(_sysmask, 0, LEN_SYS_MASK);
-		}
 
 		void _clearAllStatus() {
 			//Latched bits in status register are reset by writing 1 to them
@@ -1150,18 +1144,7 @@ namespace DW1000Ng {
 			pinMode(_rst, INPUT);
 		}
 		reset();
-		// default network and node id
-		//DW1000NgUtils::writeValueToBytes(_networkAndAddress, 0xFF, LEN_PANADR);
-
-		// mimic default system configuration inside the DW1000Ng
-		//memset(_syscfg, 0, LEN_SYS_CFG);
-		//setDoubleBuffering(false);
-		//_setInterruptPolarity(true);
-
-		// mimic default interrupt mask, i.e. no interrupts
-		//_clearInterrupts();
-
-		// load LDE micro-code
+		
 		_enableClock(SYS_XTI_CLOCK);
 		delay(5);
 		_manageLDE();
