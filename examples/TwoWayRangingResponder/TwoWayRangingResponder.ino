@@ -253,7 +253,7 @@ void loop() {
                 DW1000NgUtils::writeValueToBytes(data + 6, timePollAckReceived, LENGTH_TIMESTAMP);
                 DW1000NgUtils::writeValueToBytes(data + 11, timeRangeSent, LENGTH_TIMESTAMP);
                 // (re-)compute range as two-way ranging is done
-                float distance = DW1000NgRangingUtils::computeRangeAsymmetric(timePollSent,
+                double distance = DW1000NgRangingUtils::computeRangeAsymmetric(timePollSent,
                                                             timePollReceived, 
                                                             timePollAckSent, 
                                                             timePollAckReceived, 

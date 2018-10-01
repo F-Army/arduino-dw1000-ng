@@ -39,7 +39,7 @@ namespace DW1000NgRangingUtils {
  * are capable of symmetric ranging (and of asymmetric ranging anyway).
  */
 
-    float computeRangeAsymmetric(    
+    double computeRangeAsymmetric(    
                                         uint64_t timePollSent, 
                                         uint64_t timePollReceived, 
                                         uint64_t timePollAckSent, 

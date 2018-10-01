@@ -26,14 +26,6 @@
 #include "DW1000NgRangingUtils.hpp"
 #include "DW1000NgConstants.hpp"
 
-static int64_t overflowCorrectedValue(int64_t value) {
-    if(value < 0) {
-        return value+TIME_OVERFLOW;
-    } else {
-        return value;
-    }
-}
-
 namespace DW1000NgRangingUtils {
 
     
@@ -45,30 +37,22 @@ namespace DW1000NgRangingUtils {
                                     uint64_t timePollAckSent, 
                                     uint64_t timePollAckReceived,
                                     uint64_t timeRangeSent,
-                                    uint64_t timeRangeReceived 
-                                ) 
+                                    uint64_t timeRangeReceived
+                                )
     {
-        int64_t round1 = overflowCorrectedValue((int64_t)timePollAckReceived - (int64_t)timePollSent);
-        int64_t reply1 = overflowCorrectedValue((int64_t)timePollAckSent - (int64_t)timePollReceived);
-        int64_t round2 = overflowCorrectedValue((int64_t)timeRangeReceived - (int64_t)timePollAckSent);
-        int64_t reply2 = overflowCorrectedValue((int64_t)timeRangeSent - (int64_t)timePollAckReceived);
-        if(round1 == 0) {
-            Serial.println("Mirko Ceres 1");
-        }
-
-        if(reply1 == 0) {
-            Serial.println("Mirko Ceres 2");
-        }
-
-        if(round2 == 0) {
-            Serial.println("Mirko Ceres 3");
-        }
-
-        if(reply2 == 0) {
-            Serial.println("Mirko Ceres 4");
-        }
-        int64_t tof = (round1 * round2 - reply1 * reply2) / (round1 + round2 + reply1 + reply2);
-        return ((float) ( (tof%TIME_OVERFLOW) * DISTANCE_OF_RADIO));
+        uint32_t timePollSent_32 = (uint32_t) timePollSent;
+        uint32_t timePollReceived_32 = (uint32_t) timePollReceived;
+        uint32_t timePollAckSent_32 = (uint32_t) timePollAckSent;
+        uint32_t timePollAckReceived_32 = (uint32_t) timePollAckReceived;
+        uint32_t timeRangeSent_32 = (uint32_t) timeRangeSent;
+        
+        double round1 = (double) (timePollAckReceived - timePollSent);
+        double reply1 = (double) (timePollAckSent - timePollReceived);
+        double round2 = (double) (timeRangeReceived - timePollAckSent);
+        double reply2 = (double) (timeRangeSent - timePollAckReceived);
+        int64_t tof_uwb = (int64_t) (round1 * round2 - reply1 * reply2) / (round1 + round2 + reply1 + reply2);
+        double distance = tof_uwb * DISTANCE_OF_RADIO;
+        return distance;
     }
 
 
