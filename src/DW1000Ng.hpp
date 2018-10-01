@@ -156,9 +156,7 @@ namespace DW1000Ng {
 	void         getReceivedData(byte data[], uint16_t n);
 	void         getReceivedData(String& data);
 	uint16_t     getReceivedDataLength();
-	void         getTransmitTimestamp(byte data[]);
-	void         getReceiveTimestamp(byte data[]);
-	void         getSystemTimestamp(byte data[]);
+	
 	uint64_t     getTransmitTimestamp();
 	uint64_t     getReceiveTimestamp();
 	uint64_t     getSystemTimestamp();

@@ -1904,19 +1904,6 @@ namespace DW1000Ng {
 		free(dataBytes);
 	}
 
-	void getTransmitTimestamp(byte data[]) {
-		_readBytes(TX_TIME, TX_STAMP_SUB, data, LEN_TX_STAMP);
-	}
-
-	void getReceiveTimestamp(byte data[]) {
-		_readBytes(RX_TIME, RX_STAMP_SUB, data, LEN_RX_STAMP);
-		//correctTimestamp(data);
-	}
-
-	void getSystemTimestamp(byte data[]) {
-		_readBytes(SYS_TIME, NO_SUB, data, LEN_SYS_TIME);
-	}
-
 	uint64_t getTransmitTimestamp() {
 		byte data[LENGTH_TIMESTAMP];
 		memset(data, 0 , LENGTH_TIMESTAMP);
