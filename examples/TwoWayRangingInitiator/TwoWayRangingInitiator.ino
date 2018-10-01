@@ -177,14 +177,13 @@ void transmitRange() {
     data[0] = RANGE;
 
     /* Calculation of future time */
-    byte delayBytes[5];
-    uint64_t delayTime = DW1000NgUtils::microsecondsToUWBTime(replyDelayTimeUS);
+    byte futureTimeBytes[LENGTH_TIMESTAMP];
+
 	timeRangeSent = DW1000Ng::getSystemTimestamp();
-	timeRangeSent += delayTime;
-    DW1000NgUtils::writeValueToBytes(delayBytes, timeRangeSent, LENGTH_TIMESTAMP);
-    DW1000Ng::setDelayedTRX(delayBytes);
-    uint16_t antennaDelay = DW1000Ng::getTxAntennaDelay();
-    timeRangeSent += antennaDelay;
+	timeRangeSent += DW1000NgUtils::microsecondsToUWBTime(replyDelayTimeUS);
+    DW1000NgUtils::writeValueToBytes(futureTimeBytes, timeRangeSent, LENGTH_TIMESTAMP);
+    DW1000Ng::setDelayedTRX(futureTimeBytes);
+    timeRangeSent += DW1000Ng::getTxAntennaDelay();
 
     DW1000NgUtils::writeValueToBytes(data + 1, timePollSent, LENGTH_TIMESTAMP);
     DW1000NgUtils::writeValueToBytes(data + 6, timePollAckReceived, LENGTH_TIMESTAMP);
