@@ -870,7 +870,6 @@ namespace DW1000Ng {
 			_writeSystemConfigurationRegister();
 			_writeChannelControlRegister();
 			_writeTransmitFrameControlRegister();
-			_writeSystemEventMaskRegister();
 		}
 
 		void _manageLDE() {
@@ -1665,6 +1664,7 @@ namespace DW1000Ng {
 		setPulseFrequency(config.pulseFreq);
 		setPreambleLength(config.preambleLen);
 		setPreambleCode(config.preaCode);
+		commitConfiguration();
 	}
 
 	void applyInterruptConfiguration(interrupt_configuration_t interrupt_config) {
@@ -1676,6 +1676,8 @@ namespace DW1000Ng {
 		interruptOnReceiveTimeout(interrupt_config.interruptOnReceiveTimeout);
 		interruptOnReceiveTimestampAvailable(interrupt_config.interruptOnReceiveTimestampAvailable);
 		interruptOnAutomaticAcknowledgeTrigger(interrupt_config.interruptOnAutomaticAcknowledgeTrigger);
+
+		_writeSystemEventMaskRegister();
 	}
 
 	void waitForResponse(boolean val) {

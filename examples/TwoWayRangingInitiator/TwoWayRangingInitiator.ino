@@ -118,7 +118,6 @@ void setup() {
     // general configuration
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
-    DW1000Ng::commitConfiguration();
 
     DW1000Ng::setDeviceAddress(2);
     DW1000Ng::setNetworkId(10);
