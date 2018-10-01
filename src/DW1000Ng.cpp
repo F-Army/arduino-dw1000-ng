@@ -998,6 +998,34 @@ namespace DW1000Ng {
 			}
 		}
 
+		void _interruptOnSent(boolean val) {
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, TXFRS_BIT, val);
+		}
+
+		void _interruptOnReceived(boolean val) {
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, RXDFR_BIT, val);
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, RXFCG_BIT, val);
+		}
+
+		void _interruptOnReceiveFailed(boolean val) {
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, LDEERR_BIT, val);
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXFCE_BIT, val);
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXPHE_BIT, val);
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXRFSL_BIT, val);
+		}
+
+		void _interruptOnReceiveTimeout(boolean val) {
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, RXRFTO_BIT, val);
+		}
+
+		void _interruptOnReceiveTimestampAvailable(boolean val) {
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, LDEDONE_BIT, val);
+		}
+
+		void _interruptOnAutomaticAcknowledgeTrigger(boolean val) {
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, AAT_BIT, val);
+		}
+
 		void _manageLDE() {
 			// transfer any ldo tune values
 			byte ldoTune[LEN_OTP_RDAT];
@@ -1649,34 +1677,6 @@ namespace DW1000Ng {
 		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, DIS_DRXB_BIT, !val);
 	}
 
-	void interruptOnSent(boolean val) {
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, TXFRS_BIT, val);
-	}
-
-	void interruptOnReceived(boolean val) {
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, RXDFR_BIT, val);
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, RXFCG_BIT, val);
-	}
-
-	void interruptOnReceiveFailed(boolean val) {
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, LDEERR_BIT, val);
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXFCE_BIT, val);
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXPHE_BIT, val);
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXRFSL_BIT, val);
-	}
-
-	void interruptOnReceiveTimeout(boolean val) {
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, RXRFTO_BIT, val);
-	}
-
-	void interruptOnReceiveTimestampAvailable(boolean val) {
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, LDEDONE_BIT, val);
-	}
-
-	void interruptOnAutomaticAcknowledgeTrigger(boolean val) {
-		DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, AAT_BIT, val);
-	}
-
 	void setAntennaDelay(uint16_t value) {
 		_antennaTxDelay = value;
 		_antennaRxDelay = value;
@@ -1759,12 +1759,12 @@ namespace DW1000Ng {
 	void applyInterruptConfiguration(interrupt_configuration_t interrupt_config) {
 		forceTRxOff();
 
-		interruptOnSent(interrupt_config.interruptOnSent);
-		interruptOnReceived(interrupt_config.interruptOnReceived);
-		interruptOnReceiveFailed(interrupt_config.interruptOnReceiveFailed);
-		interruptOnReceiveTimeout(interrupt_config.interruptOnReceiveTimeout);
-		interruptOnReceiveTimestampAvailable(interrupt_config.interruptOnReceiveTimestampAvailable);
-		interruptOnAutomaticAcknowledgeTrigger(interrupt_config.interruptOnAutomaticAcknowledgeTrigger);
+		_interruptOnSent(interrupt_config.interruptOnSent);
+		_interruptOnReceived(interrupt_config.interruptOnReceived);
+		_interruptOnReceiveFailed(interrupt_config.interruptOnReceiveFailed);
+		_interruptOnReceiveTimeout(interrupt_config.interruptOnReceiveTimeout);
+		_interruptOnReceiveTimestampAvailable(interrupt_config.interruptOnReceiveTimestampAvailable);
+		_interruptOnAutomaticAcknowledgeTrigger(interrupt_config.interruptOnAutomaticAcknowledgeTrigger);
 
 		_writeSystemEventMaskRegister();
 	}

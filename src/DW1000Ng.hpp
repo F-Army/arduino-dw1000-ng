@@ -167,14 +167,6 @@ namespace DW1000Ng {
 	float getReceivePower();
 	float getFirstPathPower();
 	float getReceiveQuality();
-	
-	/* interrupt management. */
-	void interruptOnSent(boolean val);
-	void interruptOnReceived(boolean val);
-	void interruptOnReceiveFailed(boolean val);
-	void interruptOnReceiveTimeout(boolean val);
-	void interruptOnReceiveTimestampAvailable(boolean val);
-	void interruptOnAutomaticAcknowledgeTrigger(boolean val);
 
 	/* Antenna delay calibration */
 	void setAntennaDelay(uint16_t value);
