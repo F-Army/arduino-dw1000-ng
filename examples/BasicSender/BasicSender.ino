@@ -127,7 +127,7 @@ void transmit() {
   String msg = "Hello DW1000Ng, it's #"; msg += sentNum;
   DW1000Ng::setTransmitData(msg);
   // delay sending the message for the given amount
-  setDelay(1000);
+  delay(1000);
   DW1000Ng::startTransmit(TransmitMode::IMMEDIATE);
   delaySent = millis();
 }
