@@ -47,7 +47,7 @@ namespace DW1000NgRangingUtils {
                                         uint64_t timeRangeSent,
                                         uint64_t timeRangeReceived 
                                     );
-
+    /*
     float computeRangeSymmetric(    
                                         uint64_t timePollSent, 
                                         uint64_t timePollReceived, 
@@ -56,4 +56,5 @@ namespace DW1000NgRangingUtils {
                                         uint64_t timeRangeSent,
                                         uint64_t timeRangeReceived 
                                     );
+    */
 }
