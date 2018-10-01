@@ -113,7 +113,7 @@ void setup() {
     Serial.begin(115200);
     Serial.println(F("### DW1000Ng-arduino-ranging-tag ###"));
     // initialize the driver
-    DW1000Ng::begin(PIN_SS, PIN_IRQ, PIN_RST);
+    DW1000Ng::initialize(PIN_SS, PIN_IRQ, PIN_RST);
     Serial.println("DW1000Ng initialized ...");
     // general configuration
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);

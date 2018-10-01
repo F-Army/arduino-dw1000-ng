@@ -1269,7 +1269,7 @@ namespace DW1000Ng {
 
 	/* ####################### PUBLIC ###################### */
 
-	void begin(uint8_t ss, uint8_t irq, uint8_t rst) {
+	void initialize(uint8_t ss, uint8_t irq, uint8_t rst) {
 		// generous initial init/wake-up-idle delay
 		delay(5);
 		_ss = ss;

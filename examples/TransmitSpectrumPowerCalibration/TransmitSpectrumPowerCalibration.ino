@@ -54,7 +54,7 @@ void setup() {
     Serial.begin(115200);
     Serial.println(F("### DW1000Ng-transmit-spectrum-power-test ###"));
     // initialize the driver
-    DW1000Ng::begin(PIN_SS, PIN_IRQ, PIN_RST);
+    DW1000Ng::initialize(PIN_SS, PIN_IRQ, PIN_RST);
     Serial.println(F("DW1000Ng initialized ..."));
     // general configuration
 
