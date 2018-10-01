@@ -820,8 +820,8 @@ namespace DW1000Ng {
 			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXAUTR_BIT, val);
 		}
 
-		void _suppressFrameCheck(boolean val) {
-			_frameCheck = !val;
+		void _useFrameCheck(boolean val) {
+			_frameCheck = val;
 		}
 
 		void _setNlosOptimization(boolean val) {
@@ -1729,7 +1729,7 @@ namespace DW1000Ng {
 		_useExtendedFrameLength(config.extendedFrameLength);
 		_setReceiverAutoReenable(config.receiverAutoReenable);
 		_useSmartPower(config.smartPower);
-		_suppressFrameCheck(!config.frameCheck);
+		_useFrameCheck(config.frameCheck);
 		_setNlosOptimization(config.nlos);
 		_setSFDMode(config.sfd);
 		_setChannel(config.channel);
