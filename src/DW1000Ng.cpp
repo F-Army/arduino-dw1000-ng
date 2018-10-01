@@ -1155,15 +1155,15 @@ namespace DW1000Ng {
 		}
 		reset();
 		// default network and node id
-		DW1000NgUtils::writeValueToBytes(_networkAndAddress, 0xFF, LEN_PANADR);
+		//DW1000NgUtils::writeValueToBytes(_networkAndAddress, 0xFF, LEN_PANADR);
 
 		// mimic default system configuration inside the DW1000Ng
-		memset(_syscfg, 0, LEN_SYS_CFG);
-		setDoubleBuffering(false);
-		_setInterruptPolarity(true);
+		//memset(_syscfg, 0, LEN_SYS_CFG);
+		//setDoubleBuffering(false);
+		//_setInterruptPolarity(true);
 
 		// mimic default interrupt mask, i.e. no interrupts
-		_clearInterrupts();
+		//_clearInterrupts();
 
 		// load LDE micro-code
 		_enableClock(SYS_XTI_CLOCK);
