@@ -28,10 +28,8 @@
 
 static int64_t overflowCorrectedValue(int64_t value) {
     if(value < 0) {
-        Serial.print("Minore di 0");
         return value+TIME_OVERFLOW;
     } else {
-        Serial.print("Maggiore di 0");
         return value;
     }
 }
@@ -55,6 +53,7 @@ namespace DW1000NgRangingUtils {
         int64_t round2 = overflowCorrectedValue((int64_t)timeRangeReceived - (int64_t)timePollAckSent);
         int64_t reply2 = overflowCorrectedValue((int64_t)timeRangeSent - (int64_t)timePollAckReceived);
         int64_t tof = (round1 * round2 - reply1 * reply2) / (round1 + round2 + reply1 + reply2);
+        if(tof > 0) {Serial.print("My Prontera");}
         return ((float) ( (tof%TIME_OVERFLOW) * DISTANCE_OF_RADIO));
     }
 
