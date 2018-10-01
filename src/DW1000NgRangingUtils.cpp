@@ -23,7 +23,6 @@
 */
 
 #include "DW1000NgRangingUtils.hpp"
-#include "DW1000NgTime.hpp"
 
 namespace DW1000NgRangingUtils {
     /*

@@ -24,9 +24,6 @@
 
 #pragma once
 
-
-#include "DW1000NgTime.hpp"
-
 namespace DW1000NgRangingUtils {
     /*
  * RANGING ALGORITHMS
