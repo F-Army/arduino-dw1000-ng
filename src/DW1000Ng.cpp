@@ -1660,6 +1660,15 @@ namespace DW1000Ng {
 		setPreambleCode(config.preaCode);
 	}
 
+	void applyInterruptConfiguration(interrupt_configuration_t interrupt_config) {
+		interruptOnSent(interrupt_config.interruptOnSent);
+		interruptOnReceived(interrupt_config.interruptOnReceived);
+		interruptOnReceiveFailed(interrupt_config.interruptOnReceiveFailed);
+		interruptOnReceiveTimeout(interrupt_config.interruptOnReceiveTimeout);
+		interruptOnReceiveTimestampAvailable(interrupt_config.interruptOnReceiveTimestampAvailable);
+		interruptOnAutomaticAcknowledgeTrigger(interrupt_config.interruptOnAutomaticAcknowledgeTrigger);
+	}
+
 	void waitForResponse(boolean val) {
 		DW1000NgUtils::setBit(_sysctrl, LEN_SYS_CTRL, WAIT4RESP_BIT, val);
 	}

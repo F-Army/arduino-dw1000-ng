@@ -86,19 +86,27 @@ uint32_t resetPeriod = 250;
 uint16_t replyDelayTimeUS = 3000;
 
 device_configuration_t DEFAULT_CONFIG = {
-            false,
-            false,
-            true,
-            true,
-            true,
-            false,
-            SFDMode::STANDARD_SFD,
-            Channel::CHANNEL_5,
-            DataRate::RATE_850KBPS,
-            PulseFrequency::FREQ_16MHZ,
-            PreambleLength::LEN_256,
-            PreambleCode::CODE_3
-        };
+    false,
+    false,
+    true,
+    true,
+    true,
+    false,
+    SFDMode::STANDARD_SFD,
+    Channel::CHANNEL_5,
+    DataRate::RATE_850KBPS,
+    PulseFrequency::FREQ_16MHZ,
+    PreambleLength::LEN_256,
+    PreambleCode::CODE_3
+};
+
+interrupt_configuration_t DEFAULT_INTERRUPT_CONFIG = {
+    true,
+    true,
+    true,
+    false,
+    true
+};
 
 void setup() {
     // DEBUG monitoring
@@ -110,11 +118,7 @@ void setup() {
     // general configuration
     DW1000Ng::newConfiguration();
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
-	DW1000Ng::interruptOnSent(true);
-	DW1000Ng::interruptOnReceived(true);
-	DW1000Ng::interruptOnReceiveFailed(true);
-	DW1000Ng::interruptOnReceiveTimestampAvailable(false);
-	DW1000Ng::interruptOnAutomaticAcknowledgeTrigger(true);
+	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
     DW1000Ng::commitConfiguration();
 
     DW1000Ng::setDeviceAddress(2);

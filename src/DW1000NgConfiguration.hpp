@@ -41,3 +41,12 @@ typedef struct device_configuration_t {
     PreambleLength preambleLen;
     PreambleCode preaCode;
 } device_configuration_t;
+
+typedef struct interrupt_configuration_t {
+    boolean interruptOnSent;
+    boolean interruptOnReceived;
+    boolean interruptOnReceiveFailed;
+    boolean interruptOnReceiveTimeout;
+    boolean interruptOnReceiveTimestampAvailable;
+    boolean interruptOnAutomaticAcknowledgeTrigger;
+} interrupt_configuration_t;
