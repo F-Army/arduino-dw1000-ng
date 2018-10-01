@@ -100,8 +100,8 @@ namespace DW1000NgUtils {
 		return bitRead(targetByte, shift); // TODO wrong type returned byte instead of boolean
 	}
 
-	void writeValueToBytes(byte data[], int32_t val, uint16_t n) {
-		uint16_t i;
+	void writeValueToBytes(byte data[], uint64_t val, uint8_t n) {
+		uint8_t i;
 		for(i = 0; i < n; i++) {
 			data[i] = ((val >> (i*8)) & 0xFF); // TODO bad types - signed unsigned problem
 		}

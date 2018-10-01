@@ -49,7 +49,7 @@
 namespace DW1000NgUtils {
     boolean getBit(byte data[], uint16_t n, uint16_t bit);
     void setBit(byte data[], uint16_t n, uint16_t bit, boolean val);
-    void writeValueToBytes(byte data[], int32_t val, uint16_t n);
+    void writeValueToBytes(byte data[], uint64_t val, uint8_t n);
     /* convert from char to 4 bits (hexadecimal) */
 	uint8_t nibbleFromChar(char c);
 	void convertToByte(char string[], byte* eui_byte);
