@@ -43,7 +43,7 @@ namespace DW1000NgRangingUtils {
         uint64_t round2 = timeRangeReceived - timePollAckSent;
         uint64_t reply2 = timeRangeSent - timePollAckReceived;
         uint64_t tof = (round1 * round2 - reply1 * reply2) / (round1 + round2 + reply1 + reply2);
-        return ((float) ((float)tof * DISTANCE_OF_RADIO));
+        return ((float) ( (tof%TIME_OVERFLOW) * DISTANCE_OF_RADIO));
     }
 
     /* symmetric two-way ranging (less computation intense, more error prone on clock drift) */
