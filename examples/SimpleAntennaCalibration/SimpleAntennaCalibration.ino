@@ -136,7 +136,7 @@ void setup() {
     delay(1000);
     Serial.println(F("### DW1000Ng-arduino-ranging-anchor ###"));
     // initialize the driver
-    DW1000Ng::begin(PIN_SS, PIN_IRQ, PIN_RST);
+    DW1000Ng::initialize(PIN_SS, PIN_IRQ, PIN_RST);
     Serial.println(F("DW1000Ng initialized ..."));
     // general configuration
 
