@@ -50,11 +50,11 @@ namespace DW1000NgRangingUtils {
         uint32_t timeRangeReceived_32 = (uint32_t) timeRangeReceived;
         */
 
-        int64_t round1 = (int64_t)(timePollAckReceived - timePollSent);
-        int64_t reply1 = (int64_t)(timePollAckSent - timePollReceived);
-        int64_t round2 = (int64_t)(timeRangeReceived - timePollAckSent);
-        int64_t reply2 = (int64_t)(timeRangeSent - timePollAckReceived);
-        int64_t tof_uwb = (int64_t) (round1 * round2 - reply1 * reply2) / (round1 + round2 + reply1 + reply2);
+        double round1 = (double) (timePollAckReceived - timePollSent);
+        double reply1 = (double) (timePollAckSent - timePollReceived);
+        double round2 = (double) (timeRangeReceived - timePollAckSent);
+        double reply2 = (double) (timeRangeSent - timePollAckReceived);
+        double tof_uwb = (round1 * round2 - reply1 * reply2) / (round1 + round2 + reply1 + reply2);
         double distance = tof_uwb * DISTANCE_OF_RADIO;
         return distance;
     }
