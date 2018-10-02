@@ -38,13 +38,14 @@ namespace DW1000NgRangingUtils {
                                     uint64_t timeRangeReceived
                                 )
     {
+        
         uint32_t timePollSent_32 = (uint32_t) timePollSent;
         uint32_t timePollReceived_32 = (uint32_t) timePollReceived;
         uint32_t timePollAckSent_32 = (uint32_t) timePollAckSent;
         uint32_t timePollAckReceived_32 = (uint32_t) timePollAckReceived;
         uint32_t timeRangeSent_32 = (uint32_t) timeRangeSent;
         uint32_t timeRangeReceived_32 = (uint32_t) timeRangeReceived;
-
+        
         double round1 = (double) (timePollAckReceived_32 - timePollSent_32);
         double reply1 = (double) (timePollAckSent_32 - timePollReceived_32);
         double round2 = (double) (timeRangeReceived_32 - timePollAckSent_32);

@@ -59,7 +59,6 @@ boolean sent = false;
 volatile boolean sentAck = false;
 volatile unsigned long delaySent = 0;
 int16_t sentNum = 0; // todo check int type
-DW1000NgTime sentTime;
 
 device_configuration_t DEFAULT_CONFIG = {
     false,
@@ -139,13 +138,8 @@ void loop() {
     sentAck = false;
     // update and print some information about the sent message
     Serial.print("ARDUINO delay sent [ms] ... "); Serial.println(millis() - delaySent);
-    DW1000NgTime newSentTime;
-    DW1000Ng::getTransmitTimestamp(newSentTime);
+    uint64_t newSentTime = DW1000Ng::getTransmitTimestamp();
     Serial.print("Processed packet ... #"); Serial.println(sentNum);
-    Serial.print("Sent timestamp ... "); Serial.println(newSentTime.getAsMicroSeconds());
-    // note: delta is just for simple demo as not correct on system time counter wrap-around
-    Serial.print("DW1000Ng delta send time [ms] ... "); Serial.println((newSentTime.getAsMicroSeconds() - sentTime.getAsMicroSeconds()) * 1.0e-3);
-    sentTime = newSentTime;
     sentNum++;
     // again, transmit some data
     transmit();
