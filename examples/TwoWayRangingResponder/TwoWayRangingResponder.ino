@@ -55,7 +55,7 @@
 #include <SPI.h>
 #include <DW1000Ng.hpp>
 #include <DW1000NgUtils.hpp>
-#include <DW1000NgRangingUtils.hpp>
+#include <DW1000NgRanging.hpp>
 
 // connection pins
 const uint8_t PIN_RST = 9; // reset pin
@@ -253,14 +253,14 @@ void loop() {
                 timePollAckReceived = DW1000NgUtils::bytesAsValue(data + 6, LENGTH_TIMESTAMP);
                 timeRangeSent = DW1000NgUtils::bytesAsValue(data + 11, LENGTH_TIMESTAMP);
                 // (re-)compute range as two-way ranging is done
-                double distance = DW1000NgRangingUtils::computeRangeAsymmetric(timePollSent,
+                double distance = DW1000NgRanging::computeRangeAsymmetric(timePollSent,
                                                             timePollReceived, 
                                                             timePollAckSent, 
                                                             timePollAckReceived, 
                                                             timeRangeSent, 
                                                             timeRangeReceived);
                 /* Apply simple bias correction */
-                distance = DW1000NgRangingUtils::correctRange(distance);
+                distance = DW1000NgRanging::correctRange(distance);
                 
                 String rangeString = "Range: "; rangeString += distance; rangeString += " m";
                 rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";

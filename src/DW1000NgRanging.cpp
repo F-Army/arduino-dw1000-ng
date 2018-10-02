@@ -25,10 +25,10 @@
 #include <Arduino.h>
 #include "DW1000Ng.hpp"
 #include "DW1000NgConstants.hpp"
-#include "DW1000NgRangingUtils.hpp"
+#include "DW1000NgRanging.hpp"
 #include "DW1000NgConstants.hpp"
 
-namespace DW1000NgRangingUtils {
+namespace DW1000NgRanging {
 
     /* asymmetric two-way ranging (more computation intense, less error prone) */
     double computeRangeAsymmetric(    

@@ -26,7 +26,7 @@
 
 #include <Arduino.h>
 
-namespace DW1000NgRangingUtils {
+namespace DW1000NgRanging {
 
     /* asymmetric two-way ranging (more computation intense, less error prone) */
     double computeRangeAsymmetric(    
