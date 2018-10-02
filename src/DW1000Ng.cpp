@@ -1940,6 +1940,7 @@ namespace DW1000Ng {
 			A       = 121.74;
 			corrFac = 1.1667;
 		}
+		
 		float estRxPwr = 10.0*log10(((float)C*(float)twoPower17)/((float)N*(float)N))-A;
 		if(estRxPwr <= -88) {
 			return estRxPwr;

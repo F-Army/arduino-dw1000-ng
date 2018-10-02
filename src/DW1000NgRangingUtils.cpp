@@ -104,14 +104,7 @@ namespace DW1000NgRangingUtils {
         int64_t tof_uwb = static_cast<int64_t>((round1 * round2 - reply1 * reply2) / (round1 + round2 + reply1 + reply2));
         double distance = tof_uwb * DISTANCE_OF_RADIO;
 
-        double old_dist = distance;
         distance = _correctRange(distance);
-
-        if(old_dist == distance) {
-            Serial.println("Ci è qualquadra che non cosa");
-        } else {
-            Serial.println("Correzione del bias applicata");
-        }
 
         return distance;
     }
