@@ -53,7 +53,8 @@
 
 #include <SPI.h>
 #include <DW1000Ng.hpp>
-#include <DW1000NgTime.hpp>
+#include <DW1000NgUtils.hpp>
+#include <DW1000NgConstants.hpp>
 
 // connection pins
 const uint8_t PIN_RST = 9; // reset pin
@@ -73,9 +74,9 @@ volatile byte expectedMsgId = POLL_ACK;
 volatile boolean sentAck = false;
 volatile boolean receivedAck = false;
 // timestamps to remember
-DW1000NgTime timePollSent;
-DW1000NgTime timePollAckReceived;
-DW1000NgTime timeRangeSent;
+uint64_t timePollSent;
+uint64_t timePollAckReceived;
+uint64_t timeRangeSent;
 // data buffer
 #define LEN_DATA 16
 byte data[LEN_DATA];
@@ -176,19 +177,17 @@ void transmitRange() {
     data[0] = RANGE;
 
     /* Calculation of future time */
-    byte delayBytes[5];
-	DW1000NgTime delayTime = DW1000NgTime(replyDelayTimeUS, DW1000NgTime::MICROSECONDS);
-	DW1000Ng::getSystemTimestamp(timeRangeSent);
-	timeRangeSent += delayTime;
-	timeRangeSent.getTimestamp(delayBytes);
-    DW1000Ng::setDelayedTRX(delayBytes);
-    DW1000NgTime antennaDelay;
-    antennaDelay.setTimestamp(DW1000Ng::getTxAntennaDelay());
-    timeRangeSent += antennaDelay;
+    byte futureTimeBytes[LENGTH_TIMESTAMP];
 
-    timePollSent.getTimestamp(data + 1);
-    timePollAckReceived.getTimestamp(data + 6);
-    timeRangeSent.getTimestamp(data + 11);
+	timeRangeSent = DW1000Ng::getSystemTimestamp();
+	timeRangeSent += DW1000NgUtils::microsecondsToUWBTime(replyDelayTimeUS);
+    DW1000NgUtils::writeValueToBytes(futureTimeBytes, timeRangeSent, LENGTH_TIMESTAMP);
+    DW1000Ng::setDelayedTRX(futureTimeBytes);
+    timeRangeSent += DW1000Ng::getTxAntennaDelay();
+
+    DW1000NgUtils::writeValueToBytes(data + 1, timePollSent, LENGTH_TIMESTAMP);
+    DW1000NgUtils::writeValueToBytes(data + 6, timePollAckReceived, LENGTH_TIMESTAMP);
+    DW1000NgUtils::writeValueToBytes(data + 11, timeRangeSent, LENGTH_TIMESTAMP);
     DW1000Ng::setTransmitData(data, LEN_DATA);
     DW1000Ng::startTransmit(TransmitMode::DELAYED);
     //Serial.print("Expect RANGE to be sent @ "); Serial.println(timeRangeSent.getAsFloat());
@@ -207,10 +206,10 @@ void loop() {
         sentAck = false;
         byte msgId = data[0];
         if (msgId == POLL) {
-            DW1000Ng::getTransmitTimestamp(timePollSent);
+            timePollSent = DW1000Ng::getTransmitTimestamp();
             //Serial.print("Sent POLL @ "); Serial.println(timePollSent.getAsFloat());
         } else if (msgId == RANGE) {
-            DW1000Ng::getTransmitTimestamp(timeRangeSent);
+            timeRangeSent = DW1000Ng::getTransmitTimestamp();
             noteActivity();
         }
         DW1000Ng::startReceive();
@@ -228,7 +227,7 @@ void loop() {
             return;
         }
         if (msgId == POLL_ACK) {
-            DW1000Ng::getReceiveTimestamp(timePollAckReceived);
+            timePollAckReceived = DW1000Ng::getReceiveTimestampUnbiased();
             expectedMsgId = RANGE_REPORT;
             transmitRange();
             noteActivity();
@@ -245,4 +244,3 @@ void loop() {
         }
     }
 }
-

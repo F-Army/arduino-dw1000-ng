@@ -54,6 +54,7 @@
 
 #include <SPI.h>
 #include <DW1000Ng.hpp>
+#include <DW1000NgUtils.hpp>
 #include <DW1000NgRangingUtils.hpp>
 
 // connection pins
@@ -76,14 +77,14 @@ volatile boolean receivedAck = false;
 // protocol error state
 boolean protocolFailed = false;
 // timestamps to remember
-DW1000NgTime timePollSent;
-DW1000NgTime timePollReceived;
-DW1000NgTime timePollAckSent;
-DW1000NgTime timePollAckReceived;
-DW1000NgTime timeRangeSent;
-DW1000NgTime timeRangeReceived;
+uint64_t timePollSent;
+uint64_t timePollReceived;
+uint64_t timePollAckSent;
+uint64_t timePollAckReceived;
+uint64_t timeRangeSent;
+uint64_t timeRangeReceived;
 
-DW1000NgTime timeComputedRange;
+uint64_t timeComputedRange;
 // last computed range/time
 // data buffer
 #define LEN_DATA 16
@@ -222,7 +223,7 @@ void loop() {
         sentAck = false;
         byte msgId = data[0];
         if (msgId == POLL_ACK) {
-            DW1000Ng::getTransmitTimestamp(timePollAckSent);
+            timePollAckSent = DW1000Ng::getTransmitTimestamp();
             noteActivity();
         }
         DW1000Ng::startReceive();
@@ -239,26 +240,26 @@ void loop() {
         if (msgId == POLL) {
             // on POLL we (re-)start, so no protocol failure
             protocolFailed = false;
-            DW1000Ng::getReceiveTimestamp(timePollReceived);
+            timePollReceived = DW1000Ng::getReceiveTimestamp();
             expectedMsgId = RANGE;
             transmitPollAck();
             noteActivity();
         }
         else if (msgId == RANGE) {
-            DW1000Ng::getReceiveTimestamp(timeRangeReceived);
+            timeRangeReceived = DW1000Ng::getReceiveTimestamp();
             expectedMsgId = POLL;
             if (!protocolFailed) {
-                timePollSent.setTimestamp(data + 1);
-                timePollAckReceived.setTimestamp(data + 6);
-                timeRangeSent.setTimestamp(data + 11);
+                timePollSent = DW1000NgUtils::bytesAsValue(data + 1, LENGTH_TIMESTAMP);
+                timePollAckReceived = DW1000NgUtils::bytesAsValue(data + 6, LENGTH_TIMESTAMP);
+                timeRangeSent = DW1000NgUtils::bytesAsValue(data + 11, LENGTH_TIMESTAMP);
                 // (re-)compute range as two-way ranging is done
-                timeComputedRange = DW1000NgRangingUtils::computeRangeAsymmetric(timePollSent,
+                double distance = DW1000NgRangingUtils::computeRangeAsymmetric(timePollSent,
                                                             timePollReceived, 
                                                             timePollAckSent, 
                                                             timePollAckReceived, 
                                                             timeRangeSent, 
                                                             timeRangeReceived);
-                float distance = timeComputedRange.getAsMeters();
+                
                 String rangeString = "Range: "; rangeString += distance; rangeString += " m";
                 rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
                 rangeString += "\t Sampling: "; rangeString += samplingRate; rangeString += " Hz";
@@ -267,7 +268,7 @@ void loop() {
                 //Serial.print("RX power is [dBm]: "); Serial.println(DW1000Ng::getReceivePower());
                 //Serial.print("Receive quality: "); Serial.println(DW1000Ng::getReceiveQuality());
                 // update sampling rate (each second)
-                transmitRangeReport(timeComputedRange.getAsMicroSeconds());
+                transmitRangeReport(distance * DISTANCE_OF_RADIO_INV);
                 successRangingCount++;
                 if (curMillis - rangingCountPeriod > 1000) {
                     samplingRate = (1000.0f * successRangingCount) / (curMillis - rangingCountPeriod);

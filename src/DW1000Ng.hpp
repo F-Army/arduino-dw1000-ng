@@ -50,7 +50,7 @@
 #include <SPI.h>
 #include "DW1000NgConstants.hpp"
 #include "DW1000NgConfiguration.hpp"
-#include "DW1000NgTime.hpp"
+#include "DW1000NgCompileOptions.hpp"
 
 namespace DW1000Ng {
 	/* ##### Init ################################################################ */
@@ -156,12 +156,11 @@ namespace DW1000Ng {
 	void         getReceivedData(byte data[], uint16_t n);
 	void         getReceivedData(String& data);
 	uint16_t     getReceivedDataLength();
-	void         getTransmitTimestamp(DW1000NgTime& time);
-	void         getReceiveTimestamp(DW1000NgTime& time);
-	void         getSystemTimestamp(DW1000NgTime& time);
-	void         getTransmitTimestamp(byte data[]);
-	void         getReceiveTimestamp(byte data[]);
-	void         getSystemTimestamp(byte data[]);
+	
+	uint64_t     getTransmitTimestamp();
+	uint64_t     getReceiveTimestamp();
+	uint64_t     getReceiveTimestampUnbiased();
+	uint64_t     getSystemTimestamp();
 	
 	/* receive quality information. (RX_FSQUAL) - reg:0x12 */
 	float getReceivePower();

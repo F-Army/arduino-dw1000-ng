@@ -24,37 +24,19 @@
 
 #pragma once
 
-#include "DW1000NgTime.hpp"
+#include <Arduino.h>
 
 namespace DW1000NgRangingUtils {
-    /*
- * RANGING ALGORITHMS
- * ------------------
- * Either of the below functions can be used for range computation (see line "CHOSEN
- * RANGING ALGORITHM" in the code).
- * - Asymmetric is more computation intense but least error prone
- * - Symmetric is less computation intense but more error prone to clock drifts
- *
- * The anchors and tags of this reference example use the same reply delay times, hence
- * are capable of symmetric ranging (and of asymmetric ranging anyway).
- */
 
-
-    DW1000NgTime computeRangeAsymmetric(    
-                                        DW1000NgTime &timePollSent, 
-                                        DW1000NgTime &timePollReceived, 
-                                        DW1000NgTime &timePollAckSent, 
-                                        DW1000NgTime &timePollAckReceived,
-                                        DW1000NgTime &timeRangeSent,
-                                        DW1000NgTime &timeRangeReceived 
-                                    );
-
-    DW1000NgTime computeRangeSymmetric(    
-                                        DW1000NgTime &timePollSent, 
-                                        DW1000NgTime &timePollReceived, 
-                                        DW1000NgTime &timePollAckSent, 
-                                        DW1000NgTime &timePollAckReceived,
-                                        DW1000NgTime &timeRangeSent,
-                                        DW1000NgTime &timeRangeReceived 
-                                    );
+    /* asymmetric two-way ranging (more computation intense, less error prone) */
+    double computeRangeAsymmetric(    
+                                        uint64_t timePollSent, 
+                                        uint64_t timePollReceived, 
+                                        uint64_t timePollAckSent, 
+                                        uint64_t timePollAckReceived,
+                                        uint64_t timeRangeSent,
+                                        uint64_t timeRangeReceived 
+                                 );
+    
+    //TODO Symmetric
 }

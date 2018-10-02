@@ -50,7 +50,6 @@
 #include "DW1000NgConstants.hpp"
 #include "DW1000NgRegisters.hpp"
 #include "DW1000Ng.hpp"
-#include "DW1000NgTime.hpp"
 
 namespace DW1000Ng {
 	
@@ -1206,7 +1205,7 @@ namespace DW1000Ng {
         }
 
 		// TODO check function, different type violations between byte and int
-		void _correctTimestamp(DW1000NgTime& timestamp) {
+		void _correctTimestamp(byte data[]) {
 			// base line dBm, which is -61, 2 dBm steps, total 18 data points (down to -95 dBm)
 			float rxPowerBase     = -(getReceivePower()+61.0f)*0.5f;
 			int16_t   rxPowerBaseLow  = (int16_t)rxPowerBase; // TODO check type
@@ -1251,12 +1250,13 @@ namespace DW1000Ng {
 				}
 			}
 			// linear interpolation of bias values
-			float      rangeBias = rangeBiasLow+(rxPowerBase-rxPowerBaseLow)*(rangeBiasHigh-rangeBiasLow);
+			float rangeBias = rangeBiasLow+(rxPowerBase-rxPowerBaseLow)*(rangeBiasHigh-rangeBiasLow);
 			// range bias [mm] to timestamp modification value conversion
-			DW1000NgTime adjustmentTime;
-			adjustmentTime.setTimestamp((int16_t)(rangeBias*DW1000NgTime::DISTANCE_OF_RADIO_INV*0.001f));
+			uint64_t adjustmentTime = (uint64_t)(rangeBias*DISTANCE_OF_RADIO_INV*0.001f);
 			// apply correction
-			timestamp -= adjustmentTime;
+			uint64_t newTimestamp = DW1000NgUtils::bytesAsValue(data, LENGTH_TIMESTAMP);
+			newTimestamp -= adjustmentTime;
+			DW1000NgUtils::writeValueToBytes(data, newTimestamp, LENGTH_TIMESTAMP);
 		}
 
         void _configureRFTransmitPowerSpectrumTestMode() {
@@ -1904,36 +1904,33 @@ namespace DW1000Ng {
 		free(dataBytes);
 	}
 
-	void getTransmitTimestamp(DW1000NgTime& time) {
-		byte txTimeBytes[LEN_TX_STAMP];
-		_readBytes(TX_TIME, TX_STAMP_SUB, txTimeBytes, LEN_TX_STAMP);
-		time.setTimestamp(txTimeBytes);
-	}
-
-	void getReceiveTimestamp(DW1000NgTime& time) {
-		byte rxTimeBytes[LEN_RX_STAMP];
-		_readBytes(RX_TIME, RX_STAMP_SUB, rxTimeBytes, LEN_RX_STAMP);
-		time.setTimestamp(rxTimeBytes);
-		// correct timestamp (i.e. consider range bias)
-		_correctTimestamp(time);
-	}
-
-	void getSystemTimestamp(DW1000NgTime& time) {
-		byte sysTimeBytes[LEN_SYS_TIME];
-		_readBytes(SYS_TIME, NO_SUB, sysTimeBytes, LEN_SYS_TIME);
-		time.setTimestamp(sysTimeBytes);
-	}
-
-	void getTransmitTimestamp(byte data[]) {
+	uint64_t getTransmitTimestamp() {
+		byte data[LENGTH_TIMESTAMP];
+		memset(data, 0 , LENGTH_TIMESTAMP);
 		_readBytes(TX_TIME, TX_STAMP_SUB, data, LEN_TX_STAMP);
+		return DW1000NgUtils::bytesAsValue(data, LEN_TX_STAMP);
 	}
 
-	void getReceiveTimestamp(byte data[]) {
+	uint64_t getReceiveTimestamp() {
+		byte data[LEN_RX_STAMP];
+		memset(data, 0, LEN_RX_STAMP);
 		_readBytes(RX_TIME, RX_STAMP_SUB, data, LEN_RX_STAMP);
+		return DW1000NgUtils::bytesAsValue(data, LEN_RX_STAMP);
 	}
 
-	void getSystemTimestamp(byte data[]) {
+	uint64_t getReceiveTimestampUnbiased() {
+		byte data[LEN_RX_STAMP];
+		memset(data, 0, LEN_RX_STAMP);
+		_readBytes(RX_TIME, RX_STAMP_SUB, data, LEN_RX_STAMP);
+		_correctTimestamp(data);
+		return DW1000NgUtils::bytesAsValue(data, LEN_RX_STAMP);
+	}
+
+	uint64_t getSystemTimestamp() {
+		byte data[LEN_SYS_TIME];
+		memset(data, 0, LEN_SYS_TIME);
 		_readBytes(SYS_TIME, NO_SUB, data, LEN_SYS_TIME);
+		return DW1000NgUtils::bytesAsValue(data, LEN_SYS_TIME);		
 	}
 
 	float getReceiveQuality() {

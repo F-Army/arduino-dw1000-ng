@@ -44,6 +44,7 @@
 
 #include <Arduino.h>
 #include "DW1000NgUtils.hpp"
+#include "DW1000NgConstants.hpp"
 #include "DW1000NgRegisters.hpp"
 
 namespace DW1000NgUtils {
@@ -100,11 +101,23 @@ namespace DW1000NgUtils {
 		return bitRead(targetByte, shift); // TODO wrong type returned byte instead of boolean
 	}
 
-	void writeValueToBytes(byte data[], int32_t val, uint16_t n) {
-		uint16_t i;
+	void writeValueToBytes(byte data[], uint64_t val, uint8_t n) {
+		uint8_t i;
 		for(i = 0; i < n; i++) {
 			data[i] = ((val >> (i*8)) & 0xFF); // TODO bad types - signed unsigned problem
 		}
+	}
+
+	uint64_t bytesAsValue(byte data[], uint8_t n) {
+		uint64_t value = 0;
+		for(auto i = 0; i < n; i++) {	
+			value |= ((uint64_t)data[i] << (i*8));
+		}
+		return value;
+	}
+
+	uint64_t microsecondsToUWBTime(uint64_t microSeconds) {
+		return ((uint64_t) (microSeconds * TIME_RES_INV));
 	}
 
 	uint8_t nibbleFromChar(char c) {

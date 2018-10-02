@@ -54,6 +54,8 @@
 
 #include <SPI.h>
 #include <DW1000Ng.hpp>
+#include <DW1000NgUtils.hpp>
+#include <DW1000NgRangingUtils.hpp>
 
 // connection pins
 const uint8_t PIN_RST = 9; // reset pin
@@ -83,17 +85,18 @@ boolean protocolFailed = false;
 
 // Antenna calibration variables
 int accuracyCounter = 0;
-uint16_t antenna_delay = 16384;
+uint16_t antenna_delay = 16436;
 
 // timestamps to remember
-DW1000NgTime timePollSent;
-DW1000NgTime timePollReceived;
-DW1000NgTime timePollAckSent;
-DW1000NgTime timePollAckReceived;
-DW1000NgTime timeRangeSent;
-DW1000NgTime timeRangeReceived;
+uint64_t timePollSent;
+uint64_t timePollReceived;
+uint64_t timePollAckSent;
+uint64_t timePollAckReceived;
+uint64_t timeRangeSent;
+uint64_t timeRangeReceived;
+
+uint64_t timeComputedRange;
 // last computed range/time
-DW1000NgTime timeComputedRange;
 // data buffer
 #define LEN_DATA 16
 byte data[LEN_DATA];
@@ -139,14 +142,13 @@ void setup() {
     DW1000Ng::initialize(PIN_SS, PIN_IRQ, PIN_RST);
     Serial.println(F("DW1000Ng initialized ..."));
     // general configuration
-
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
 
     DW1000Ng::setDeviceAddress(1);
     DW1000Ng::setNetworkId(10);
-    
-	DW1000Ng::setAntennaDelay(antenna_delay);
+	
+    DW1000Ng::setAntennaDelay(antenna_delay);
     
     Serial.println(F("Committed configuration ..."));
     // DEBUG chip info and registers pretty printed
@@ -218,42 +220,6 @@ void receiver() {
     DW1000Ng::startReceive();
 }
 
-/*
- * RANGING ALGORITHMS
- * ------------------
- * Either of the below functions can be used for range computation (see line "CHOSEN
- * RANGING ALGORITHM" in the code).
- * - Asymmetric is more computation intense but least error prone
- * - Symmetric is less computation intense but more error prone to clock drifts
- *
- * The anchors and tags of this reference example use the same reply delay times, hence
- * are capable of symmetric ranging (and of asymmetric ranging anyway).
- */
-
-void computeRangeAsymmetric() {
-    // asymmetric two-way ranging (more computation intense, less error prone)
-    DW1000NgTime round1 = (timePollAckReceived - timePollSent).wrap();
-    DW1000NgTime reply1 = (timePollAckSent - timePollReceived).wrap();
-    DW1000NgTime round2 = (timeRangeReceived - timePollAckSent).wrap();
-    DW1000NgTime reply2 = (timeRangeSent - timePollAckReceived).wrap();
-    DW1000NgTime tof = (round1 * round2 - reply1 * reply2) / (round1 + round2 + reply1 + reply2);
-    // set tof timestamp
-    timeComputedRange.setTimestamp(tof);
-}
-
-void computeRangeSymmetric() {
-    // symmetric two-way ranging (less computation intense, more error prone on clock drift)
-    DW1000NgTime tof = ((timePollAckReceived - timePollSent) - (timePollAckSent - timePollReceived) +
-                      (timeRangeReceived - timePollAckSent) - (timeRangeSent - timePollAckReceived)) * 0.25f;
-    // set tof timestamp
-    timeComputedRange.setTimestamp(tof);
-}
-
-/*
- * END RANGING ALGORITHMS
- * ----------------------
- */
-
 void loop() {
     int32_t curMillis = millis();
     if (!sentAck && !receivedAck) {
@@ -268,7 +234,7 @@ void loop() {
         sentAck = false;
         byte msgId = data[0];
         if (msgId == POLL_ACK) {
-            DW1000Ng::getTransmitTimestamp(timePollAckSent);
+            timePollAckSent = DW1000Ng::getTransmitTimestamp();
             noteActivity();
         }
         DW1000Ng::startReceive();
@@ -285,21 +251,26 @@ void loop() {
         if (msgId == POLL) {
             // on POLL we (re-)start, so no protocol failure
             protocolFailed = false;
-            DW1000Ng::getReceiveTimestamp(timePollReceived);
+            timePollReceived = DW1000Ng::getReceiveTimestamp();
             expectedMsgId = RANGE;
             transmitPollAck();
             noteActivity();
         }
         else if (msgId == RANGE) {
-            DW1000Ng::getReceiveTimestamp(timeRangeReceived);
+            timeRangeReceived = DW1000Ng::getReceiveTimestamp();
             expectedMsgId = POLL;
             if (!protocolFailed) {
-                timePollSent.setTimestamp(data + 1);
-                timePollAckReceived.setTimestamp(data + 6);
-                timeRangeSent.setTimestamp(data + 11);
+                timePollSent = DW1000NgUtils::bytesAsValue(data + 1, LENGTH_TIMESTAMP);
+                timePollAckReceived = DW1000NgUtils::bytesAsValue(data + 6, LENGTH_TIMESTAMP);
+                timeRangeSent = DW1000NgUtils::bytesAsValue(data + 11, LENGTH_TIMESTAMP);
                 // (re-)compute range as two-way ranging is done
-                computeRangeAsymmetric(); // CHOSEN RANGING ALGORITHM
-                float distance = timeComputedRange.getAsMeters();
+                double distance = DW1000NgRangingUtils::computeRangeAsymmetric(timePollSent,
+                                                            timePollReceived, 
+                                                            timePollAckSent, 
+                                                            timePollAckReceived, 
+                                                            timeRangeSent, 
+                                                            timeRangeReceived);
+                
                 String rangeString = "Range: "; rangeString += distance; rangeString += " m";
                 rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
                 rangeString += "\t Sampling: "; rangeString += samplingRate; rangeString += " Hz";
@@ -319,9 +290,11 @@ void loop() {
                     Serial.println(antenna_delay);
                     delay(10000);
                 }
-
-                transmitRangeReport(timeComputedRange.getAsMicroSeconds());
-                // update sampling rate (each second)                
+                //Serial.print("FP power is [dBm]: "); Serial.print(DW1000Ng::getFirstPathPower());
+                //Serial.print("RX power is [dBm]: "); Serial.println(DW1000Ng::getReceivePower());
+                //Serial.print("Receive quality: "); Serial.println(DW1000Ng::getReceiveQuality());
+                // update sampling rate (each second)
+                transmitRangeReport(distance * DISTANCE_OF_RADIO_INV);
                 successRangingCount++;
                 if (curMillis - rangingCountPeriod > 1000) {
                     samplingRate = (1000.0f * successRangingCount) / (curMillis - rangingCountPeriod);
