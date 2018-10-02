@@ -54,6 +54,7 @@
 #include <SPI.h>
 #include <DW1000Ng.hpp>
 #include <DW1000NgUtils.hpp>
+#include <DW1000NgTime.hpp>
 #include <DW1000NgConstants.hpp>
 
 // connection pins
@@ -180,7 +181,7 @@ void transmitRange() {
     byte futureTimeBytes[LENGTH_TIMESTAMP];
 
 	timeRangeSent = DW1000Ng::getSystemTimestamp();
-	timeRangeSent += DW1000NgUtils::microsecondsToUWBTime(replyDelayTimeUS);
+	timeRangeSent += DW1000NgTime::microsecondsToUWBTime(replyDelayTimeUS);
     DW1000NgUtils::writeValueToBytes(futureTimeBytes, timeRangeSent, LENGTH_TIMESTAMP);
     DW1000Ng::setDelayedTRX(futureTimeBytes);
     timeRangeSent += DW1000Ng::getTxAntennaDelay();
