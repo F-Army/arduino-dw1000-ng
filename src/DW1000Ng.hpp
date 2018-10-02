@@ -186,7 +186,7 @@ namespace DW1000Ng {
 	*/
 	void setTCPGDelayAuto();
 
-	/* Used for Transmit Power regulatory testing */
+	/* Enables transmit power spectrum test mode that is used for Transmit Power regulatory testing */
 	void enableTransmitPowerSpectrumTestMode(int32_t repeat_interval);
 	
 	/* transmit and receive configuration. */
