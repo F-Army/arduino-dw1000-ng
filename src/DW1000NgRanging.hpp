@@ -26,7 +26,7 @@
 
 #include <Arduino.h>
 
-namespace DW1000NgRangingUtils {
+namespace DW1000NgRanging {
 
     /* asymmetric two-way ranging (more computation intense, less error prone) */
     double computeRangeAsymmetric(    
@@ -37,6 +37,7 @@ namespace DW1000NgRangingUtils {
                                         uint64_t timeRangeSent,
                                         uint64_t timeRangeReceived 
                                  );
-    
     //TODO Symmetric
+
+    double correctRange(double range);
 }
