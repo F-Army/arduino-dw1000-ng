@@ -53,24 +53,18 @@
 #include "DW1000NgCompileOptions.hpp"
 
 namespace DW1000Ng {
-	/* ##### Init ################################################################ */
 	/** 
-	Initiates and starts a sessions with one or more DW1000. If rst is not set or value 0xff, a soft resets (i.e. command
+	Initiates and starts a sessions with a DW1000. If rst is not set or value 0xff, a soft resets (i.e. command
 	triggered) are used and it is assumed that no reset line is wired.
-	 
+	
+	@param[in] ss  The SPI Selection pin used to identify the specific connection
 	@param[in] irq The interrupt line/pin that connects the Arduino.
 	@param[in] rst The reset line/pin for hard resets of ICs that connect to the Arduino. Value 0xff means soft reset.
 	*/
 	void initialize(uint8_t ss, uint8_t irq, uint8_t rst = 0xff);
 	
 	/** 
-	(Re-)selects a specific DW1000 chip for communication. In case of a single DW1000Ng chip in use
-	this call is not needed; only a call to `select()` has to be performed once at start up. Other 
-	than a call to `select()` this function does not perform an initial setup of the (again-)selected 
-	chips and assumes it to have a valid configuration loaded.
-
-	@param[in] ss The chip select line/pin that connects the to-be-selected chip with the
-	Arduino.
+	(Re-)selects a specific DW1000 chip for communication. Used in case you switched SPI to another device.
 	*/
 	void select();
 
@@ -91,7 +85,7 @@ namespace DW1000Ng {
 	void enableLedBlinking();
 
 	/**
-	Set GPIO mode
+	Set DW1000's GPIO pins mode
 	*/
 	void setGPIOMode(uint8_t msgp, uint8_t mode);
 
@@ -106,9 +100,8 @@ namespace DW1000Ng {
 	void spiWakeup();
 	
 	/**
-	Resets all connected or the currently selected DW1000 chip. A hard reset of all chips
-	is preferred, although a soft reset of the currently selected one is executed if no 
-	reset pin has been specified (when using `begin(int)`, instead of `begin(int, int)`).
+	Resets all connected or the currently selected DW1000 chip.
+	Uses hardware reset or in case the reset pin is not wired it falls back to software Reset. 
 	*/
 	void reset();
 	
@@ -117,10 +110,10 @@ namespace DW1000Ng {
 	*/
 	void softwareReset();
 	
-	/* ##### Device address management, filters ################################## */
 	/** 
 	(Re-)set the network identifier which the selected chip should be associated with. This
 	setting is important for certain MAC address filtering rules.
+	This is also referred as PanId
 
 	@param[in] val An arbitrary numeric network identifier.
 	*/
@@ -135,15 +128,62 @@ namespace DW1000Ng {
 	void setDeviceAddress(uint16_t val);
 	// TODO MAC and filters
 	
+	/**
+	Sets the device Extended Unique Identifier.
+	This is a long identifier of the device.
+
+	@param[in] eui A string containing the eui in its normal notation using columns.
+	*/
 	void setEUI(char eui[]);
+
+	/**
+	Sets the device Extended Unique Identifier.
+	This is a long identifier of the device.
+
+	@param[in] eui The raw bytes of the eui.
+	*/
 	void setEUI(byte eui[]);
 
+	/**
+	Sets the transmission power of the device.
+	Be careful to respect your current country limitations.
+
+	@param[in] power Bytes that represent the power
+	*/
 	void setTXPower(byte power[]);
+
+	/**
+	Sets the transmission power of the device.
+	Be careful to respect your current country limitations.
+
+	@param[in] power  Bytes (written as a 32-bit number) that represent the power
+	*/
 	void setTXPower(int32_t power);
+
+	/**
+	Sets the transmission power of the device.
+	Be careful to respect your current country limitations.
+
+	@param[in] driver_amplifier Base power amplifier
+	@param[in] mixer Mixer power
+	*/
 	void setTXPower(DriverAmplifierValue driver_amplifier, TransmitMixerValue mixer);
+
+	/**
+	Automatically sets power in respect to the current device settings.
+	This should be guaranteed to set power under -41.3 dBm / MHz (legal limit in most countries).
+	*/
 	void setTXPowerAuto();
 
+	/**
+	Sets the pulse generator delay value.
+	You should use the setTCPGDelayAuto() function.
+	*/
 	void setTCPGDelay(byte tcpg_delay);
+
+	/**
+	Automatically sets pulse generator delay value
+	*/
 	void setTCPGDelayAuto();
 
 	/* Used for Transmit Power regulatory testing */
