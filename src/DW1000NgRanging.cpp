@@ -81,7 +81,7 @@ namespace DW1000NgRanging {
                 } else {
                     for(auto i=0; i < 18; i++){
                         if (rxPower == BIAS_500_16_1[i][0]){
-                            mmToCorrectRange += BIAS_500_16_1[i][0];
+                            mmToCorrectRange += BIAS_500_16_1[i][1];
                             currentMatrixPosition = i;
                         } else if (rxPower > BIAS_500_16_1[i][0] && rxPower < BIAS_500_16_1[i+1][0] ){
                             mmToCorrectRange += BIAS_500_16_1[i][1];
