@@ -116,10 +116,6 @@ namespace DW1000NgUtils {
 		return value;
 	}
 
-	uint64_t microsecondsToUWBTime(uint64_t microSeconds) {
-		return ((uint64_t) (microSeconds * TIME_RES_INV));
-	}
-
 	uint8_t nibbleFromChar(char c) {
 		if(c >= '0' && c <= '9') {
 			return c-'0';
