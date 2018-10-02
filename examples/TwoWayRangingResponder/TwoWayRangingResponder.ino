@@ -259,6 +259,8 @@ void loop() {
                                                             timePollAckReceived, 
                                                             timeRangeSent, 
                                                             timeRangeReceived);
+                /* Apply simple bias correction */
+                distance = DW1000NgRangingUtils::correctRange(distance);
                 
                 String rangeString = "Range: "; rangeString += distance; rangeString += " m";
                 rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";

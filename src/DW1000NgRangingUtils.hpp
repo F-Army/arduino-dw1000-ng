@@ -37,6 +37,7 @@ namespace DW1000NgRangingUtils {
                                         uint64_t timeRangeSent,
                                         uint64_t timeRangeReceived 
                                  );
-    
     //TODO Symmetric
+
+    double correctRange(double range);
 }
