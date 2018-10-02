@@ -159,7 +159,6 @@ namespace DW1000Ng {
 	
 	uint64_t     getTransmitTimestamp();
 	uint64_t     getReceiveTimestamp();
-	uint64_t     getReceiveTimestampUnbiased();
 	uint64_t     getSystemTimestamp();
 	
 	/* receive quality information. (RX_FSQUAL) - reg:0x12 */
@@ -198,6 +197,12 @@ namespace DW1000Ng {
 
 	void applyConfiguration(device_configuration_t config);
 	void applyInterruptConfiguration(interrupt_configuration_t interrupt_config);
+
+	/* Configuration Getters */
+
+	Channel getChannel();
+
+	PulseFrequency getPulseFrequency();
 	
 	// reception state
 	void startReceive(ReceiveMode mode = ReceiveMode::IMMEDIATE);
