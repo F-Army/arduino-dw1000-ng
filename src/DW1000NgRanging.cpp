@@ -59,88 +59,26 @@ namespace DW1000NgRanging {
     }
 
     double correctRange(double range) {
+        Channel currentChannel = DW1000Ng::getChannel();
+        PulseFrequency currentPRF = DW1000Ng::getPulseFrequency();
         double rxPower = -(static_cast<double>(DW1000Ng::getReceivePower()));
-        double mmToCorrectRange;
-        Channel currentChannel = DW1000Ng::getChannel();
-        PulseFrequency currentPRF = DW1000Ng::getPulseFrequency();
-        if(currentChannel == Channel::CHANNEL_4 || currentChannel == Channel::CHANNEL_7) {
-            /* 900 MHz receiver bandwidth */
-            if(currentPRF == PulseFrequency::FREQ_16MHZ) {
-
-            } else if(currentPRF == PulseFrequency::FREQ_64MHZ) {
-
-            }
-        } else {
-            /* 500 MHz receiver bandwidth */
-            if(currentPRF == PulseFrequency::FREQ_16MHZ) {
-                if (rxPower < BIAS_500_16_1[0][0]) {
-                    mmToCorrectRange = BIAS_500_16_1[0][1];
-                } else if (rxPower > BIAS_500_16_1[17][0]) {
-                    mmToCorrectRange = BIAS_500_16_1[17][1];
-                } else {
-                    for(auto i=0; i < 18; i++) {
-                        if (rxPower == BIAS_500_16_1[i][0]) {
-                            mmToCorrectRange = BIAS_500_16_1[i][1];
-                            break;
-                        } else if (rxPower > BIAS_500_16_1[i][0] && rxPower < BIAS_500_16_1[i+1][0] ){
-                            mmToCorrectRange = BIAS_500_16_1[i][1];
-                            break;
-                        }
-                    }
-                }
-            } else if(currentPRF == PulseFrequency::FREQ_64MHZ) {
-
-            }
-        }
         
-        return range += mmToCorrectRange*0.001;
-    }
-/*
-    double correctRange(double range) {
-        // base line dBm, which is -61, 2 dBm steps, total 18 data points (down to -95 dBm)
-        double rxPowerBase     = -(DW1000Ng::getReceivePower()+61.0f)*0.5f;
-        int16_t   rxPowerBaseLow  = (int16_t)rxPowerBase; // TODO check type
-        int16_t   rxPowerBaseHigh = rxPowerBaseLow+1; // TODO check type
-        if(rxPowerBaseLow <= 0) {
-            rxPowerBaseLow  = 0;
-            rxPowerBaseHigh = 0;
-        } else if(rxPowerBaseHigh >= 17) {
-            rxPowerBaseLow  = 17;
-            rxPowerBaseHigh = 17;
-        }
-        // select range low/high values from corresponding table
-        int16_t rangeBiasHigh;
-        int16_t rangeBiasLow;
-        Channel currentChannel = DW1000Ng::getChannel();
-        PulseFrequency currentPRF = DW1000Ng::getPulseFrequency();
-        if(currentChannel == Channel::CHANNEL_4 || currentChannel == Channel::CHANNEL_7) {
-            // 900 MHz receiver bandwidth
-            if(currentPRF == PulseFrequency::FREQ_16MHZ) {
-                rangeBiasHigh = (rxPowerBaseHigh < BIAS_900_16_ZERO ? -BIAS_900_16[rxPowerBaseHigh] : BIAS_900_16[rxPowerBaseHigh]);
-                rangeBiasHigh <<= 1;
-                rangeBiasLow  = (rxPowerBaseLow < BIAS_900_16_ZERO ? -BIAS_900_16[rxPowerBaseLow] : BIAS_900_16[rxPowerBaseLow]);
-                rangeBiasLow <<= 1;
-            } else if(currentPRF == PulseFrequency::FREQ_64MHZ) {
-                rangeBiasHigh = (rxPowerBaseHigh < BIAS_900_64_ZERO ? -BIAS_900_64[rxPowerBaseHigh] : BIAS_900_64[rxPowerBaseHigh]);
-                rangeBiasHigh <<= 1;
-                rangeBiasLow  = (rxPowerBaseLow < BIAS_900_64_ZERO ? -BIAS_900_64[rxPowerBaseLow] : BIAS_900_64[rxPowerBaseLow]);
-                rangeBiasLow <<= 1;
-            }
+        size_t index = currentPRF == PulseFrequency::FREQ_16MHZ ? 1 : 2;
+        if(currentChannel == Channel::CHANNEL_4 || currentChannel == Channel::CHANNEL_7)
+            index+=2;
+        
+        /* 500 MHz receiver bandwidth */
+        if (rxPower < BIAS_TABLE[0][0]) {
+            return range += BIAS_TABLE[0][index]*0.001;
+        } else if (rxPower >= BIAS_TABLE[17][0]) {
+            return range += BIAS_TABLE[17][index]**0.001;
         } else {
-            // 500 MHz receiver bandwidth
-            if(currentPRF == PulseFrequency::FREQ_16MHZ) {
-                rangeBiasHigh = (rxPowerBaseHigh < BIAS_500_16_ZERO ? -BIAS_500_16[rxPowerBaseHigh] : BIAS_500_16[rxPowerBaseHigh]);
-                rangeBiasLow  = (rxPowerBaseLow < BIAS_500_16_ZERO ? -BIAS_500_16[rxPowerBaseLow] : BIAS_500_16[rxPowerBaseLow]);
-            } else if(currentPRF == PulseFrequency::FREQ_64MHZ) {
-                rangeBiasHigh = (rxPowerBaseHigh < BIAS_500_64_ZERO ? -BIAS_500_64[rxPowerBaseHigh] : BIAS_500_64[rxPowerBaseHigh]);
-                rangeBiasLow  = (rxPowerBaseLow < BIAS_500_64_ZERO ? -BIAS_500_64[rxPowerBaseLow] : BIAS_500_64[rxPowerBaseLow]);
+            for(auto i=0; i < 17; i++) {
+                if (rxPower >= BIAS_TABLE[i][0] && rxPower < BIAS_TABLE[i+1][0]){
+                    return range += BIAS_TABLE[i][index]*0.001;
+                }
             }
         }
-        // linear interpolation of bias values
-        double rangeBias = rangeBiasLow+(rxPowerBase-rxPowerBaseLow)*(rangeBiasHigh-rangeBiasLow);
-        // range bias [mm] to timestamp modification value conversion
-        range -= (rangeBias*0.001);
-        return range;
     }
-    */
+    
 }
