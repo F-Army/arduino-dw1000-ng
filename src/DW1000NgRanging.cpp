@@ -61,7 +61,6 @@ namespace DW1000NgRanging {
     double correctRange(double range) {
         double rxPower = -(static_cast<double>(DW1000Ng::getReceivePower()));
         double mmToCorrectRange;
-        int currentMatrixPosition;
         Channel currentChannel = DW1000Ng::getChannel();
         PulseFrequency currentPRF = DW1000Ng::getPulseFrequency();
         if(currentChannel == Channel::CHANNEL_4 || currentChannel == Channel::CHANNEL_7) {
@@ -78,16 +77,13 @@ namespace DW1000NgRanging {
                     mmToCorrectRange = BIAS_500_16_1[0][1];
                 } else if (rxPower > BIAS_500_16_1[17][0]) {
                     mmToCorrectRange = BIAS_500_16_1[17][1];
-                    currentMatrixPosition = 17;
                 } else {
                     for(auto i=0; i < 18; i++) {
                         if (rxPower == BIAS_500_16_1[i][0]) {
                             mmToCorrectRange = BIAS_500_16_1[i][1];
-                            currentMatrixPosition = i;
                             break;
                         } else if (rxPower > BIAS_500_16_1[i][0] && rxPower < BIAS_500_16_1[i+1][0] ){
                             mmToCorrectRange = BIAS_500_16_1[i][1];
-                            currentMatrixPosition = i;
                             break;
                         }
                     }
@@ -97,7 +93,7 @@ namespace DW1000NgRanging {
             }
         }
         
-        return range += (currentMatrixPosition < 10 ? -mmToCorrectRange*0.001 : mmToCorrectRange*0.001);
+        return range += mmToCorrectRange*0.001;
     }
 /*
     double correctRange(double range) {
