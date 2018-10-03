@@ -1565,16 +1565,16 @@ namespace DW1000Ng {
 		_writeBytesToRegister(EUI, NO_SUB, reverseEUI, LEN_EUI);
 	}
 
-	void getTemperature(float& temp) {
+	float getTemperature() {
 		_vbatAndTempSteps();
 		byte sar_ltemp = 0; _readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
-		temp = (sar_ltemp - _tmeas23C) * 1.14f + 23.0f;
+		return (sar_ltemp - _tmeas23C) * 1.14f + 23.0f;
 	}
 
-	void getBatteryVoltage(float& vbat) {
+	float getBatteryVoltage() {
 		_vbatAndTempSteps();
 		byte sar_lvbat = 0; _readBytes(TX_CAL, 0x03, &sar_lvbat, 1);
-		vbat = (sar_lvbat - _vmeas3v3) / 173.0f + 3.3f;
+		return (sar_lvbat - _vmeas3v3) / 173.0f + 3.3f;
 	}
 
 	void getTemperatureAndBatteryVoltage(float& temp, float& vbat) {
