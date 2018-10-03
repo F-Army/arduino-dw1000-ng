@@ -69,7 +69,7 @@ namespace DW1000NgRanging {
         if (rxPower < BIAS_TABLE[0][0]) {
             return range += BIAS_TABLE[0][index]*0.001;
         } else if (rxPower >= BIAS_TABLE[17][0]) {
-            return range += BIAS_TABLE[17][index]**0.001;
+            return range += BIAS_TABLE[17][index]*0.001;
         } else {
             for(auto i=0; i < 17; i++) {
                 if (rxPower >= BIAS_TABLE[i][0] && rxPower < BIAS_TABLE[i+1][0]){
