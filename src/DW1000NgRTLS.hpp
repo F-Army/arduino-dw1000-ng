@@ -27,13 +27,6 @@
 #include <Arduino.h>
 #include "DW1000NgConstants.hpp"
 
-typedef struct blink_settings_t {
-    
-    
-    
-    byte* extData;
-} blink_settings_t;
-
 typedef struct blink_sensor_settings_t {
     byte telemetry;
     float battery;
