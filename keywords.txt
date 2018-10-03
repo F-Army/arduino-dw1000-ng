@@ -7,21 +7,70 @@
 #######################################
 
 DW1000Ng	KEYWORD1
-DW1000NgDebug KEYWORD1
+DW1000NgTime    KEYWORD1
+DW1000NgUtils   KEYWORD1
+DW1000NgRanging KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
-begin	KEYWORD2
-end	KEYWORD2
+initialize  KEYWORD2
 select	KEYWORD2
-newConfiguration	KEYWORD2
-commitConfiguration	KEYWORD2
-startTransmit	KEYWORD2
-startReceive	KEYWORD2
+end	KEYWORD2
+enableDebounceClock KEYWORD2
+enableLedBlinking   KEYWORD2
+setGPIOMode KEYWORD2
+deepSleep   KEYWORD2
+spiWakeup KEYWORD2
+reset KEYWORD2
+softwareReset KEYWORD2
+setNetworkId KEYWORD2
+setDeviceAddress KEYWORD2
+setEUI KEYWORD2
+setTXPower KEYWORD2
+setTCPGDelay KEYWORD2
+enableTransmitPowerSpectrumTestMode KEYWORD2
+setDelayedTRX KEYWORD2
+setTransmitData KEYWORD2
+getReceivedData KEYWORD2
+getReceivedDataLength KEYWORD2
+getTransmitTimestamp KEYWORD2
+getReceiveTimestamp KEYWORD2
+getSystemTimestamp KEYWORD2
+getReceivePower KEYWORD2
+getFirstPathPower KEYWORD2
+getReceiveQuality KEYWORD2
+setAntennaDelay KEYWORD2
+setTxAntennaDelay KEYWORD2
+setRxAntennaDelay KEYWORD2
+getTxAntennaDelay KEYWORD2
+getRxAntennaDelay KEYWORD2
+attachErrorHandler KEYWORD2
+attachSentHandler KEYWORD2
+attachReceivedHandler KEYWORD2
+attachReceiveFailedHandler KEYWORD2
+attachReceiveTimeoutHandler KEYWORD2
+attachReceiveTimestampAvailableHandler KEYWORD2
+pollForEvents KEYWORD2
+forceTRxOff KEYWORD2
+setInterruptPolarity KEYWORD2
+applyConfiguration KEYWORD2
+applyInterruptConfiguration KEYWORD2
+getChannel KEYWORD2
+getPulseFrequency KEYWORD2
+startReceive KEYWORD2
+startTransmit KEYWORD2
+getTemperature KEYWORD2
+getBatteryVoltage KEYWORD2
+getTemperatureAndBatteryVoltage KEYWORD2
+useExtendedFrameLength KEYWORD2
+getPrintableDeviceIdentifier KEYWORD2
+getPrintableExtendedUniqueIdentifier KEYWORD2
+getPrintableNetworkIdAndShortAddress KEYWORD2
+getPrintableDeviceMode KEYWORD2
 getPrettyBytes KEYWORD2
-# TODO ...
+# TODO  Continue...
 
 #######################################
 # Constants (LITERAL1)
