@@ -60,14 +60,12 @@ namespace DW1000NgRanging {
 
     double correctRange(double range) {
         Channel currentChannel = DW1000Ng::getChannel();
-        PulseFrequency currentPRF = DW1000Ng::getPulseFrequency();
         double rxPower = -(static_cast<double>(DW1000Ng::getReceivePower()));
         
-        size_t index = currentPRF == PulseFrequency::FREQ_16MHZ ? 1 : 2;
+        size_t index = DW1000Ng::getPulseFrequency() == PulseFrequency::FREQ_16MHZ ? 1 : 2;
         if(currentChannel == Channel::CHANNEL_4 || currentChannel == Channel::CHANNEL_7)
             index+=2;
         
-        /* 500 MHz receiver bandwidth */
         if (rxPower < BIAS_TABLE[0][0]) {
             return range += BIAS_TABLE[0][index]*0.001;
         } else if (rxPower >= BIAS_TABLE[17][0]) {
@@ -80,5 +78,5 @@ namespace DW1000NgRanging {
             }
         }
     }
-    
+
 }
