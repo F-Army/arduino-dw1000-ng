@@ -60,32 +60,31 @@ namespace DW1000NgRanging {
 
     double correctRange(double range) {
         double rxPower = -(static_cast<double>(DW1000Ng::getReceivePower()));
-        double mmToCorrectRange = 0;
-        int currentMatrixPosition = 0;
+        double mmToCorrectRange;
         Channel currentChannel = DW1000Ng::getChannel();
         PulseFrequency currentPRF = DW1000Ng::getPulseFrequency();
         if(currentChannel == Channel::CHANNEL_4 || currentChannel == Channel::CHANNEL_7) {
+            /* 900 MHz receiver bandwidth */
             if(currentPRF == PulseFrequency::FREQ_16MHZ) {
 
             } else if(currentPRF == PulseFrequency::FREQ_64MHZ) {
 
             }
         } else {
-            // 500 MHz receiver bandwidth
+            /* 500 MHz receiver bandwidth */
             if(currentPRF == PulseFrequency::FREQ_16MHZ) {
                 if (rxPower < BIAS_500_16_1[0][0]) {
-                    mmToCorrectRange += BIAS_500_16_1[0][1];
+                    mmToCorrectRange = BIAS_500_16_1[0][1];
                 } else if (rxPower > BIAS_500_16_1[17][0]) {
-                    mmToCorrectRange += BIAS_500_16_1[17][1];
-                    currentMatrixPosition = 17;
+                    mmToCorrectRange = BIAS_500_16_1[17][1];
                 } else {
-                    for(auto i=0; i < 18; i++){
-                        if (rxPower == BIAS_500_16_1[i][0]){
-                            mmToCorrectRange += BIAS_500_16_1[i][0];
-                            currentMatrixPosition = i;
+                    for(auto i=0; i < 18; i++) {
+                        if (rxPower == BIAS_500_16_1[i][0]) {
+                            mmToCorrectRange = BIAS_500_16_1[i][1];
+                            break;
                         } else if (rxPower > BIAS_500_16_1[i][0] && rxPower < BIAS_500_16_1[i+1][0] ){
-                            mmToCorrectRange += BIAS_500_16_1[i][1];
-                            currentMatrixPosition = i;
+                            mmToCorrectRange = BIAS_500_16_1[i][1];
+                            break;
                         }
                     }
                 }
@@ -93,18 +92,8 @@ namespace DW1000NgRanging {
 
             }
         }
-
-        if (currentMatrixPosition < 10){
-            range -= (mmToCorrectRange*0.001);
-            //Serial.println("CORREGGO il RANGE con -");
-            //Serial.println(mmToCorrectRange);
-        } else if (currentMatrixPosition < 10) {
-            range += (mmToCorrectRange*0.001);
-            //Serial.println("CORREGGO il RANGE con +");
-            //Serial.println(mmToCorrectRange);
-        }
-
-        return range;
+        
+        return range += mmToCorrectRange*0.001;
     }
 /*
     double correctRange(double range) {
