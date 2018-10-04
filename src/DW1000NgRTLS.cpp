@@ -24,10 +24,10 @@
 
 #include "DW1000Ng.hpp"
 #include "DW1000NgRegisters.hpp"
-#include "DW1000NgRTLSStandardMessages.hpp"
+#include "DW1000NgRTLS.hpp"
 #include "DW1000NgUtils.hpp"
 
-namespace DW1000NgRTLSStandardMessages {
+namespace DW1000Ng {
 
     static byte seq_number = 0;
 

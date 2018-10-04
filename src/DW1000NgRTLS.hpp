@@ -74,7 +74,9 @@ typedef struct message_data_settings_t {
 } message_data_settings_t;
 
 
-namespace DW1000NgRTLSStandardMessages {
+
+
+namespace DW1000Ng {
     void transmitBlink();
     //void transmitLongBlink(blink_settings_t settings);
     /*
