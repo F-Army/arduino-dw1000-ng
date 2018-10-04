@@ -138,6 +138,8 @@ namespace DW1000Ng {
 	void setEUI(char eui[]);
 	void setEUI(byte eui[]);
 
+	void getEUI(byte eui[]);
+
 	void setTXPower(byte power[]);
 	void setTXPower(int32_t power);
 	void setTXPower(DriverAmplifierValue driver_amplifier, TransmitMixerValue mixer);

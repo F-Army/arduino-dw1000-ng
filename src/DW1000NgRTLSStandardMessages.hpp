@@ -26,6 +26,14 @@
 
 #include <Arduino.h>
 #include "DW1000NgConstants.hpp"
+#include "DW1000NgRegisters.hpp"
+
+/* //TODO
+
+typedef struct blink_settings_t {
+    blink_sensor_settings_t* sensor_settings;
+    blink_exId_settings_t* 
+}
 
 typedef struct blink_sensor_settings_t {
     byte telemetry;
@@ -39,20 +47,44 @@ typedef struct blink_exId_settings_t {
     byte exIdLength;
 } blink_exId_settings_t;
 
-typedef struct blink_rateAndListen_t {
+typedef struct blink_rateAndListen_settings_t {
     boolean tagListeningNow;
     uint16_t blinkRate;
     byte numberOfblinksToNextListen;
-    preambleCode listenMode;
-} blink_rateAndListen_t;
+    PreambleCode listenMode;
+} blink_rateAndListen_settings_t;
 
-namespace DW1000NgRTLS {
-    statusCode transmitBlink(byte []);
+typedef struct blink_extData_settings_t {
+    byte* extData;
+    size_t extDataLength;
+} blink_extData_settings_t;
+*/
 
-    statusCode transmitBlink(
-                                blink_sensor_settings_t* sensor_settings = nullptr,
-                                blink_exId_settings_t* exId_settings = nullptr,
-                                blink_rateAndListen_t* rateAndListen_settings = nullptr,
-                                byte* extData = nullptr
-                            );
+typedef struct message_addressing_settings_t {
+    boolean useShortDestinationAddress;
+    boolean useShortSourceAddress;
+    uint16_t shortDestinationAddress;
+    uint64_t longDestinationAddress;
+} message_addressing_settings_t;
+
+typedef struct message_data_settings_t {
+    byte functionCode;
+    byte *data;
+    size_t dataLength;
+} message_data_settings_t;
+
+
+namespace DW1000NgRTLSStandardMessages {
+    void transmitBlink();
+    //void transmitLongBlink(blink_settings_t settings);
+    /*
+    void transmitBlink(
+                        blink_sensor_settings_t &sensor_settings,
+                        blink_exId_settings_t &exId_settings,
+                        blink_rateAndListen_settings_t &rateAndListen_settings,
+                        blink_extData_settings_t &extData_setting
+                      );
+    */
+
+    void transmitData(message_addressing_settings_t &addressing_settings, message_data_settings_t &data_settings);
 }

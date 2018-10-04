@@ -1565,6 +1565,10 @@ namespace DW1000Ng {
 		_writeBytesToRegister(EUI, NO_SUB, reverseEUI, LEN_EUI);
 	}
 
+	void getEUI(byte eui[]) {
+		_readBytes(EUI,NO_SUB, eui, LEN_EUI);
+	}
+
 	float getTemperature() {
 		_vbatAndTempSteps();
 		byte sar_ltemp = 0; _readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
