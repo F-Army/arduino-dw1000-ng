@@ -31,7 +31,7 @@ namespace DW1000Ng {
 
     static byte seq_number = 0;
 
-    void transmitBlink() {
+    void transmitShortBlink() {
         byte blink[] = {
                         0xC5, 
                         seq_number++, 
@@ -45,6 +45,10 @@ namespace DW1000Ng {
 
         DW1000Ng::setTransmitData(blink, sizeof(blink));
         DW1000Ng::startTransmit(TransmitMode::IMMEDIATE);
+    }
+
+    void transmitLongBlink(blink_settings_t &settings) {
+
     }
     
     void transmitData(message_addressing_settings_t &addressing_settings, message_data_settings_t &data_settings) {
@@ -81,7 +85,6 @@ namespace DW1000Ng {
         //Carico la application data a partire da dataFrame[9+application_offset]
 
         //Carico i dati e trasmetto
-        
 
         
 
