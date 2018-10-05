@@ -30,6 +30,7 @@
 namespace DW1000NgRanging {
 
     void encodePoll(byte source[], addressType src_len, byte destination[], addressType dest_len);
+    void encodePollAck(byte source[], addressType src_len, byte destination[], addressType dest_len);
 
     /* asymmetric two-way ranging (more computation intense, less error prone) */
     double computeRangeAsymmetric(    

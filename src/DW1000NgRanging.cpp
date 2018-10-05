@@ -40,6 +40,17 @@ namespace DW1000NgRanging {
         DW1000Ng::encodeData(source, src_len, destination, dest_len, poll);
     }
 
+    void encodePollAck(byte source[], addressType src_len, byte destination[], addressType dest_len) {
+        byte data[3] = {0x02, 0, 0};
+        message_data_settings_t pollAck {
+            0x10,
+            data,
+            sizeof(data)
+        };
+
+        DW1000Ng::encodeData(source, src_len, destination, dest_len, pollAck);
+    }
+
     /* asymmetric two-way ranging (more computation intense, less error prone) */
     double computeRangeAsymmetric(    
                                     uint64_t timePollSent, 
