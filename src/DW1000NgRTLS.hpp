@@ -25,21 +25,21 @@
 #pragma once
 
 #include <Arduino.h>
-#include "DW1000NgRTLS.hpp"
 
-namespace DW1000NgRanging {
+enum class addressType : size_t {
+    SHORT = 2,
+    LONG = 8
+};
 
-    void encodePoll(byte source[], addressType src_len, byte destination[], addressType dest_len);
+typedef struct message_data_settings_t {
+    byte functionCode;
+    byte *data;
+    size_t dataLength;
+} message_data_settings_t;
 
-    /* asymmetric two-way ranging (more computation intense, less error prone) */
-    double computeRangeAsymmetric(    
-                                        uint64_t timePollSent, 
-                                        uint64_t timePollReceived, 
-                                        uint64_t timePollAckSent, 
-                                        uint64_t timePollAckReceived,
-                                        uint64_t timeRangeSent,
-                                        uint64_t timeRangeReceived 
-                                 );
-    
-    double correctRange(double range);
+
+namespace DW1000Ng {
+    void encodeShortBlink();
+    //void encodeLongBlink(byte data[], size_t len);
+    void encodeData(byte source[], addressType src_len, byte destination[], addressType dest_len, message_data_settings_t &data_settings);
 }
