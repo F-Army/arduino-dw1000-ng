@@ -28,6 +28,10 @@
 
 namespace DW1000NgRanging {
 
+    void encodePoll(byte source[], size_t src_len, byte destination[], size_t dest_len) {
+
+    }
+
     /* asymmetric two-way ranging (more computation intense, less error prone) */
     double computeRangeAsymmetric(    
                                         uint64_t timePollSent, 
@@ -37,7 +41,6 @@ namespace DW1000NgRanging {
                                         uint64_t timeRangeSent,
                                         uint64_t timeRangeReceived 
                                  );
-    //TODO Symmetric
-
+    
     double correctRange(double range);
 }

@@ -102,6 +102,8 @@ namespace DW1000Ng {
 		uint16_t		_antennaTxDelay = 0;
 		uint16_t		_antennaRxDelay = 0;
 
+		byte _transmitSequenceNumber = 0;
+
 		/* SPI relative variables */
 		const SPISettings  _fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
 		const SPISettings  _slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
@@ -1672,6 +1674,13 @@ namespace DW1000Ng {
 			DW1000NgUtils::setBit(_sysctrl, LEN_SYS_CTRL, TXDLYS_BIT, true);
 		DW1000NgUtils::setBit(_sysctrl, LEN_SYS_CTRL, TXSTRT_BIT, true);
 		_writeBytesToRegister(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
+		
+		/* Keeps track of messages sent, useful when encoding frames as of standard ISO/IEC_24730-62 */
+		_transmitSequenceNumber++;
+	}
+
+	byte getTransmitSequenceNumber() {
+		return _transmitSequenceNumber;
 	}
 
 	void setInterruptPolarity(boolean val) {

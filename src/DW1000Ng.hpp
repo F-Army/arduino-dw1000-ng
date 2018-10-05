@@ -213,6 +213,9 @@ namespace DW1000Ng {
 	
 	// transmission state
 	void startTransmit(TransmitMode mode = TransmitMode::IMMEDIATE);
+
+	/* Gets the current transmission sequence number that should be included inside the transmission frame */
+	byte getTransmitSequenceNumber();
 	
 	/* host-initiated reading of temperature and battery voltage */
 	float getTemperature();
