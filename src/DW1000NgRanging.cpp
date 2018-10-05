@@ -40,7 +40,7 @@ namespace DW1000NgRanging {
         DW1000Ng::encodeData(source, src_len, destination, dest_len, poll);
     }
 
-    void encodePollAck(byte source[], addressType src_len, byte destination[], addressType dest_len) {
+    void encodeResponseToPoll(byte source[], addressType src_len, byte destination[], addressType dest_len) {
         byte data[3] = {0x02, 0, 0};
         message_data_settings_t pollAck {
             0x10,
@@ -49,6 +49,17 @@ namespace DW1000NgRanging {
         };
 
         DW1000Ng::encodeData(source, src_len, destination, dest_len, pollAck);
+    }
+
+    void encodeRangingConfirm(byte source[], addressType src_len, byte destination[], addressType dest_len, ranging_confirm_settings_t &settings) {
+        byte data[3] = {static_cast<byte>(settings.activity), static_cast<byte>(settings.value & 0xFF), static_cast<byte>((settings.value >> 8) & 0xFF)};
+        message_data_settings_t rangingConfirm {
+            0x10,
+            data,
+            sizeof(data)
+        };
+
+        DW1000Ng::encodeData(source, src_len, destination, dest_len, rangingConfirm);
     }
 
     /* asymmetric two-way ranging (more computation intense, less error prone) */

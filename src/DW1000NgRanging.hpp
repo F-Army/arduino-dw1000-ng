@@ -27,10 +27,22 @@
 #include <Arduino.h>
 #include "DW1000NgRTLS.hpp"
 
+enum class rangingConfirmActivity : byte {
+    FINISHED,
+    RANGING_CONFIRM
+};
+
+typedef struct ranging_confirm_settings_t {
+    rangingConfirmActivity activity;
+    uint16_t value;
+} ranging_confirm_settings_t;
+
 namespace DW1000NgRanging {
 
     void encodePoll(byte source[], addressType src_len, byte destination[], addressType dest_len);
-    void encodePollAck(byte source[], addressType src_len, byte destination[], addressType dest_len);
+    void encodeResponseToPoll(byte source[], addressType src_len, byte destination[], addressType dest_len);
+    //void encodeFinalMessage(byte source[], addressType src_len, byte destination[], addressType dest_len);
+    void encodeRangingConfirm(byte source[], addressType src_len, byte destination[], addressType dest_len, ranging_confirm_settings_t &settings);
 
     /* asymmetric two-way ranging (more computation intense, less error prone) */
     double computeRangeAsymmetric(    
