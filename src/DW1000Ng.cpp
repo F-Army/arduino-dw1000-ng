@@ -1549,6 +1549,13 @@ namespace DW1000Ng {
 		_writeNetworkIdAndDeviceAddress();
 	}
 
+	void getDeviceAddress(byte address[]) {
+		_readNetworkIdAndDeviceAddress();
+		address[0] = _networkAndAddress[0];
+		address[1] = _networkAndAddress[1];
+	}
+
+
 	void setEUI(char eui[]) {
 		byte eui_byte[LEN_EUI];
 		DW1000NgUtils::convertToByte(eui, eui_byte);

@@ -31,7 +31,7 @@ namespace DW1000Ng {
 
     static byte seq_number = 0;
 
-    void transmitShortBlink() {
+    void encodeShortBlink() {
         byte blink[] = {
                         0xC5, 
                         seq_number++, 
@@ -44,28 +44,38 @@ namespace DW1000Ng {
         memcpy(&blink[2], device_eui, LEN_EUI);
 
         DW1000Ng::setTransmitData(blink, sizeof(blink));
-        DW1000Ng::startTransmit(TransmitMode::IMMEDIATE);
     }
 
-    void transmitLongBlink(blink_settings_t &settings) {
-
+    void encodeLongBlink(blink_settings_t &settings) {
+        size_t BLINK_SIZE = 11;
+        if(!settings.sensor_settings->temperatureUnknown)
+            BLINK_SIZE++;
+        
+        if(settings.exId_settings != nullptr)
+            BLINK_SIZE += settings.exId_settings->exIdLength + 2;
     }
     
-    void transmitData(message_addressing_settings_t &addressing_settings, message_data_settings_t &data_settings) {
-        size_t data_length = 5;
-        size_t source_address_offset = 0;
-        size_t application_data_offset = 0;
-        data_length += addressing_settings.useShortDestinationAddress ? 2 : 8;
-        data_length += addressing_settings.useShortSourceAddress ? 2 : 8;
-        data_length += (data_settings.dataLength) + 1;
-        byte dataFrame[data_length];
+    void encodeData(message_addressing_settings_t &addressing_settings, message_data_settings_t &data_settings) {
+        size_t DATA_LEN = 5;
+        size_t SRC_OFFSET = 0;
+        size_t APP_OFFSET = 0;
+        DATA_LEN += addressing_settings.useShortDestinationAddress ? 2 : 8;
+        DATA_LEN += addressing_settings.useShortSourceAddress ? 2 : 8;
+        /* Application data length + 1 for the mandatory function code */
+        DATA_LEN += (data_settings.dataLength) + 1;
+
+        byte dataFrame[DATA_LEN];
+
         dataFrame[0] = 0x41;
         dataFrame[1] = 0x00;
         dataFrame[1] |= addressing_settings.useShortDestinationAddress ? 0x08 : 0x0C;
         dataFrame[1] |= addressing_settings.useShortSourceAddress ? 0x80 : 0xC0;
+
         dataFrame[2] = seq_number++;
+
         dataFrame[3] = 0x9A;
         dataFrame[4] = 0x60;
+
         if(addressing_settings.useShortDestinationAddress) {
             dataFrame[5] = static_cast<byte>(addressing_settings.shortDestinationAddress & 0xFF);
             dataFrame[6] = static_cast<byte>((addressing_settings.shortDestinationAddress >> 8) & 0xFF);
@@ -73,22 +83,28 @@ namespace DW1000Ng {
             byte eui[LEN_EUI];
             DW1000NgUtils::writeValueToBytes(eui, addressing_settings.longDestinationAddress, LEN_EUI);
             memcpy(&dataFrame[5], eui, LEN_EUI);
-            source_address_offset += 6;
+            SRC_OFFSET += 6;
+            APP_OFFSET = SRC_OFFSET;
         }
 
         if(addressing_settings.useShortSourceAddress) {
-            //Carico il mio short in dataFrame[7+source_address_offset] application_offset = source_address_offset 
+            //Carico il mio short in dataFrame[7+SRC_OFFSET] 
+            byte shortAddress[LEN_PANADR - 2];
+            DW1000Ng::getDeviceAddress(shortAddress);
+            dataFrame[7+SRC_OFFSET] = shortAddress[0];
+            dataFrame[8+SRC_OFFSET] = shortAddress[1];
         } else {
-            //Carico il mio eui in dataFrame[7+source_address_offset] application_offset = source_address_offset + 6
+            byte eui[LEN_EUI];
+            DW1000Ng::getEUI(eui);
+            memcpy(&dataFrame[7+SRC_OFFSET], eui, LEN_EUI);
+            APP_OFFSET += 6;
         }
 
-        //Carico la application data a partire da dataFrame[9+application_offset]
-
-        //Carico i dati e trasmetto
-
+        dataFrame[9+APP_OFFSET] = data_settings.functionCode;
+        if(data_settings.dataLength > 0) {
+            memcpy(&dataFrame[10+APP_OFFSET], data_settings.data, data_settings.dataLength);
+        }
         
-
-        
-
+        DW1000Ng::setTransmitData(dataFrame, DATA_LEN);              
     }
 }

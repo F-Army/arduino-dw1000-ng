@@ -25,51 +25,9 @@
 #pragma once
 
 #include <Arduino.h>
-#include "DW1000NgConstants.hpp"
-#include "DW1000NgRegisters.hpp"
-
-typedef struct blink_sensor_settings_t {
-    byte telemetry;
-    float battery;
-    float temperature;
-} blink_sensor_settings_t;
-
-typedef struct blink_exId_settings_t {
-    byte exIdSource;
-    byte* exId;
-    byte exIdLength;
-} blink_exId_settings_t;
-
-typedef struct blink_EXT_settings_t {
-    boolean tagListeningNow;
-    uint16_t blinkRate;
-    byte numberOfblinksToNextListen;
-    PreambleCode listenMode;
-    byte* extData;
-    size_t extDataLength;
-} blink_EXT_settings_t;
-
-typedef struct blink_settings_t {
-    blink_sensor_settings_t* sensor_settings;
-    blink_exId_settings_t* exId_settings;
-    blink_EXT_settings_t* EXT_settings;
-} blink_settings_t;
-
-typedef struct message_addressing_settings_t {
-    boolean useShortDestinationAddress;
-    boolean useShortSourceAddress;
-    uint16_t shortDestinationAddress;
-    uint64_t longDestinationAddress;
-} message_addressing_settings_t;
-
-typedef struct message_data_settings_t {
-    byte functionCode;
-    byte *data;
-    size_t dataLength;
-} message_data_settings_t;
 
 namespace DW1000Ng {
-    void transmitShortBlink();
-    void transmitLongBlink(blink_settings_t &settings);
-    void transmitData(message_addressing_settings_t &addressing_settings, message_data_settings_t &data_settings);
+    void encodeShortBlink();
+    void encodeLongBlink(byte data[], size_t len);
+    void encodeData(message_addressing_settings_t &addressing_settings, message_data_settings_t &data_settings);
 }
