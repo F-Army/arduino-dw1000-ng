@@ -28,6 +28,12 @@
 #include "DW1000NgUtils.hpp"
 #include "DW1000NgRanging.hpp"
 #include "DW1000NgConstants.hpp"
+#include "DW1000NgTime.hpp"
+
+namespace {
+    byte PollTxTime[4];
+    byte RespRxTime[4];
+}
 
 namespace DW1000NgRanging {
 
@@ -52,14 +58,53 @@ namespace DW1000NgRanging {
         DW1000Ng::encodeData(source, src_len, destination, dest_len, pollAck);
     }
 
+    void encodeFinalMessage(byte source[], addressType src_len, byte destination[], addressType dest_len, uint16_t replyDelayTimeUS) {
+        byte embedFinalTxTime[LENGTH_TIMESTAMP];
+
+	    uint64_t timeRangeSent = DW1000Ng::getSystemTimestamp();
+	    timeRangeSent += DW1000NgTime::microsecondsToUWBTime(replyDelayTimeUS);
+        DW1000NgUtils::writeValueToBytes(embedFinalTxTime, timeRangeSent, LENGTH_TIMESTAMP);
+        DW1000Ng::setDelayedTRX(embedFinalTxTime);
+        timeRangeSent += DW1000Ng::getTxAntennaDelay();
+        DW1000NgUtils::writeValueToBytes(embedFinalTxTime, static_cast<uint32_t>(timeRangeSent), 4);
+
+        byte data[12];
+        memcpy(data, PollTxTime, 4);
+        memcpy(&data[4], RespRxTime, 4);
+        memcpy(&data[8], embedFinalTxTime, 4);
+
+        message_data_settings_t finalMessage {
+            0x23,
+            data,
+            sizeof(data)
+        };
+
+        DW1000Ng::encodeData(source, src_len, destination, dest_len, finalMessage);
+    }
+
+    void encodeFinalMessageNoEmbedding(byte source[], addressType src_len, byte destination[], addressType dest_len) {
+        byte data[8];
+        memcpy(data, PollTxTime, 4);
+        memcpy(&data[4], RespRxTime, 4);
+
+        message_data_settings_t finalMessageNoEmbedding {
+            0x25,
+            data,
+            sizeof(data)
+        };
+
+        DW1000Ng::encodeData(source, src_len, destination, dest_len, finalMessageNoEmbedding);
+    }
+
     void encodeFinalSendTimeMessage(byte source[], addressType src_len, byte destination[], addressType dest_len) {
+        /* It is assumed there is no message in between as of standard ISO/IEC 24730-62_2013 */
         byte FinalTxTime[4];
         DW1000NgUtils::writeValueToBytes(FinalTxTime, static_cast<uint32_t>(DW1000Ng::getTransmitTimestamp()), 4);
 
         message_data_settings_t finalSendTimeMessage {
             0x27,
             FinalTxTime,
-            4
+            sizeof(FinalTxTime)
         };
 
         DW1000Ng::encodeData(source, src_len, destination, dest_len, finalSendTimeMessage);
