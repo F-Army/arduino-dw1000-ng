@@ -41,7 +41,7 @@ namespace DW1000NgRanging {
 
     void encodePoll(byte source[], addressType src_len, byte destination[], addressType dest_len);
     void encodeResponseToPoll(byte source[], addressType src_len, byte destination[], addressType dest_len);
-    //void encodeFinalMessage(byte source[], addressType src_len, byte destination[], addressType dest_len);
+    void encodeFinalSendTimeMessage(byte source[], addressType src_len, byte destination[], addressType dest_len);
     void encodeRangingConfirm(byte source[], addressType src_len, byte destination[], addressType dest_len, ranging_confirm_settings_t &settings);
 
     /* asymmetric two-way ranging (more computation intense, less error prone) */

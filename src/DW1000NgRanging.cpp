@@ -25,6 +25,7 @@
 #include <Arduino.h>
 #include "DW1000Ng.hpp"
 #include "DW1000NgConstants.hpp"
+#include "DW1000NgUtils.hpp"
 #include "DW1000NgRanging.hpp"
 #include "DW1000NgConstants.hpp"
 
@@ -49,6 +50,19 @@ namespace DW1000NgRanging {
         };
 
         DW1000Ng::encodeData(source, src_len, destination, dest_len, pollAck);
+    }
+
+    void encodeFinalSendTimeMessage(byte source[], addressType src_len, byte destination[], addressType dest_len) {
+        byte FinalTxTime[4];
+        DW1000NgUtils::writeValueToBytes(FinalTxTime, static_cast<uint32_t>(DW1000Ng::getTransmitTimestamp()), 4);
+
+        message_data_settings_t finalSendTimeMessage {
+            0x27,
+            FinalTxTime,
+            4
+        };
+
+        DW1000Ng::encodeData(source, src_len, destination, dest_len, finalSendTimeMessage);
     }
 
     void encodeRangingConfirm(byte source[], addressType src_len, byte destination[], addressType dest_len, ranging_confirm_settings_t &settings) {
