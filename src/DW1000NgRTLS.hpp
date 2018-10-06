@@ -31,15 +31,24 @@ enum class addressType : size_t {
     LONG = 8
 };
 
+enum class frameType {
+    BLINK,
+    DATA,
+    OTHER
+};
+
 typedef struct message_data_settings_t {
     byte functionCode;
     byte *data;
     size_t dataLength;
 } message_data_settings_t;
 
-
 namespace DW1000Ng {
     void encodeShortBlink();
     //void encodeLongBlink(byte data[], size_t len);
     void encodeData(byte source[], addressType src_len, byte destination[], addressType dest_len, message_data_settings_t &data_settings);
+
+    frameType getFrameType(byte frame[]);
+
+
 }

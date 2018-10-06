@@ -80,4 +80,17 @@ namespace DW1000Ng {
             
         DW1000Ng::setTransmitData(dataFrame, len);
     }
+
+    frameType getFrameType(byte frame[]) {
+        if(frame[0] == 0xC5) 
+            return frameType::BLINK;
+        else if(frame[0] == 0x41) {
+            if(frame[1] == 0x88 || frame[1] == 0x8C || frame[1] == 0xC8 || frame[1] == 0xCC)
+                return frameType::DATA;
+            else
+                return frameType::OTHER;
+        } else {
+            return frameType::OTHER;
+        }
+    }
 }
