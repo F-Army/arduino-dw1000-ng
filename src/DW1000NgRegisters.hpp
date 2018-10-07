@@ -190,13 +190,19 @@ constexpr uint16_t DRX_TUNE0b_SUB = 0x02;
 constexpr uint16_t DRX_TUNE1a_SUB = 0x04;
 constexpr uint16_t DRX_TUNE1b_SUB = 0x06;
 constexpr uint16_t DRX_TUNE2_SUB = 0x08;
+constexpr uint16_t DRX_SFDTOC_SUB = 0x20;
+constexpr uint16_t DRX_PRETOC_SUB = 0x24;
 constexpr uint16_t DRX_TUNE4H_SUB = 0x26;
+constexpr uint16_t DRX_CAR_INT_SUB = 0x28;
 constexpr uint16_t RXPACC_NOSAT_SUB = 0x2C;
 constexpr uint16_t LEN_DRX_TUNE0b = 2;
 constexpr uint16_t LEN_DRX_TUNE1a = 2;
 constexpr uint16_t LEN_DRX_TUNE1b = 2;
 constexpr uint16_t LEN_DRX_TUNE2 = 4;
+constexpr uint16_t LEN_DRX_SDFTOC = 2;
+constexpr uint16_t LEN_DRX_PRETOC = 2;
 constexpr uint16_t LEN_DRX_TUNE4H = 2;
+constexpr uint16_t LEN_DRX_CAR_INT = 3;
 constexpr uint16_t LEN_RXPACC_NOSAT = 2;
 
 // LDE_CFG1 (for re-tuning only)
@@ -212,7 +218,15 @@ constexpr uint16_t LEN_LDE_RXANTD = 2;
 
 // DIG_DIAG (Digital Diagnostics Interface)
 constexpr uint16_t DIG_DIAG = 0x2F;
+constexpr uint16_t EVC_CTRL_SUB = 0x00;
+constexpr uint16_t EVC_STO_SUB = 0x10;
+constexpr uint16_t EVC_PTO_SUB = 0x12;
+constexpr uint16_t EVC_FWTO_SUB = 0x14;
 constexpr uint16_t DIAG_TMC_SUB = 0x24;
+constexpr uint16_t LEN_EVC_CTRL = 4;
+constexpr uint16_t LEN_EVC_STO = 2;
+constexpr uint16_t LEN_EVC_PTO = 2;
+constexpr uint16_t LEN_EVC_FWTO = 2;
 constexpr uint16_t LEN_DIAG_TMC = 2;
 
 // TX_POWER (for re-tuning only)

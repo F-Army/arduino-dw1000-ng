@@ -1704,6 +1704,18 @@ namespace DW1000Ng {
 		return _pulseFrequency;
 	}
 
+	void setPreambleDetectionTimeout(uint16_t pacSize) {
+		byte drx_pretoc[LEN_DRX_PRETOC];
+		DW1000NgUtils::writeValueToBytes(drx_pretoc, pacSize, LEN_DRX_PRETOC);
+		_writeBytesToRegister(DRX_TUNE, DRX_PRETOC_SUB, drx_pretoc, LEN_DRX_PRETOC);
+	}
+
+	void setSfdDetectionTimeout(uint16_t preambleSymbols) {
+		byte drx_sfdtoc[LEN_DRX_SDFTOC];
+		DW1000NgUtils::writeValueToBytes(drx_sfdtoc, preambleSymbols, LEN_DRX_SFDTOC);
+		_writeBytesToRegister(DRX_TUNE, DRX_SFDTOC_SUB, drx_sfdtoc, LEN_DRX_SFDTOC);
+	}
+
 	void applyInterruptConfiguration(interrupt_configuration_t interrupt_config) {
 		forceTRxOff();
 
