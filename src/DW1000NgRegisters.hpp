@@ -72,7 +72,7 @@ constexpr uint16_t RXDLYS_BIT = 9;
 
 // system event status register
 constexpr uint16_t SYS_STATUS = 0x0F;
-constexpr uint16_t LEN_SYS_STATUS = 5;
+constexpr uint16_t SYS_STATUS_SUB = 0x04;
 constexpr uint16_t IRQS_BIT = 0;
 constexpr uint16_t CPLOCK_BIT = 1;
 constexpr uint16_t ESYNCR_BIT = 2;
@@ -104,6 +104,8 @@ constexpr uint16_t TXBERR_BIT = 28;
 constexpr uint16_t AFFREJ_BIT = 29;
 constexpr uint16_t HSRBP_BIT = 30;
 constexpr uint16_t ICRBP_BIT = 31;
+constexpr uint16_t LEN_SYS_STATUS = 4;
+constexpr uint16_t LEN_SYS_STATUS_SUB = 1;
 
 // system event mask register
 // NOTE: uses the bit definitions of SYS_STATUS (below 32)
