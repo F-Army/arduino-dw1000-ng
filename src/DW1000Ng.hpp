@@ -213,6 +213,14 @@ namespace DW1000Ng {
 	default value = MAX Preamble Lenght(4096) + MAX SFD(64) + 1*/
 	void setSfdDetectionTimeout(uint16_t preambleSymbols);
 
+	/**
+	Sets the timeout for Raceive Frame.
+	Allow the external microprocessor to enter a low power state awaiting a valid receive frame.
+
+	@param[in] time in μs. units = ~1μs(1.026μs) 
+	*/
+	void useReceiveFrameWaitTimeoutPeriod(uint16_t time);
+
 	// reception state
 	void startReceive(ReceiveMode mode = ReceiveMode::IMMEDIATE);
 	

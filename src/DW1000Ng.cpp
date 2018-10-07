@@ -1718,6 +1718,13 @@ namespace DW1000Ng {
 		_writeBytesToRegister(DRX_TUNE, DRX_SFDTOC_SUB, drx_sfdtoc, LEN_DRX_SFDTOC);
 	}
 
+	void useReceiveFrameWaitTimeoutPeriod(uint16_t time){
+		byte rx_wfto[LEN_RX_WFTO];
+		/* enable frame wait timeout bit */
+		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXWTOE_BIT, true);
+		_writeBytesToRegister(RX_WFTO, NO_SUB, rx_wfto, LEN_RX_WFTO);
+	}
+
 	void applyInterruptConfiguration(interrupt_configuration_t interrupt_config) {
 		forceTRxOff();
 
