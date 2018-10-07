@@ -68,7 +68,6 @@ constexpr uint16_t RXAUTR_BIT = 29;
 constexpr uint16_t AUTOACK_BIT = 30;
 constexpr uint16_t AACKPEND_BIT = 31;
 constexpr uint16_t LEN_SYS_CFG = 4;
-constexpr uint16_t LEN_PHR_MODE_SUB = 2;
 
 // device control register
 constexpr uint16_t SYS_CTRL = 0x0D;
