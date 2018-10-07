@@ -810,9 +810,8 @@ namespace DW1000Ng {
 		}
 
 		void _useExtendedFrameLength(boolean val) {
-			_extendedFrameLength = (val ? FRAME_LENGTH_EXTENDED : FRAME_LENGTH_NORMAL);
-			_syscfg[2] &= 0xFC;
-			_syscfg[2] |= _extendedFrameLength;
+			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, PHR_MODE_0_BIT, val);
+			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, PHR_MODE_1_BIT, val);
 		}
 
 		void _setReceiverAutoReenable(boolean val) {
