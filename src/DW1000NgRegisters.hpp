@@ -73,15 +73,17 @@ constexpr uint16_t RXDLYS_BIT = 9;
 // system event status register
 constexpr uint16_t SYS_STATUS = 0x0F;
 constexpr uint16_t LEN_SYS_STATUS = 5;
+constexpr uint16_t IRQS_BIT = 0;
 constexpr uint16_t CPLOCK_BIT = 1;
+constexpr uint16_t ESYNCR_BIT = 2;
 constexpr uint16_t AAT_BIT = 3;
 constexpr uint16_t TXFRB_BIT = 4;
 constexpr uint16_t TXPRS_BIT = 5;
 constexpr uint16_t TXPHS_BIT = 6;
 constexpr uint16_t TXFRS_BIT = 7;
-constexpr uint16_t LDEDONE_BIT = 10;
 constexpr uint16_t RXPRD_BIT = 8;
 constexpr uint16_t RXSFDD_BIT = 9;
+constexpr uint16_t LDEDONE_BIT = 10;
 constexpr uint16_t RXPHD_BIT = 11;
 constexpr uint16_t RXPHE_BIT = 12;
 constexpr uint16_t RXDFR_BIT = 13;
@@ -89,12 +91,19 @@ constexpr uint16_t RXFCG_BIT = 14;
 constexpr uint16_t RXFCE_BIT = 15;
 constexpr uint16_t RXRFSL_BIT = 16;
 constexpr uint16_t RXRFTO_BIT = 17;
-constexpr uint16_t RXPTO_BIT = 21;
-constexpr uint16_t RXSFDTO_BIT = 26;
 constexpr uint16_t LDEERR_BIT = 18;
+constexpr uint16_t RXOVRR_BIT = 20;
+constexpr uint16_t RXPTO_BIT = 21;
+constexpr uint16_t GPIOIRQ_BIT = 22;
+constexpr uint16_t SLP2INIT_BIT = 23;
 constexpr uint16_t RFPLL_LL_BIT = 24;
 constexpr uint16_t CLKPLL_LL_BIT = 25;
+constexpr uint16_t RXSFDTO_BIT = 26;
+constexpr uint16_t HPDWARN_BIT = 27;
+constexpr uint16_t TXBERR_BIT = 28;
 constexpr uint16_t AFFREJ_BIT = 29;
+constexpr uint16_t HSRBP_BIT = 30;
+constexpr uint16_t ICRBP_BIT = 31;
 
 // system event mask register
 // NOTE: uses the bit definitions of SYS_STATUS (below 32)
