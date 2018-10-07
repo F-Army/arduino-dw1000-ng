@@ -1713,7 +1713,7 @@ namespace DW1000Ng {
 	}
 
 	void setSfdDetectionTimeout(uint16_t preambleSymbols) {
-		byte drx_sfdtoc[LEN_DRX_SDFTOC];
+		byte drx_sfdtoc[LEN_DRX_SFDTOC];
 		DW1000NgUtils::writeValueToBytes(drx_sfdtoc, preambleSymbols, LEN_DRX_SFDTOC);
 		_writeBytesToRegister(DRX_TUNE, DRX_SFDTOC_SUB, drx_sfdtoc, LEN_DRX_SFDTOC);
 	}
