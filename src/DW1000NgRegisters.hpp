@@ -43,7 +43,7 @@ constexpr uint16_t LEN_PANADR = 4;
 
 // device configuration register
 constexpr uint16_t SYS_CFG = 0x04;
-constexpr uint16_t LEN_SYS_CFG = 4;
+constexpr uint16_t PHR_MODE_SUB = 16;
 constexpr uint16_t FFEN_BIT = 0;
 constexpr uint16_t FFBC_BIT = 1;
 constexpr uint16_t FFAB_BIT = 2;
@@ -51,13 +51,23 @@ constexpr uint16_t FFAD_BIT = 3;
 constexpr uint16_t FFAA_BIT = 4;
 constexpr uint16_t FFAM_BIT = 5;
 constexpr uint16_t FFAR_BIT = 6;
-constexpr uint16_t DIS_DRXB_BIT = 12;
-constexpr uint16_t DIS_STXP_BIT = 18;
+constexpr uint16_t FFA4_BIT = 7;
+constexpr uint16_t FFA5_BIT = 8;
 constexpr uint16_t HIRQ_POL_BIT = 9;
-constexpr uint16_t RXAUTR_BIT = 29;
-constexpr uint16_t PHR_MODE_SUB = 16;
-constexpr uint16_t LEN_PHR_MODE_SUB = 2;
+constexpr uint16_t SPI_EDGE_BIT = 10;
+constexpr uint16_t DIS_FCE_BIT = 11;
+constexpr uint16_t DIS_DRXB_BIT = 12;
+constexpr uint16_t DIS_PHE_BIT = 13;
+constexpr uint16_t DIS_RSDE_BIT = 14;
+constexpr uint16_t FCS_INIT2F_BIT = 15;
+constexpr uint16_t DIS_STXP_BIT = 18;
 constexpr uint16_t RXM110K_BIT = 22;
+constexpr uint16_t RXWTOE_BIT = 28;
+constexpr uint16_t RXAUTR_BIT = 29;
+constexpr uint16_t AUTOACK_BIT = 30;
+constexpr uint16_t AACKPEND_BIT = 31;
+constexpr uint16_t LEN_SYS_CFG = 4;
+constexpr uint16_t LEN_PHR_MODE_SUB = 2;
 
 // device control register
 constexpr uint16_t SYS_CTRL = 0x0D;
@@ -72,16 +82,18 @@ constexpr uint16_t RXDLYS_BIT = 9;
 
 // system event status register
 constexpr uint16_t SYS_STATUS = 0x0F;
-constexpr uint16_t LEN_SYS_STATUS = 5;
+constexpr uint16_t SYS_STATUS_SUB = 0x04;
+constexpr uint16_t IRQS_BIT = 0;
 constexpr uint16_t CPLOCK_BIT = 1;
+constexpr uint16_t ESYNCR_BIT = 2;
 constexpr uint16_t AAT_BIT = 3;
 constexpr uint16_t TXFRB_BIT = 4;
 constexpr uint16_t TXPRS_BIT = 5;
 constexpr uint16_t TXPHS_BIT = 6;
 constexpr uint16_t TXFRS_BIT = 7;
-constexpr uint16_t LDEDONE_BIT = 10;
 constexpr uint16_t RXPRD_BIT = 8;
 constexpr uint16_t RXSFDD_BIT = 9;
+constexpr uint16_t LDEDONE_BIT = 10;
 constexpr uint16_t RXPHD_BIT = 11;
 constexpr uint16_t RXPHE_BIT = 12;
 constexpr uint16_t RXDFR_BIT = 13;
@@ -89,12 +101,24 @@ constexpr uint16_t RXFCG_BIT = 14;
 constexpr uint16_t RXFCE_BIT = 15;
 constexpr uint16_t RXRFSL_BIT = 16;
 constexpr uint16_t RXRFTO_BIT = 17;
-constexpr uint16_t RXPTO_BIT = 21;
-constexpr uint16_t RXSFDTO_BIT = 26;
 constexpr uint16_t LDEERR_BIT = 18;
+constexpr uint16_t RXOVRR_BIT = 20;
+constexpr uint16_t RXPTO_BIT = 21;
+constexpr uint16_t GPIOIRQ_BIT = 22;
+constexpr uint16_t SLP2INIT_BIT = 23;
 constexpr uint16_t RFPLL_LL_BIT = 24;
 constexpr uint16_t CLKPLL_LL_BIT = 25;
+constexpr uint16_t RXSFDTO_BIT = 26;
+constexpr uint16_t HPDWARN_BIT = 27;
+constexpr uint16_t TXBERR_BIT = 28;
 constexpr uint16_t AFFREJ_BIT = 29;
+constexpr uint16_t HSRBP_BIT = 30;
+constexpr uint16_t ICRBP_BIT = 31;
+constexpr uint16_t RXRSCS_BIT = 0;
+constexpr uint16_t RXPREJ_BIT = 1;
+constexpr uint16_t TXPUTE_BIT = 2;
+constexpr uint16_t LEN_SYS_STATUS = 4;
+constexpr uint16_t LEN_SYS_STATUS_SUB = 1;
 
 // system event mask register
 // NOTE: uses the bit definitions of SYS_STATUS (below 32)
@@ -134,6 +158,10 @@ constexpr uint16_t LEN_TX_STAMP = 5;
 // timing register (for delayed RX/TX)
 constexpr uint16_t DX_TIME = 0x0A;
 constexpr uint16_t LEN_DX_TIME = 5;
+
+// Receive Frame Wait Timeout Period
+constexpr uint16_t RX_WFTO = 0x0C;
+constexpr uint16_t LEN_RX_WFTO = 2;
 
 // transmit data buffer
 constexpr uint16_t TX_BUFFER = 0x09;
@@ -190,13 +218,19 @@ constexpr uint16_t DRX_TUNE0b_SUB = 0x02;
 constexpr uint16_t DRX_TUNE1a_SUB = 0x04;
 constexpr uint16_t DRX_TUNE1b_SUB = 0x06;
 constexpr uint16_t DRX_TUNE2_SUB = 0x08;
+constexpr uint16_t DRX_SFDTOC_SUB = 0x20;
+constexpr uint16_t DRX_PRETOC_SUB = 0x24;
 constexpr uint16_t DRX_TUNE4H_SUB = 0x26;
+constexpr uint16_t DRX_CAR_INT_SUB = 0x28;
 constexpr uint16_t RXPACC_NOSAT_SUB = 0x2C;
 constexpr uint16_t LEN_DRX_TUNE0b = 2;
 constexpr uint16_t LEN_DRX_TUNE1a = 2;
 constexpr uint16_t LEN_DRX_TUNE1b = 2;
 constexpr uint16_t LEN_DRX_TUNE2 = 4;
+constexpr uint16_t LEN_DRX_SFDTOC = 2;
+constexpr uint16_t LEN_DRX_PRETOC = 2;
 constexpr uint16_t LEN_DRX_TUNE4H = 2;
+constexpr uint16_t LEN_DRX_CAR_INT = 3;
 constexpr uint16_t LEN_RXPACC_NOSAT = 2;
 
 // LDE_CFG1 (for re-tuning only)
@@ -212,7 +246,15 @@ constexpr uint16_t LEN_LDE_RXANTD = 2;
 
 // DIG_DIAG (Digital Diagnostics Interface)
 constexpr uint16_t DIG_DIAG = 0x2F;
+constexpr uint16_t EVC_CTRL_SUB = 0x00;
+constexpr uint16_t EVC_STO_SUB = 0x10;
+constexpr uint16_t EVC_PTO_SUB = 0x12;
+constexpr uint16_t EVC_FWTO_SUB = 0x14;
 constexpr uint16_t DIAG_TMC_SUB = 0x24;
+constexpr uint16_t LEN_EVC_CTRL = 4;
+constexpr uint16_t LEN_EVC_STO = 2;
+constexpr uint16_t LEN_EVC_PTO = 2;
+constexpr uint16_t LEN_EVC_FWTO = 2;
 constexpr uint16_t LEN_DIAG_TMC = 2;
 
 // TX_POWER (for re-tuning only)

@@ -1096,6 +1096,8 @@ namespace DW1000Ng {
 		}
 
 		void _clearReceiveTimeoutStatus() {
+			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXSFDTO_BIT, true);
+			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXPTO_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXRFTO_BIT, true);
 			_writeBytesToRegister(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
@@ -1702,6 +1704,28 @@ namespace DW1000Ng {
 
 	PulseFrequency getPulseFrequency() {
 		return _pulseFrequency;
+	}
+
+	void setPreambleDetectionTimeout(uint16_t pacSize) {
+		byte drx_pretoc[LEN_DRX_PRETOC];
+		DW1000NgUtils::writeValueToBytes(drx_pretoc, pacSize, LEN_DRX_PRETOC);
+		_writeBytesToRegister(DRX_TUNE, DRX_PRETOC_SUB, drx_pretoc, LEN_DRX_PRETOC);
+	}
+
+	void setSfdDetectionTimeout(uint16_t preambleSymbols) {
+		byte drx_sfdtoc[LEN_DRX_SFDTOC];
+		DW1000NgUtils::writeValueToBytes(drx_sfdtoc, preambleSymbols, LEN_DRX_SFDTOC);
+		_writeBytesToRegister(DRX_TUNE, DRX_SFDTOC_SUB, drx_sfdtoc, LEN_DRX_SFDTOC);
+	}
+
+	void useReceiveFrameWaitTimeoutPeriod(uint16_t timeMicroSeconds){
+		forceTRxOff();
+		byte rx_wfto[LEN_RX_WFTO];
+		/* enable frame wait timeout bit */
+		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXWTOE_BIT, true);
+		_writeSystemConfigurationRegister();
+		DW1000NgUtils::writeValueToBytes(rx_wfto, timeMicroSeconds, LEN_RX_WFTO);
+		_writeBytesToRegister(RX_WFTO, NO_SUB, rx_wfto, LEN_RX_WFTO);
 	}
 
 	void applyInterruptConfiguration(interrupt_configuration_t interrupt_config) {
