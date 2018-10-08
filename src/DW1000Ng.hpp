@@ -204,14 +204,27 @@ namespace DW1000Ng {
 
 	PulseFrequency getPulseFrequency();
 	
-	/* Used to set the preamble detection timeout period, in units of PAC size symbols.
-	Note that the counter automatically adds 1 to the programmed value so DRX_PRETOC should be
-	programmed to be 1 less than the desired value. */
+	/**
+	Sets the timeout for Raceive Frame.
+
+	@param[in] Pac size based on current preamble lenght - 1
+	*/
 	void setPreambleDetectionTimeout(uint16_t pacSize);
 
-	/* Used to set the SFD detection timeout counter period, in units of preamble symbols 
-	default value = MAX Preamble Lenght(4096) + MAX SFD(64) + 1*/
+	/**
+	Sets the timeout for SFD detection.
+	
+	@param[in] PreambleLenght + SFD + 1. default value 4096+64+1 
+	*/
 	void setSfdDetectionTimeout(uint16_t preambleSymbols);
+
+	/**
+	Sets the timeout for Raceive Frame.
+	Allow the external microprocessor to enter a low power state awaiting a valid receive frame.
+
+	@param[in] time in μs. units = ~1μs(1.026μs) 
+	*/
+	void useReceiveFrameWaitTimeoutPeriod(uint16_t timeMicroSeconds);
 
 	// reception state
 	void startReceive(ReceiveMode mode = ReceiveMode::IMMEDIATE);

@@ -159,6 +159,10 @@ constexpr uint16_t LEN_TX_STAMP = 5;
 constexpr uint16_t DX_TIME = 0x0A;
 constexpr uint16_t LEN_DX_TIME = 5;
 
+// Receive Frame Wait Timeout Period
+constexpr uint16_t RX_WFTO = 0x0C;
+constexpr uint16_t LEN_RX_WFTO = 2;
+
 // transmit data buffer
 constexpr uint16_t TX_BUFFER = 0x09;
 constexpr uint16_t LEN_TX_BUFFER = 1024;
