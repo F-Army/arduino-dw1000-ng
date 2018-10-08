@@ -1719,6 +1719,7 @@ namespace DW1000Ng {
 	}
 
 	void useReceiveFrameWaitTimeoutPeriod(uint16_t timeMicroSeconds){
+		forceTRxOff();
 		byte rx_wfto[LEN_RX_WFTO];
 		/* enable frame wait timeout bit */
 		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXWTOE_BIT, true);
