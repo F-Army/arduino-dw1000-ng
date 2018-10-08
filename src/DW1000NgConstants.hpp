@@ -142,11 +142,6 @@ enum class Channel : byte {
     CHANNEL_7 = 7
 };
 
-
-/* frame length settings. */
-constexpr byte FRAME_LENGTH_NORMAL   = 0x00;
-constexpr byte FRAME_LENGTH_EXTENDED = 0x03;
-
 /* Register is 6 bit, 7 = write, 6 = sub-adressing, 5-0 = register value
  * Total header with sub-adressing can be 15 bit. */
 constexpr byte WRITE      = 0x80; // regular write

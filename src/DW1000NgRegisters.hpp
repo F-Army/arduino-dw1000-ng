@@ -43,7 +43,6 @@ constexpr uint16_t LEN_PANADR = 4;
 
 // device configuration register
 constexpr uint16_t SYS_CFG = 0x04;
-constexpr uint16_t PHR_MODE_SUB = 16;
 constexpr uint16_t FFEN_BIT = 0;
 constexpr uint16_t FFBC_BIT = 1;
 constexpr uint16_t FFAB_BIT = 2;
@@ -60,6 +59,8 @@ constexpr uint16_t DIS_DRXB_BIT = 12;
 constexpr uint16_t DIS_PHE_BIT = 13;
 constexpr uint16_t DIS_RSDE_BIT = 14;
 constexpr uint16_t FCS_INIT2F_BIT = 15;
+constexpr uint16_t PHR_MODE_0_BIT = 16;
+constexpr uint16_t PHR_MODE_1_BIT = 17;
 constexpr uint16_t DIS_STXP_BIT = 18;
 constexpr uint16_t RXM110K_BIT = 22;
 constexpr uint16_t RXWTOE_BIT = 28;
@@ -67,7 +68,6 @@ constexpr uint16_t RXAUTR_BIT = 29;
 constexpr uint16_t AUTOACK_BIT = 30;
 constexpr uint16_t AACKPEND_BIT = 31;
 constexpr uint16_t LEN_SYS_CFG = 4;
-constexpr uint16_t LEN_PHR_MODE_SUB = 2;
 
 // device control register
 constexpr uint16_t SYS_CTRL = 0x0D;
