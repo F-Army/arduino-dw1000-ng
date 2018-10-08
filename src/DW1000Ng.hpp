@@ -224,7 +224,7 @@ namespace DW1000Ng {
 
 	@param[in] time in μs. units = ~1μs(1.026μs) 
 	*/
-	void useReceiveFrameWaitTimeoutPeriod(uint16_t time);
+	void useReceiveFrameWaitTimeoutPeriod(uint16_t timeMicroSeconds);
 
 	// reception state
 	void startReceive(ReceiveMode mode = ReceiveMode::IMMEDIATE);
