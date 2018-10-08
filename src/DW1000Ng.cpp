@@ -1722,6 +1722,7 @@ namespace DW1000Ng {
 		byte rx_wfto[LEN_RX_WFTO];
 		/* enable frame wait timeout bit */
 		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXWTOE_BIT, true);
+		DW1000NgUtils::writeValueToBytes(rx_wfto, time, LEN_RX_WFTO);
 		_writeBytesToRegister(RX_WFTO, NO_SUB, rx_wfto, LEN_RX_WFTO);
 	}
 
