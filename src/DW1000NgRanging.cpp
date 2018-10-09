@@ -70,6 +70,10 @@ namespace DW1000NgRanging {
     }
 
     void encodeFinalMessage(byte source[], addressType src_len, byte destination[], addressType dest_len, uint16_t replyDelayTimeUS) {
+        /* Gets poll send time and response to poll time */
+        DW1000NgUtils::writeValueToBytes(PollTxTime, static_cast<uint32_t>(DW1000Ng::getTransmitTimestamp()), 4);
+        DW1000NgUtils::writeValueToBytes(RespRxTime, static_cast<uint32_t>(DW1000Ng::getReceiveTimestamp()), 4);
+
         byte embedFinalTxTime[LENGTH_TIMESTAMP];
 
 	    uint64_t timeRangeSent = DW1000Ng::getSystemTimestamp();
