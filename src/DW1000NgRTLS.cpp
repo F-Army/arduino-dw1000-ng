@@ -64,17 +64,17 @@ namespace DW1000Ng {
         size_t DEST_LEN = static_cast<size_t>(dest_len);
         size_t len = FRAME_CONTROL_LEN + SEQUENCE_NUMBER_LEN + APPLICATION_ID_LEN + DEST_LEN + SRC_LEN + FUNCTION_CODE_LEN + (data_settings.dataLength);
         byte dataFrame[len];
-        dataFrame[0] = 0x41;
-        dataFrame[1] = 0x00 | (dest_len == addressType::SHORT ? 0x08 : 0x0C);
-        dataFrame[1] |= (src_len == addressType::SHORT ? 0x80 : 0xC0);
-        dataFrame[2] = DW1000Ng::getTransmitSequenceNumber();
-        dataFrame[3] = 0x9A;
-        dataFrame[4] = 0x60;
-        memcpy(&dataFrame[5], destination, DEST_LEN);
-        memcpy(&dataFrame[5+DEST_LEN], source, SRC_LEN);
+        dataFrame[FRAME_CONTROL_OFFSET] = 0x41;
+        dataFrame[FRAME_CONTROL_OFFSET+1] = 0x00 | (dest_len == addressType::SHORT ? 0x08 : 0x0C);
+        dataFrame[FRAME_CONTROL_OFFSET+1] |= (src_len == addressType::SHORT ? 0x80 : 0xC0);
+        dataFrame[SEQUENCE_NUMBER_OFFSET] = DW1000Ng::getTransmitSequenceNumber();
+        dataFrame[APPLICATION_ID_OFFSET] = 0x9A;
+        dataFrame[APPLICATION_ID_OFFSET+1] = 0x60;
+        memcpy(&dataFrame[DESTINATION_OFFSET], destination, DEST_LEN);
+        memcpy(&dataFrame[DESTINATION_OFFSET+DEST_LEN], source, SRC_LEN);
 
 
-        dataFrame[5+DEST_LEN+SRC_LEN] = data_settings.functionCode;
+        dataFrame[DESTINATION_OFFSET+DEST_LEN+SRC_LEN] = data_settings.functionCode;
         if(data_settings.dataLength > 0)
             memcpy(&dataFrame[6+DEST_LEN+SRC_LEN], data_settings.data, data_settings.dataLength);
             
@@ -82,13 +82,18 @@ namespace DW1000Ng {
     }
 
     frameType getFrameType(byte frame[]) {
-        if(frame[0] == 0xC5) 
+        if(frame[FRAME_CONTROL_OFFSET] == 0xC5) 
             return frameType::BLINK;
-        else if(frame[0] == 0x41) {
-            if(frame[1] == 0x88 || frame[1] == 0x8C || frame[1] == 0xC8 || frame[1] == 0xCC)
-                return frameType::DATA;
-            else
+        else if(frame[FRAME_CONTROL_OFFSET] == 0x41) {
+            if( frame[FRAME_CONTROL_OFFSET+1] == 0x88 || 
+                frame[FRAME_CONTROL_OFFSET+1] == 0x8C || 
+                frame[FRAME_CONTROL_OFFSET+1] == 0xC8 || 
+                frame[FRAME_CONTROL_OFFSET+1] == 0xCC) {
+                
+                    return frameType::DATA;
+            } else {
                 return frameType::OTHER;
+            }
         } else {
             return frameType::OTHER;
         }
@@ -98,22 +103,22 @@ namespace DW1000Ng {
         data_offset_t offsets;
         size_t DEST_LEN;
         size_t SRC_LEN;
-        
-        if((frame[1] & 0x0C) == 0x0C) {
+
+        if((frame[FRAME_CONTROL_OFFSET+1] & 0x0C) == 0x0C) {
             DEST_LEN = 8;
         } else {
             DEST_LEN = 2;
         }
         
-        offsets.source_offset = 5 + DEST_LEN;
+        offsets.source_offset = DESTINATION_OFFSET + DEST_LEN;
 
-        if((frame[1] & 0xC0) == 0xC0) {
+        if((frame[FRAME_CONTROL_OFFSET+1] & 0xC0) == 0xC0) {
             SRC_LEN = 8;
         } else {
             SRC_LEN = 2;
         }
 
-        offsets.application_offset = 5 + DEST_LEN + SRC_LEN;
+        offsets.application_offset = DESTINATION_OFFSET + DEST_LEN + SRC_LEN;
 
         return offsets;
     }
