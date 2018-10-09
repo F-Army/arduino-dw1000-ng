@@ -27,6 +27,17 @@
 #include <Arduino.h>
 #include "DW1000NgRTLS.hpp"
 
+enum class rangingFrameType {
+    POLL,
+    RESPONSE_TO_POLL,
+    FINAL_MESSAGE,
+    FINAL_MESSAGE_NO_EMBEDDING,
+    FINAL_SEND_TIME_MESSAGE,
+    RANGING_CONFIRM,
+    ACTIVITY_FINISHED,
+    NO_RANGING
+};
+
 enum class rangingConfirmActivity : byte {
     FINISHED,
     RANGING_CONFIRM
@@ -45,6 +56,8 @@ namespace DW1000NgRanging {
     void encodeFinalMessageNoEmbedding(byte source[], addressType src_len, byte destination[], addressType dest_len);
     void encodeFinalSendTimeMessage(byte source[], addressType src_len, byte destination[], addressType dest_len);
     void encodeRangingConfirm(byte source[], addressType src_len, byte destination[], addressType dest_len, ranging_confirm_settings_t &settings);
+
+    rangingFrameType getRangingFrameType(byte frame[]);
 
     /* asymmetric two-way ranging (more computation intense, less error prone) */
     double computeRangeAsymmetric(    

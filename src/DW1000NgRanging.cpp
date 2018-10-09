@@ -121,6 +121,33 @@ namespace DW1000NgRanging {
         DW1000Ng::encodeData(source, src_len, destination, dest_len, rangingConfirm);
     }
 
+    rangingFrameType getRangingFrameType(byte frame[]) {
+        /* It is assumed the frame is a frame data */
+        size_t FCODE_OFFSET = 0;
+        if((frame[1] & 0x0C) == 0x0C) FCODE_OFFSET += 6;
+        if((frame[1] & 0xC0) == 0xC0) FCODE_OFFSET += 6;
+
+        if(frame[9+FCODE_OFFSET] == 0x10) {
+            /* Activity control frame */
+            switch(frame[10+FCODE_OFFSET]) {
+                case 0x00: return rangingFrameType::ACTIVITY_FINISHED;
+                case 0x01: return rangingFrameType::RANGING_CONFIRM;
+                case 0x02: return rangingFrameType::RESPONSE_TO_POLL;
+                default: return rangingFrameType::NO_RANGING;
+            }
+        } else if(frame[9+FCODE_OFFSET] == 0x21) {
+            return rangingFrameType::POLL;
+        } else if(frame[9+FCODE_OFFSET] == 0x23) {
+            return rangingFrameType::FINAL_MESSAGE;
+        } else if(frame[9+FCODE_OFFSET] == 0x25) {
+            return rangingFrameType::FINAL_MESSAGE_NO_EMBEDDING;
+        } else if(frame[9+FCODE_OFFSET] == 0x27) {
+            return rangingFrameType::FINAL_SEND_TIME_MESSAGE;
+        } else {
+            return rangingFrameType::NO_RANGING;
+        }
+    }
+
     /* asymmetric two-way ranging (more computation intense, less error prone) */
     double computeRangeAsymmetric(    
                                     uint64_t timePollSent, 
