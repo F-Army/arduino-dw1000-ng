@@ -28,6 +28,7 @@
 #include "DW1000NgRTLS.hpp"
 
 enum class rangingFrameType {
+    RANGING_INITIATION,
     POLL,
     RESPONSE_TO_POLL,
     FINAL_MESSAGE,
@@ -50,6 +51,7 @@ typedef struct ranging_confirm_settings_t {
 
 namespace DW1000NgRanging {
 
+    void encodeRangingInitiation(byte source[],addressType src_len,byte destination[],addressType dest_len, byte shortAddress[]);
     void encodePoll(byte source[], addressType src_len, byte destination[], addressType dest_len);
     void encodeResponseToPoll(byte source[], addressType src_len, byte destination[], addressType dest_len);
     void encodeFinalMessage(byte source[], addressType src_len, byte destination[], addressType dest_len, uint16_t replyDelayTimeUS);

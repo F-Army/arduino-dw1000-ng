@@ -37,6 +37,17 @@ namespace {
 
 namespace DW1000NgRanging {
 
+    void encodeRangingInitiation(byte source[],addressType src_len,byte destination[],addressType dest_len, byte shortAddress[]) {
+        message_data_settings_t ranging_initiation {
+            0x20,
+            shortAddress,
+            2
+        };
+
+        DW1000Ng::encodeData(source, src_len, destination, dest_len, ranging_initiation);
+
+    }
+
     void encodePoll(byte source[], addressType src_len, byte destination[], addressType dest_len) {
         message_data_settings_t poll {
             0x21,
@@ -135,6 +146,8 @@ namespace DW1000NgRanging {
                 case 0x02: return rangingFrameType::RESPONSE_TO_POLL;
                 default: return rangingFrameType::NO_RANGING;
             }
+        } else if(frame[9+FCODE_OFFSET] == 0x20) {
+            return rangingFrameType::RANGING_INITIATION;
         } else if(frame[9+FCODE_OFFSET] == 0x21) {
             return rangingFrameType::POLL;
         } else if(frame[9+FCODE_OFFSET] == 0x23) {
