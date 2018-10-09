@@ -26,6 +26,14 @@
 
 #include <Arduino.h>
 
+constexpr size_t FRAME_CONTROL_OFFSET = 0;
+constexpr size_t FRAME_CONTROL_SIZE = 2;
+constexpr size_t SEQUENCE_NUMBER_OFFSET = 2;
+constexpr size_t SEQUENCE_NUMBER_SIZE = 1;
+constexpr size_t APPLICATION_ID_OFFSET = 3;
+constexpr size_t APPLICATION_ID_SIZE = 2;
+constexpr size_t DESTINATION_OFFSET = 5;
+
 enum class addressType : size_t {
     SHORT = 2,
     LONG = 8
