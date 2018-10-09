@@ -57,7 +57,7 @@ typedef struct data_offset_t {
 } data_offset_t;
 
 namespace DW1000Ng {
-    void encodeShortBlink();
+    void encodeMinimalBlink();
     //void encodeLongBlink(byte data[], size_t len);
     void encodeData(byte source[], addressType src_len, byte destination[], addressType dest_len, message_data_settings_t &data_settings);
     

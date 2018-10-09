@@ -34,10 +34,10 @@ constexpr size_t FUNCTION_CODE_LEN = 1;
 
 namespace DW1000Ng {
     
-    void encodeShortBlink() {
+    void encodeMinimalBlink() {
         byte blink[] = {
                         0xC5, 
-                        DW1000Ng::getTransmitSequenceNumber(), 
+                        DW1000Ng::getTransmitSequenceNumber(),
                         0,0,0,0,0,0,0,0, //EUI will be inserted here
                         };
                         
