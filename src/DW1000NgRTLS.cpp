@@ -93,4 +93,28 @@ namespace DW1000Ng {
             return frameType::OTHER;
         }
     }
+
+    data_offset_t getDataOffsets(byte frame[]) {
+        data_offset_t offsets;
+        size_t DEST_LEN;
+        size_t SRC_LEN;
+        
+        if((frame[1] & 0x0C) == 0x0C) {
+            DEST_LEN = 8;
+        } else {
+            DEST_LEN = 2;
+        }
+        
+        offsets.source_offset = 5 + DEST_LEN;
+
+        if((frame[1] & 0xC0) == 0xC0) {
+            SRC_LEN = 8;
+        } else {
+            SRC_LEN = 2;
+        }
+
+        offsets.application_offset = 5 + DEST_LEN + SRC_LEN;
+
+        return offsets;
+    }
 }

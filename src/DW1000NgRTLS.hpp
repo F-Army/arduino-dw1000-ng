@@ -43,12 +43,17 @@ typedef struct message_data_settings_t {
     size_t dataLength;
 } message_data_settings_t;
 
+typedef struct data_offset_t {
+    size_t source_offset;
+    size_t application_offset;
+} data_offset_t;
+
 namespace DW1000Ng {
     void encodeShortBlink();
     //void encodeLongBlink(byte data[], size_t len);
     void encodeData(byte source[], addressType src_len, byte destination[], addressType dest_len, message_data_settings_t &data_settings);
-
+    
     frameType getFrameType(byte frame[]);
-
-
+    
+    data_offset_t getDataOffsets(byte frame[]);
 }
