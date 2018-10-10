@@ -120,6 +120,7 @@ void receive() {
 }
 
 void loop() {
+    /*
     if (!sentAck && !receivedAck) {
         // check if inactive
         if (millis() - lastActivity > resetPeriod) {
@@ -128,10 +129,11 @@ void loop() {
         }
         return;
     }
-
+*/
     if(sentAck) {
         sentAck = false;
         receive();
+        Serial.println("Trasmesso");
     }
 
     if(receivedAck) {
@@ -141,6 +143,7 @@ void loop() {
         DW1000Ng::getReceivedData(receivedData, DATA_LEN);
         frameType frame_type = DW1000Ng::getFrameType(receivedData);
         if(frame_type == frameType::BLINK) {
+            Serial.println("Ricevuto blink");
             byte destAddr[8];
             memcpy(destAddr, &receivedData[2], 8);
             DW1000NgRanging::encodeRangingInitiation(srcAddr, addressType::SHORT, destAddr, addressType::LONG, shortTagAddr);

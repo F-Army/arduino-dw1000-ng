@@ -121,6 +121,7 @@ void setup() {
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
 
+    DW1000Ng::setDeviceAddress(2);
     DW1000Ng::setNetworkId(10);
     
     DW1000Ng::setAntennaDelay(16436);
@@ -204,6 +205,14 @@ void loop() {
     // continue on any success confirmation
     if (sentAck) {
         sentAck = false;
+        byte msgId = data[0];
+        if (msgId == POLL) {
+            timePollSent = DW1000Ng::getTransmitTimestamp();
+            //Serial.print("Sent POLL @ "); Serial.println(timePollSent.getAsFloat());
+        } else if (msgId == RANGE) {
+            timeRangeSent = DW1000Ng::getTransmitTimestamp();
+            noteActivity();
+        }
         DW1000Ng::startReceive();
     }
     if (receivedAck) {
@@ -219,7 +228,6 @@ void loop() {
             return;
         }
         if (msgId == POLL_ACK) {
-            timePollSent = DW1000Ng::getTransmitTimestamp();
             timePollAckReceived = DW1000Ng::getReceiveTimestamp();
             expectedMsgId = RANGE_REPORT;
             transmitRange();

@@ -118,6 +118,7 @@ void returnToBlink() {
 }
 
 void loop() {
+    /*
     if (!sentAck && !receivedAck) {
         // check if inactive
         if (millis() - lastActivity > resetPeriod) {
@@ -126,19 +127,23 @@ void loop() {
         }
         return;
     }
+    */
 
     if(sentAck) {
         sentAck = false;
+        Serial.println("Inviato blink");
         DW1000Ng::startReceive();
     }
 
     if(receivedAck) {
         receivedAck = false;
+        Serial.print("Ricevuto");
         size_t DATA_LEN =  DW1000Ng::getReceivedDataLength();
         byte receivedData[DATA_LEN];
         DW1000Ng::getReceivedData(receivedData, DATA_LEN);
         frameType frame_type = DW1000Ng::getFrameType(receivedData);
         if(frame_type != frameType::DATA) {
+            Serial.print("Not data");
             returnToBlink();
         } else {
             rangingFrameType ranging_frame_type = DW1000NgRanging::getRangingFrameType(receivedData);
