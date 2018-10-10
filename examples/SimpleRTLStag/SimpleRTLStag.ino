@@ -82,6 +82,8 @@ void setup() {
     DW1000Ng::attachSentHandler(handleSent);
     DW1000Ng::attachReceivedHandler(handleReceived);
 
+    Serial.println("Configurations committed");
+
     blink();
     noteActivity();
     DW1000Ng::startReceive();
@@ -126,6 +128,7 @@ void loop() {
     }
 
     if(sentAck) {
+        sentAck = false;
         DW1000Ng::startReceive();
     }
 
