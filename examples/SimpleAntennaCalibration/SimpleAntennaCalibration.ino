@@ -146,7 +146,6 @@ void setup() {
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
 
     DW1000Ng::setDeviceAddress(1);
-    DW1000Ng::setNetworkId(10);
 	
     DW1000Ng::setAntennaDelay(antenna_delay);
     
