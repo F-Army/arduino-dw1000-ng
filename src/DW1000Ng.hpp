@@ -254,7 +254,7 @@ namespace DW1000Ng {
 	// TODO is implemented, but needs testing
 	void useExtendedFrameLength(boolean val);
 	// TODO is implemented, but needs testing
-	void wait4Response(uint16_t time);
+	void setWait4Response(uint16_t timeUS);
 
 	#if DW1000NG_PRINTABLE
 

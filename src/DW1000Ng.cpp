@@ -99,6 +99,7 @@ namespace DW1000Ng {
 		boolean			_standardSFD = true;
 		boolean     	_autoTXPower = true;
 		boolean     	_autoTCPGDelay = true;
+		boolean 		_wait4resp = false;
 		uint16_t		_antennaTxDelay = 0;
 		uint16_t		_antennaRxDelay = 0;
 
@@ -1660,6 +1661,9 @@ namespace DW1000Ng {
 		DW1000NgUtils::setBit(_sysctrl, LEN_SYS_CTRL, SFCST_BIT, !_frameCheck);
 		if(mode == TransmitMode::DELAYED)
 			DW1000NgUtils::setBit(_sysctrl, LEN_SYS_CTRL, TXDLYS_BIT, true);
+		if(_wait4resp)
+			DW1000NgUtils::setBit(_sysctrl, LEN_SYS_CTRL, WAIT4RESP_BIT, true);
+
 		DW1000NgUtils::setBit(_sysctrl, LEN_SYS_CTRL, TXSTRT_BIT, true);
 		_writeBytesToRegister(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
 	}
@@ -1740,11 +1744,11 @@ namespace DW1000Ng {
 		_writeSystemEventMaskRegister();
 	}
 
-	void wait4Response(uint16_t time) {
+	void setWait4Response(uint16_t timeUS) {
 		byte W4R_TIME[LEN_ACK_RESP_T_W4R_TIME_SUB];
-		DW1000NgUtils::setBit(_sysctrl, LEN_SYS_CTRL, WAIT4RESP_BIT, val);
-		DW1000NgUtils::writeValueToBytes(W4R_TIME, time, LEN_ACK_RESP_T_W4R_TIME_SUB);
+		DW1000NgUtils::writeValueToBytes(W4R_TIME, timeUS, LEN_ACK_RESP_T_W4R_TIME_SUB);
 		_writeBytesToRegister(ACK_RESP_T, ACK_RESP_T_W4R_TIME_SUB, W4R_TIME, LEN_ACK_RESP_T_W4R_TIME_SUB);
+		_wait4resp = true;
 	}
 
 	void setTXPower(byte power[]) {
