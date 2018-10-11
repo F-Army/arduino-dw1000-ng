@@ -78,9 +78,6 @@ volatile boolean receivedAck = false;
 uint64_t timePollSent;
 uint64_t timePollAckReceived;
 uint64_t timeRangeSent;
-// data buffer
-#define LEN_DATA 16
-byte data[LEN_DATA];
 // watchdog and reset period
 uint32_t lastActivity;
 uint32_t resetPeriod = 250;
