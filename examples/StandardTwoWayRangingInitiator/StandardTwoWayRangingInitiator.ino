@@ -209,8 +209,15 @@ void loop() {
     if (receivedAck) {
         receivedAck = false;
         // get message and parse
-        DW1000Ng::getReceivedData(data, LEN_DATA);
-        byte msgId = data[0];
+        size_t recv_len = DW1000Ng::getReceivedDataLength();
+        byte recv_data[recv_len];
+        DW1000Ng::getReceivedData(recv_data, recv_len);
+        byte msgId = recv_data[0];
+        if(msgId == 0x41) {
+            if(recv_data[9] == 0x10 && recv_data[10] == 0x02){
+                msgId = POLL_ACK;
+            }
+        }
         if (msgId != expectedMsgId) {
             // unexpected message, start over again
             //Serial.print("Received wrong message # "); Serial.println(msgId);

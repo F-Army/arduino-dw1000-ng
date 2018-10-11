@@ -64,8 +64,6 @@ const uint8_t PIN_SS = SS; // spi select pin
 
 // messages used in the ranging protocol
 // TODO replace by enum
-#define POLL 0
-#define POLL_ACK 1
 #define RANGE 2
 #define RANGE_REPORT 3
 #define RANGE_FAILED 255
@@ -183,8 +181,8 @@ void handleReceived() {
 }
 
 void transmitPollAck() {
-    data[0] = POLL_ACK;
-    DW1000Ng::setTransmitData(data, LEN_DATA);
+    byte pollAck[] = {0x41, 0x88, 0x01, 0x9A, 0x60, 0x04, 0x00, 0x01, 0x00, 0x10, 0x02, 0x00, 0x00};
+    DW1000Ng::setTransmitData(pollAck, sizeof(pollAck));
     DW1000Ng::startTransmit();
 }
 
