@@ -250,10 +250,7 @@ void loop() {
                 rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
                 rangeString += "\t Sampling: "; rangeString += samplingRate; rangeString += " Hz";
                 Serial.println(rangeString);
-                //Serial.print("FP power is [dBm]: "); Serial.print(DW1000Ng::getFirstPathPower());
-                //Serial.print("RX power is [dBm]: "); Serial.println(DW1000Ng::getReceivePower());
-                //Serial.print("Receive quality: "); Serial.println(DW1000Ng::getReceiveQuality());
-                // update sampling rate (each second)
+                
                 transmitRangingConfirm();
                 successRangingCount++;
                 if (curMillis - rangingCountPeriod > 1000) {
