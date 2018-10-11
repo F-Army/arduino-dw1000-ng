@@ -193,6 +193,15 @@ void receiver() {
     DW1000Ng::startReceive();
 }
 
+boolean isStandardRangingMessage(byte data[], size_t size) {
+    
+    if(size < 9 || !(data[0] == 0x41 && data[1] == 0x88 && data[3] == 0x9A && data[4] == 0x60)) {
+        return false;
+    }
+
+    return true;
+}
+
 void loop() {
     int32_t curMillis = millis();
     if (!sentAck && !receivedAck) {
@@ -213,51 +222,51 @@ void loop() {
         size_t recv_len = DW1000Ng::getReceivedDataLength();
         byte recv_data[recv_len];
         DW1000Ng::getReceivedData(recv_data, recv_len);
-        byte msgId = recv_data[0];
-        if(recv_data[0] == 0x41) {
-            msgId = recv_data[9];
-        }
 
-        if (msgId == 0x21) {
-            // on POLL we (re-)start, so no protocol failure
-            timePollReceived = DW1000Ng::getReceiveTimestamp();
-            transmitPollAck();
-            noteActivity();
-        }
-        else if (msgId == 0x23) {
-            timePollAckSent = DW1000Ng::getTransmitTimestamp();
-            timeRangeReceived = DW1000Ng::getReceiveTimestamp();
+        if(isStandardRangingMessage(recv_data, recv_len)) {
+            if (recv_data[9] == 0x21) {
+                // on POLL we (re-)start, so no protocol failure
+                timePollReceived = DW1000Ng::getReceiveTimestamp();
+                transmitPollAck();
+                noteActivity();
+            } else if (recv_data[9] == 0x23) {
+                timePollAckSent = DW1000Ng::getTransmitTimestamp();
+                timeRangeReceived = DW1000Ng::getReceiveTimestamp();
 
-            timePollSent = DW1000NgUtils::bytesAsValue(recv_data + 10, LENGTH_TIMESTAMP);
-            timePollAckReceived = DW1000NgUtils::bytesAsValue(recv_data + 14, LENGTH_TIMESTAMP);
-            timeRangeSent = DW1000NgUtils::bytesAsValue(recv_data + 18, LENGTH_TIMESTAMP);
-            // (re-)compute range as two-way ranging is done
-            double distance = DW1000NgRanging::computeRangeAsymmetric(timePollSent,
-                                                        timePollReceived, 
-                                                        timePollAckSent, 
-                                                        timePollAckReceived, 
-                                                        timeRangeSent, 
-                                                        timeRangeReceived);
-            /* Apply simple bias correction */
-            distance = DW1000NgRanging::correctRange(distance);
-            
-            String rangeString = "Range: "; rangeString += distance; rangeString += " m";
-            rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
-            rangeString += "\t Sampling: "; rangeString += samplingRate; rangeString += " Hz";
-            Serial.println(rangeString);
-            //Serial.print("FP power is [dBm]: "); Serial.print(DW1000Ng::getFirstPathPower());
-            //Serial.print("RX power is [dBm]: "); Serial.println(DW1000Ng::getReceivePower());
-            //Serial.print("Receive quality: "); Serial.println(DW1000Ng::getReceiveQuality());
-            // update sampling rate (each second)
-            transmitRangingConfirm();
-            successRangingCount++;
-            if (curMillis - rangingCountPeriod > 1000) {
-                samplingRate = (1000.0f * successRangingCount) / (curMillis - rangingCountPeriod);
-                rangingCountPeriod = curMillis;
-                successRangingCount = 0;
+                timePollSent = DW1000NgUtils::bytesAsValue(recv_data + 10, LENGTH_TIMESTAMP);
+                timePollAckReceived = DW1000NgUtils::bytesAsValue(recv_data + 14, LENGTH_TIMESTAMP);
+                timeRangeSent = DW1000NgUtils::bytesAsValue(recv_data + 18, LENGTH_TIMESTAMP);
+                // (re-)compute range as two-way ranging is done
+                double distance = DW1000NgRanging::computeRangeAsymmetric(timePollSent,
+                                                            timePollReceived, 
+                                                            timePollAckSent, 
+                                                            timePollAckReceived, 
+                                                            timeRangeSent, 
+                                                            timeRangeReceived);
+                /* Apply simple bias correction */
+                distance = DW1000NgRanging::correctRange(distance);
+                
+                String rangeString = "Range: "; rangeString += distance; rangeString += " m";
+                rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
+                rangeString += "\t Sampling: "; rangeString += samplingRate; rangeString += " Hz";
+                Serial.println(rangeString);
+                //Serial.print("FP power is [dBm]: "); Serial.print(DW1000Ng::getFirstPathPower());
+                //Serial.print("RX power is [dBm]: "); Serial.println(DW1000Ng::getReceivePower());
+                //Serial.print("Receive quality: "); Serial.println(DW1000Ng::getReceiveQuality());
+                // update sampling rate (each second)
+                transmitRangingConfirm();
+                successRangingCount++;
+                if (curMillis - rangingCountPeriod > 1000) {
+                    samplingRate = (1000.0f * successRangingCount) / (curMillis - rangingCountPeriod);
+                    rangingCountPeriod = curMillis;
+                    successRangingCount = 0;
+                }
+                noteActivity();
             }
-            noteActivity();
         }
+
+        
+        
     }
 }
 
