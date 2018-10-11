@@ -168,8 +168,8 @@ void handleReceived() {
 }
 
 void transmitPoll() {
-    data[0] = POLL;
-    DW1000Ng::setTransmitData(data, LEN_DATA);
+    byte Poll[] = {0x41, 0x88, 0x01, 0x9A, 0x60, 0x01, 0x00, 0x04, 0x00, 0x21};
+    DW1000Ng::setTransmitData(Poll, sizeof(Poll));
     DW1000Ng::startTransmit();
 }
 
@@ -226,8 +226,6 @@ void loop() {
             noteActivity();
         } else if (msgId == RANGE_REPORT) {
             expectedMsgId = POLL_ACK;
-            float curRange;
-            memcpy(&curRange, data + 1, 4);
             transmitPoll();
             noteActivity();
         } else if (msgId == RANGE_FAILED) {

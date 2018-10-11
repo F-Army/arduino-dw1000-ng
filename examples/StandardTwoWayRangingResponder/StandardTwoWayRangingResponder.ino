@@ -70,7 +70,7 @@ const uint8_t PIN_SS = SS; // spi select pin
 #define RANGE_REPORT 3
 #define RANGE_FAILED 255
 // message flow state
-volatile byte expectedMsgId = POLL;
+volatile byte expectedMsgId = 0x21;
 // message sent/received state
 volatile boolean sentAck = false;
 volatile boolean receivedAck = false;
@@ -167,7 +167,7 @@ void noteActivity() {
 
 void resetInactive() {
     // anchor listens for POLL
-    expectedMsgId = POLL;
+    expectedMsgId = 0x21;
     receiver();
     noteActivity();
 }
@@ -191,7 +191,7 @@ void transmitPollAck() {
 void transmitRangeReport(float curRange) {
     data[0] = RANGE_REPORT;
     // write final ranging result
-    memcpy(data + 1, &curRange, 4);
+    //memcpy(data + 1, &curRange, 4);
     DW1000Ng::setTransmitData(data, LEN_DATA);
     DW1000Ng::startTransmit();
 }
@@ -225,13 +225,18 @@ void loop() {
     if (receivedAck) {
         receivedAck = false;
         // get message and parse
-        DW1000Ng::getReceivedData(data, LEN_DATA);
-        byte msgId = data[0];
+        size_t recv_len = DW1000Ng::getReceivedDataLength();
+        byte recv_data[recv_len];
+        DW1000Ng::getReceivedData(recv_data, recv_len);
+        byte msgId = recv_data[0];
+        if(recv_data[0] == 0x41) {
+            msgId = recv_data[9];
+        }
         if (msgId != expectedMsgId) {
             // unexpected message, start over again (except if already POLL)
             protocolFailed = true;
         }
-        if (msgId == POLL) {
+        if (msgId == 0x21) {
             // on POLL we (re-)start, so no protocol failure
             protocolFailed = false;
             timePollReceived = DW1000Ng::getReceiveTimestamp();
@@ -242,11 +247,11 @@ void loop() {
         else if (msgId == RANGE) {
             timePollAckSent = DW1000Ng::getTransmitTimestamp();
             timeRangeReceived = DW1000Ng::getReceiveTimestamp();
-            expectedMsgId = POLL;
+            expectedMsgId = 0x21;
             if (!protocolFailed) {
-                timePollSent = DW1000NgUtils::bytesAsValue(data + 1, LENGTH_TIMESTAMP);
-                timePollAckReceived = DW1000NgUtils::bytesAsValue(data + 6, LENGTH_TIMESTAMP);
-                timeRangeSent = DW1000NgUtils::bytesAsValue(data + 11, LENGTH_TIMESTAMP);
+                timePollSent = DW1000NgUtils::bytesAsValue(recv_data + 1, LENGTH_TIMESTAMP);
+                timePollAckReceived = DW1000NgUtils::bytesAsValue(recv_data + 6, LENGTH_TIMESTAMP);
+                timeRangeSent = DW1000NgUtils::bytesAsValue(recv_data + 11, LENGTH_TIMESTAMP);
                 // (re-)compute range as two-way ranging is done
                 double distance = DW1000NgRanging::computeRangeAsymmetric(timePollSent,
                                                             timePollReceived, 
