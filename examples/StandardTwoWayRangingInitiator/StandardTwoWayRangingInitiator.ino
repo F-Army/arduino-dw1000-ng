@@ -62,13 +62,6 @@ const uint8_t PIN_RST = 9; // reset pin
 const uint8_t PIN_IRQ = 2; // irq pin
 const uint8_t PIN_SS = SS; // spi select pin
 
-// messages used in the ranging protocol
-// TODO replace by enum
-#define POLL 0
-#define POLL_ACK 1
-#define RANGE 2
-#define RANGE_REPORT 3
-#define RANGE_FAILED 255
 // message flow state
 // message sent/received state
 volatile boolean sentAck = false;
@@ -146,7 +139,7 @@ void noteActivity() {
 }
 
 void resetInactive() {
-    // tag sends POLL and listens for POLL_ACK
+    // tag returns to Idle and sends POLL
     DW1000Ng::forceTRxOff();
     transmitPoll();
     noteActivity();
@@ -185,7 +178,6 @@ void transmitFinalMessage() {
     DW1000NgUtils::writeValueToBytes(finalMessage + 18, (uint32_t) timeRangeSent, 4);
     DW1000Ng::setTransmitData(finalMessage, sizeof(finalMessage));
     DW1000Ng::startTransmit(TransmitMode::DELAYED);
-    //Serial.print("Expect RANGE to be sent @ "); Serial.println(timeRangeSent.getAsFloat());
 }
 
 boolean isStandardRangingMessage(byte data[], size_t size) {
@@ -205,7 +197,7 @@ void loop() {
         }
         return;
     }
-    // continue on any success confirmation
+
     if (sentAck) {
         sentAck = false;
         DW1000Ng::startReceive();
@@ -217,6 +209,7 @@ void loop() {
         size_t recv_len = DW1000Ng::getReceivedDataLength();
         byte recv_data[recv_len];
         DW1000Ng::getReceivedData(recv_data, recv_len);
+        
         if(isStandardRangingMessage(recv_data, recv_len)) {
             /* RTLS standard message */
             if (recv_data[9] == 0x10 && recv_data[10] == 0x02) {
@@ -231,6 +224,5 @@ void loop() {
                 noteActivity();
             }
         }
-        
     }
 }

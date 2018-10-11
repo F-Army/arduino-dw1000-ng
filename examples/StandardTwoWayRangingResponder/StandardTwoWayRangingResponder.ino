@@ -62,12 +62,6 @@ const uint8_t PIN_RST = 9; // reset pin
 const uint8_t PIN_IRQ = 2; // irq pin
 const uint8_t PIN_SS = SS; // spi select pin
 
-// messages used in the ranging protocol
-// TODO replace by enum
-#define RANGE 2
-#define RANGE_REPORT 3
-#define RANGE_FAILED 255
-// message flow state
 // message sent/received state
 volatile boolean sentAck = false;
 volatile boolean receivedAck = false;
@@ -79,9 +73,6 @@ uint64_t timePollAckSent;
 uint64_t timePollAckReceived;
 uint64_t timeRangeSent;
 uint64_t timeRangeReceived;
-
-uint64_t timeComputedRange;
-// last computed range/time
 
 // watchdog and reset period
 uint32_t lastActivity;
@@ -119,7 +110,6 @@ interrupt_configuration_t DEFAULT_INTERRUPT_CONFIG = {
 void setup() {
     // DEBUG monitoring
     Serial.begin(115200);
-    delay(1000);
     Serial.println(F("### DW1000Ng-arduino-ranging-anchor ###"));
     // initialize the driver
     DW1000Ng::initialize(PIN_SS, PIN_IRQ, PIN_RST);
@@ -146,8 +136,8 @@ void setup() {
     // attach callback for (successfully) sent and received messages
     DW1000Ng::attachSentHandler(handleSent);
     DW1000Ng::attachReceivedHandler(handleReceived);
+    
     // anchor starts in receiving mode, awaiting a ranging poll message
-   
     receiver();
     noteActivity();
     // for first time ranging frequency computation
@@ -161,6 +151,7 @@ void noteActivity() {
 
 void resetInactive() {
     // anchor listens for POLL
+    DW1000Ng::forceTRxOff();
     receiver();
     noteActivity();
 }
@@ -176,20 +167,20 @@ void handleReceived() {
 }
 
 void transmitPollAck() {
+    /*Function code 0x10, Activity code 0x02 */
     byte pollAck[] = {0x41, 0x88, 0x01, 0x9A, 0x60, 0x04, 0x00, 0x01, 0x00, 0x10, 0x02, 0x00, 0x00};
     DW1000Ng::setTransmitData(pollAck, sizeof(pollAck));
     DW1000Ng::startTransmit();
 }
 
 void transmitRangingConfirm() {
+    /*Function code 0x10, Activity code 0x01 */
     byte rangingConfirm[] = {0x41, 0x88, 0x01, 0x9A, 0x60, 0x04, 0x00, 0x01, 0x00, 0x10, 0x01, 0x00, 0x01};
     DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));
     DW1000Ng::startTransmit();
 }
 
 void receiver() {
-    DW1000Ng::forceTRxOff();
-    // so we don't need to restart the receiver manually
     DW1000Ng::startReceive();
 }
 
@@ -211,11 +202,12 @@ void loop() {
         }
         return;
     }
-    // continue on any success confirmation
+
     if (sentAck) {
         sentAck = false;
         DW1000Ng::startReceive();
     }
+
     if (receivedAck) {
         receivedAck = false;
         // get message and parse
@@ -243,7 +235,7 @@ void loop() {
                                                             timePollAckReceived, 
                                                             timeRangeSent, 
                                                             timeRangeReceived);
-                /* Apply simple bias correction */
+                /* Apply bias correction */
                 distance = DW1000NgRanging::correctRange(distance);
                 
                 String rangeString = "Range: "; rangeString += distance; rangeString += " m";
@@ -260,10 +252,7 @@ void loop() {
                 }
                 noteActivity();
             }
-        }
-
-        
-        
+        }   
     }
 }
 
