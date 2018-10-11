@@ -221,13 +221,6 @@ void loop() {
                 }
             }
         }
-        if (msgId != expectedMsgId) {
-            // unexpected message, start over again
-            //Serial.print("Received wrong message # "); Serial.println(msgId);
-            expectedMsgId = POLL_ACK;
-            transmitPoll();
-            return;
-        }
         if (msgId == POLL_ACK) {
             timePollSent = DW1000Ng::getTransmitTimestamp();
             timePollAckReceived = DW1000Ng::getReceiveTimestamp();

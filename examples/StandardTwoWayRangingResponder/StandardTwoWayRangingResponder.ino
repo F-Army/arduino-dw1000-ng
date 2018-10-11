@@ -191,12 +191,6 @@ void transmitRangingConfirm() {
     DW1000Ng::startTransmit();
 }
 
-void transmitRangeFailed() {
-    data[0] = RANGE_FAILED;
-    DW1000Ng::setTransmitData(data, LEN_DATA);
-    DW1000Ng::startTransmit();
-}
-
 void receiver() {
     DW1000Ng::forceTRxOff();
     // so we don't need to restart the receiver manually
@@ -227,10 +221,7 @@ void loop() {
         if(recv_data[0] == 0x41) {
             msgId = recv_data[9];
         }
-        if (msgId != expectedMsgId) {
-            // unexpected message, start over again (except if already POLL)
-            transmitRangeFailed();
-        }
+
         if (msgId == 0x21) {
             // on POLL we (re-)start, so no protocol failure
             timePollReceived = DW1000Ng::getReceiveTimestamp();
