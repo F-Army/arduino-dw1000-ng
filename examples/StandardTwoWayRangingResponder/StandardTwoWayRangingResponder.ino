@@ -68,7 +68,6 @@ const uint8_t PIN_SS = SS; // spi select pin
 #define RANGE_REPORT 3
 #define RANGE_FAILED 255
 // message flow state
-volatile byte expectedMsgId = 0x21;
 // message sent/received state
 volatile boolean sentAck = false;
 volatile boolean receivedAck = false;
@@ -83,9 +82,7 @@ uint64_t timeRangeReceived;
 
 uint64_t timeComputedRange;
 // last computed range/time
-// data buffer
-#define LEN_DATA 16
-byte data[LEN_DATA];
+
 // watchdog and reset period
 uint32_t lastActivity;
 uint32_t resetPeriod = 250;
@@ -164,7 +161,6 @@ void noteActivity() {
 
 void resetInactive() {
     // anchor listens for POLL
-    expectedMsgId = 0x21;
     receiver();
     noteActivity();
 }
@@ -225,14 +221,13 @@ void loop() {
         if (msgId == 0x21) {
             // on POLL we (re-)start, so no protocol failure
             timePollReceived = DW1000Ng::getReceiveTimestamp();
-            expectedMsgId = 0x23;
             transmitPollAck();
             noteActivity();
         }
         else if (msgId == 0x23) {
             timePollAckSent = DW1000Ng::getTransmitTimestamp();
             timeRangeReceived = DW1000Ng::getReceiveTimestamp();
-            expectedMsgId = 0x21;
+
             timePollSent = DW1000NgUtils::bytesAsValue(recv_data + 10, LENGTH_TIMESTAMP);
             timePollAckReceived = DW1000NgUtils::bytesAsValue(recv_data + 14, LENGTH_TIMESTAMP);
             timeRangeSent = DW1000NgUtils::bytesAsValue(recv_data + 18, LENGTH_TIMESTAMP);

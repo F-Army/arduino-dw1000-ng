@@ -70,7 +70,6 @@ const uint8_t PIN_SS = SS; // spi select pin
 #define RANGE_REPORT 3
 #define RANGE_FAILED 255
 // message flow state
-volatile byte expectedMsgId = POLL_ACK;
 // message sent/received state
 volatile boolean sentAck = false;
 volatile boolean receivedAck = false;
@@ -148,19 +147,16 @@ void noteActivity() {
 
 void resetInactive() {
     // tag sends POLL and listens for POLL_ACK
-    expectedMsgId = POLL_ACK;
     DW1000Ng::forceTRxOff();
     transmitPoll();
     noteActivity();
 }
 
 void handleSent() {
-    // status change on sent success
     sentAck = true;
 }
 
 void handleReceived() {
-    // status change on received success
     receivedAck = true;
 }
 
@@ -170,7 +166,7 @@ void transmitPoll() {
     DW1000Ng::startTransmit();
 }
 
-void transmitRange() {
+void transmitFinalMessage() {
     /* Calculation of future time */
     byte futureTimeBytes[LENGTH_TIMESTAMP];
 
@@ -192,6 +188,15 @@ void transmitRange() {
     //Serial.print("Expect RANGE to be sent @ "); Serial.println(timeRangeSent.getAsFloat());
 }
 
+boolean isStandardRangingMessage(byte data[], size_t size) {
+    
+    if(size < 9 || !(data[0] == 0x41 && data[1] == 0x88 && data[3] == 0x9A && data[4] == 0x60)) {
+        return false;
+    }
+
+    return true;
+}
+
 void loop() {
     if (!sentAck && !receivedAck) {
         // check if inactive
@@ -205,36 +210,27 @@ void loop() {
         sentAck = false;
         DW1000Ng::startReceive();
     }
+
     if (receivedAck) {
         receivedAck = false;
-        // get message and parse
+        /* Parse received message */
         size_t recv_len = DW1000Ng::getReceivedDataLength();
         byte recv_data[recv_len];
         DW1000Ng::getReceivedData(recv_data, recv_len);
-        byte msgId = recv_data[0];
-        if(msgId == 0x41) {
-            if(recv_data[9] == 0x10) {
-                if(recv_data[10] == 0x02) {
-                    msgId = POLL_ACK;
-                } else if(recv_data[10] == 0x01) {
-                    msgId = RANGE_REPORT;
-                }
+        if(isStandardRangingMessage(recv_data, recv_len)) {
+            /* RTLS standard message */
+            if (recv_data[9] == 0x10 && recv_data[10] == 0x02) {
+                /* Received Response to poll */
+                timePollSent = DW1000Ng::getTransmitTimestamp();
+                timePollAckReceived = DW1000Ng::getReceiveTimestamp();
+                transmitFinalMessage();
+                noteActivity();
+            } else if (recv_data[9] == 0x10 && recv_data[10] == 0x01) {
+                /* Received ranging confirm */
+                transmitPoll();
+                noteActivity();
             }
         }
-        if (msgId == POLL_ACK) {
-            timePollSent = DW1000Ng::getTransmitTimestamp();
-            timePollAckReceived = DW1000Ng::getReceiveTimestamp();
-            expectedMsgId = RANGE_REPORT;
-            transmitRange();
-            noteActivity();
-        } else if (msgId == RANGE_REPORT) {
-            expectedMsgId = POLL_ACK;
-            transmitPoll();
-            noteActivity();
-        } else if (msgId == RANGE_FAILED) {
-            expectedMsgId = POLL_ACK;
-            transmitPoll();
-            noteActivity();
-        }
+        
     }
 }
