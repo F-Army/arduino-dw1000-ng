@@ -238,18 +238,18 @@ void loop() {
             // on POLL we (re-)start, so no protocol failure
             protocolFailed = false;
             timePollReceived = DW1000Ng::getReceiveTimestamp();
-            expectedMsgId = RANGE;
+            expectedMsgId = 0x23;
             transmitPollAck();
             noteActivity();
         }
-        else if (msgId == RANGE) {
+        else if (msgId == 0x23) {
             timePollAckSent = DW1000Ng::getTransmitTimestamp();
             timeRangeReceived = DW1000Ng::getReceiveTimestamp();
             expectedMsgId = 0x21;
             if (!protocolFailed) {
-                timePollSent = DW1000NgUtils::bytesAsValue(recv_data + 1, LENGTH_TIMESTAMP);
-                timePollAckReceived = DW1000NgUtils::bytesAsValue(recv_data + 6, LENGTH_TIMESTAMP);
-                timeRangeSent = DW1000NgUtils::bytesAsValue(recv_data + 11, LENGTH_TIMESTAMP);
+                timePollSent = DW1000NgUtils::bytesAsValue(recv_data + 10, LENGTH_TIMESTAMP);
+                timePollAckReceived = DW1000NgUtils::bytesAsValue(recv_data + 14, LENGTH_TIMESTAMP);
+                timeRangeSent = DW1000NgUtils::bytesAsValue(recv_data + 18, LENGTH_TIMESTAMP);
                 // (re-)compute range as two-way ranging is done
                 double distance = DW1000NgRanging::computeRangeAsymmetric(timePollSent,
                                                             timePollReceived, 

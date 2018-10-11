@@ -174,8 +174,6 @@ void transmitPoll() {
 }
 
 void transmitRange() {
-    data[0] = RANGE;
-
     /* Calculation of future time */
     byte futureTimeBytes[LENGTH_TIMESTAMP];
 
@@ -185,10 +183,14 @@ void transmitRange() {
     DW1000Ng::setDelayedTRX(futureTimeBytes);
     timeRangeSent += DW1000Ng::getTxAntennaDelay();
 
-    DW1000NgUtils::writeValueToBytes(data + 1, timePollSent, LENGTH_TIMESTAMP);
-    DW1000NgUtils::writeValueToBytes(data + 6, timePollAckReceived, LENGTH_TIMESTAMP);
-    DW1000NgUtils::writeValueToBytes(data + 11, timeRangeSent, LENGTH_TIMESTAMP);
-    DW1000Ng::setTransmitData(data, LEN_DATA);
+    byte finalMessage[] = {0x41, 0x88, 0x01, 0x9A, 0x60, 0x01, 0x00, 0x04, 0x00, 0x23, 
+        0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
+    };
+
+    DW1000NgUtils::writeValueToBytes(finalMessage + 10, (uint32_t) timePollSent, 4);
+    DW1000NgUtils::writeValueToBytes(finalMessage + 14, (uint32_t) timePollAckReceived, 4);
+    DW1000NgUtils::writeValueToBytes(finalMessage + 18, (uint32_t) timeRangeSent, 4);
+    DW1000Ng::setTransmitData(finalMessage, sizeof(finalMessage));
     DW1000Ng::startTransmit(TransmitMode::DELAYED);
     //Serial.print("Expect RANGE to be sent @ "); Serial.println(timeRangeSent.getAsFloat());
 }
