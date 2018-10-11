@@ -186,11 +186,9 @@ void transmitPollAck() {
     DW1000Ng::startTransmit();
 }
 
-void transmitRangeReport(float curRange) {
-    data[0] = RANGE_REPORT;
-    // write final ranging result
-    //memcpy(data + 1, &curRange, 4);
-    DW1000Ng::setTransmitData(data, LEN_DATA);
+void transmitRangingConfirm() {
+    byte rangingConfirm[] = {0x41, 0x88, 0x01, 0x9A, 0x60, 0x04, 0x00, 0x01, 0x00, 0x10, 0x01, 0x00, 0x01};
+    DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));
     DW1000Ng::startTransmit();
 }
 
@@ -268,7 +266,7 @@ void loop() {
                 //Serial.print("RX power is [dBm]: "); Serial.println(DW1000Ng::getReceivePower());
                 //Serial.print("Receive quality: "); Serial.println(DW1000Ng::getReceiveQuality());
                 // update sampling rate (each second)
-                transmitRangeReport(distance * DISTANCE_OF_RADIO_INV);
+                transmitRangingConfirm();
                 successRangingCount++;
                 if (curMillis - rangingCountPeriod > 1000) {
                     samplingRate = (1000.0f * successRangingCount) / (curMillis - rangingCountPeriod);

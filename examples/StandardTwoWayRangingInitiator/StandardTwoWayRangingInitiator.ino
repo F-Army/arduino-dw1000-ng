@@ -216,8 +216,12 @@ void loop() {
         DW1000Ng::getReceivedData(recv_data, recv_len);
         byte msgId = recv_data[0];
         if(msgId == 0x41) {
-            if(recv_data[9] == 0x10 && recv_data[10] == 0x02){
-                msgId = POLL_ACK;
+            if(recv_data[9] == 0x10) {
+                if(recv_data[10] == 0x02) {
+                    msgId = POLL_ACK;
+                } else if(recv_data[10] == 0x01) {
+                    msgId = RANGE_REPORT;
+                }
             }
         }
         if (msgId != expectedMsgId) {
