@@ -171,7 +171,7 @@ void handleReceived() {
 }
 
 void transmitRangingInitiation() {
-    byte RangingInitiation[] = {DATA, 0x8C, 0x01, 0x9A, 0x60, 0,0,0,0,0,0,0,0, 0x01, 0x00, 0x20, 0,0};
+    byte RangingInitiation[] = {DATA, SHORT_SRC_LONG_DEST, 0x01, 0x9A, 0x60, 0,0,0,0,0,0,0,0, 0x01, 0x00, 0x20, 0,0};
     memcpy(&RangingInitiation[16], tag_shortAddress, 2);
     memcpy(&RangingInitiation[5], target_eui, 8);
     DW1000Ng::setTransmitData(RangingInitiation, sizeof(RangingInitiation));
@@ -180,7 +180,7 @@ void transmitRangingInitiation() {
 
 void transmitPollAck() {
     /*Function code 0x10, Activity code 0x02 */
-    byte pollAck[] = {DATA, 0x88, 0x01, 0x9A, 0x60, 0,0 , 0x01, 0x00, 0x10, 0x02, 0x00, 0x00};
+    byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, 0x01, 0x9A, 0x60, 0,0 , 0x01, 0x00, 0x10, 0x02, 0x00, 0x00};
     memcpy(&pollAck[5], tag_shortAddress, 2);
     DW1000Ng::setTransmitData(pollAck, sizeof(pollAck));
     DW1000Ng::startTransmit();
@@ -188,7 +188,7 @@ void transmitPollAck() {
 
 void transmitRangingConfirm() {
     /*Function code 0x10, Activity code 0x01 */
-    byte rangingConfirm[] = {DATA, 0x88, 0x01, 0x9A, 0x60, 0,0, 0x01, 0x00, 0x10, 0x01, 0x01, 0x00};
+    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, 0x01, 0x9A, 0x60, 0,0, 0x01, 0x00, 0x10, 0x01, 0x01, 0x00};
     memcpy(&rangingConfirm[5], tag_shortAddress, 2);
     DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));
     DW1000Ng::startTransmit();
