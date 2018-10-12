@@ -68,6 +68,8 @@ const uint8_t PIN_SS = SS; // spi select pin
 // message sent/received state
 volatile boolean sentAck = false;
 volatile boolean receivedAck = false;
+
+byte SEQ_NUMBER = 0;
 // timestamps to remember
 uint64_t timePollSent;
 uint64_t timePollAckReceived;
@@ -157,14 +159,14 @@ void handleReceived() {
 }
 
 void transmitBlink() {
-    byte Blink[] = {BLINK, 1, 0,0,0,0,0,0,0,0, NO_BATTERY_STATUS | NO_EX_ID, TAG_LISTENING_NOW};
+    byte Blink[] = {BLINK, SEQ_NUMBER++, 0,0,0,0,0,0,0,0, NO_BATTERY_STATUS | NO_EX_ID, TAG_LISTENING_NOW};
     DW1000Ng::getEUI(&Blink[2]);
     DW1000Ng::setTransmitData(Blink, sizeof(Blink));
     DW1000Ng::startTransmit();
 }
 
 void transmitPoll() {
-    byte Poll[] = {DATA, SHORT_SRC_AND_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0x01, 0x00, 0,0 , RANGING_TAG_POLL};
+    byte Poll[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0x01, 0x00, 0,0 , RANGING_TAG_POLL};
     DW1000Ng::getDeviceAddress(&Poll[7]);
     DW1000Ng::setTransmitData(Poll, sizeof(Poll));
     DW1000Ng::startTransmit();
@@ -181,7 +183,7 @@ void transmitFinalMessage() {
     DW1000Ng::setDelayedTRX(futureTimeBytes);
     timeRangeSent += DW1000Ng::getTxAntennaDelay();
 
-    byte finalMessage[] = {DATA, SHORT_SRC_AND_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0x01, 0x00, 0,0, RANGING_TAG_FINAL_RESPONSE_EMBEDDED, 
+    byte finalMessage[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0x01, 0x00, 0,0, RANGING_TAG_FINAL_RESPONSE_EMBEDDED, 
         0,0,0,0,0,0,0,0,0,0,0,0
     };
 

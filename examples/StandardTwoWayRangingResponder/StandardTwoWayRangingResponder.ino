@@ -67,6 +67,8 @@ const uint8_t PIN_SS = SS; // spi select pin
 volatile boolean sentAck = false;
 volatile boolean receivedAck = false;
 
+byte SEQ_NUMBER = 0;
+
 // timestamps to remember
 uint64_t timePollSent;
 uint64_t timePollReceived;
@@ -171,7 +173,7 @@ void handleReceived() {
 }
 
 void transmitRangingInitiation() {
-    byte RangingInitiation[] = {DATA, SHORT_SRC_LONG_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0,0,0,0,0,0,0, 0x01, 0x00, RANGING_INITIATION, 0,0};
+    byte RangingInitiation[] = {DATA, SHORT_SRC_LONG_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0,0,0,0,0,0,0, 0x01, 0x00, RANGING_INITIATION, 0,0};
     memcpy(&RangingInitiation[16], tag_shortAddress, 2);
     memcpy(&RangingInitiation[5], target_eui, 8);
     DW1000Ng::setTransmitData(RangingInitiation, sizeof(RangingInitiation));
@@ -179,14 +181,14 @@ void transmitRangingInitiation() {
 }
 
 void transmitPollAck() {
-    byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0 , 0x01, 0x00, ACTIVITY_CONTROL, RANGING_CONTINUE, 0x00, 0x00};
+    byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0 , 0x01, 0x00, ACTIVITY_CONTROL, RANGING_CONTINUE, 0x00, 0x00};
     memcpy(&pollAck[5], tag_shortAddress, 2);
     DW1000Ng::setTransmitData(pollAck, sizeof(pollAck));
     DW1000Ng::startTransmit();
 }
 
 void transmitRangingConfirm() {
-    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0, 0x01, 0x00, ACTIVITY_CONTROL, RANGING_CONFIRM, 0x01, 0x00};
+    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0, 0x01, 0x00, ACTIVITY_CONTROL, RANGING_CONFIRM, 0x01, 0x00};
     memcpy(&rangingConfirm[5], tag_shortAddress, 2);
     DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));
     DW1000Ng::startTransmit();
