@@ -253,7 +253,12 @@ namespace DW1000Ng {
 	void setDoubleBuffering(boolean val);
 	// TODO is implemented, but needs testing
 	void useExtendedFrameLength(boolean val);
-	// TODO is implemented, but needs testing
+	
+	/**
+	Sets the time before the device enters receive after a transmission.
+
+	@param[in] time in μs. units = ~1μs(1.026μs) 
+	*/
 	void setWait4Response(uint32_t timeMicroSeconds);
 
 	#if DW1000NG_PRINTABLE
