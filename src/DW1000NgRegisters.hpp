@@ -288,7 +288,6 @@ constexpr uint16_t LEN_FS_XTALT = 1;
 
 // AON
 constexpr uint16_t AON = 0x2C;
-
 constexpr uint16_t AON_WCFG_SUB = 0x00;
 constexpr uint16_t ONW_RX = 1;
 constexpr uint16_t ONW_LDC_BIT = 6;
@@ -335,6 +334,12 @@ constexpr uint16_t ARXSLP_BIT = 12;
 // TX_ANTD Antenna delays
 constexpr uint16_t TX_ANTD = 0x18;
 constexpr uint16_t LEN_TX_ANTD = 2;
+
+// Acknowledgement time and response time
+constexpr uint16_t ACK_RESP_T = 0x1A;
+constexpr uint16_t ACK_RESP_T_W4R_TIME_SUB = 0x00;
+constexpr uint16_t LEN_ACK_RESP_T_W4R_TIME_SUB = 3;
+constexpr uint16_t LEN_ACK_RESP_T = 4;
 
 // GPIO
 constexpr uint16_t GPIO_CTRL = 0x26;
