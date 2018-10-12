@@ -1184,9 +1184,11 @@ namespace DW1000Ng {
 			return false;
 		}
 
-		//Checks to see any of the three timeout bits in sysstatus are high (RXRFTO (Frame Wait timeout), RXPTO (Preamble timeout), RXSFDTO (Start frame delimiter(?) timeout).
+		//Checks timeout bits in sysstatus (RXRFTO, RXPTO, RXSFDTO).
 		boolean _isReceiveTimeout() {
-			return (DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXRFTO_BIT) | DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXPTO_BIT) | DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXSFDTO_BIT));
+			return (DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXRFTO_BIT) | 
+					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXPTO_BIT) | 
+					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXSFDTO_BIT));
 		}
 
 		boolean _isClockProblem() {
@@ -1721,14 +1723,20 @@ namespace DW1000Ng {
 		_writeBytesToRegister(DRX_TUNE, DRX_SFDTOC_SUB, drx_sfdtoc, LEN_DRX_SFDTOC);
 	}
 
-	void useReceiveFrameWaitTimeoutPeriod(uint16_t timeMicroSeconds){
+	void setReceiveFrameWaitTimeoutPeriod(uint16_t timeMicroSeconds) {
 		forceTRxOff();
-		byte rx_wfto[LEN_RX_WFTO];
-		/* enable frame wait timeout bit */
-		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXWTOE_BIT, true);
-		_writeSystemConfigurationRegister();
-		DW1000NgUtils::writeValueToBytes(rx_wfto, timeMicroSeconds, LEN_RX_WFTO);
-		_writeBytesToRegister(RX_WFTO, NO_SUB, rx_wfto, LEN_RX_WFTO);
+		if (timeMicroSeconds > 0) {
+			byte rx_wfto[LEN_RX_WFTO];
+			DW1000NgUtils::writeValueToBytes(rx_wfto, timeMicroSeconds, LEN_RX_WFTO);
+			_writeBytesToRegister(RX_WFTO, NO_SUB, rx_wfto, LEN_RX_WFTO);
+			/* enable frame wait timeout bit */
+			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXWTOE_BIT, true);
+			_writeSystemConfigurationRegister();
+		} else {
+			/* disable frame wait timeout bit */
+			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXWTOE_BIT, false);
+			_writeSystemConfigurationRegister();
+		}
 	}
 
 	void applyInterruptConfiguration(interrupt_configuration_t interrupt_config) {
