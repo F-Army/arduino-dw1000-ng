@@ -66,6 +66,8 @@ float samplingRate = 0;
 byte target_eui[8];
 byte tag_shortAddress[] = {0x05, 0x00};
 
+byte self_address[2];
+
 device_configuration_t DEFAULT_CONFIG = {
     false,
     false,
@@ -101,6 +103,7 @@ void setup() {
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
 
     DW1000Ng::setDeviceAddress(1);
+    DW1000Ng::getDeviceAddress(self_address);
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:01");
 	
     DW1000Ng::setAntennaDelay(16436);
@@ -209,15 +212,19 @@ void loop() {
 
         if(DW1000NgRanging::isStandardRangingMessage(recv_data, recv_len)) {
             if (recv_data[9] == RANGING_TAG_POLL) {
-                byte address[2];
-                DW1000Ng::getDeviceAddress(address);
-                if(memcmp(address,&recv_data[5], 2) != 0)
+                /* Software frame filter */
+                if(memcmp(self_address,&recv_data[5], 2) != 0)
                     return;
+
                 // on POLL we (re-)start, so no protocol failure
                 timePollReceived = DW1000Ng::getReceiveTimestamp();
                 transmitResponseToPoll();
                 noteActivity();
             } else if (recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
+                /* Software frame filter */
+                if(memcmp(self_address,&recv_data[5], 2) != 0)
+                    return;
+
                 timePollAckSent = DW1000Ng::getTransmitTimestamp();
                 timeRangeReceived = DW1000Ng::getReceiveTimestamp();
 
