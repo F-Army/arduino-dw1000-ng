@@ -157,7 +157,7 @@ void handleReceived() {
 }
 
 void transmitBlink() {
-    byte Blink[] = {BLINK, 1, 0,0,0,0,0,0,0,0, 0x43, 0x02};
+    byte Blink[] = {BLINK, 1, 0,0,0,0,0,0,0,0, NO_BATTERY_STATUS | NO_EX_ID, TAG_LISTENING_NOW};
     DW1000Ng::getEUI(&Blink[2]);
     DW1000Ng::setTransmitData(Blink, sizeof(Blink));
     DW1000Ng::startTransmit();

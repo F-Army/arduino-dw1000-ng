@@ -50,3 +50,18 @@ constexpr byte RANGING_TAG_FINAL_SEND_TIME = 0x27;
 constexpr byte ACTIVITY_FINISHED = 0x00;
 constexpr byte RANGING_CONFIRM = 0x01;
 constexpr byte RANGING_CONTINUE = 0x02;
+
+/* BLINK Encoding Header */
+constexpr byte BATTERY_GOOD = 0x00;
+constexpr byte BATTERY_10_30_PERCENT = 0x02;
+constexpr byte BATTERY_0_10_PERCENT = 0x01;
+constexpr byte NO_BATTERY_STATUS = 0x03;
+
+constexpr byte TEMPERATURE_DATA = 0x20;
+
+constexpr byte EX_ID = 0x80;
+constexpr byte NO_EX_ID = 0x40;
+
+/* BLINK Ext Header */
+constexpr byte BLINK_RATE_AND_LISTENING = 0x01;
+constexpr byte TAG_LISTENING_NOW = 0x02;
