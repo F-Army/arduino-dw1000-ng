@@ -124,8 +124,7 @@ void setup() {
     DW1000Ng::attachReceivedHandler(handleReceived);
     
     // anchor starts in receiving mode, awaiting a ranging poll message
-    receiver();
-    noteActivity();
+    receive();
     // for first time ranging frequency computation
     rangingCountPeriod = millis();
 }
@@ -135,11 +134,15 @@ void noteActivity() {
     lastActivity = millis();
 }
 
+void receive() {
+    DW1000Ng::startReceive();
+    noteActivity();
+}
+ 
 void resetInactive() {
     // anchor listens for POLL
     DW1000Ng::forceTRxOff();
-    receiver();
-    noteActivity();
+    receive();
 }
 
 void handleSent() {
@@ -176,10 +179,6 @@ void transmitRangingConfirm() {
     DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));
     DW1000Ng::startTransmit();
 }
-
-void receiver() {
-    DW1000Ng::startReceive();
-}
  
 void loop() {
     int32_t curMillis = millis();
@@ -213,8 +212,10 @@ void loop() {
         if(DW1000NgRanging::isStandardRangingMessage(recv_data, recv_len)) {
             if (recv_data[9] == RANGING_TAG_POLL) {
                 /* Software frame filter */
-                if(memcmp(self_address,&recv_data[5], 2) != 0)
+                if(memcmp(self_address,&recv_data[5], 2) != 0) {
+                    receive();
                     return;
+                }
 
                 // on POLL we (re-)start, so no protocol failure
                 timePollReceived = DW1000Ng::getReceiveTimestamp();
@@ -222,8 +223,10 @@ void loop() {
                 noteActivity();
             } else if (recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
                 /* Software frame filter */
-                if(memcmp(self_address,&recv_data[5], 2) != 0)
+                if(memcmp(self_address,&recv_data[5], 2) != 0) {
+                    receive();
                     return;
+                }
 
                 timePollAckSent = DW1000Ng::getTransmitTimestamp();
                 timeRangeReceived = DW1000Ng::getReceiveTimestamp();
