@@ -70,6 +70,8 @@ volatile boolean sentAck = false;
 volatile boolean receivedAck = false;
 
 byte SEQ_NUMBER = 0;
+
+byte anchor_address[2];
 // timestamps to remember
 uint64_t timePollSent;
 uint64_t timePollAckReceived;
@@ -166,7 +168,8 @@ void transmitBlink() {
 }
 
 void transmitPoll() {
-    byte Poll[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0x01, 0x00, 0,0 , RANGING_TAG_POLL};
+    byte Poll[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0, 0,0 , RANGING_TAG_POLL};
+    memcpy(&Poll[5], anchor_address, 2);
     DW1000Ng::getDeviceAddress(&Poll[7]);
     DW1000Ng::setTransmitData(Poll, sizeof(Poll));
     DW1000Ng::startTransmit();
@@ -183,10 +186,11 @@ void transmitFinalMessage() {
     DW1000Ng::setDelayedTRX(futureTimeBytes);
     timeRangeSent += DW1000Ng::getTxAntennaDelay();
 
-    byte finalMessage[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0x01, 0x00, 0,0, RANGING_TAG_FINAL_RESPONSE_EMBEDDED, 
+    byte finalMessage[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0, 0,0, RANGING_TAG_FINAL_RESPONSE_EMBEDDED, 
         0,0,0,0,0,0,0,0,0,0,0,0
     };
 
+    memcpy(&finalMessage[5], anchor_address, 2);
     DW1000Ng::getDeviceAddress(&finalMessage[7]);
 
     DW1000NgUtils::writeValueToBytes(finalMessage + 10, (uint32_t) timePollSent, 4);
@@ -221,6 +225,7 @@ void loop() {
             /* RTLS standard message */
             if(recv_data[15] == RANGING_INITIATION) {
                 DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&recv_data[16], 2));
+                memcpy(anchor_address, &recv_data[13], 2);
                 transmitPoll();
                 noteActivity();
             }
