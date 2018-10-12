@@ -129,7 +129,7 @@ void setup() {
     DW1000Ng::attachSentHandler(handleSent);
     DW1000Ng::attachReceivedHandler(handleReceived);
     // anchor starts by transmitting a POLL message
-    transmitPoll();
+    transmitBlink();
     noteActivity();
 }
 
@@ -141,7 +141,7 @@ void noteActivity() {
 void resetInactive() {
     // tag returns to Idle and sends POLL
     DW1000Ng::forceTRxOff();
-    transmitPoll();
+    transmitBlink();
     noteActivity();
 }
 
@@ -153,11 +153,18 @@ void handleReceived() {
     receivedAck = true;
 }
 
+void transmitBlink() {
+    byte Blink[] = {0xC5, 1, 0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF, 0x43, 0x02};
+    DW1000Ng::setTransmitData(Blink, sizeof(Blink));
+    DW1000Ng::startTransmit();
+}
+
 void transmitPoll() {
     byte Poll[] = {0x41, 0x88, 0x01, 0x9A, 0x60, 0x01, 0x00, 0x04, 0x00, 0x21};
     DW1000Ng::setTransmitData(Poll, sizeof(Poll));
     DW1000Ng::startTransmit();
 }
+
 
 void transmitFinalMessage() {
     /* Calculation of future time */
@@ -182,7 +189,7 @@ void transmitFinalMessage() {
 
 boolean isStandardRangingMessage(byte data[], size_t size) {
     
-    if(size < 9 || !(data[0] == 0x41 && data[1] == 0x88 && data[3] == 0x9A && data[4] == 0x60)) {
+    if(size < 9 || !(data[0] == 0x41 && (data[1] == 0x88 || data[1] == 0x8C) && data[3] == 0x9A && data[4] == 0x60)) {
         return false;
     }
 
@@ -212,6 +219,11 @@ void loop() {
         
         if(isStandardRangingMessage(recv_data, recv_len)) {
             /* RTLS standard message */
+            if(recv_data[15] == 0x20) {
+                transmitPoll();
+                noteActivity();
+            }
+
             if (recv_data[9] == 0x10 && recv_data[10] == 0x02) {
                 /* Received Response to poll */
                 timePollSent = DW1000Ng::getTransmitTimestamp();

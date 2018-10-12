@@ -166,6 +166,12 @@ void handleReceived() {
     receivedAck = true;
 }
 
+void transmitRangingInitiation() {
+    byte RangingInitiation[] = {0x41, 0x8C, 0x01, 0x9A, 0x60, 0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF, 0x01, 0x00, 0x20, 0x04, 0x00};
+    DW1000Ng::setTransmitData(RangingInitiation, sizeof(RangingInitiation));
+    DW1000Ng::startTransmit();
+}
+
 void transmitPollAck() {
     /*Function code 0x10, Activity code 0x02 */
     byte pollAck[] = {0x41, 0x88, 0x01, 0x9A, 0x60, 0x04, 0x00, 0x01, 0x00, 0x10, 0x02, 0x00, 0x00};
@@ -192,7 +198,7 @@ boolean isStandardRangingMessage(byte data[], size_t size) {
 
     return true;
 }
-
+ 
 void loop() {
     int32_t curMillis = millis();
     if (!sentAck && !receivedAck) {
@@ -214,6 +220,12 @@ void loop() {
         size_t recv_len = DW1000Ng::getReceivedDataLength();
         byte recv_data[recv_len];
         DW1000Ng::getReceivedData(recv_data, recv_len);
+
+        if(recv_data[0] == 0xC5) {
+            /* Is blink */
+            transmitRangingInitiation();
+            noteActivity();
+        }
 
         if(isStandardRangingMessage(recv_data, recv_len)) {
             if (recv_data[9] == 0x21) {
