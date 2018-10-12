@@ -196,15 +196,6 @@ void transmitRangingConfirm() {
 void receiver() {
     DW1000Ng::startReceive();
 }
-
-boolean isStandardRangingMessage(byte data[], size_t size) {
-    
-    if(size < 9 || !(data[0] == 0x41 && data[1] == 0x88 && data[3] == 0x9A && data[4] == 0x60)) {
-        return false;
-    }
-
-    return true;
-}
  
 void loop() {
     int32_t curMillis = millis();
@@ -235,7 +226,7 @@ void loop() {
             noteActivity();
         }
 
-        if(isStandardRangingMessage(recv_data, recv_len)) {
+        if(DW1000NgRanging::isStandardRangingMessage(recv_data, recv_len)) {
             if (recv_data[9] == 0x21) {
                 // on POLL we (re-)start, so no protocol failure
                 timePollReceived = DW1000Ng::getReceiveTimestamp();

@@ -56,6 +56,7 @@
 #include <DW1000NgUtils.hpp>
 #include <DW1000NgTime.hpp>
 #include <DW1000NgConstants.hpp>
+#include <DW1000NgRanging.hpp>
 
 // connection pins
 const uint8_t PIN_RST = 9; // reset pin
@@ -192,15 +193,6 @@ void transmitFinalMessage() {
     DW1000Ng::startTransmit(TransmitMode::DELAYED);
 }
 
-boolean isStandardRangingMessage(byte data[], size_t size) {
-    
-    if(size < 9 || !(data[0] == 0x41 && (data[1] == 0x88 || data[1] == 0x8C) && data[3] == 0x9A && data[4] == 0x60)) {
-        return false;
-    }
-
-    return true;
-}
-
 void loop() {
     if (!sentAck && !receivedAck) {
         // check if inactive
@@ -222,7 +214,7 @@ void loop() {
         byte recv_data[recv_len];
         DW1000Ng::getReceivedData(recv_data, recv_len);
         
-        if(isStandardRangingMessage(recv_data, recv_len)) {
+        if(DW1000NgRanging::isStandardRangingMessage(recv_data, recv_len)) {
             /* RTLS standard message */
             if(recv_data[15] == 0x20) {
                 DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&recv_data[16], 2));

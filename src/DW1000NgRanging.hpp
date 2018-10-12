@@ -40,4 +40,6 @@ namespace DW1000NgRanging {
     //TODO Symmetric
 
     double correctRange(double range);
+
+    boolean isStandardRangingMessage(byte data[], size_t size);
 }
