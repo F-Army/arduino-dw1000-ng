@@ -1113,7 +1113,6 @@ namespace DW1000Ng {
 		}
 
 		void _clearTransmitStatus() {
-			// clear latched TX bits
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, AAT_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, TXFRB_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, TXPRS_BIT, true);
@@ -1179,7 +1178,6 @@ namespace DW1000Ng {
 					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT));
 		}
 
-		//Checks timeout bits in sysstatus (RXRFTO, RXPTO, RXSFDTO).
 		boolean _isReceiveTimeout() {
 			return (DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXRFTO_BIT) || 
 					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXPTO_BIT) || 
