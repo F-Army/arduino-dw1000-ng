@@ -164,7 +164,7 @@ void transmitBlink() {
 }
 
 void transmitPoll() {
-    byte Poll[] = {DATA, SHORT_SRC_AND_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0x01, 0x00, 0,0 , 0x21};
+    byte Poll[] = {DATA, SHORT_SRC_AND_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0x01, 0x00, 0,0 , RANGING_TAG_POLL};
     DW1000Ng::getDeviceAddress(&Poll[7]);
     DW1000Ng::setTransmitData(Poll, sizeof(Poll));
     DW1000Ng::startTransmit();
@@ -181,7 +181,7 @@ void transmitFinalMessage() {
     DW1000Ng::setDelayedTRX(futureTimeBytes);
     timeRangeSent += DW1000Ng::getTxAntennaDelay();
 
-    byte finalMessage[] = {DATA, SHORT_SRC_AND_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0x01, 0x00, 0,0, 0x23, 
+    byte finalMessage[] = {DATA, SHORT_SRC_AND_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0x01, 0x00, 0,0, RANGING_TAG_FINAL_RESPONSE_EMBEDDED, 
         0,0,0,0,0,0,0,0,0,0,0,0
     };
 
@@ -217,19 +217,19 @@ void loop() {
         
         if(DW1000NgRanging::isStandardRangingMessage(recv_data, recv_len)) {
             /* RTLS standard message */
-            if(recv_data[15] == 0x20) {
+            if(recv_data[15] == RANGING_INITIATION) {
                 DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&recv_data[16], 2));
                 transmitPoll();
                 noteActivity();
             }
 
-            if (recv_data[9] == 0x10 && recv_data[10] == 0x02) {
+            if (recv_data[9] == ACTIVITY_CONTROL && recv_data[10] == 0x02) {
                 /* Received Response to poll */
                 timePollSent = DW1000Ng::getTransmitTimestamp();
                 timePollAckReceived = DW1000Ng::getReceiveTimestamp();
                 transmitFinalMessage();
                 noteActivity();
-            } else if (recv_data[9] == 0x10 && recv_data[10] == 0x01) {
+            } else if (recv_data[9] == ACTIVITY_CONTROL && recv_data[10] == 0x01) {
                 /* Received ranging confirm */
                 transmitPoll();
                 noteActivity();

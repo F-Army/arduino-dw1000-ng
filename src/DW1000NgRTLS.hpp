@@ -37,3 +37,11 @@ constexpr byte LONG_SRC_SHORT_DEST = 0xC8;
 /* Application ID */
 constexpr byte RTLS_APP_ID_LOW = 0x9A;
 constexpr byte RTLS_APP_ID_HIGH = 0x60;
+
+/* Function code */
+constexpr byte ACTIVITY_CONTROL = 0x10;
+constexpr byte RANGING_INITIATION = 0x20;
+constexpr byte RANGING_TAG_POLL = 0x21;
+constexpr byte RANGING_TAG_FINAL_RESPONSE_EMBEDDED = 0x23;
+constexpr byte RANGING_TAG_FINAL_RESPONSE_NO_EMBEDDED = 0x25;
+constexpr byte RANGING_TAG_FINAL_SEND_TIME = 0x27;

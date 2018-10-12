@@ -171,7 +171,7 @@ void handleReceived() {
 }
 
 void transmitRangingInitiation() {
-    byte RangingInitiation[] = {DATA, SHORT_SRC_LONG_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0,0,0,0,0,0,0, 0x01, 0x00, 0x20, 0,0};
+    byte RangingInitiation[] = {DATA, SHORT_SRC_LONG_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0,0,0,0,0,0,0, 0x01, 0x00, RANGING_INITIATION, 0,0};
     memcpy(&RangingInitiation[16], tag_shortAddress, 2);
     memcpy(&RangingInitiation[5], target_eui, 8);
     DW1000Ng::setTransmitData(RangingInitiation, sizeof(RangingInitiation));
@@ -179,16 +179,14 @@ void transmitRangingInitiation() {
 }
 
 void transmitPollAck() {
-    /*Function code 0x10, Activity code 0x02 */
-    byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0 , 0x01, 0x00, 0x10, 0x02, 0x00, 0x00};
+    byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0 , 0x01, 0x00, ACTIVITY_CONTROL, 0x02, 0x00, 0x00};
     memcpy(&pollAck[5], tag_shortAddress, 2);
     DW1000Ng::setTransmitData(pollAck, sizeof(pollAck));
     DW1000Ng::startTransmit();
 }
 
 void transmitRangingConfirm() {
-    /*Function code 0x10, Activity code 0x01 */
-    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0, 0x01, 0x00, 0x10, 0x01, 0x01, 0x00};
+    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0, 0x01, 0x00, ACTIVITY_CONTROL, 0x01, 0x01, 0x00};
     memcpy(&rangingConfirm[5], tag_shortAddress, 2);
     DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));
     DW1000Ng::startTransmit();
@@ -228,12 +226,12 @@ void loop() {
         }
 
         if(DW1000NgRanging::isStandardRangingMessage(recv_data, recv_len)) {
-            if (recv_data[9] == 0x21) {
+            if (recv_data[9] == RANGING_TAG_POLL) {
                 // on POLL we (re-)start, so no protocol failure
                 timePollReceived = DW1000Ng::getReceiveTimestamp();
                 transmitPollAck();
                 noteActivity();
-            } else if (recv_data[9] == 0x23) {
+            } else if (recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
                 timePollAckSent = DW1000Ng::getTransmitTimestamp();
                 timeRangeReceived = DW1000Ng::getReceiveTimestamp();
 
