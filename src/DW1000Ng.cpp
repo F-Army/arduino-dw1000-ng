@@ -103,6 +103,8 @@ namespace DW1000Ng {
 		uint16_t		_antennaTxDelay = 0;
 		uint16_t		_antennaRxDelay = 0;
 
+		byte _transmitSequenceNumber = 0;
+
 		/* SPI relative variables */
 		const SPISettings  _fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
 		const SPISettings  _slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
@@ -1551,6 +1553,13 @@ namespace DW1000Ng {
 		_writeNetworkIdAndDeviceAddress();
 	}
 
+	void getDeviceAddress(byte address[]) {
+		_readNetworkIdAndDeviceAddress();
+		address[0] = _networkAndAddress[0];
+		address[1] = _networkAndAddress[1];
+	}
+
+
 	void setEUI(char eui[]) {
 		byte eui_byte[LEN_EUI];
 		DW1000NgUtils::convertToByte(eui, eui_byte);
@@ -1567,16 +1576,20 @@ namespace DW1000Ng {
 		_writeBytesToRegister(EUI, NO_SUB, reverseEUI, LEN_EUI);
 	}
 
-	void getTemperature(float& temp) {
-		_vbatAndTempSteps();
-		byte sar_ltemp = 0; _readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
-		temp = (sar_ltemp - _tmeas23C) * 1.14f + 23.0f;
+	void getEUI(byte eui[]) {
+		_readBytes(EUI,NO_SUB, eui, LEN_EUI);
 	}
 
-	void getBatteryVoltage(float& vbat) {
+	float getTemperature() {
+		_vbatAndTempSteps();
+		byte sar_ltemp = 0; _readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
+		return (sar_ltemp - _tmeas23C) * 1.14f + 23.0f;
+	}
+
+	float getBatteryVoltage() {
 		_vbatAndTempSteps();
 		byte sar_lvbat = 0; _readBytes(TX_CAL, 0x03, &sar_lvbat, 1);
-		vbat = (sar_lvbat - _vmeas3v3) / 173.0f + 3.3f;
+		return (sar_lvbat - _vmeas3v3) / 173.0f + 3.3f;
 	}
 
 	void getTemperatureAndBatteryVoltage(float& temp, float& vbat) {
@@ -1666,6 +1679,13 @@ namespace DW1000Ng {
 
 		DW1000NgUtils::setBit(_sysctrl, LEN_SYS_CTRL, TXSTRT_BIT, true);
 		_writeBytesToRegister(SYS_CTRL, NO_SUB, _sysctrl, LEN_SYS_CTRL);
+		
+		/* Keeps track of messages sent, useful when encoding frames as of standard ISO/IEC_24730-62 */
+		_transmitSequenceNumber++;
+	}
+
+	byte getTransmitSequenceNumber() {
+		return _transmitSequenceNumber;
 	}
 
 	void setInterruptPolarity(boolean val) {

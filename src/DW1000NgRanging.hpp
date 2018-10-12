@@ -25,8 +25,41 @@
 #pragma once
 
 #include <Arduino.h>
+#include "DW1000NgRTLS.hpp"
+
+enum class rangingFrameType {
+    RANGING_INITIATION,
+    POLL,
+    RESPONSE_TO_POLL,
+    FINAL_MESSAGE,
+    FINAL_MESSAGE_NO_EMBEDDING,
+    FINAL_SEND_TIME_MESSAGE,
+    RANGING_CONFIRM,
+    ACTIVITY_FINISHED,
+    NO_RANGING
+};
+
+enum class rangingConfirmActivity : byte {
+    FINISHED,
+    RANGING_CONFIRM
+};
+
+typedef struct ranging_confirm_settings_t {
+    rangingConfirmActivity activity;
+    uint16_t value;
+} ranging_confirm_settings_t;
 
 namespace DW1000NgRanging {
+
+    void encodeRangingInitiation(byte source[],addressType src_len,byte destination[],addressType dest_len, byte shortAddress[]);
+    void encodePoll(byte source[], addressType src_len, byte destination[], addressType dest_len);
+    void encodeResponseToPoll(byte source[], addressType src_len, byte destination[], addressType dest_len);
+    void encodeFinalMessage(byte source[], addressType src_len, byte destination[], addressType dest_len, uint16_t replyDelayTimeUS);
+    void encodeFinalMessageNoEmbedding(byte source[], addressType src_len, byte destination[], addressType dest_len);
+    void encodeFinalSendTimeMessage(byte source[], addressType src_len, byte destination[], addressType dest_len);
+    void encodeRangingConfirm(byte source[], addressType src_len, byte destination[], addressType dest_len, ranging_confirm_settings_t &settings);
+
+    rangingFrameType getRangingFrameType(byte frame[]);
 
     /* asymmetric two-way ranging (more computation intense, less error prone) */
     double computeRangeAsymmetric(    
@@ -37,7 +70,6 @@ namespace DW1000NgRanging {
                                         uint64_t timeRangeSent,
                                         uint64_t timeRangeReceived 
                                  );
-    //TODO Symmetric
-
+    
     double correctRange(double range);
 }

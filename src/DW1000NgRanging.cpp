@@ -25,10 +25,145 @@
 #include <Arduino.h>
 #include "DW1000Ng.hpp"
 #include "DW1000NgConstants.hpp"
+#include "DW1000NgUtils.hpp"
 #include "DW1000NgRanging.hpp"
 #include "DW1000NgConstants.hpp"
+#include "DW1000NgTime.hpp"
+
+namespace {
+    byte PollTxTime[4];
+    byte RespRxTime[4];
+}
 
 namespace DW1000NgRanging {
+
+    void encodeRangingInitiation(byte source[],addressType src_len,byte destination[],addressType dest_len, byte shortAddress[]) {
+        message_data_settings_t ranging_initiation {
+            0x20,
+            shortAddress,
+            2
+        };
+
+        DW1000Ng::encodeData(source, src_len, destination, dest_len, ranging_initiation);
+
+    }
+
+    void encodePoll(byte source[], addressType src_len, byte destination[], addressType dest_len) {
+        message_data_settings_t poll {
+            0x21,
+            nullptr,
+            0
+        };
+
+        DW1000Ng::encodeData(source, src_len, destination, dest_len, poll);
+    }
+
+    void encodeResponseToPoll(byte source[], addressType src_len, byte destination[], addressType dest_len) {
+        byte data[3] = {0x02, 0, 0};
+        message_data_settings_t pollAck {
+            0x10,
+            data,
+            sizeof(data)
+        };
+
+        DW1000Ng::encodeData(source, src_len, destination, dest_len, pollAck);
+    }
+
+    void encodeFinalMessage(byte source[], addressType src_len, byte destination[], addressType dest_len, uint16_t replyDelayTimeUS) {
+        /* Gets poll send time and response to poll time */
+        DW1000NgUtils::writeValueToBytes(PollTxTime, static_cast<uint32_t>(DW1000Ng::getTransmitTimestamp()), 4);
+        DW1000NgUtils::writeValueToBytes(RespRxTime, static_cast<uint32_t>(DW1000Ng::getReceiveTimestamp()), 4);
+
+        byte embedFinalTxTime[LENGTH_TIMESTAMP];
+
+	    uint64_t timeRangeSent = DW1000Ng::getSystemTimestamp();
+	    timeRangeSent += DW1000NgTime::microsecondsToUWBTime(replyDelayTimeUS);
+        DW1000NgUtils::writeValueToBytes(embedFinalTxTime, timeRangeSent, LENGTH_TIMESTAMP);
+        DW1000Ng::setDelayedTRX(embedFinalTxTime);
+        timeRangeSent += DW1000Ng::getTxAntennaDelay();
+        DW1000NgUtils::writeValueToBytes(embedFinalTxTime, static_cast<uint32_t>(timeRangeSent), 4);
+
+        byte data[12];
+        memcpy(data, PollTxTime, 4);
+        memcpy(&data[4], RespRxTime, 4);
+        memcpy(&data[8], embedFinalTxTime, 4);
+
+        message_data_settings_t finalMessage {
+            0x23,
+            data,
+            sizeof(data)
+        };
+
+        DW1000Ng::encodeData(source, src_len, destination, dest_len, finalMessage);
+    }
+
+    void encodeFinalMessageNoEmbedding(byte source[], addressType src_len, byte destination[], addressType dest_len) {
+        byte data[8];
+        memcpy(data, PollTxTime, 4);
+        memcpy(&data[4], RespRxTime, 4);
+
+        message_data_settings_t finalMessageNoEmbedding {
+            0x25,
+            data,
+            sizeof(data)
+        };
+
+        DW1000Ng::encodeData(source, src_len, destination, dest_len, finalMessageNoEmbedding);
+    }
+
+    void encodeFinalSendTimeMessage(byte source[], addressType src_len, byte destination[], addressType dest_len) {
+        /* It is assumed there is no message in between as of standard ISO/IEC 24730-62_2013 */
+        byte FinalTxTime[4];
+        DW1000NgUtils::writeValueToBytes(FinalTxTime, static_cast<uint32_t>(DW1000Ng::getTransmitTimestamp()), 4);
+
+        message_data_settings_t finalSendTimeMessage {
+            0x27,
+            FinalTxTime,
+            sizeof(FinalTxTime)
+        };
+
+        DW1000Ng::encodeData(source, src_len, destination, dest_len, finalSendTimeMessage);
+    }
+
+    void encodeRangingConfirm(byte source[], addressType src_len, byte destination[], addressType dest_len, ranging_confirm_settings_t &settings) {
+        byte data[3] = {static_cast<byte>(settings.activity), static_cast<byte>(settings.value & 0xFF), static_cast<byte>((settings.value >> 8) & 0xFF)};
+        message_data_settings_t rangingConfirm {
+            0x10,
+            data,
+            sizeof(data)
+        };
+
+        DW1000Ng::encodeData(source, src_len, destination, dest_len, rangingConfirm);
+    }
+
+    rangingFrameType getRangingFrameType(byte frame[]) {
+        /* It is assumed the frame is a frame data */
+        size_t FCODE_OFFSET = 0;
+        if((frame[1] & 0x0C) == 0x0C) FCODE_OFFSET += 6;
+        if((frame[1] & 0xC0) == 0xC0) FCODE_OFFSET += 6;
+
+        if(frame[9+FCODE_OFFSET] == 0x10) {
+            /* Activity control frame */
+            switch(frame[10+FCODE_OFFSET]) {
+                case 0x00: return rangingFrameType::ACTIVITY_FINISHED;
+                case 0x01: return rangingFrameType::RANGING_CONFIRM;
+                case 0x02: return rangingFrameType::RESPONSE_TO_POLL;
+                default: return rangingFrameType::NO_RANGING;
+            }
+        } else if(frame[9+FCODE_OFFSET] == 0x20) {
+            return rangingFrameType::RANGING_INITIATION;
+        } else if(frame[9+FCODE_OFFSET] == 0x21) {
+            return rangingFrameType::POLL;
+        } else if(frame[9+FCODE_OFFSET] == 0x23) {
+            return rangingFrameType::FINAL_MESSAGE;
+        } else if(frame[9+FCODE_OFFSET] == 0x25) {
+            return rangingFrameType::FINAL_MESSAGE_NO_EMBEDDING;
+        } else if(frame[9+FCODE_OFFSET] == 0x27) {
+            return rangingFrameType::FINAL_SEND_TIME_MESSAGE;
+        } else {
+            return rangingFrameType::NO_RANGING;
+        }
+    }
 
     /* asymmetric two-way ranging (more computation intense, less error prone) */
     double computeRangeAsymmetric(    

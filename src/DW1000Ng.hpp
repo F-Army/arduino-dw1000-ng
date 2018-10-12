@@ -133,10 +133,14 @@ namespace DW1000Ng {
 	@param[in] val An arbitrary numeric device address.
 	*/
 	void setDeviceAddress(uint16_t val);
+
+	void getDeviceAddress(byte address[]);
 	// TODO MAC and filters
 	
 	void setEUI(char eui[]);
 	void setEUI(byte eui[]);
+
+	void getEUI(byte eui[]);
 
 	void setTXPower(byte power[]);
 	void setTXPower(int32_t power);
@@ -231,10 +235,13 @@ namespace DW1000Ng {
 	
 	// transmission state
 	void startTransmit(TransmitMode mode = TransmitMode::IMMEDIATE);
+
+	/* Gets the current transmission sequence number that should be included inside the transmission frame */
+	byte getTransmitSequenceNumber();
 	
 	/* host-initiated reading of temperature and battery voltage */
-	void getTemperature(float& temp);
-	void getBatteryVoltage(float& vbat);
+	float getTemperature();
+	float getBatteryVoltage();
 	void getTemperatureAndBatteryVoltage(float& temp, float& vbat);
 
 	/* Allow MAC frame filtering */
