@@ -133,6 +133,8 @@ namespace DW1000Ng {
 	@param[in] val An arbitrary numeric device address.
 	*/
 	void setDeviceAddress(uint16_t val);
+
+	void getDeviceAddress(byte address[]);
 	// TODO MAC and filters
 	
 	void setEUI(char eui[]);

@@ -162,7 +162,8 @@ void transmitBlink() {
 }
 
 void transmitPoll() {
-    byte Poll[] = {0x41, 0x88, 0x01, 0x9A, 0x60, 0x01, 0x00, 0x04, 0x00, 0x21};
+    byte Poll[] = {0x41, 0x88, 0x01, 0x9A, 0x60, 0x01, 0x00, 0,0 , 0x21};
+    DW1000Ng::getDeviceAddress(&Poll[7]);
     DW1000Ng::setTransmitData(Poll, sizeof(Poll));
     DW1000Ng::startTransmit();
 }
@@ -178,9 +179,11 @@ void transmitFinalMessage() {
     DW1000Ng::setDelayedTRX(futureTimeBytes);
     timeRangeSent += DW1000Ng::getTxAntennaDelay();
 
-    byte finalMessage[] = {0x41, 0x88, 0x01, 0x9A, 0x60, 0x01, 0x00, 0x04, 0x00, 0x23, 
+    byte finalMessage[] = {0x41, 0x88, 0x01, 0x9A, 0x60, 0x01, 0x00, 0,0, 0x23, 
         0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
     };
+
+    DW1000Ng::getDeviceAddress(&finalMessage[7]);
 
     DW1000NgUtils::writeValueToBytes(finalMessage + 10, (uint32_t) timePollSent, 4);
     DW1000NgUtils::writeValueToBytes(finalMessage + 14, (uint32_t) timePollAckReceived, 4);
@@ -222,6 +225,7 @@ void loop() {
         if(isStandardRangingMessage(recv_data, recv_len)) {
             /* RTLS standard message */
             if(recv_data[15] == 0x20) {
+                DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&recv_data[16], 2));
                 transmitPoll();
                 noteActivity();
             }
