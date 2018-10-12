@@ -109,8 +109,9 @@ void setup() {
     // general configuration
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
+    
+    DW1000Ng::setEUI("FF:FF:FF:FF:FF:FF:FF:FF");
 
-    DW1000Ng::setNetworkId(10);
     
     DW1000Ng::setAntennaDelay(16436);
     
@@ -154,7 +155,8 @@ void handleReceived() {
 }
 
 void transmitBlink() {
-    byte Blink[] = {0xC5, 1, 0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF, 0x43, 0x02};
+    byte Blink[] = {0xC5, 1, 0,0,0,0,0,0,0,0, 0x43, 0x02};
+    DW1000Ng::getEUI(&Blink[2]);
     DW1000Ng::setTransmitData(Blink, sizeof(Blink));
     DW1000Ng::startTransmit();
 }

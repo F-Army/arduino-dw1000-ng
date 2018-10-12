@@ -84,6 +84,8 @@ uint16_t successRangingCount = 0;
 uint32_t rangingCountPeriod = 0;
 float samplingRate = 0;
 
+byte target_eui[8];
+
 device_configuration_t DEFAULT_CONFIG = {
     false,
     false,
@@ -167,7 +169,8 @@ void handleReceived() {
 }
 
 void transmitRangingInitiation() {
-    byte RangingInitiation[] = {0x41, 0x8C, 0x01, 0x9A, 0x60, 0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF, 0x01, 0x00, 0x20, 0x04, 0x00};
+    byte RangingInitiation[] = {0x41, 0x8C, 0x01, 0x9A, 0x60, 0,0,0,0,0,0,0,0, 0x01, 0x00, 0x20, 0x04, 0x00};
+    memcpy(&RangingInitiation[5], target_eui, 8);
     DW1000Ng::setTransmitData(RangingInitiation, sizeof(RangingInitiation));
     DW1000Ng::startTransmit();
 }
@@ -223,6 +226,7 @@ void loop() {
 
         if(recv_data[0] == 0xC5) {
             /* Is blink */
+            memcpy(target_eui, &recv_data[2], 8);
             transmitRangingInitiation();
             noteActivity();
         }
