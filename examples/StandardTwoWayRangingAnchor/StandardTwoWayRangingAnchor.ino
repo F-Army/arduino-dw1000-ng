@@ -209,6 +209,10 @@ void loop() {
 
         if(DW1000NgRanging::isStandardRangingMessage(recv_data, recv_len)) {
             if (recv_data[9] == RANGING_TAG_POLL) {
+                byte address[2];
+                DW1000Ng::getDeviceAddress(address);
+                if(memcmp(address,&recv_data[5], 2) != 0)
+                    return;
                 // on POLL we (re-)start, so no protocol failure
                 timePollReceived = DW1000Ng::getReceiveTimestamp();
                 transmitResponseToPoll();
