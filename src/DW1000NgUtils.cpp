@@ -102,9 +102,8 @@ namespace DW1000NgUtils {
 	}
 
 	void writeValueToBytes(byte data[], uint64_t val, uint8_t n) {
-		uint8_t i;
-		for(i = 0; i < n; i++) {
-			data[i] = ((val >> (i*8)) & 0xFF); // TODO bad types - signed unsigned problem
+		for(auto i = 0; i < n; i++) {
+			data[i] = ((val >> (i*8)) & 0xFF);
 		}
 	}
 

@@ -1744,11 +1744,17 @@ namespace DW1000Ng {
 		_writeSystemEventMaskRegister();
 	}
 
-	void setWait4Response(uint16_t timeUS) {
+	void setWait4Response(uint32_t timeMicroSeconds) {
+		_wait4resp = timeMicroSeconds == 0 ? false : true;
+
+		/* Check if it overflows 20 bits */
+		if(timeMicroSeconds > 1048575)
+			timeMicroSeconds = 1048575;
+
 		byte W4R_TIME[LEN_ACK_RESP_T_W4R_TIME_SUB];
-		DW1000NgUtils::writeValueToBytes(W4R_TIME, timeUS, LEN_ACK_RESP_T_W4R_TIME_SUB);
+		DW1000NgUtils::writeValueToBytes(W4R_TIME, timeMicroSeconds, LEN_ACK_RESP_T_W4R_TIME_SUB);
+		W4R_TIME[2] &= 0x0F; 
 		_writeBytesToRegister(ACK_RESP_T, ACK_RESP_T_W4R_TIME_SUB, W4R_TIME, LEN_ACK_RESP_T_W4R_TIME_SUB);
-		_wait4resp = true;
 	}
 
 	void setTXPower(byte power[]) {
