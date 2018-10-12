@@ -27,3 +27,4 @@
 #include <Arduino.h>
 
 constexpr byte BLINK = 0xC5;
+constexpr byte DATA = 0x41;
