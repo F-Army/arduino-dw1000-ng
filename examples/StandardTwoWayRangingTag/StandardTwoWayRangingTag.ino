@@ -214,6 +214,7 @@ void loop() {
                 noteActivity();
             } else if (recv_data[9] == ACTIVITY_CONTROL && recv_data[10] == RANGING_CONFIRM) {
                 /* Received ranging confirm */
+                memcpy(anchor_address, &recv_data[11], 2);
                 transmitPoll();
                 noteActivity();
             }
