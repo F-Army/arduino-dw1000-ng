@@ -93,9 +93,8 @@ void setup() {
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
     
-    DW1000Ng::setEUI("FF:FF:FF:FF:FF:FF:FF:FF");
+    DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
 
-    
     DW1000Ng::setAntennaDelay(16436);
     
     Serial.println(F("Committed configuration ..."));

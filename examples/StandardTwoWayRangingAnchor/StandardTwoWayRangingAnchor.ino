@@ -103,6 +103,7 @@ void setup() {
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
 
     DW1000Ng::setDeviceAddress(1);
+    DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:01");
 	
     DW1000Ng::setAntennaDelay(16436);
     
