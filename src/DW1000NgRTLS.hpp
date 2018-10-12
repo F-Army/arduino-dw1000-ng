@@ -33,3 +33,7 @@ constexpr byte SHORT_SRC_AND_DEST = 0x88;
 constexpr byte LONG_SRC_AND_DEST = 0xCC;
 constexpr byte SHORT_SRC_LONG_DEST = 0x8C;
 constexpr byte LONG_SRC_SHORT_DEST = 0xC8;
+
+/* Application ID */
+constexpr byte RTLS_APP_ID_LOW = 0x9A;
+constexpr byte RTLS_APP_ID_HIGH = 0x60;

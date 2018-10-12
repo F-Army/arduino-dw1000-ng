@@ -164,7 +164,7 @@ void transmitBlink() {
 }
 
 void transmitPoll() {
-    byte Poll[] = {DATA, SHORT_SRC_AND_DEST, 0x01, 0x9A, 0x60, 0x01, 0x00, 0,0 , 0x21};
+    byte Poll[] = {DATA, SHORT_SRC_AND_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0x01, 0x00, 0,0 , 0x21};
     DW1000Ng::getDeviceAddress(&Poll[7]);
     DW1000Ng::setTransmitData(Poll, sizeof(Poll));
     DW1000Ng::startTransmit();
@@ -181,7 +181,7 @@ void transmitFinalMessage() {
     DW1000Ng::setDelayedTRX(futureTimeBytes);
     timeRangeSent += DW1000Ng::getTxAntennaDelay();
 
-    byte finalMessage[] = {DATA, SHORT_SRC_AND_DEST, 0x01, 0x9A, 0x60, 0x01, 0x00, 0,0, 0x23, 
+    byte finalMessage[] = {DATA, SHORT_SRC_AND_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0x01, 0x00, 0,0, 0x23, 
         0,0,0,0,0,0,0,0,0,0,0,0
     };
 
