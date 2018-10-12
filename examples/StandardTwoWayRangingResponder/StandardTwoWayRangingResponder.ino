@@ -183,7 +183,7 @@ void transmitRangingInitiation() {
     DW1000Ng::startTransmit();
 }
 
-void transmitPollAck() {
+void transmitResponseToPoll() {
     byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONTINUE, 0x00, 0x00};
     memcpy(&pollAck[5], tag_shortAddress, 2);
     memcpy(&pollAck[7], anchor_shortAddress, 2);
@@ -236,7 +236,7 @@ void loop() {
             if (recv_data[9] == RANGING_TAG_POLL) {
                 // on POLL we (re-)start, so no protocol failure
                 timePollReceived = DW1000Ng::getReceiveTimestamp();
-                transmitPollAck();
+                transmitResponseToPoll();
                 noteActivity();
             } else if (recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
                 timePollAckSent = DW1000Ng::getTransmitTimestamp();
