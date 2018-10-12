@@ -57,6 +57,7 @@
 #include <DW1000NgTime.hpp>
 #include <DW1000NgConstants.hpp>
 #include <DW1000NgRanging.hpp>
+#include <DW1000NgRTLS.hpp>
 
 // connection pins
 const uint8_t PIN_RST = 9; // reset pin
@@ -156,7 +157,7 @@ void handleReceived() {
 }
 
 void transmitBlink() {
-    byte Blink[] = {0xC5, 1, 0,0,0,0,0,0,0,0, 0x43, 0x02};
+    byte Blink[] = {BLINK, 1, 0,0,0,0,0,0,0,0, 0x43, 0x02};
     DW1000Ng::getEUI(&Blink[2]);
     DW1000Ng::setTransmitData(Blink, sizeof(Blink));
     DW1000Ng::startTransmit();

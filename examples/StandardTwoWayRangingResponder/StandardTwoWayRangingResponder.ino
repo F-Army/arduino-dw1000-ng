@@ -56,6 +56,7 @@
 #include <DW1000Ng.hpp>
 #include <DW1000NgUtils.hpp>
 #include <DW1000NgRanging.hpp>
+#include <DW1000NgRTLS.hpp>
 
 // connection pins
 const uint8_t PIN_RST = 9; // reset pin
@@ -219,7 +220,7 @@ void loop() {
         byte recv_data[recv_len];
         DW1000Ng::getReceivedData(recv_data, recv_len);
 
-        if(recv_data[0] == 0xC5) {
+        if(recv_data[0] == BLINK) {
             /* Is blink */
             memcpy(target_eui, &recv_data[2], 8);
             transmitRangingInitiation();
