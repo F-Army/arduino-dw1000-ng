@@ -1173,15 +1173,10 @@ namespace DW1000Ng {
 		}
 
 		boolean _isReceiveFailed() {
-			boolean ldeErr, rxCRCErr, rxHeaderErr, rxDecodeErr;
-			ldeErr      = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT);
-			rxCRCErr    = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXFCE_BIT);
-			rxHeaderErr = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXPHE_BIT);
-			rxDecodeErr = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT);
-			if(ldeErr || rxCRCErr || rxHeaderErr || rxDecodeErr) {
-				return true;
-			}
-			return false;
+			return (DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT) ||
+					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXFCE_BIT) ||
+					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXPHE_BIT) ||
+					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT));
 		}
 
 		//Checks timeout bits in sysstatus (RXRFTO, RXPTO, RXSFDTO).
