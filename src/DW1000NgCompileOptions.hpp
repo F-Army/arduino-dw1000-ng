@@ -54,7 +54,7 @@
  * Adds debug functionalities
  * 
 */
-#define DW1000NG_DEBUG true
+#define DW1000NG_DEBUG false
 
 /**
  * Optimizes code for the DWM1000 Module

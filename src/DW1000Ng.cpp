@@ -1186,19 +1186,14 @@ namespace DW1000Ng {
 
 		//Checks timeout bits in sysstatus (RXRFTO, RXPTO, RXSFDTO).
 		boolean _isReceiveTimeout() {
-			return (DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXRFTO_BIT) | 
-					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXPTO_BIT) | 
+			return (DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXRFTO_BIT) || 
+					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXPTO_BIT) || 
 					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXSFDTO_BIT));
 		}
 
 		boolean _isClockProblem() {
-			boolean clkllErr, rfllErr;
-			clkllErr = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, CLKPLL_LL_BIT);
-			rfllErr  = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RFPLL_LL_BIT);
-			if(clkllErr || rfllErr) {
-				return true;
-			}
-			return false;
+			return (DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, CLKPLL_LL_BIT) ||
+					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RFPLL_LL_BIT));
 		}
 
 		void _disableSequencing() {
