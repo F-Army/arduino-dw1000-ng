@@ -63,8 +63,6 @@ uint16_t successRangingCount = 0;
 uint32_t rangingCountPeriod = 0;
 float samplingRate = 0;
 
-byte anchor_shortAddress[] = {0x01, 0x00};
-
 byte target_eui[8];
 byte tag_shortAddress[] = {0x05, 0x00};
 
@@ -154,16 +152,16 @@ void handleReceived() {
 void transmitRangingInitiation() {
     byte RangingInitiation[] = {DATA, SHORT_SRC_LONG_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0,0,0,0,0,0,0,  0,0, RANGING_INITIATION, 0,0};
     memcpy(&RangingInitiation[5], target_eui, 8);
-    memcpy(&RangingInitiation[13], anchor_shortAddress, 2);
+    DW1000Ng::getDeviceAddress(&RangingInitiation[13]);
     memcpy(&RangingInitiation[16], tag_shortAddress, 2);
     DW1000Ng::setTransmitData(RangingInitiation, sizeof(RangingInitiation));
     DW1000Ng::startTransmit();
 }
 
 void transmitResponseToPoll() {
-    byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONTINUE, 0x00, 0x00};
+    byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONTINUE, 0, 0};
     memcpy(&pollAck[5], tag_shortAddress, 2);
-    memcpy(&pollAck[7], anchor_shortAddress, 2);
+    DW1000Ng::getDeviceAddress(&pollAck[7]);
     DW1000Ng::setTransmitData(pollAck, sizeof(pollAck));
     DW1000Ng::startTransmit();
 }
@@ -171,7 +169,7 @@ void transmitResponseToPoll() {
 void transmitRangingConfirm() {
     byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONFIRM, 0x01, 0x00};
     memcpy(&rangingConfirm[5], tag_shortAddress, 2);
-    memcpy(&rangingConfirm[7], anchor_shortAddress, 2);
+    DW1000Ng::getDeviceAddress(&rangingConfirm[7]);
     DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));
     DW1000Ng::startTransmit();
 }
