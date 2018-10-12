@@ -179,14 +179,14 @@ void transmitRangingInitiation() {
 }
 
 void transmitPollAck() {
-    byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0 , 0x01, 0x00, ACTIVITY_CONTROL, 0x02, 0x00, 0x00};
+    byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0 , 0x01, 0x00, ACTIVITY_CONTROL, RANGING_CONTINUE, 0x00, 0x00};
     memcpy(&pollAck[5], tag_shortAddress, 2);
     DW1000Ng::setTransmitData(pollAck, sizeof(pollAck));
     DW1000Ng::startTransmit();
 }
 
 void transmitRangingConfirm() {
-    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0, 0x01, 0x00, ACTIVITY_CONTROL, 0x01, 0x01, 0x00};
+    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, 0x01, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0, 0x01, 0x00, ACTIVITY_CONTROL, RANGING_CONFIRM, 0x01, 0x00};
     memcpy(&rangingConfirm[5], tag_shortAddress, 2);
     DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));
     DW1000Ng::startTransmit();

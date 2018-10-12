@@ -45,3 +45,8 @@ constexpr byte RANGING_TAG_POLL = 0x21;
 constexpr byte RANGING_TAG_FINAL_RESPONSE_EMBEDDED = 0x23;
 constexpr byte RANGING_TAG_FINAL_RESPONSE_NO_EMBEDDED = 0x25;
 constexpr byte RANGING_TAG_FINAL_SEND_TIME = 0x27;
+
+/* Activity code */
+constexpr byte ACTIVITY_FINISHED = 0x00;
+constexpr byte RANGING_CONFIRM = 0x01;
+constexpr byte RANGING_CONTINUE = 0x02;

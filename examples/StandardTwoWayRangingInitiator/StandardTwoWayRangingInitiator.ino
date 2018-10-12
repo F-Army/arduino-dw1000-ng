@@ -223,13 +223,13 @@ void loop() {
                 noteActivity();
             }
 
-            if (recv_data[9] == ACTIVITY_CONTROL && recv_data[10] == 0x02) {
+            if (recv_data[9] == ACTIVITY_CONTROL && recv_data[10] == RANGING_CONTINUE) {
                 /* Received Response to poll */
                 timePollSent = DW1000Ng::getTransmitTimestamp();
                 timePollAckReceived = DW1000Ng::getReceiveTimestamp();
                 transmitFinalMessage();
                 noteActivity();
-            } else if (recv_data[9] == ACTIVITY_CONTROL && recv_data[10] == 0x01) {
+            } else if (recv_data[9] == ACTIVITY_CONTROL && recv_data[10] == RANGING_CONFIRM) {
                 /* Received ranging confirm */
                 transmitPoll();
                 noteActivity();
