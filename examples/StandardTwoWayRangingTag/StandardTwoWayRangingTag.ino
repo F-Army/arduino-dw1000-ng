@@ -213,27 +213,29 @@ void loop() {
         byte recv_data[recv_len];
         DW1000Ng::getReceivedData(recv_data, recv_len);
         
-        if(DW1000NgRanging::isStandardRangingMessage(recv_data, recv_len)) {
-            /* RTLS standard message */
-            if(recv_data[15] == RANGING_INITIATION) {
-                DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&recv_data[16], 2));
-                memcpy(anchor_address, &recv_data[13], 2);
-                transmitPoll();
-                noteActivity();
-            }
+        /* RTLS standard message */
 
-            if (recv_data[9] == ACTIVITY_CONTROL && recv_data[10] == RANGING_CONTINUE) {
-                /* Received Response to poll */
-                timePollSent = DW1000Ng::getTransmitTimestamp();
-                timePollAckReceived = DW1000Ng::getReceiveTimestamp();
-                transmitFinalMessage();
-                noteActivity();
-            } else if (recv_data[9] == ACTIVITY_CONTROL && recv_data[10] == RANGING_CONFIRM) {
-                /* Received ranging confirm */
-                memcpy(anchor_address, &recv_data[11], 2);
-                transmitPoll();
-                noteActivity();
-            }
+        if (recv_data[9] == ACTIVITY_CONTROL && recv_data[10] == RANGING_CONTINUE) {
+            /* Received Response to poll */
+            timePollSent = DW1000Ng::getTransmitTimestamp();
+            timePollAckReceived = DW1000Ng::getReceiveTimestamp();
+            transmitFinalMessage();
+            noteActivity();
+            return;
+        } else if (recv_data[9] == ACTIVITY_CONTROL && recv_data[10] == RANGING_CONFIRM) {
+            /* Received ranging confirm */
+            memcpy(anchor_address, &recv_data[11], 2);
+            transmitPoll();
+            noteActivity();
+            return;
+        }
+
+        if(recv_data[15] == RANGING_INITIATION) {
+            DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&recv_data[16], 2));
+            memcpy(anchor_address, &recv_data[13], 2);
+            transmitPoll();
+            noteActivity();
+            return;
         }
     }
 }
