@@ -90,6 +90,17 @@ interrupt_configuration_t DEFAULT_INTERRUPT_CONFIG = {
     true
 };
 
+frame_filtering_configuration_t ANCHOR_FRAME_FILTER_CONFIG = {
+    false,
+    false,
+    true,
+    false,
+    false,
+    false,
+    false,
+    true
+};
+
 void setup() {
     // DEBUG monitoring
     Serial.begin(115200);
@@ -100,6 +111,7 @@ void setup() {
     // general configuration
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
+    DW1000Ng::enableFrameFiltering(ANCHOR_FRAME_FILTER_CONFIG);
     
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:01");
 
