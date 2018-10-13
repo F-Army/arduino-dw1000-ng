@@ -62,7 +62,6 @@ int16_t sentNum = 0; // todo check int type
 
 device_configuration_t DEFAULT_CONFIG = {
     false,
-    false,
     true,
     true,
     true,

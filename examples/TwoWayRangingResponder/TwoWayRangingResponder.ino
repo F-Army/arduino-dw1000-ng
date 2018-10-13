@@ -101,7 +101,6 @@ float samplingRate = 0;
 
 device_configuration_t DEFAULT_CONFIG = {
     false,
-    false,
     true,
     true,
     true,
