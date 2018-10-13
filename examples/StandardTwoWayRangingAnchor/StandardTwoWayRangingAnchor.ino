@@ -228,22 +228,10 @@ void loop() {
 
         if(DW1000NgRanging::isStandardRangingMessage(recv_data, recv_len)) {
             if (recv_data[9] == RANGING_TAG_POLL) {
-                /* Software frame filter */
-                if(memcmp(self_address, &recv_data[5], 2) != 0) {
-                    DW1000Ng::startReceive();
-                    return;
-                }
-
-                // on POLL we (re-)start, so no protocol failure
                 timePollReceived = DW1000Ng::getReceiveTimestamp();
                 transmitResponseToPoll();
                 noteActivity();
             } else if (recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
-                /* Software frame filter */
-                if(memcmp(self_address, &recv_data[5], 2) != 0) {
-                    DW1000Ng::startReceive();
-                    return;
-                }
 
                 timePollAckSent = DW1000Ng::getTransmitTimestamp();
                 timeRangeReceived = DW1000Ng::getReceiveTimestamp();
