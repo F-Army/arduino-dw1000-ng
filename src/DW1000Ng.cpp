@@ -1167,7 +1167,8 @@ namespace DW1000Ng {
 
 		boolean _isReceiveDone() {
 			if(_frameCheck) {
-				return DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXFCG_BIT);
+				return (DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXFCG_BIT) &&
+						DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXDFR_BIT));
 			}
 			return DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXDFR_BIT);
 		}
