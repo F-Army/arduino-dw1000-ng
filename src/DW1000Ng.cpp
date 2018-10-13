@@ -1666,7 +1666,6 @@ namespace DW1000Ng {
 	void applyConfiguration(device_configuration_t config) {
 		forceTRxOff();
 
-		_setFrameFilter(config.frameFiltering);
 		_useExtendedFrameLength(config.extendedFrameLength);
 		_setReceiverAutoReenable(config.receiverAutoReenable);
 		_useSmartPower(config.smartPower);

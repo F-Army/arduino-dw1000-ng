@@ -28,7 +28,6 @@
 #include "DW1000NgConstants.hpp"
 
 typedef struct device_configuration_t {
-    boolean frameFiltering;
     boolean extendedFrameLength;
     boolean receiverAutoReenable;
     boolean smartPower;
