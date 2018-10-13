@@ -215,51 +215,55 @@ void loop() {
         byte recv_data[recv_len];
         DW1000Ng::getReceivedData(recv_data, recv_len);
 
+        if (recv_data[9] == RANGING_TAG_POLL) {
+            timePollReceived = DW1000Ng::getReceiveTimestamp();
+            transmitResponseToPoll();
+            noteActivity();
+            return;
+        } 
+        
+        if (recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
+
+            timePollAckSent = DW1000Ng::getTransmitTimestamp();
+            timeRangeReceived = DW1000Ng::getReceiveTimestamp();
+
+            timePollSent = DW1000NgUtils::bytesAsValue(recv_data + 10, LENGTH_TIMESTAMP);
+            timePollAckReceived = DW1000NgUtils::bytesAsValue(recv_data + 14, LENGTH_TIMESTAMP);
+            timeRangeSent = DW1000NgUtils::bytesAsValue(recv_data + 18, LENGTH_TIMESTAMP);
+            // (re-)compute range as two-way ranging is done
+            double distance = DW1000NgRanging::computeRangeAsymmetric(timePollSent,
+                                                        timePollReceived, 
+                                                        timePollAckSent, 
+                                                        timePollAckReceived, 
+                                                        timeRangeSent, 
+                                                        timeRangeReceived);
+            /* Apply bias correction */
+            distance = DW1000NgRanging::correctRange(distance);
+            
+            String rangeString = "Range: "; rangeString += distance; rangeString += " m";
+            rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
+            rangeString += "\t Sampling: "; rangeString += samplingRate; rangeString += " Hz";
+            Serial.println(rangeString);
+            
+            transmitRangingConfirm();
+            successRangingCount++;
+            if (curMillis - rangingCountPeriod > 1000) {
+                samplingRate = (1000.0f * successRangingCount) / (curMillis - rangingCountPeriod);
+                rangingCountPeriod = curMillis;
+                successRangingCount = 0;
+            }
+            noteActivity();
+            return;
+        }
+
         if(recv_data[0] == BLINK) {
             /* Is blink */
             memcpy(target_eui, &recv_data[2], 8);
             transmitRangingInitiation();
             noteActivity();
+            return;
         }
 
-        if(DW1000NgRanging::isStandardRangingMessage(recv_data, recv_len)) {
-            if (recv_data[9] == RANGING_TAG_POLL) {
-                timePollReceived = DW1000Ng::getReceiveTimestamp();
-                transmitResponseToPoll();
-                noteActivity();
-            } else if (recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
-
-                timePollAckSent = DW1000Ng::getTransmitTimestamp();
-                timeRangeReceived = DW1000Ng::getReceiveTimestamp();
-
-                timePollSent = DW1000NgUtils::bytesAsValue(recv_data + 10, LENGTH_TIMESTAMP);
-                timePollAckReceived = DW1000NgUtils::bytesAsValue(recv_data + 14, LENGTH_TIMESTAMP);
-                timeRangeSent = DW1000NgUtils::bytesAsValue(recv_data + 18, LENGTH_TIMESTAMP);
-                // (re-)compute range as two-way ranging is done
-                double distance = DW1000NgRanging::computeRangeAsymmetric(timePollSent,
-                                                            timePollReceived, 
-                                                            timePollAckSent, 
-                                                            timePollAckReceived, 
-                                                            timeRangeSent, 
-                                                            timeRangeReceived);
-                /* Apply bias correction */
-                distance = DW1000NgRanging::correctRange(distance);
-                
-                String rangeString = "Range: "; rangeString += distance; rangeString += " m";
-                rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
-                rangeString += "\t Sampling: "; rangeString += samplingRate; rangeString += " Hz";
-                Serial.println(rangeString);
-                
-                transmitRangingConfirm();
-                successRangingCount++;
-                if (curMillis - rangingCountPeriod > 1000) {
-                    samplingRate = (1000.0f * successRangingCount) / (curMillis - rangingCountPeriod);
-                    rangingCountPeriod = curMillis;
-                    successRangingCount = 0;
-                }
-                noteActivity();
-            }
-        }   
     }
 }
 

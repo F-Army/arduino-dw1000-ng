@@ -80,13 +80,4 @@ namespace DW1000NgRanging {
         }
     }
 
-    boolean isStandardRangingMessage(byte data[], size_t size) {
-    
-        if(size < 9 || !(data[0] == DATA && (data[1] == SHORT_SRC_AND_DEST || data[1] == SHORT_SRC_LONG_DEST) && data[3] == 0x9A && data[4] == 0x60)) {
-            return false;
-        }
-
-        return true;
-    }
-
 }
