@@ -98,7 +98,7 @@ frame_filtering_configuration_t ANCHOR_FRAME_FILTER_CONFIG = {
     false,
     false,
     false,
-    true
+    true /* This allows blink frames */
 };
 
 void setup() {
