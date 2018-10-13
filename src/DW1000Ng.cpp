@@ -1544,6 +1544,12 @@ namespace DW1000Ng {
 		_writeNetworkIdAndDeviceAddress();
 	}
 
+	void getNetworkId(byte id[]) {
+		_readNetworkIdAndDeviceAddress();
+		id[0] = _networkAndAddress[2];
+		id[1] = _networkAndAddress[3];
+	}
+
 	void setDeviceAddress(uint16_t val) {
 		_networkAndAddress[0] = (byte)(val & 0xFF);
 		_networkAndAddress[1] = (byte)((val >> 8) & 0xFF);

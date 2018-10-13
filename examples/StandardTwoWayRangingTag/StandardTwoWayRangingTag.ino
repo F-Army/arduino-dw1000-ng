@@ -100,6 +100,8 @@ void setup() {
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
     DW1000Ng::getEUI(self_eui);
 
+    DW1000Ng::setNetworkId(RTLS_APP_ID);
+
     DW1000Ng::setAntennaDelay(16436);
     
     Serial.println(F("Committed configuration ..."));
@@ -149,7 +151,8 @@ void transmitBlink() {
 }
 
 void transmitPoll() {
-    byte Poll[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0, 0,0 , RANGING_TAG_POLL};
+    byte Poll[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0 , RANGING_TAG_POLL};
+    DW1000Ng::getNetworkId(&Poll[3]);
     memcpy(&Poll[5], anchor_address, 2);
     DW1000Ng::getDeviceAddress(&Poll[7]);
     DW1000Ng::setTransmitData(Poll, sizeof(Poll));
@@ -167,10 +170,11 @@ void transmitFinalMessage() {
     DW1000Ng::setDelayedTRX(futureTimeBytes);
     timeRangeSent += DW1000Ng::getTxAntennaDelay();
 
-    byte finalMessage[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0, 0,0, RANGING_TAG_FINAL_RESPONSE_EMBEDDED, 
+    byte finalMessage[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, RANGING_TAG_FINAL_RESPONSE_EMBEDDED, 
         0,0,0,0,0,0,0,0,0,0,0,0
     };
 
+    DW1000Ng::getNetworkId(&finalMessage[3]);
     memcpy(&finalMessage[5], anchor_address, 2);
     DW1000Ng::getDeviceAddress(&finalMessage[7]);
 

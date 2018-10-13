@@ -101,10 +101,13 @@ void setup() {
     // general configuration
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
-
-    DW1000Ng::setDeviceAddress(1);
-    DW1000Ng::getDeviceAddress(self_address);
+    
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:01");
+
+    DW1000Ng::setNetworkId(RTLS_APP_ID);
+    DW1000Ng::setDeviceAddress(1);
+
+    DW1000Ng::getDeviceAddress(self_address);
 	
     DW1000Ng::setAntennaDelay(16436);
     
@@ -156,7 +159,8 @@ void handleReceived() {
 }
 
 void transmitRangingInitiation() {
-    byte RangingInitiation[] = {DATA, SHORT_SRC_LONG_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0,0,0,0,0,0,0,  0,0, RANGING_INITIATION, 0,0};
+    byte RangingInitiation[] = {DATA, SHORT_SRC_LONG_DEST, SEQ_NUMBER++, 0,0, 0,0,0,0,0,0,0,0,  0,0, RANGING_INITIATION, 0,0};
+    DW1000Ng::getNetworkId(&RangingInitiation[3]);
     memcpy(&RangingInitiation[5], target_eui, 8);
     DW1000Ng::getDeviceAddress(&RangingInitiation[13]);
     memcpy(&RangingInitiation[16], tag_shortAddress, 2);
@@ -165,7 +169,8 @@ void transmitRangingInitiation() {
 }
 
 void transmitResponseToPoll() {
-    byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONTINUE, 0, 0};
+    byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONTINUE, 0, 0};
+    DW1000Ng::getNetworkId(&pollAck[3]);
     memcpy(&pollAck[5], tag_shortAddress, 2);
     DW1000Ng::getDeviceAddress(&pollAck[7]);
     DW1000Ng::setTransmitData(pollAck, sizeof(pollAck));
@@ -173,7 +178,8 @@ void transmitResponseToPoll() {
 }
 
 void transmitRangingConfirm() {
-    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, RTLS_APP_ID_LOW, RTLS_APP_ID_HIGH, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONFIRM, 0x01, 0x00};
+    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONFIRM, 0x01, 0x00};
+    DW1000Ng::getNetworkId(&rangingConfirm[3]);
     memcpy(&rangingConfirm[5], tag_shortAddress, 2);
     DW1000Ng::getDeviceAddress(&rangingConfirm[7]);
     DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));

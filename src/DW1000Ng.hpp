@@ -125,6 +125,8 @@ namespace DW1000Ng {
 	@param[in] val An arbitrary numeric network identifier.
 	*/
 	void setNetworkId(uint16_t val);
+
+	void getNetworkId(byte id[]);
 	
 	/** 
 	(Re-)set the device address (i.e. short address) for the currently selected chip. This

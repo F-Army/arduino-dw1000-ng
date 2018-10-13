@@ -37,6 +37,7 @@ constexpr byte LONG_SRC_SHORT_DEST = 0xC8;
 /* Application ID */
 constexpr byte RTLS_APP_ID_LOW = 0x9A;
 constexpr byte RTLS_APP_ID_HIGH = 0x60;
+constexpr uint16_t RTLS_APP_ID = RTLS_APP_ID_LOW | ((uint16_t) (RTLS_APP_ID_HIGH << 8));
 
 /* Function code */
 constexpr byte ACTIVITY_CONTROL = 0x10;
