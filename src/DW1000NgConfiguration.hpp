@@ -28,7 +28,6 @@
 #include "DW1000NgConstants.hpp"
 
 typedef struct device_configuration_t {
-    boolean frameFiltering;
     boolean extendedFrameLength;
     boolean receiverAutoReenable;
     boolean smartPower;
@@ -50,3 +49,14 @@ typedef struct interrupt_configuration_t {
     boolean interruptOnReceiveTimestampAvailable;
     boolean interruptOnAutomaticAcknowledgeTrigger;
 } interrupt_configuration_t;
+
+typedef struct frame_filtering_configuration_t {
+    boolean behaveAsCoordinator;
+    boolean allowBeacon;
+    boolean allowData;
+    boolean allowAcknowledgement;
+    boolean allowMacCommand;
+    boolean allowAllReserved;
+    boolean allowReservedFour;
+    boolean allowReservedFive;
+} frame_filtering_configuration_t;

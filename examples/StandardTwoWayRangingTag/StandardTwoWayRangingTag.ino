@@ -65,7 +65,6 @@ uint16_t replyDelayTimeUS = 3000;
 
 device_configuration_t DEFAULT_CONFIG = {
     false,
-    false,
     true,
     true,
     true,
@@ -86,6 +85,17 @@ interrupt_configuration_t DEFAULT_INTERRUPT_CONFIG = {
     true
 };
 
+frame_filtering_configuration_t TAG_FRAME_FILTER_CONFIG = {
+    false,
+    false,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false
+};
+
 void setup() {
     // DEBUG monitoring
     Serial.begin(115200);
@@ -96,6 +106,7 @@ void setup() {
     // general configuration
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
+    DW1000Ng::enableFrameFiltering(TAG_FRAME_FILTER_CONFIG);
     
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
     DW1000Ng::getEUI(self_eui);
@@ -209,10 +220,6 @@ void loop() {
         if(DW1000NgRanging::isStandardRangingMessage(recv_data, recv_len)) {
             /* RTLS standard message */
             if(recv_data[15] == RANGING_INITIATION) {
-                if(memcmp(self_eui, &recv_data[5], 8) != 0) {
-                    DW1000Ng::startReceive();
-                    return;
-                }
                 DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&recv_data[16], 2));
                 memcpy(anchor_address, &recv_data[13], 2);
                 memcpy(self_address, &recv_data[16], 2);
@@ -221,20 +228,12 @@ void loop() {
             }
 
             if (recv_data[9] == ACTIVITY_CONTROL && recv_data[10] == RANGING_CONTINUE) {
-                if(memcmp(self_address, &recv_data[5], 2) != 0) {
-                    DW1000Ng::startReceive();
-                    return;
-                }
                 /* Received Response to poll */
                 timePollSent = DW1000Ng::getTransmitTimestamp();
                 timePollAckReceived = DW1000Ng::getReceiveTimestamp();
                 transmitFinalMessage();
                 noteActivity();
             } else if (recv_data[9] == ACTIVITY_CONTROL && recv_data[10] == RANGING_CONFIRM) {
-                if(memcmp(self_address, &recv_data[5], 2) != 0) {
-                    DW1000Ng::startReceive();
-                    return;
-                }
                 /* Received ranging confirm */
                 memcpy(anchor_address, &recv_data[11], 2);
                 transmitPoll();

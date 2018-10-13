@@ -70,7 +70,6 @@ byte self_address[2];
 
 device_configuration_t DEFAULT_CONFIG = {
     false,
-    false,
     true,
     true,
     true,
@@ -91,6 +90,17 @@ interrupt_configuration_t DEFAULT_INTERRUPT_CONFIG = {
     true
 };
 
+frame_filtering_configuration_t ANCHOR_FRAME_FILTER_CONFIG = {
+    false,
+    false,
+    true,
+    false,
+    false,
+    false,
+    false,
+    true /* This allows blink frames */
+};
+
 void setup() {
     // DEBUG monitoring
     Serial.begin(115200);
@@ -101,6 +111,7 @@ void setup() {
     // general configuration
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
+    DW1000Ng::enableFrameFiltering(ANCHOR_FRAME_FILTER_CONFIG);
     
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:01");
 
@@ -217,22 +228,10 @@ void loop() {
 
         if(DW1000NgRanging::isStandardRangingMessage(recv_data, recv_len)) {
             if (recv_data[9] == RANGING_TAG_POLL) {
-                /* Software frame filter */
-                if(memcmp(self_address, &recv_data[5], 2) != 0) {
-                    DW1000Ng::startReceive();
-                    return;
-                }
-
-                // on POLL we (re-)start, so no protocol failure
                 timePollReceived = DW1000Ng::getReceiveTimestamp();
                 transmitResponseToPoll();
                 noteActivity();
             } else if (recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
-                /* Software frame filter */
-                if(memcmp(self_address, &recv_data[5], 2) != 0) {
-                    DW1000Ng::startReceive();
-                    return;
-                }
 
                 timePollAckSent = DW1000Ng::getTransmitTimestamp();
                 timeRangeReceived = DW1000Ng::getReceiveTimestamp();
