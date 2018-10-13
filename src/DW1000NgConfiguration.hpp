@@ -59,4 +59,4 @@ typedef struct frame_filtering_configuration_t {
     boolean allowAllReserved;
     boolean allowReservedFour;
     boolean allowReservedFive;
-} frame_filtering_type_configuration_t;
+} frame_filtering_configuration_t;
