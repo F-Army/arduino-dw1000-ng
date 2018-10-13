@@ -135,7 +135,7 @@ void noteActivity() {
     lastActivity = millis();
 }
 
-void resetInactive() {
+void reset() {
     // tag returns to Idle and sends POLL
     DW1000Ng::forceTRxOff();
     transmitBlink();
@@ -196,7 +196,7 @@ void loop() {
     if (!sentAck && !receivedAck) {
         // check if inactive
         if (millis() - lastActivity > resetPeriod) {
-            resetInactive();
+            reset();
         }
         return;
     }
@@ -214,24 +214,26 @@ void loop() {
         DW1000Ng::getReceivedData(recv_data, recv_len);
         
         /* RTLS standard message */
-
-        if (recv_data[9] == ACTIVITY_CONTROL && recv_data[10] == RANGING_CONTINUE) {
-            /* Received Response to poll */
-            timePollSent = DW1000Ng::getTransmitTimestamp();
-            timePollAckReceived = DW1000Ng::getReceiveTimestamp();
-            transmitFinalMessage();
-            noteActivity();
-            return;
-        } 
-        
-        if (recv_data[9] == ACTIVITY_CONTROL && recv_data[10] == RANGING_CONFIRM) {
-            /* Received ranging confirm */
-            memcpy(anchor_address, &recv_data[11], 2);
-            transmitPoll();
-            noteActivity();
-            return;
+        if(recv_data[9] == ACTIVITY_CONTROL) {
+            if (recv_data[10] == RANGING_CONTINUE) {
+                /* Received Response to poll */
+                timePollSent = DW1000Ng::getTransmitTimestamp();
+                timePollAckReceived = DW1000Ng::getReceiveTimestamp();
+                transmitFinalMessage();
+                noteActivity();
+                return;
+            } else if (recv_data[10] == RANGING_CONFIRM) {
+                /* Received ranging confirm */
+                memcpy(anchor_address, &recv_data[11], 2);
+                transmitPoll();
+                noteActivity();
+                return;
+            } else {
+                reset();
+                return;
+            }
         }
-
+        
         if(recv_data[15] == RANGING_INITIATION) {
             DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&recv_data[16], 2));
             memcpy(anchor_address, &recv_data[13], 2);
