@@ -70,7 +70,6 @@ byte self_address[2];
 
 device_configuration_t DEFAULT_CONFIG = {
     false,
-    false,
     true,
     true,
     true,

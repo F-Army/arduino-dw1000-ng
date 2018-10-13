@@ -65,7 +65,6 @@ uint16_t replyDelayTimeUS = 3000;
 
 device_configuration_t DEFAULT_CONFIG = {
     false,
-    false,
     true,
     true,
     true,
