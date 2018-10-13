@@ -49,9 +49,6 @@ volatile boolean receivedAck = false;
 byte SEQ_NUMBER = 0;
 
 byte anchor_address[2];
-byte self_address[2];
-
-byte self_eui[8];
 
 // timestamps to remember
 uint64_t timePollSent;
@@ -109,7 +106,6 @@ void setup() {
     DW1000Ng::enableFrameFiltering(TAG_FRAME_FILTER_CONFIG);
     
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
-    DW1000Ng::getEUI(self_eui);
 
     DW1000Ng::setNetworkId(RTLS_APP_ID);
 
@@ -222,7 +218,6 @@ void loop() {
             if(recv_data[15] == RANGING_INITIATION) {
                 DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&recv_data[16], 2));
                 memcpy(anchor_address, &recv_data[13], 2);
-                memcpy(self_address, &recv_data[16], 2);
                 transmitPoll();
                 noteActivity();
             }

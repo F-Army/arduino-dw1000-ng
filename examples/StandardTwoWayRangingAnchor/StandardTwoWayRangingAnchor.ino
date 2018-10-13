@@ -66,8 +66,6 @@ float samplingRate = 0;
 byte target_eui[8];
 byte tag_shortAddress[] = {0x05, 0x00};
 
-byte self_address[2];
-
 device_configuration_t DEFAULT_CONFIG = {
     false,
     true,
@@ -117,8 +115,6 @@ void setup() {
 
     DW1000Ng::setNetworkId(RTLS_APP_ID);
     DW1000Ng::setDeviceAddress(1);
-
-    DW1000Ng::getDeviceAddress(self_address);
 	
     DW1000Ng::setAntennaDelay(16436);
     
