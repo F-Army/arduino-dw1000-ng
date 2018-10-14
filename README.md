@@ -9,10 +9,9 @@
 
 ![c++11](https://img.shields.io/badge/C%2B%2B-11-brightgreen.svg?&style=for-the-badge)
 ![Arduino](https://img.shields.io/badge/Arduino-%3E%3D1.6.6-blue.svg?&style=for-the-badge)
+[![Discord](https://img.shields.io/badge/Discord-Arduino%20DW1000Ng-7289da.svg?&style=for-the-badge&logo=discord&link=https://discord.gg/8KTKDwH&link=https://discord.gg/8KTKDwH)](https://discord.gg/8KTKDwH)
 </div>
 <br/>
-
-[![Discord](https://img.shields.io/badge/Discord-Arduino%20DW1000Ng-7289da.svg?&style=for-the-badge&logo=discord&link=https://discord.gg/8KTKDwH&link=https://discord.gg/8KTKDwH)](https://discord.gg/8KTKDwH)
 
 Status
 ------------
