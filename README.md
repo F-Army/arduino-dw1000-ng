@@ -30,11 +30,6 @@ Usage
 -----
 Check examples for basic usage.
 
-Tests
------
-To run tests open them with Arduino and upload them to a device. <br />
-Be careful to activate the necessary compile options inside [DW1000NgCompileOptions.hpp](https://github.com/F-Army/arduino-dw1000Ng/blob/master/src/DW1000NgCompileOptions.hpp)
-
 License
 -------
 The project is under MIT (see [LICENSE.md](https://github.com/F-Army/arduino-dw1000Ng/blob/master/LICENSE.md)) <br />
