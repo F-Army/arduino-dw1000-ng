@@ -125,6 +125,8 @@ namespace DW1000Ng {
 	@param[in] val An arbitrary numeric network identifier.
 	*/
 	void setNetworkId(uint16_t val);
+
+	void getNetworkId(byte id[]);
 	
 	/** 
 	(Re-)set the device address (i.e. short address) for the currently selected chip. This
@@ -133,10 +135,14 @@ namespace DW1000Ng {
 	@param[in] val An arbitrary numeric device address.
 	*/
 	void setDeviceAddress(uint16_t val);
+
+	void getDeviceAddress(byte address[]);
 	// TODO MAC and filters
 	
 	void setEUI(char eui[]);
 	void setEUI(byte eui[]);
+
+	void getEUI(byte eui[]);
 
 	void setTXPower(byte power[]);
 	void setTXPower(int32_t power);
@@ -239,15 +245,8 @@ namespace DW1000Ng {
 
 	/* Allow MAC frame filtering */
 	// TODO auto-acknowledge
-	void setFrameFilter(boolean val);
-	void setFrameFilterBehaveCoordinator(boolean val);
-	void setFrameFilterAllowBeacon(boolean val);
-	//data type is used in the FC_1 0x41
-	void setFrameFilterAllowData(boolean val);
-	void setFrameFilterAllowAcknowledgement(boolean val);
-	void setFrameFilterAllowMAC(boolean val);
-	//Reserved is used for the Blink message
-	void setFrameFilterAllowReserved(boolean val);
+	void enableFrameFiltering(frame_filtering_configuration_t config);
+	void disableFrameFiltering();
 	
 	// note: not sure if going to be implemented for now
 	void setDoubleBuffering(boolean val);

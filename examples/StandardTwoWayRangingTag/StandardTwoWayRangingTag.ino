@@ -22,33 +22,10 @@
  * SOFTWARE.
 */
 
-/*
- * Copyright (c) 2015 by Thomas Trojer <thomas@trojer.net>
- * Decawave DW1000 library for arduino.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @file RangingTag.ino
- * Use this to test two-way ranging functionality with two DW1000Ng:: This is
- * the tag component's code which polls for range computation. Addressing and
- * frame filtering is currently done in a custom way, as no MAC features are
- * implemented yet.
- *
- * Complements the "RangingAnchor" example sketch.
- *
- * @todo
- *  - use enum instead of define
- *  - move strings to flash (less RAM consumption)
+/* 
+ * StandardTwoWayRangingTag.ino
+ * 
+ * This is an example tag in a RTLS using two way ranging ISO/IEC 24730-62_2013 messages
  */
 
 #include <SPI.h>
@@ -56,31 +33,27 @@
 #include <DW1000NgUtils.hpp>
 #include <DW1000NgTime.hpp>
 #include <DW1000NgConstants.hpp>
+#include <DW1000NgRanging.hpp>
+#include <DW1000NgRTLS.hpp>
 
 // connection pins
 const uint8_t PIN_RST = 9; // reset pin
 const uint8_t PIN_IRQ = 2; // irq pin
 const uint8_t PIN_SS = SS; // spi select pin
 
-// messages used in the ranging protocol
-// TODO replace by enum
-#define POLL 0
-#define POLL_ACK 1
-#define RANGE 2
-#define RANGE_REPORT 3
-#define RANGE_FAILED 255
 // message flow state
-volatile byte expectedMsgId = POLL_ACK;
 // message sent/received state
 volatile boolean sentAck = false;
 volatile boolean receivedAck = false;
+
+byte SEQ_NUMBER = 0;
+
+byte anchor_address[2];
+
 // timestamps to remember
 uint64_t timePollSent;
 uint64_t timePollAckReceived;
 uint64_t timeRangeSent;
-// data buffer
-#define LEN_DATA 16
-byte data[LEN_DATA];
 // watchdog and reset period
 uint32_t lastActivity;
 uint32_t resetPeriod = 250;
@@ -109,6 +82,17 @@ interrupt_configuration_t DEFAULT_INTERRUPT_CONFIG = {
     true
 };
 
+frame_filtering_configuration_t TAG_FRAME_FILTER_CONFIG = {
+    false,
+    false,
+    true,
+    false,
+    false,
+    false,
+    false,
+    false
+};
+
 void setup() {
     // DEBUG monitoring
     Serial.begin(115200);
@@ -119,9 +103,12 @@ void setup() {
     // general configuration
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
-
-    DW1000Ng::setNetworkId(10);
+    DW1000Ng::enableFrameFiltering(TAG_FRAME_FILTER_CONFIG);
     
+    DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
+
+    DW1000Ng::setNetworkId(RTLS_APP_ID);
+
     DW1000Ng::setAntennaDelay(16436);
     
     Serial.println(F("Committed configuration ..."));
@@ -139,7 +126,7 @@ void setup() {
     DW1000Ng::attachSentHandler(handleSent);
     DW1000Ng::attachReceivedHandler(handleReceived);
     // anchor starts by transmitting a POLL message
-    transmitPoll();
+    transmitBlink();
     noteActivity();
 }
 
@@ -148,33 +135,39 @@ void noteActivity() {
     lastActivity = millis();
 }
 
-void resetInactive() {
-    // tag sends POLL and listens for POLL_ACK
-    expectedMsgId = POLL_ACK;
+void reset() {
+    // tag returns to Idle and sends POLL
     DW1000Ng::forceTRxOff();
-    transmitPoll();
+    transmitBlink();
     noteActivity();
 }
 
 void handleSent() {
-    // status change on sent success
     sentAck = true;
 }
 
 void handleReceived() {
-    // status change on received success
     receivedAck = true;
 }
 
-void transmitPoll() {
-    data[0] = POLL;
-    DW1000Ng::setTransmitData(data, LEN_DATA);
+void transmitBlink() {
+    byte Blink[] = {BLINK, SEQ_NUMBER++, 0,0,0,0,0,0,0,0, NO_BATTERY_STATUS | NO_EX_ID, TAG_LISTENING_NOW};
+    DW1000Ng::getEUI(&Blink[2]);
+    DW1000Ng::setTransmitData(Blink, sizeof(Blink));
     DW1000Ng::startTransmit();
 }
 
-void transmitRange() {
-    data[0] = RANGE;
+void transmitPoll() {
+    byte Poll[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0 , RANGING_TAG_POLL};
+    DW1000Ng::getNetworkId(&Poll[3]);
+    memcpy(&Poll[5], anchor_address, 2);
+    DW1000Ng::getDeviceAddress(&Poll[7]);
+    DW1000Ng::setTransmitData(Poll, sizeof(Poll));
+    DW1000Ng::startTransmit();
+}
 
+
+void transmitFinalMessage() {
     /* Calculation of future time */
     byte futureTimeBytes[LENGTH_TIMESTAMP];
 
@@ -184,55 +177,69 @@ void transmitRange() {
     DW1000Ng::setDelayedTRX(futureTimeBytes);
     timeRangeSent += DW1000Ng::getTxAntennaDelay();
 
-    DW1000NgUtils::writeValueToBytes(data + 1, timePollSent, LENGTH_TIMESTAMP);
-    DW1000NgUtils::writeValueToBytes(data + 6, timePollAckReceived, LENGTH_TIMESTAMP);
-    DW1000NgUtils::writeValueToBytes(data + 11, timeRangeSent, LENGTH_TIMESTAMP);
-    DW1000Ng::setTransmitData(data, LEN_DATA);
+    byte finalMessage[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, RANGING_TAG_FINAL_RESPONSE_EMBEDDED, 
+        0,0,0,0,0,0,0,0,0,0,0,0
+    };
+
+    DW1000Ng::getNetworkId(&finalMessage[3]);
+    memcpy(&finalMessage[5], anchor_address, 2);
+    DW1000Ng::getDeviceAddress(&finalMessage[7]);
+
+    DW1000NgUtils::writeValueToBytes(finalMessage + 10, (uint32_t) timePollSent, 4);
+    DW1000NgUtils::writeValueToBytes(finalMessage + 14, (uint32_t) timePollAckReceived, 4);
+    DW1000NgUtils::writeValueToBytes(finalMessage + 18, (uint32_t) timeRangeSent, 4);
+    DW1000Ng::setTransmitData(finalMessage, sizeof(finalMessage));
     DW1000Ng::startTransmit(TransmitMode::DELAYED);
-    //Serial.print("Expect RANGE to be sent @ "); Serial.println(timeRangeSent.getAsFloat());
 }
 
 void loop() {
     if (!sentAck && !receivedAck) {
         // check if inactive
         if (millis() - lastActivity > resetPeriod) {
-            resetInactive();
+            reset();
         }
         return;
     }
-    // continue on any success confirmation
+
     if (sentAck) {
         sentAck = false;
         DW1000Ng::startReceive();
     }
+
     if (receivedAck) {
         receivedAck = false;
-        // get message and parse
-        DW1000Ng::getReceivedData(data, LEN_DATA);
-        byte msgId = data[0];
-        if (msgId != expectedMsgId) {
-            // unexpected message, start over again
-            //Serial.print("Received wrong message # "); Serial.println(msgId);
-            expectedMsgId = POLL_ACK;
-            transmitPoll();
-            return;
+        /* Parse received message */
+        size_t recv_len = DW1000Ng::getReceivedDataLength();
+        byte recv_data[recv_len];
+        DW1000Ng::getReceivedData(recv_data, recv_len);
+        
+        /* RTLS standard message */
+        if(recv_data[9] == ACTIVITY_CONTROL) {
+            if (recv_data[10] == RANGING_CONTINUE) {
+                /* Received Response to poll */
+                timePollSent = DW1000Ng::getTransmitTimestamp();
+                timePollAckReceived = DW1000Ng::getReceiveTimestamp();
+                transmitFinalMessage();
+                noteActivity();
+                return;
+            } else if (recv_data[10] == RANGING_CONFIRM) {
+                /* Received ranging confirm */
+                memcpy(anchor_address, &recv_data[11], 2);
+                transmitPoll();
+                noteActivity();
+                return;
+            } else {
+                reset();
+                return;
+            }
         }
-        if (msgId == POLL_ACK) {
-            timePollSent = DW1000Ng::getTransmitTimestamp();
-            timePollAckReceived = DW1000Ng::getReceiveTimestamp();
-            expectedMsgId = RANGE_REPORT;
-            transmitRange();
-            noteActivity();
-        } else if (msgId == RANGE_REPORT) {
-            expectedMsgId = POLL_ACK;
-            float curRange;
-            memcpy(&curRange, data + 1, 4);
+        
+        if(recv_data[15] == RANGING_INITIATION) {
+            DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&recv_data[16], 2));
+            memcpy(anchor_address, &recv_data[13], 2);
             transmitPoll();
             noteActivity();
-        } else if (msgId == RANGE_FAILED) {
-            expectedMsgId = POLL_ACK;
-            transmitPoll();
-            noteActivity();
+            return;
         }
     }
 }

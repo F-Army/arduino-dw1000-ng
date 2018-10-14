@@ -7,11 +7,11 @@
 
 ### Arduino library to use Decawave's [DW1000](https://www.decawave.com/product/dw1000-radio-ic/) IC and relative modules.
 
-![c++11](https://img.shields.io/badge/C%2B%2B-11-brightgreen.svg)
-![Arduino](https://img.shields.io/badge/Arduino-%3E%3D1.6.6-blue.svg)
+![c++11](https://img.shields.io/badge/C%2B%2B-11-brightgreen.svg?&style=for-the-badge)
+![Arduino](https://img.shields.io/badge/Arduino-%3E%3D1.6.6-blue.svg?&style=for-the-badge)
+[![Discord](https://img.shields.io/badge/Discord-Arduino%20DW1000Ng-7289da.svg?&style=for-the-badge&logo=discord)](https://discord.gg/VJWYhJq)
 </div>
 <br/>
-
 
 Status
 ------------

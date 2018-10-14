@@ -806,10 +806,6 @@ namespace DW1000Ng {
 			_writeTransmitFrameControlRegister();
 		}
 
-		void _setFrameFilter(boolean val) {
-			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFEN_BIT, val);
-		}
-
 		void _useExtendedFrameLength(boolean val) {
 			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, PHR_MODE_0_BIT, val);
 			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, PHR_MODE_1_BIT, val);
@@ -1166,7 +1162,8 @@ namespace DW1000Ng {
 
 		boolean _isReceiveDone() {
 			if(_frameCheck) {
-				return DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXFCG_BIT);
+				return (DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXFCG_BIT) &&
+						DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXDFR_BIT));
 			}
 			return DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXDFR_BIT);
 		}
@@ -1535,10 +1532,22 @@ namespace DW1000Ng {
 		_writeNetworkIdAndDeviceAddress();
 	}
 
+	void getNetworkId(byte id[]) {
+		_readNetworkIdAndDeviceAddress();
+		id[0] = _networkAndAddress[2];
+		id[1] = _networkAndAddress[3];
+	}
+
 	void setDeviceAddress(uint16_t val) {
 		_networkAndAddress[0] = (byte)(val & 0xFF);
 		_networkAndAddress[1] = (byte)((val >> 8) & 0xFF);
 		_writeNetworkIdAndDeviceAddress();
+	}
+
+	void getDeviceAddress(byte address[]) {
+		_readNetworkIdAndDeviceAddress();
+		address[0] = _networkAndAddress[0];
+		address[1] = _networkAndAddress[1];
 	}
 
 	void setEUI(char eui[]) {
@@ -1555,6 +1564,10 @@ namespace DW1000Ng {
 			*(reverseEUI+i) = *(eui+size-i-1);
 		}
 		_writeBytesToRegister(EUI, NO_SUB, reverseEUI, LEN_EUI);
+	}
+
+	void getEUI(byte eui[]) {
+		_readBytes(EUI, NO_SUB, eui, LEN_EUI);
 	}
 
 	void getTemperature(float& temp) {
@@ -1580,30 +1593,24 @@ namespace DW1000Ng {
 		temp = (sar_ltemp - _tmeas23C) * 1.14f + 23.0f;
 	}
 
-	void setFrameFilterBehaveCoordinator(boolean val) {
-		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFBC_BIT, val);
+	void enableFrameFiltering(frame_filtering_configuration_t config) {
+		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFEN_BIT, true);
+		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFBC_BIT, config.behaveAsCoordinator);
+		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFAB_BIT, config.allowBeacon);
+		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFAD_BIT, config.allowData);
+		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFAA_BIT, config.allowAcknowledgement);
+		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFAM_BIT, config.allowMacCommand);
+		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFAR_BIT, config.allowAllReserved);
+		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFA4_BIT, config.allowReservedFour);
+		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFA5_BIT, config.allowReservedFive);
+
+		_writeSystemConfigurationRegister();
 	}
 
-	void setFrameFilterAllowBeacon(boolean val) {
-		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFAB_BIT, val);
+	void disableFrameFiltering() {
+		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFEN_BIT, false);
+		_writeSystemConfigurationRegister();
 	}
-
-	void setFrameFilterAllowData(boolean val) {
-		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFAD_BIT, val);
-	}
-
-	void setFrameFilterAllowAcknowledgement(boolean val) {
-		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFAA_BIT, val);
-	}
-
-	void setFrameFilterAllowMAC(boolean val) {
-		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFAM_BIT, val);
-	}
-
-	void setFrameFilterAllowReserved(boolean val) {
-		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, FFAR_BIT, val);
-	}
-
 
 	void setDoubleBuffering(boolean val) {
 		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, DIS_DRXB_BIT, !val);
@@ -1666,7 +1673,6 @@ namespace DW1000Ng {
 	void applyConfiguration(device_configuration_t config) {
 		forceTRxOff();
 
-		_setFrameFilter(config.frameFiltering);
 		_useExtendedFrameLength(config.extendedFrameLength);
 		_setReceiverAutoReenable(config.receiverAutoReenable);
 		_useSmartPower(config.smartPower);
