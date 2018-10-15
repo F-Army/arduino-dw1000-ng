@@ -17,7 +17,9 @@ env:
     - PLATFORMIO_CI_SRC=examples/TransmitSpectrumPowerCalibration/TransmitSpectrumPowerCalibration.ino
     - PLATFORMIO_CI_SRC=examples/BasicConnectivityTest/BasicConnectivityTest.ino
     - PLATFORMIO_CI_SRC=examples/StandardTwoWayRangingTag/StandardTwoWayRangingTag.ino
-    - PLATFORMIO_CI_SRC=examples/StandardTwoWayRangingAnchor/StandardTwoWayRangingAnchor.ino
+    - PLATFORMIO_CI_SRC=examples/StandardTwoWayRangingAnchorMain/StandardTwoWayRangingAnchorMain.ino
+    - PLATFORMIO_CI_SRC=examples/StandardTwoWayRangingAnchorB/StandardTwoWayRangingAnchorB.ino
+    - PLATFORMIO_CI_SRC=examples/StandardTwoWayRangingAnchorC/StandardTwoWayRangingAnchorC.ino
 
 install:
     - pip install -U platformio

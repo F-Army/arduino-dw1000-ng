@@ -101,7 +101,7 @@ frame_filtering_configuration_t ANCHOR_FRAME_FILTER_CONFIG = {
 void setup() {
     // DEBUG monitoring
     Serial.begin(115200);
-    Serial.println(F("### DW1000Ng-arduino-ranging-anchorC ###"));
+    Serial.println(F("### arduino-DW1000Ng-ranging-anchor-C ###"));
     // initialize the driver
     DW1000Ng::initialize(PIN_SS, PIN_IRQ, PIN_RST);
     Serial.println(F("DW1000Ng initialized ..."));
