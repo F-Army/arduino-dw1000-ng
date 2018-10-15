@@ -62,8 +62,6 @@ uint16_t replyDelayTimeUS = 3000;
 byte target_eui[8];
 byte tag_shortAddress[] = {0x05, 0x00};
 
-byte next_anchor_range[] = {0x01, 0x00};
-
 device_configuration_t DEFAULT_CONFIG = {
     false,
     true,
@@ -162,16 +160,6 @@ void handleReceived() {
     receivedAck = true;
 }
 
-void transmitRangingInitiation() {
-    byte RangingInitiation[] = {DATA, SHORT_SRC_LONG_DEST, SEQ_NUMBER++, 0,0, 0,0,0,0,0,0,0,0,  0,0, RANGING_INITIATION, 0,0};
-    DW1000Ng::getNetworkId(&RangingInitiation[3]);
-    memcpy(&RangingInitiation[5], target_eui, 8);
-    DW1000Ng::getDeviceAddress(&RangingInitiation[13]);
-    memcpy(&RangingInitiation[16], tag_shortAddress, 2);
-    DW1000Ng::setTransmitData(RangingInitiation, sizeof(RangingInitiation));
-    DW1000Ng::startTransmit();
-}
-
 void transmitResponseToPoll() {
     byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONTINUE, 0, 0};
     DW1000Ng::getNetworkId(&pollAck[3]);
@@ -181,8 +169,8 @@ void transmitResponseToPoll() {
     DW1000Ng::startTransmit();
 }
 
-void transmitRangingConfirm() {
-    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONFIRM, next_anchor_range[0], next_anchor_range[1]};
+void transmitActivityFinished() {
+    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, ACTIVITY_FINISHED, 0xFA, 0x00};
     DW1000Ng::getNetworkId(&rangingConfirm[3]);
     memcpy(&rangingConfirm[5], tag_shortAddress, 2);
     DW1000Ng::getDeviceAddress(&rangingConfirm[7]);
@@ -240,7 +228,7 @@ void loop() {
             rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
             Serial.println(rangeString);
             
-            transmitRangingConfirm();
+            transmitActivityFinished();
             noteActivity();
             return;
         }

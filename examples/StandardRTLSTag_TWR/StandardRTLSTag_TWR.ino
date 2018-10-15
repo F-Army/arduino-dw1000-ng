@@ -229,6 +229,11 @@ void loop() {
                 transmitPoll();
                 noteActivity();
                 return;
+            } else if(recv_data[10] == ACTIVITY_FINISHED) {
+                delay(250);
+                transmitBlink();
+                noteActivity();
+                return;
             } else {
                 reset();
                 return;

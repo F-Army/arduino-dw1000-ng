@@ -162,16 +162,6 @@ void handleReceived() {
     receivedAck = true;
 }
 
-void transmitRangingInitiation() {
-    byte RangingInitiation[] = {DATA, SHORT_SRC_LONG_DEST, SEQ_NUMBER++, 0,0, 0,0,0,0,0,0,0,0,  0,0, RANGING_INITIATION, 0,0};
-    DW1000Ng::getNetworkId(&RangingInitiation[3]);
-    memcpy(&RangingInitiation[5], target_eui, 8);
-    DW1000Ng::getDeviceAddress(&RangingInitiation[13]);
-    memcpy(&RangingInitiation[16], tag_shortAddress, 2);
-    DW1000Ng::setTransmitData(RangingInitiation, sizeof(RangingInitiation));
-    DW1000Ng::startTransmit();
-}
-
 void transmitResponseToPoll() {
     byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONTINUE, 0, 0};
     DW1000Ng::getNetworkId(&pollAck[3]);
