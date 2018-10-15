@@ -133,7 +133,6 @@ void setup() {
     
     // anchor starts in receiving mode, awaiting a ranging poll message
     receive();
-    // for first time ranging frequency computation
 }
 
 void noteActivity() {
