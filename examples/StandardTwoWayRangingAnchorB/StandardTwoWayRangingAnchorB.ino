@@ -62,7 +62,7 @@ uint16_t replyDelayTimeUS = 3000;
 byte target_eui[8];
 byte tag_shortAddress[] = {0x05, 0x00};
 
-byte next_anchor_range[] = {0x02, 0x00};
+byte next_anchor_range[] = {0x01, 0x00};
 
 device_configuration_t DEFAULT_CONFIG = {
     false,
@@ -110,10 +110,10 @@ void setup() {
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
     DW1000Ng::enableFrameFiltering(ANCHOR_FRAME_FILTER_CONFIG);
     
-    DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:01");
+    DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:02");
 
     DW1000Ng::setNetworkId(RTLS_APP_ID);
-    DW1000Ng::setDeviceAddress(1);
+    DW1000Ng::setDeviceAddress(2);
 	
     DW1000Ng::setAntennaDelay(16436);
     
