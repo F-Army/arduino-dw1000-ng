@@ -58,13 +58,11 @@ uint32_t lastActivity;
 uint32_t resetPeriod = 250;
 // reply times (same on both sides for symm. ranging)
 uint16_t replyDelayTimeUS = 3000;
-// ranging counter (per second)
-uint16_t successRangingCount = 0;
-uint32_t rangingCountPeriod = 0;
-float samplingRate = 0;
 
 byte target_eui[8];
 byte tag_shortAddress[] = {0x05, 0x00};
+
+byte next_anchor_range[] = {0x01, 0x00};
 
 device_configuration_t DEFAULT_CONFIG = {
     false,
@@ -83,9 +81,10 @@ device_configuration_t DEFAULT_CONFIG = {
 interrupt_configuration_t DEFAULT_INTERRUPT_CONFIG = {
     true,
     true,
-    true,
     false,
-    true
+    false,
+    false,
+    false
 };
 
 frame_filtering_configuration_t ANCHOR_FRAME_FILTER_CONFIG = {
@@ -96,13 +95,13 @@ frame_filtering_configuration_t ANCHOR_FRAME_FILTER_CONFIG = {
     false,
     false,
     false,
-    true /* This allows blink frames */
+    false
 };
 
 void setup() {
     // DEBUG monitoring
     Serial.begin(115200);
-    Serial.println(F("### DW1000Ng-arduino-ranging-anchor ###"));
+    Serial.println(F("### arduino-DW1000Ng-ranging-anchor-C ###"));
     // initialize the driver
     DW1000Ng::initialize(PIN_SS, PIN_IRQ, PIN_RST);
     Serial.println(F("DW1000Ng initialized ..."));
@@ -111,10 +110,10 @@ void setup() {
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
     DW1000Ng::enableFrameFiltering(ANCHOR_FRAME_FILTER_CONFIG);
     
-    DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:01");
+    DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:03");
 
     DW1000Ng::setNetworkId(RTLS_APP_ID);
-    DW1000Ng::setDeviceAddress(1);
+    DW1000Ng::setDeviceAddress(3);
 	
     DW1000Ng::setAntennaDelay(16436);
     
@@ -135,8 +134,6 @@ void setup() {
     
     // anchor starts in receiving mode, awaiting a ranging poll message
     receive();
-    // for first time ranging frequency computation
-    rangingCountPeriod = millis();
 }
 
 void noteActivity() {
@@ -185,7 +182,7 @@ void transmitResponseToPoll() {
 }
 
 void transmitRangingConfirm() {
-    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONFIRM, 0x01, 0x00};
+    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONFIRM, next_anchor_range[0], next_anchor_range[1]};
     DW1000Ng::getNetworkId(&rangingConfirm[3]);
     memcpy(&rangingConfirm[5], tag_shortAddress, 2);
     DW1000Ng::getDeviceAddress(&rangingConfirm[7]);
@@ -194,10 +191,9 @@ void transmitRangingConfirm() {
 }
  
 void loop() {
-    int32_t curMillis = millis();
     if (!sentAck && !receivedAck) {
         // check if inactive
-        if (curMillis - lastActivity > resetPeriod) {
+        if (millis() - lastActivity > resetPeriod) {
             resetInactive();
         }
         return;
@@ -242,28 +238,12 @@ void loop() {
             
             String rangeString = "Range: "; rangeString += distance; rangeString += " m";
             rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
-            rangeString += "\t Sampling: "; rangeString += samplingRate; rangeString += " Hz";
             Serial.println(rangeString);
             
             transmitRangingConfirm();
-            successRangingCount++;
-            if (curMillis - rangingCountPeriod > 1000) {
-                samplingRate = (1000.0f * successRangingCount) / (curMillis - rangingCountPeriod);
-                rangingCountPeriod = curMillis;
-                successRangingCount = 0;
-            }
             noteActivity();
             return;
         }
-
-        if(recv_data[0] == BLINK) {
-            /* Is blink */
-            memcpy(target_eui, &recv_data[2], 8);
-            transmitRangingInitiation();
-            noteActivity();
-            return;
-        }
-
     }
 }
 
