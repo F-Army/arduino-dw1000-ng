@@ -23,7 +23,7 @@
 */
 
 /* 
- * StandardTwoWayRangingTag.ino
+ * StandardRTLSTag_TWR.ino
  * 
  * This is an example tag in a RTLS using two way ranging ISO/IEC 24730-62_2013 messages
  */

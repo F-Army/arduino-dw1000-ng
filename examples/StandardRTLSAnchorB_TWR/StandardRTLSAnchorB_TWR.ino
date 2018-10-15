@@ -23,9 +23,9 @@
 */
 
 /* 
- * StandardTwoWayRangingAnchor.ino
+ * StandardRTLSAnchorB_TWR.ino
  * 
- * This is an example anchor in a RTLS using two way ranging ISO/IEC 24730-62_2013 messages
+ * This is an example slave anchor in a RTLS using two way ranging ISO/IEC 24730-62_2013 messages
  */
 
 #include <SPI.h>
