@@ -58,10 +58,6 @@ uint32_t lastActivity;
 uint32_t resetPeriod = 250;
 // reply times (same on both sides for symm. ranging)
 uint16_t replyDelayTimeUS = 3000;
-// ranging counter (per second)
-uint16_t successRangingCount = 0;
-uint32_t rangingCountPeriod = 0;
-float samplingRate = 0;
 
 byte target_eui[8];
 byte tag_shortAddress[] = {0x05, 0x00};
@@ -196,10 +192,9 @@ void transmitRangingConfirm() {
 }
  
 void loop() {
-    int32_t curMillis = millis();
     if (!sentAck && !receivedAck) {
         // check if inactive
-        if (curMillis - lastActivity > resetPeriod) {
+        if (millis() - lastActivity > resetPeriod) {
             resetInactive();
         }
         return;
@@ -244,16 +239,9 @@ void loop() {
             
             String rangeString = "Range: "; rangeString += distance; rangeString += " m";
             rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
-            rangeString += "\t Sampling: "; rangeString += samplingRate; rangeString += " Hz";
             Serial.println(rangeString);
             
             transmitRangingConfirm();
-            successRangingCount++;
-            if (curMillis - rangingCountPeriod > 1000) {
-                samplingRate = (1000.0f * successRangingCount) / (curMillis - rangingCountPeriod);
-                rangingCountPeriod = curMillis;
-                successRangingCount = 0;
-            }
             noteActivity();
             return;
         }
