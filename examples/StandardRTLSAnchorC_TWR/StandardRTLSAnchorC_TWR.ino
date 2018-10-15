@@ -53,6 +53,8 @@ uint64_t timePollAckReceived;
 uint64_t timeRangeSent;
 uint64_t timeRangeReceived;
 
+double distance;
+
 // watchdog and reset period
 uint32_t lastActivity;
 uint32_t resetPeriod = 250;
@@ -177,6 +179,16 @@ void transmitActivityFinished() {
     DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));
     DW1000Ng::startTransmit();
 }
+
+void transmitRangeReport() {
+    byte rangingReport[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, 0x60, 0,0 };
+    DW1000Ng::getNetworkId(&rangingReport[3]);
+    memcpy(&rangingReport[5], main_anchor_address, 2);
+    DW1000Ng::getDeviceAddress(&rangingReport[7]);
+    DW1000NgUtils::writeValueToBytes(&rangingReport[10], static_cast<uint16_t>((distance*1000)), 2);
+    DW1000Ng::setTransmitData(rangingReport, sizeof(rangingReport));
+    DW1000Ng::startTransmit();
+}
  
 void loop() {
     if (!sentAck && !receivedAck) {
@@ -215,7 +227,7 @@ void loop() {
             timePollAckReceived = DW1000NgUtils::bytesAsValue(recv_data + 14, LENGTH_TIMESTAMP);
             timeRangeSent = DW1000NgUtils::bytesAsValue(recv_data + 18, LENGTH_TIMESTAMP);
             // (re-)compute range as two-way ranging is done
-            double distance = DW1000NgRanging::computeRangeAsymmetric(timePollSent,
+            distance = DW1000NgRanging::computeRangeAsymmetric(timePollSent,
                                                         timePollReceived, 
                                                         timePollAckSent, 
                                                         timePollAckReceived, 
@@ -230,6 +242,7 @@ void loop() {
             
             transmitActivityFinished();
             noteActivity();
+            transmitRangeReport();
             return;
         }
     }

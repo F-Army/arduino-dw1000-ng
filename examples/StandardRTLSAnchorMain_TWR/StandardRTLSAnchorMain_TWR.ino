@@ -245,6 +245,15 @@ void loop() {
             return;
         }
 
+        if(recv_data[9] == 0x60) {
+            String rangeReportString = "Range from: "; rangeReportString += recv_data[7];
+            rangeReportString += " = "; rangeReportString += static_cast<double>(DW1000NgUtils::bytesAsValue(&recv_data[10],2) / 1000.0);
+            Serial.println(rangeReportString);
+            DW1000Ng::startReceive();
+            noteActivity();
+            return;
+        }
+
         if(recv_data[0] == BLINK) {
             /* Is blink */
             memcpy(target_eui, &recv_data[2], 8);
