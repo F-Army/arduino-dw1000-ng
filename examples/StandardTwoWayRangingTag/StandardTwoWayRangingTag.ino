@@ -77,9 +77,10 @@ device_configuration_t DEFAULT_CONFIG = {
 interrupt_configuration_t DEFAULT_INTERRUPT_CONFIG = {
     true,
     true,
-    true,
     false,
-    true
+    false,
+    false,
+    false
 };
 
 frame_filtering_configuration_t TAG_FRAME_FILTER_CONFIG = {

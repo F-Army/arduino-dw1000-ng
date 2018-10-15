@@ -95,7 +95,7 @@ frame_filtering_configuration_t ANCHOR_FRAME_FILTER_CONFIG = {
     false,
     false,
     false,
-    true /* This allows blink frames */
+    false
 };
 
 void setup() {
@@ -244,15 +244,6 @@ void loop() {
             noteActivity();
             return;
         }
-
-        if(recv_data[0] == BLINK) {
-            /* Is blink */
-            memcpy(target_eui, &recv_data[2], 8);
-            transmitRangingInitiation();
-            noteActivity();
-            return;
-        }
-
     }
 }
 
