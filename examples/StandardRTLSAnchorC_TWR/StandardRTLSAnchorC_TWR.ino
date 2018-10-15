@@ -64,6 +64,8 @@ uint16_t replyDelayTimeUS = 3000;
 byte target_eui[8];
 byte tag_shortAddress[] = {0x05, 0x00};
 
+byte main_anchor_address[] = {0x01, 0x00};
+
 device_configuration_t DEFAULT_CONFIG = {
     false,
     true,
