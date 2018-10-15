@@ -66,6 +66,8 @@ float samplingRate = 0;
 byte target_eui[8];
 byte tag_shortAddress[] = {0x05, 0x00};
 
+byte next_anchor_range[] = {0x02, 0x00};
+
 device_configuration_t DEFAULT_CONFIG = {
     false,
     true,
@@ -185,7 +187,7 @@ void transmitResponseToPoll() {
 }
 
 void transmitRangingConfirm() {
-    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONFIRM, 0x01, 0x00};
+    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONFIRM, next_anchor_range[0], next_anchor_range[1]};
     DW1000Ng::getNetworkId(&rangingConfirm[3]);
     memcpy(&rangingConfirm[5], tag_shortAddress, 2);
     DW1000Ng::getDeviceAddress(&rangingConfirm[7]);
