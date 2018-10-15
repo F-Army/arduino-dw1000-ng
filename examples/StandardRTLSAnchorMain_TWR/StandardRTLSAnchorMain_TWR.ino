@@ -28,6 +28,7 @@
  * This is an example master anchor in a RTLS using two way ranging ISO/IEC 24730-62_2013 messages
  */
 
+#include <math.h>
 #include <SPI.h>
 #include <DW1000Ng.hpp>
 #include <DW1000NgUtils.hpp>
@@ -53,6 +54,14 @@ uint64_t timePollAckReceived;
 uint64_t timeRangeSent;
 uint64_t timeRangeReceived;
 
+double position_self[] = {0,0};
+double position_B[] = {3,0};
+double position_C[] = {3, 2.5};
+
+double range_self;
+double range_B;
+double range_C;
+
 // watchdog and reset period
 uint32_t lastActivity;
 uint32_t resetPeriod = 250;
@@ -62,7 +71,8 @@ uint16_t replyDelayTimeUS = 3000;
 byte target_eui[8];
 byte tag_shortAddress[] = {0x05, 0x00};
 
-byte next_anchor_range[] = {0x02, 0x00};
+byte anchor_b[] = {0x02, 0x00};
+byte anchor_c[] = {0x03, 0x00};
 
 device_configuration_t DEFAULT_CONFIG = {
     false,
@@ -182,12 +192,31 @@ void transmitResponseToPoll() {
 }
 
 void transmitRangingConfirm() {
-    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONFIRM, next_anchor_range[0], next_anchor_range[1]};
+    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONFIRM, anchor_b[0], anchor_b[1]};
     DW1000Ng::getNetworkId(&rangingConfirm[3]);
     memcpy(&rangingConfirm[5], tag_shortAddress, 2);
     DW1000Ng::getDeviceAddress(&rangingConfirm[7]);
     DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));
     DW1000Ng::startTransmit();
+}
+
+void calculatePosition(double &x, double &y) {
+    double b = ((range_B*range_B) - (range_self*range_self) + (position_B[0]*position_B[0])) / 2*position_B[0];
+    x = position_B[0] - b;
+    y = sqrt((range_self*range_self) - (b*b));
+
+    /* Select the two possible y values */
+
+    double distanceFromX = (position_C[0] - x)*(position_C[0] - x);
+
+    double distanceFromCPositiveY = sqrt(distanceFromX + (position_C[1] - y)*(position_C[1] - y));
+    double distanceFromCNegativeY = sqrt(distanceFromX + (position_C[1] + y)*(position_C[1] + y));
+
+    double differenceFromRangeCPositiveY = range_C - distanceFromCPositiveY;
+    double differenceFromRangeCNegativeY = range_C - distanceFromCNegativeY;
+
+    if(differenceFromRangeCPositiveY - differenceFromRangeCNegativeY)
+        y = -y;
 }
  
 void loop() {
@@ -227,16 +256,16 @@ void loop() {
             timePollAckReceived = DW1000NgUtils::bytesAsValue(recv_data + 14, LENGTH_TIMESTAMP);
             timeRangeSent = DW1000NgUtils::bytesAsValue(recv_data + 18, LENGTH_TIMESTAMP);
             // (re-)compute range as two-way ranging is done
-            double distance = DW1000NgRanging::computeRangeAsymmetric(timePollSent,
+            range_self = DW1000NgRanging::computeRangeAsymmetric(timePollSent,
                                                         timePollReceived, 
                                                         timePollAckSent, 
                                                         timePollAckReceived, 
                                                         timeRangeSent, 
                                                         timeRangeReceived);
             /* Apply bias correction */
-            distance = DW1000NgRanging::correctRange(distance);
+            range_self = DW1000NgRanging::correctRange(range_self);
             
-            String rangeString = "Range: "; rangeString += distance; rangeString += " m";
+            String rangeString = "Range: "; rangeString += range_self; rangeString += " m";
             rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
             Serial.println(rangeString);
             
@@ -246,9 +275,21 @@ void loop() {
         }
 
         if(recv_data[9] == 0x60) {
+            double range = static_cast<double>(DW1000NgUtils::bytesAsValue(&recv_data[10],2) / 1000.0);
             String rangeReportString = "Range from: "; rangeReportString += recv_data[7];
-            rangeReportString += " = "; rangeReportString += static_cast<double>(DW1000NgUtils::bytesAsValue(&recv_data[10],2) / 1000.0);
+            rangeReportString += " = "; rangeReportString += range;
             Serial.println(rangeReportString);
+            if(recv_data[7] == anchor_b[0] && recv_data[8] == anchor_b[1]) {
+                range_B = range;
+            } else if(recv_data[7] == anchor_c[0] && recv_data[8] == anchor_c[1]){
+                range_C = range;
+                double x,y;
+                calculatePosition(x,y);
+                String positioning = "Found position - x: ";
+                positioning += x; positioning +=" y: ";
+                positioning += y;
+                Serial.println(positioning);
+            }
             DW1000Ng::startReceive();
             noteActivity();
             return;
