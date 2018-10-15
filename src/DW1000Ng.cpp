@@ -1718,7 +1718,6 @@ namespace DW1000Ng {
 	}
 
 	void setReceiveFrameWaitTimeoutPeriod(uint16_t timeMicroSeconds) {
-		forceTRxOff();
 		if (timeMicroSeconds > 0) {
 			byte rx_wfto[LEN_RX_WFTO];
 			DW1000NgUtils::writeValueToBytes(rx_wfto, timeMicroSeconds, LEN_RX_WFTO);
