@@ -23,9 +23,9 @@
 */
 
 /* 
- * StandardTwoWayRangingAnchor.ino
+ * StandardRTLSAnchorMain_TWR.ino
  * 
- * This is an example anchor in a RTLS using two way ranging ISO/IEC 24730-62_2013 messages
+ * This is an example master anchor in a RTLS using two way ranging ISO/IEC 24730-62_2013 messages
  */
 
 #include <SPI.h>
@@ -33,6 +33,11 @@
 #include <DW1000NgUtils.hpp>
 #include <DW1000NgRanging.hpp>
 #include <DW1000NgRTLS.hpp>
+
+typedef struct Position {
+    double x;
+    double y;
+} Position;
 
 // connection pins
 const uint8_t PIN_RST = 9; // reset pin
@@ -43,26 +48,35 @@ const uint8_t PIN_SS = SS; // spi select pin
 volatile boolean sentAck = false;
 volatile boolean receivedAck = false;
 
-byte SEQ_NUMBER = 0;
+volatile byte SEQ_NUMBER = 0;
 
 // timestamps to remember
-uint64_t timePollSent;
-uint64_t timePollReceived;
-uint64_t timePollAckSent;
-uint64_t timePollAckReceived;
-uint64_t timeRangeSent;
-uint64_t timeRangeReceived;
+volatile uint64_t timePollSent;
+volatile uint64_t timePollReceived;
+volatile uint64_t timePollAckSent;
+volatile uint64_t timePollAckReceived;
+volatile uint64_t timeRangeSent;
+volatile uint64_t timeRangeReceived;
+
+Position position_self = {0,0};
+Position position_B = {3,0};
+Position position_C = {3,2.5};
+
+volatile double range_self;
+volatile double range_B;
+volatile double range_C;
 
 // watchdog and reset period
-uint32_t lastActivity;
-uint32_t resetPeriod = 250;
+volatile uint32_t lastActivity;
+volatile uint32_t resetPeriod = 250;
 // reply times (same on both sides for symm. ranging)
 uint16_t replyDelayTimeUS = 3000;
 
 byte target_eui[8];
 byte tag_shortAddress[] = {0x05, 0x00};
 
-byte next_anchor_range[] = {0x02, 0x00};
+byte anchor_b[] = {0x02, 0x00};
+byte anchor_c[] = {0x03, 0x00};
 
 device_configuration_t DEFAULT_CONFIG = {
     false,
@@ -182,12 +196,27 @@ void transmitResponseToPoll() {
 }
 
 void transmitRangingConfirm() {
-    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONFIRM, next_anchor_range[0], next_anchor_range[1]};
+    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONFIRM, anchor_b[0], anchor_b[1]};
     DW1000Ng::getNetworkId(&rangingConfirm[3]);
     memcpy(&rangingConfirm[5], tag_shortAddress, 2);
     DW1000Ng::getDeviceAddress(&rangingConfirm[7]);
     DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));
     DW1000Ng::startTransmit();
+}
+
+/* using https://math.stackexchange.com/questions/884807/find-x-location-using-3-known-x-y-location-using-trilateration */
+void calculatePosition(double &x, double &y) {
+
+    /* This gives for granted that the z plane is the same for anchor and tags */
+    double A = ( (-2*position_self.x) + (2*position_B.x) );
+    double B = ( (-2*position_self.y) + (2*position_B.y) );
+    double C = (range_self*range_self) - (range_B*range_B) - (position_self.x*position_self.x) + (position_B.x*position_B.x) - (position_self.y*position_self.y) + (position_B.y*position_B.y);
+    double D = ( (-2*position_B.x) + (2*position_C.x) );
+    double E = ( (-2*position_B.y) + (2*position_C.y) );
+    double F = (range_B*range_B) - (range_C*range_C) - (position_B.x*position_B.x) + (position_C.x*position_C.x) - (position_B.y*position_B.y) + (position_C.y*position_C.y);
+
+    x = (C*E-F*B) / (E*A-B*D);
+    y = (C*D-A*F) / (B*D-A*E);
 }
  
 void loop() {
@@ -227,20 +256,45 @@ void loop() {
             timePollAckReceived = DW1000NgUtils::bytesAsValue(recv_data + 14, LENGTH_TIMESTAMP);
             timeRangeSent = DW1000NgUtils::bytesAsValue(recv_data + 18, LENGTH_TIMESTAMP);
             // (re-)compute range as two-way ranging is done
-            double distance = DW1000NgRanging::computeRangeAsymmetric(timePollSent,
+            range_self = DW1000NgRanging::computeRangeAsymmetric(timePollSent,
                                                         timePollReceived, 
                                                         timePollAckSent, 
                                                         timePollAckReceived, 
                                                         timeRangeSent, 
                                                         timeRangeReceived);
             /* Apply bias correction */
-            distance = DW1000NgRanging::correctRange(distance);
+            range_self = DW1000NgRanging::correctRange(range_self);
+
+            /* In case of wrong read due to bad device calibration */
+            if(range_self <= 0) 
+                range_self = 0.001;
             
-            String rangeString = "Range: "; rangeString += distance; rangeString += " m";
+            String rangeString = "Range: "; rangeString += range_self; rangeString += " m";
             rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
             Serial.println(rangeString);
             
             transmitRangingConfirm();
+            noteActivity();
+            return;
+        }
+
+        if(recv_data[9] == 0x60) {
+            double range = static_cast<double>(DW1000NgUtils::bytesAsValue(&recv_data[10],2) / 1000.0);
+            String rangeReportString = "Range from: "; rangeReportString += recv_data[7];
+            rangeReportString += " = "; rangeReportString += range;
+            Serial.println(rangeReportString);
+            if(recv_data[7] == anchor_b[0] && recv_data[8] == anchor_b[1]) {
+                range_B = range;
+            } else if(recv_data[7] == anchor_c[0] && recv_data[8] == anchor_c[1]){
+                range_C = range;
+                double x,y;
+                calculatePosition(x,y);
+                String positioning = "Found position - x: ";
+                positioning += x; positioning +=" y: ";
+                positioning += y;
+                Serial.println(positioning);
+            }
+            DW1000Ng::startReceive();
             noteActivity();
             return;
         }
