@@ -230,7 +230,19 @@ void loop() {
                 noteActivity();
                 return;
             } else if(recv_data[10] == ACTIVITY_FINISHED) {
-                delay(250);
+                resetPeriod = recv_data[11] + static_cast<uint32_t>(((recv_data[12] & 0x3F) << 8));
+                byte multiplier = (recv_data[12] & 0xC0) >> 6);
+                if(multiplier  == 0x01) {
+                    resetPeriod *= 25;
+                } else if(multiplier == 0x02) {
+                    resetPeriod *= 1000;
+                }
+                
+                /* Sleep until next blink to save power */
+                DW1000Ng::deepSleep();
+                delay(resetPeriod);
+                DW1000Ng::spiWakeup();
+
                 transmitBlink();
                 noteActivity();
                 return;
