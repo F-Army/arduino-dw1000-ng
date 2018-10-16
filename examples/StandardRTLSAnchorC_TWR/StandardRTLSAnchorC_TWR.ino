@@ -239,6 +239,10 @@ void loop() {
                                                         timeRangeReceived);
             /* Apply bias correction */
             distance = DW1000NgRanging::correctRange(distance);
+
+            /* In case of wrong read due to bad device calibration */
+            if(distance < 0) 
+                distance = 0;
             
             String rangeString = "Range: "; rangeString += distance; rangeString += " m";
             rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
