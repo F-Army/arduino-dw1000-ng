@@ -200,24 +200,16 @@ void transmitRangingConfirm() {
     DW1000Ng::startTransmit();
 }
 
+/* using https://math.stackexchange.com/questions/884807/find-x-location-using-3-known-x-y-location-using-trilateration */
 void calculatePosition(double &x, double &y) {
-    double b = ( (range_B*range_B) - (range_self*range_self) + (position_B[0]*position_B[0])) / (2*position_B[0]);
-    x = position_B[0] - b;
-    y = sqrt((range_self*range_self) - (b*b));
-
-    /* Select the two possible y values */
-
-    double distanceFromX = (position_C[0] - x)*(position_C[0] - x);
-
-    double distanceFromCPositiveY = sqrt(distanceFromX + (position_C[1] - y)*(position_C[1] - y));
-    double distanceFromCNegativeY = sqrt(distanceFromX + (position_C[1] + y)*(position_C[1] + y));
-
-    double differenceFromRangeCPositiveY = range_C - distanceFromCPositiveY;
-    double differenceFromRangeCNegativeY = range_C - distanceFromCNegativeY;
-
-    if( (abs(differenceFromRangeCPositiveY) - abs(differenceFromRangeCNegativeY)) > 0 ) {
-        y = -y;
-    }
+    double A = ( (-2*position_self[0]) + (2*position_B[0]) );
+    double B = ( (-2*position_self[1]) + (2*position_B[1]) );
+    double C = (range_self*range_self) - (range_B*range_B) - (position_self[0]*position_self[0]) + (position_B[0]*position_B[0]) - (position_self[1]*position_self[1]) + (position_B[1]*position_B[1]);
+    double D = ( (-2*position_B[0]) + (2*position_C[0]) );
+    double E = ( (-2*position_B[1]) + (2*position_C[1]) );
+    double F = (range_B*range_B) - (range_C*range_C) - (position_B[0]*position_B[0]) + (position_C[0]*position_C[0]) - (position_B[1]*position_B[1]) + (position_C[1]*position_C[1]);
+    x = (C*E−F*B) / (E*A−B*D);
+    y = (C*D-A*F) / (B*D-A*E);
 }
  
 void loop() {
