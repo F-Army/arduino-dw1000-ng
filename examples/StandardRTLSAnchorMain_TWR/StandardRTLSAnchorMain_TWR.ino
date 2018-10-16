@@ -35,6 +35,11 @@
 #include <DW1000NgRanging.hpp>
 #include <DW1000NgRTLS.hpp>
 
+typedef struct Position {
+    double x;
+    double y;
+} Position;
+
 // connection pins
 const uint8_t PIN_RST = 9; // reset pin
 const uint8_t PIN_IRQ = 2; // irq pin
@@ -54,9 +59,9 @@ uint64_t timePollAckReceived;
 uint64_t timeRangeSent;
 uint64_t timeRangeReceived;
 
-double position_self[] = {0,0};
-double position_B[] = {3,0};
-double position_C[] = {3, 2.5};
+Position position_self = {0,0};
+Position position_B = {3,0};
+Position position_C = {3,2.5};
 
 double range_self;
 double range_B;
@@ -202,12 +207,12 @@ void transmitRangingConfirm() {
 
 /* using https://math.stackexchange.com/questions/884807/find-x-location-using-3-known-x-y-location-using-trilateration */
 void calculatePosition(double &x, double &y) {
-    double A = ( (-2*position_self[0]) + (2*position_B[0]) );
-    double B = ( (-2*position_self[1]) + (2*position_B[1]) );
-    double C = (range_self*range_self) - (range_B*range_B) - (position_self[0]*position_self[0]) + (position_B[0]*position_B[0]) - (position_self[1]*position_self[1]) + (position_B[1]*position_B[1]);
-    double D = ( (-2*position_B[0]) + (2*position_C[0]) );
-    double E = ( (-2*position_B[1]) + (2*position_C[1]) );
-    double F = (range_B*range_B) - (range_C*range_C) - (position_B[0]*position_B[0]) + (position_C[0]*position_C[0]) - (position_B[1]*position_B[1]) + (position_C[1]*position_C[1]);
+    double A = ( (-2*position_self.x) + (2*position_B.x) );
+    double B = ( (-2*position_self.y) + (2*position_B.y) );
+    double C = (range_self*range_self) - (range_B*range_B) - (position_self.x*position_self.x) + (position_B.x*position_B.x) - (position_self.y*position_self.y) + (position_B.y*position_B.y);
+    double D = ( (-2*position_B.x) + (2*position_C.x) );
+    double E = ( (-2*position_B.y) + (2*position_C.y) );
+    double F = (range_B*range_B) - (range_C*range_C) - (position_B.x*position_B.x) + (position_C.x*position_C.x) - (position_B.y*position_B.y) + (position_C.y*position_C.y);
 
     x = (C*E-F*B) / (E*A-B*D);
     y = (C*D-A*F) / (B*D-A*E);
