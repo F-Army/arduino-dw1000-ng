@@ -241,7 +241,7 @@ void loop() {
             distance = DW1000NgRanging::correctRange(distance);
 
             /* In case of wrong read due to bad device calibration */
-            if(distance < 0) 
+            if(distance <= 0) 
                 distance = 0.001;
             
             String rangeString = "Range: "; rangeString += distance; rangeString += " m";

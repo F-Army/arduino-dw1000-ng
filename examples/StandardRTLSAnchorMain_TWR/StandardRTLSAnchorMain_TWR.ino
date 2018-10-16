@@ -266,7 +266,7 @@ void loop() {
             range_self = DW1000NgRanging::correctRange(range_self);
 
             /* In case of wrong read due to bad device calibration */
-            if(range_self < 0) 
+            if(range_self <= 0) 
                 range_self = 0.001;
             
             String rangeString = "Range: "; rangeString += range_self; rangeString += " m";
