@@ -208,8 +208,8 @@ void calculatePosition(double &x, double &y) {
     double D = ( (-2*position_B[0]) + (2*position_C[0]) );
     double E = ( (-2*position_B[1]) + (2*position_C[1]) );
     double F = (range_B*range_B) - (range_C*range_C) - (position_B[0]*position_B[0]) + (position_C[0]*position_C[0]) - (position_B[1]*position_B[1]) + (position_C[1]*position_C[1]);
-    
-    x = (C*E−F*B) / (E*A−B*D);
+
+    x = (C*E-F*B) / (E*A-B*D);
     y = (C*D-A*F) / (B*D-A*E);
 }
  
