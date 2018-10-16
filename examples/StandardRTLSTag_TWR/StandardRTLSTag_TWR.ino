@@ -55,7 +55,7 @@ uint64_t timePollSent;
 uint64_t timePollAckReceived;
 uint64_t timeRangeSent;
 // watchdog and reset period
-uint32_t lastActivity;
+volatile uint32_t lastActivity;
 volatile uint32_t resetPeriod = 250;
 // reply times (same on both sides for symm. ranging)
 uint16_t replyDelayTimeUS = 3000;
