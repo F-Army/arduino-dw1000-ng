@@ -48,27 +48,27 @@ const uint8_t PIN_SS = SS; // spi select pin
 volatile boolean sentAck = false;
 volatile boolean receivedAck = false;
 
-byte SEQ_NUMBER = 0;
+volatile byte SEQ_NUMBER = 0;
 
 // timestamps to remember
-uint64_t timePollSent;
-uint64_t timePollReceived;
-uint64_t timePollAckSent;
-uint64_t timePollAckReceived;
-uint64_t timeRangeSent;
-uint64_t timeRangeReceived;
+volatile uint64_t timePollSent;
+volatile uint64_t timePollReceived;
+volatile uint64_t timePollAckSent;
+volatile uint64_t timePollAckReceived;
+volatile uint64_t timeRangeSent;
+volatile uint64_t timeRangeReceived;
 
 Position position_self = {0,0};
 Position position_B = {3,0};
 Position position_C = {3,2.5};
 
-double range_self;
-double range_B;
-double range_C;
+volatile double range_self;
+volatile double range_B;
+volatile double range_C;
 
 // watchdog and reset period
-uint32_t lastActivity;
-uint32_t resetPeriod = 250;
+volatile uint32_t lastActivity;
+volatile uint32_t resetPeriod = 250;
 // reply times (same on both sides for symm. ranging)
 uint16_t replyDelayTimeUS = 3000;
 

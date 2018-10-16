@@ -51,9 +51,9 @@ byte SEQ_NUMBER = 0;
 byte anchor_address[2];
 
 // timestamps to remember
-uint64_t timePollSent;
-uint64_t timePollAckReceived;
-uint64_t timeRangeSent;
+volatile uint64_t timePollSent;
+volatile uint64_t timePollAckReceived;
+volatile uint64_t timeRangeSent;
 // watchdog and reset period
 volatile uint32_t lastActivity;
 volatile uint32_t resetPeriod = 250;
