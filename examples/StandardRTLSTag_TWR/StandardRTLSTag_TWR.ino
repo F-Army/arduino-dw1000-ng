@@ -231,7 +231,7 @@ void loop() {
                 return;
             } else if(recv_data[10] == ACTIVITY_FINISHED) {
                 resetPeriod = recv_data[11] + static_cast<uint32_t>(((recv_data[12] & 0x3F) << 8));
-                byte multiplier = (recv_data[12] & 0xC0) >> 6);
+                byte multiplier = ((recv_data[12] & 0xC0) >> 6);
                 if(multiplier  == 0x01) {
                     resetPeriod *= 25;
                 } else if(multiplier == 0x02) {
