@@ -206,6 +206,8 @@ void transmitRangingConfirm() {
 
 /* using https://math.stackexchange.com/questions/884807/find-x-location-using-3-known-x-y-location-using-trilateration */
 void calculatePosition(double &x, double &y) {
+
+    /* This gives for granted that the z plane is the same for anchor and tags */
     double A = ( (-2*position_self.x) + (2*position_B.x) );
     double B = ( (-2*position_self.y) + (2*position_B.y) );
     double C = (range_self*range_self) - (range_B*range_B) - (position_self.x*position_self.x) + (position_B.x*position_B.x) - (position_self.y*position_self.y) + (position_B.y*position_B.y);
