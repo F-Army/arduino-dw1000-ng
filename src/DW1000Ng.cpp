@@ -1011,6 +1011,8 @@ namespace DW1000Ng {
 
 		void _interruptOnReceiveTimeout(boolean val) {
 			DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, RXRFTO_BIT, val);
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, RXPTO_BIT, val);
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, RXSFDTO_BIT, val);
 		}
 
 		void _interruptOnReceiveTimestampAvailable(boolean val) {
@@ -1092,9 +1094,9 @@ namespace DW1000Ng {
 		}
 
 		void _clearReceiveTimeoutStatus() {
-			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXSFDTO_BIT, true);
-			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXPTO_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXRFTO_BIT, true);
+			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXPTO_BIT, true);
+			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXSFDTO_BIT, true);
 			_writeBytesToRegister(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
@@ -1102,7 +1104,6 @@ namespace DW1000Ng {
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXPHE_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXFCE_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT, true);
-			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXSFDTO_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, AFFREJ_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT, true);
 			_writeBytesToRegister(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
