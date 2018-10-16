@@ -267,7 +267,7 @@ void loop() {
 
             /* In case of wrong read due to bad device calibration */
             if(range_self < 0) 
-                range_self = 0;
+                range_self = 0.001;
             
             String rangeString = "Range: "; rangeString += range_self; rangeString += " m";
             rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
