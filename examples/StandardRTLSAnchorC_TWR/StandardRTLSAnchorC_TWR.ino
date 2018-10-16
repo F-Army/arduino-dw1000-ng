@@ -174,7 +174,7 @@ void transmitResponseToPoll() {
 }
 
 void transmitActivityFinished() {
-    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, ACTIVITY_FINISHED, 0xFA, 0x00};
+    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, ACTIVITY_FINISHED, 0xC8, 0x00};
     DW1000Ng::getNetworkId(&rangingConfirm[3]);
     memcpy(&rangingConfirm[5], tag_shortAddress, 2);
     DW1000Ng::getDeviceAddress(&rangingConfirm[7]);
