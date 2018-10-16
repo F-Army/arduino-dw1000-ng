@@ -1003,10 +1003,10 @@ namespace DW1000Ng {
 		}
 
 		void _interruptOnReceiveFailed(boolean val) {
-			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, LDEERR_BIT, val);
-			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXFCE_BIT, val);
 			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXPHE_BIT, val);
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXFCE_BIT, val);
 			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXRFSL_BIT, val);
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, LDEERR_BIT, val);
 		}
 
 		void _interruptOnReceiveTimeout(boolean val) {
@@ -1170,10 +1170,10 @@ namespace DW1000Ng {
 		}
 
 		boolean _isReceiveFailed() {
-			return (DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT) ||
+			return (DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXPHE_BIT) ||
 					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXFCE_BIT) ||
-					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXPHE_BIT) ||
-					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT));
+					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT) ||
+					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT));
 		}
 
 		boolean _isReceiveTimeout() {
