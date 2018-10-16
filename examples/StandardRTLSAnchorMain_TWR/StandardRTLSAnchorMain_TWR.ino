@@ -201,7 +201,7 @@ void transmitRangingConfirm() {
 }
 
 void calculatePosition(double &x, double &y) {
-    double b = ((range_B*range_B) - (range_self*range_self) + (position_B[0]*position_B[0])) / 2*position_B[0];
+    double b = ( (range_B*range_B) - (range_self*range_self) + (position_B[0]*position_B[0])) / (2*position_B[0]);
     x = position_B[0] - b;
     y = sqrt((range_self*range_self) - (b*b));
 
@@ -215,8 +215,9 @@ void calculatePosition(double &x, double &y) {
     double differenceFromRangeCPositiveY = range_C - distanceFromCPositiveY;
     double differenceFromRangeCNegativeY = range_C - distanceFromCNegativeY;
 
-    if(differenceFromRangeCPositiveY - differenceFromRangeCNegativeY)
+    if( (abs(differenceFromRangeCPositiveY) - abs(differenceFromRangeCNegativeY)) > 0 ) {
         y = -y;
+    }
 }
  
 void loop() {
