@@ -26,10 +26,15 @@ spiWakeup	KEYWORD2
 reset	KEYWORD2
 softwareReset	KEYWORD2
 setNetworkId	KEYWORD2
+getNetworkId	KEYWORD2
 setDeviceAddress	KEYWORD2
+getDeviceAddress	KEYWORD2
 setEUI	KEYWORD2
+getEUI	KEYWORD2
 setTXPower	KEYWORD2
+setTXPowerAuto	KEYWORD2
 setTCPGDelay	KEYWORD2
+setTCPGDelayAuto	KEYWORD2
 enableTransmitPowerSpectrumTestMode	KEYWORD2
 setDelayedTRX	KEYWORD2
 setTransmitData	KEYWORD2
@@ -59,19 +64,34 @@ applyConfiguration	KEYWORD2
 applyInterruptConfiguration	KEYWORD2
 getChannel	KEYWORD2
 getPulseFrequency	KEYWORD2
+setPreambleDetectionTimeout	KEYWORD2
+setSfdDetectionTimeout	KEYWORD2
+setReceiveFrameWaitTimeoutPeriod	KEYWORD2
 startReceive	KEYWORD2
 startTransmit	KEYWORD2
 getTemperature	KEYWORD2
 getBatteryVoltage	KEYWORD2
 getTemperatureAndBatteryVoltage	KEYWORD2
 useExtendedFrameLength	KEYWORD2
+enableFrameFiltering	KEYWORD2
+disableFrameFiltering	KEYWORD2
+setWaitForResponse	KEYWORD2
 getPrintableDeviceIdentifier	KEYWORD2
 getPrintableExtendedUniqueIdentifier	KEYWORD2
 getPrintableNetworkIdAndShortAddress	KEYWORD2
 getPrintableDeviceMode	KEYWORD2
 getPrettyBytes	KEYWORD2
-# TODO  Continue...
 
+computeRangeAsymmetric	KEYWORD2
+correctRange	KEYWORD2
+
+microsecondsToUWBTime	KEYWORD2
+getBit	KEYWORD2
+setBit	KEYWORD2
+writeValueToBytes	KEYWORD2
+bytesAsValue	KEYWORD2
+nibbleFromChar	KEYWORD2
+convertToByte	KEYWORD2
 #######################################
 # Constants (LITERAL1)
 #######################################
