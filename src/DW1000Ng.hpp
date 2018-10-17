@@ -119,6 +119,11 @@ namespace DW1000Ng {
 	*/
 	void setNetworkId(uint16_t val);
 
+	/**
+	Gets the network identifier (a.k.a PAN id) set for the device
+
+	@param[out] id the bytes that represent the PAN id (2 bytes)
+	*/
 	void getNetworkId(byte id[]);
 	
 	/** 
@@ -129,8 +134,12 @@ namespace DW1000Ng {
 	*/
 	void setDeviceAddress(uint16_t val);
 
+	/**
+	Gets the short address identifier set for the device
+
+	@param[out] address the bytes that represent the short address of the device(2 bytes)
+	*/
 	void getDeviceAddress(byte address[]);
-	// TODO MAC and filters
 	
 	/**
 	Sets the device Extended Unique Identifier.
@@ -148,6 +157,11 @@ namespace DW1000Ng {
 	*/
 	void setEUI(byte eui[]);
 	
+	/**
+	Gets the device Extended Unique Identifier.
+
+	@param[out] eui The 8 bytes of the EUI.
+	*/
 	void getEUI(byte eui[]);
 
 	/**
@@ -192,32 +206,134 @@ namespace DW1000Ng {
 	*/
 	void setTCPGDelayAuto();
 
-	/* Enables transmit power spectrum test mode that is used for Transmit Power regulatory testing */
+	/** 
+	Enables transmit power spectrum test mode that is used for Transmit Power regulatory testing 
+	
+	@param [in] repeat_interval the interval to repeat the transmission
+	*/
 	void enableTransmitPowerSpectrumTestMode(int32_t repeat_interval);
 	
-	/* transmit and receive configuration. */
-	void         setDelayedTRX(byte futureTimeBytes[]);
-	void         setTransmitData(byte data[], uint16_t n);
-	void         setTransmitData(const String& data);
-	void         getReceivedData(byte data[], uint16_t n);
-	void         getReceivedData(String& data);
-	uint16_t     getReceivedDataLength();
+	/**
+	Sets a delay for transmission and receive
+
+	@param [in] futureTimeBytes the timestamp in bytes of the time of the transmission (in UWB time)
+	*/
+	void setDelayedTRX(byte futureTimeBytes[]);
+
+	/**
+	Sets the transmission bytes inside the tx buffer of the DW1000
+
+	@param [in] data the bytes to transmit
+	@param [in] n the length of the array of bytes
+	*/
+	void setTransmitData(byte data[], uint16_t n);
+
+	/**
+	Sets the transmission bytes inside the tx buffer of the DW1000 based on the input string
+
+	@param [in] data the string to transmit
+	*/
+	void setTransmitData(const String& data);
+
+	/**
+	Gets the received bytes and stores them in a byte array
+
+	@param [out] data The array of byte to store the data
+	@param [out] n The length of the byte array
+	*/
+	void getReceivedData(byte data[], uint16_t n);
+
+	/**
+	Stores the received data inside a string
+
+	param [out] data the string that will contain the data
+	*/
+	void getReceivedData(String& data);
+
+	/**
+	Calculates the length of the received data
+
+	returns the length of the data
+	*/
+	uint16_t getReceivedDataLength();
 	
-	uint64_t     getTransmitTimestamp();
-	uint64_t     getReceiveTimestamp();
-	uint64_t     getSystemTimestamp();
+	/**
+	Calculates the latest transmission timestamp
+
+	return the last transmission timestamp
+	*/
+	uint64_t getTransmitTimestamp();
+
+	/**
+	Calculates the latest receive timestamp
+
+	return the last receive timestamp
+	*/
+	uint64_t getReceiveTimestamp();
+
+	/**
+	Calculates the current system timestamp
+
+	return the system timestamp
+	*/
+	uint64_t getSystemTimestamp();
 	
 	/* receive quality information. (RX_FSQUAL) - reg:0x12 */
+
+	/**
+	Gets the receive power of the device (last receive)
+
+	returns the last receive power of the device
+	*/
 	float getReceivePower();
+
+	/**
+	Gets the power of the first path
+
+	returns the first path power
+	*/ 
 	float getFirstPathPower();
+
+	/**
+	Gets the last receive quality
+
+	returns last receive quality
+	*/
 	float getReceiveQuality();
 
-	/* Antenna delay calibration */
+	/**
+	Sets both tx and rx antenna delay value
+
+	@param [in] value the delay in UWB time
+	*/
 	void setAntennaDelay(uint16_t value);
+	
+	/**
+	Sets the tx antenna delay value
+
+	@param [in] value the delay in UWB time
+	*/
 	void setTxAntennaDelay(uint16_t value);
+
+	/**
+	Sets the rx antenna delay value
+
+	@param [in] value the delay in UWB time
+	*/
 	void setRxAntennaDelay(uint16_t value);
 
+	/**
+	Gets the tx antenna delay value
+
+	returns the value of the delay in UWB time
+	*/
 	uint16_t getTxAntennaDelay();
+
+	/**
+	Gets the rx antenna delay value
+
+	returns the value of the delay in UWB time
+	*/
 	uint16_t getRxAntennaDelay();
 
 	/* callback handler management. */
