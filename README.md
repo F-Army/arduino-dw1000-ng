@@ -16,6 +16,14 @@ Status
 ------------
 This is actively developed.
 
+Differences with thotro/arduino-dw1000
+------------
+This is a fork of https://github.com/thotro/arduino-dw1000.<br/>
+The main reason for this fork is because the development there is really slow (due to the original author not developing it anymore) and some important features were missing (for example antenna delay calibration). <br/>
+We also wanted to change how the ranging logic works.<br/>
+Rather than providing a ranging loop, we wanted to provide functions to send the different Two way ranging flow frames, giving the user more control over the program. <br />
+The base driver was also re-written in a lot of places, to make every API function more independent from each other.
+
 Features
 ------------
 ![Ranging](https://img.shields.io/badge/Ranging-done-brightgreen.svg?&style=for-the-badge)
