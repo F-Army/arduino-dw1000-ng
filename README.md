@@ -11,11 +11,23 @@
 ![Arduino](https://img.shields.io/badge/Arduino-%3E%3D1.6.6-blue.svg?&style=for-the-badge)
 [![Discord](https://img.shields.io/badge/Discord-Arduino%20DW1000Ng-7289da.svg?&style=for-the-badge&logo=discord)](https://discord.gg/VJWYhJq)
 </div>
-<br/>
 
 Status
 ------------
-This is still work in progress, expect breaking changes until the first release.
+This is actively developed.
+
+Features
+------------
+![Ranging](https://img.shields.io/badge/Ranging-done-brightgreen.svg?&style=for-the-badge)
+![Localization](https://img.shields.io/badge/Localization-done-brightgreen.svg?&style=for-the-badge)
+![Frame filtering](https://img.shields.io/badge/Frame%20filtering-done-brightgreen.svg?&style=for-the-badge)
+![Antenna Calibration](https://img.shields.io/badge/Antenna%20calibration-done-brightgreen.svg?&style=for-the-badge)
+![Transmission power setup](https://img.shields.io/badge/Transmission%20power%20setup-done-brightgreen.svg?&style=for-the-badge)
+![Deep sleep](https://img.shields.io/badge/Deep%20sleep%20-Simple-yellow.svg?&style=for-the-badge)
+![Double buffering](https://img.shields.io/badge/Double%20buffering-TODO-red.svg?&style=for-the-badge)
+![Transmit Power Spectrum Test Mode](https://img.shields.io/badge/Transmit%20Power%20Spectrum%20Test%20Mode-DONE-brightgreen.svg?&style=for-the-badge)
+![Continuous wave mode](https://img.shields.io/badge/Continuous%20Wave%20Mode-TODO-red.svg?&style=for-the-badge)
+<br/>
 
 Installation
 ------------
@@ -28,7 +40,14 @@ Installation
 
 Usage
 -----
-Check examples for basic usage.
+Check examples folder for basic usage.
+
+Authors
+------------
+<ul>
+  <li><b> Michele 'an4cr0n' Biondi </b>: https://github.com/an4cr0n</li>
+  <li><b>Andrea 'Sonic0' Salvatori</b>: https://github.com/Sonic0</li>
+</ul>
 
 License
 -------
