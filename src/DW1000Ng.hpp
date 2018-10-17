@@ -272,7 +272,7 @@ namespace DW1000Ng {
 	uint64_t getReceiveTimestamp();
 
 	/**
-	Calculates the current system timestamp
+	Calculates the current system timestamp inside the DW1000
 
 	return the system timestamp
 	*/
@@ -336,34 +336,94 @@ namespace DW1000Ng {
 	*/
 	uint16_t getRxAntennaDelay();
 
-	/* callback handler management. */
+	/**
+	Sets the function for error event handling
+
+	@param [in] handleError the target function
+	*/
 	void attachErrorHandler(void (* handleError)(void));
 	
+	/**
+	Sets the function for end of transission event handling
+
+	@param [in] handleSent the target function
+	*/
 	void attachSentHandler(void (* handleSent)(void));
 	
+	/**
+	Sets the function for end of receive event handling
+
+	@param [in] handleReceived the target function
+	*/
 	void attachReceivedHandler(void (* handleReceived)(void));
 	
+	/**
+	Sets the function for receive error event handling
+
+	@param [in] handleReceiveFailed the target function
+	*/
 	void attachReceiveFailedHandler(void (* handleReceiveFailed)(void));
 	
+	/**
+	Sets the function for receive timeout event handling
+
+	@param [in] handleReceiveTimeout the target function
+	*/
 	void attachReceiveTimeoutHandler(void (* handleReceiveTimeout)(void));
 	
-	void attachReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void));
+	/**
+	Sets the function for receive timestamp availabe event handling
 
+	@param [in] handleReceiveTimestampAvailable the target function
+	*/
+	void attachReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void));
+	
+	/**
+	Poll the DW1000 for system events and handles them
+	By default this is attached to the interrupt pin callback
+	*/
 	void pollForEvents();
 	
-	/* device state management. */
-	// force idle state
+	/**
+	Stops the transceiver immediately, this actually sets the device in Idle mode.
+	*/
 	void forceTRxOff();
 
+	/**
+	Sets the interrupt polarity
+
+	By default this is set to true by the DW1000
+
+	@param [in] val True here means active high
+	*/
 	void setInterruptPolarity(boolean val);
 
+	/**
+	Applies the target configuration to the DW1000
+
+	@param [in] config the configuration to apply to the DW1000
+	*/
 	void applyConfiguration(device_configuration_t config);
+
+	/**
+	Enables the interrupts for the target events
+
+	@param [in] interrupt_config the interrupt map to use
+	*/
 	void applyInterruptConfiguration(interrupt_configuration_t interrupt_config);
 
-	/* Configuration Getters */
+	/**
+	Gets the current channel in use
 
+	returns the current channel
+	*/
 	Channel getChannel();
 
+	/**
+	Gets the current PRF of the device
+
+	returns the current PRF
+	*/
 	PulseFrequency getPulseFrequency();
 	
 	/**
@@ -375,8 +435,10 @@ namespace DW1000Ng {
 
 	/**
 	Sets the timeout for SFD detection.
+	The recommended value is: PreambleLenght + SFD + 1.
+	The default value is 4096+64+1
 	
-	@param[in] PreambleLenght + SFD + 1. default value 4096+64+1 
+	@param[in] the sfd detection timeout 
 	*/
 	void setSfdDetectionTimeout(uint16_t preambleSymbols);
 
@@ -388,31 +450,73 @@ namespace DW1000Ng {
 	*/
 	void setReceiveFrameWaitTimeoutPeriod(uint16_t timeMicroSeconds);
 
-	// reception state
+	/**
+	Sets the device in receive mode
+
+	@param [in] mode IMMEDIATE or DELAYED receive
+	*/
 	void startReceive(ReceiveMode mode = ReceiveMode::IMMEDIATE);
 	
-	// transmission state
+	/**
+	Sets the device in transmission mode
+
+	@param [in] mode IMMEDIATE or DELAYED transmission
+	*/
 	void startTransmit(TransmitMode mode = TransmitMode::IMMEDIATE);
 	
-	/* host-initiated reading of temperature and battery voltage */
+	/**
+	Gets the temperature inside the DW1000 Device
+
+	@param [out] temp the temperature 
+	*/
 	void getTemperature(float& temp);
+
+	/**
+	Gets the voltage in input of the DW1000
+
+	@param [out] vbat the input voltage
+	*/
 	void getBatteryVoltage(float& vbat);
+
+	/**
+	Gets both temperature and voltage with a single read
+
+	@param [out] temp the temperature
+	@param [out] vbat the input voltage
+	*/ 
 	void getTemperatureAndBatteryVoltage(float& temp, float& vbat);
 
-	/* Allow MAC frame filtering */
-	// TODO auto-acknowledge
+	/**
+	Enables the frame filtering functionality using the provided configuration.
+	Messages must be formatted using 802.15.4-2011 format.
+
+	@param [in] config frame filtering configuration
+	*/
 	void enableFrameFiltering(frame_filtering_configuration_t config);
+
+	/**
+	Disables the frame filtering functionality
+	*/
 	void disableFrameFiltering();
 	
-	// note: not sure if going to be implemented for now
+	/**
+	WARNING: this just sets the relative bits inside the register.
+	You must refer to the DW1000 User manual to activate it properly.
+	*/
 	void setDoubleBuffering(boolean val);
-	// TODO is implemented, but needs testing
+
+	/**
+	Enables frames up to 1023 byte length
+
+	@param [in] val true or false
+	*/
 	void useExtendedFrameLength(boolean val);
 	
 	/**
 	Sets the time before the device enters receive after a transmission.
+	Use 0 here to deactivate it.
 
-	@param[in] time in μs. units = ~1μs(1.026μs) 
+	@param[in] time in μs. units = ~1μs(1.026μs)
 	*/
 	void setWait4Response(uint32_t timeMicroSeconds);
 
