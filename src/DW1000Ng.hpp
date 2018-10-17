@@ -53,24 +53,18 @@
 #include "DW1000NgCompileOptions.hpp"
 
 namespace DW1000Ng {
-	/* ##### Init ################################################################ */
 	/** 
-	Initiates and starts a sessions with one or more DW1000. If rst is not set or value 0xff, a soft resets (i.e. command
+	Initiates and starts a sessions with a DW1000. If rst is not set or value 0xff, a soft resets (i.e. command
 	triggered) are used and it is assumed that no reset line is wired.
-	 
+	
+	@param[in] ss  The SPI Selection pin used to identify the specific connection
 	@param[in] irq The interrupt line/pin that connects the Arduino.
 	@param[in] rst The reset line/pin for hard resets of ICs that connect to the Arduino. Value 0xff means soft reset.
 	*/
 	void initialize(uint8_t ss, uint8_t irq, uint8_t rst = 0xff);
 	
 	/** 
-	(Re-)selects a specific DW1000 chip for communication. In case of a single DW1000Ng chip in use
-	this call is not needed; only a call to `select()` has to be performed once at start up. Other 
-	than a call to `select()` this function does not perform an initial setup of the (again-)selected 
-	chips and assumes it to have a valid configuration loaded.
-
-	@param[in] ss The chip select line/pin that connects the to-be-selected chip with the
-	Arduino.
+	(Re-)selects a specific DW1000 chip for communication. Used in case you switched SPI to another device.
 	*/
 	void select();
 
@@ -91,7 +85,7 @@ namespace DW1000Ng {
 	void enableLedBlinking();
 
 	/**
-	Set GPIO mode
+	Set DW1000's GPIO pins mode
 	*/
 	void setGPIOMode(uint8_t msgp, uint8_t mode);
 
@@ -106,9 +100,8 @@ namespace DW1000Ng {
 	void spiWakeup();
 	
 	/**
-	Resets all connected or the currently selected DW1000 chip. A hard reset of all chips
-	is preferred, although a soft reset of the currently selected one is executed if no 
-	reset pin has been specified (when using `begin(int)`, instead of `begin(int, int)`).
+	Resets all connected or the currently selected DW1000 chip.
+	Uses hardware reset or in case the reset pin is not wired it falls back to software Reset. 
 	*/
 	void reset();
 	
@@ -117,15 +110,20 @@ namespace DW1000Ng {
 	*/
 	void softwareReset();
 	
-	/* ##### Device address management, filters ################################## */
 	/** 
 	(Re-)set the network identifier which the selected chip should be associated with. This
 	setting is important for certain MAC address filtering rules.
+	This is also referred as PanId
 
 	@param[in] val An arbitrary numeric network identifier.
 	*/
 	void setNetworkId(uint16_t val);
 
+	/**
+	Gets the network identifier (a.k.a PAN id) set for the device
+
+	@param[out] id the bytes that represent the PAN id (2 bytes)
+	*/
 	void getNetworkId(byte id[]);
 	
 	/** 
@@ -136,78 +134,296 @@ namespace DW1000Ng {
 	*/
 	void setDeviceAddress(uint16_t val);
 
-	void getDeviceAddress(byte address[]);
-	// TODO MAC and filters
-	
-	void setEUI(char eui[]);
-	void setEUI(byte eui[]);
+	/**
+	Gets the short address identifier set for the device
 
+	@param[out] address the bytes that represent the short address of the device(2 bytes)
+	*/
+	void getDeviceAddress(byte address[]);
+	
+	/**
+	Sets the device Extended Unique Identifier.
+	This is a long identifier of the device.
+
+	@param[in] eui A string containing the eui in its normal notation using columns.
+	*/
+	void setEUI(char eui[]);
+
+	/**
+	Sets the device Extended Unique Identifier.
+	This is a long identifier of the device.
+
+	@param[in] eui The raw bytes of the eui.
+	*/
+	void setEUI(byte eui[]);
+	
+	/**
+	Gets the device Extended Unique Identifier.
+
+	@param[out] eui The 8 bytes of the EUI.
+	*/
 	void getEUI(byte eui[]);
 
+	/**
+	Sets the transmission power of the device.
+	Be careful to respect your current country limitations.
+
+	@param[in] power Bytes that represent the power
+	*/
 	void setTXPower(byte power[]);
+
+	/**
+	Sets the transmission power of the device.
+	Be careful to respect your current country limitations.
+
+	@param[in] power  Bytes (written as a 32-bit number) that represent the power
+	*/
 	void setTXPower(int32_t power);
+
+	/**
+	Sets the transmission power of the device.
+	Be careful to respect your current country limitations.
+
+	@param[in] driver_amplifier Base power amplifier
+	@param[in] mixer Mixer power
+	*/
 	void setTXPower(DriverAmplifierValue driver_amplifier, TransmitMixerValue mixer);
+
+	/**
+	Automatically sets power in respect to the current device settings.
+	This should be guaranteed to set power under -41.3 dBm / MHz (legal limit in most countries).
+	*/
 	void setTXPowerAuto();
 
+	/**
+	Sets the pulse generator delay value.
+	You should use the setTCPGDelayAuto() function.
+	*/
 	void setTCPGDelay(byte tcpg_delay);
+
+	/**
+	Automatically sets pulse generator delay value
+	*/
 	void setTCPGDelayAuto();
 
-	/* Used for Transmit Power regulatory testing */
+	/** 
+	Enables transmit power spectrum test mode that is used for Transmit Power regulatory testing 
+	
+	@param [in] repeat_interval the interval to repeat the transmission
+	*/
 	void enableTransmitPowerSpectrumTestMode(int32_t repeat_interval);
 	
-	/* transmit and receive configuration. */
-	void         setDelayedTRX(byte futureTimeBytes[]);
-	void         setTransmitData(byte data[], uint16_t n);
-	void         setTransmitData(const String& data);
-	void         getReceivedData(byte data[], uint16_t n);
-	void         getReceivedData(String& data);
-	uint16_t     getReceivedDataLength();
+	/**
+	Sets a delay for transmission and receive
+
+	@param [in] futureTimeBytes the timestamp in bytes of the time of the transmission (in UWB time)
+	*/
+	void setDelayedTRX(byte futureTimeBytes[]);
+
+	/**
+	Sets the transmission bytes inside the tx buffer of the DW1000
+
+	@param [in] data the bytes to transmit
+	@param [in] n the length of the array of bytes
+	*/
+	void setTransmitData(byte data[], uint16_t n);
+
+	/**
+	Sets the transmission bytes inside the tx buffer of the DW1000 based on the input string
+
+	@param [in] data the string to transmit
+	*/
+	void setTransmitData(const String& data);
+
+	/**
+	Gets the received bytes and stores them in a byte array
+
+	@param [out] data The array of byte to store the data
+	@param [out] n The length of the byte array
+	*/
+	void getReceivedData(byte data[], uint16_t n);
+
+	/**
+	Stores the received data inside a string
+
+	param [out] data the string that will contain the data
+	*/
+	void getReceivedData(String& data);
+
+	/**
+	Calculates the length of the received data
+
+	returns the length of the data
+	*/
+	uint16_t getReceivedDataLength();
 	
-	uint64_t     getTransmitTimestamp();
-	uint64_t     getReceiveTimestamp();
-	uint64_t     getSystemTimestamp();
+	/**
+	Calculates the latest transmission timestamp
+
+	return the last transmission timestamp
+	*/
+	uint64_t getTransmitTimestamp();
+
+	/**
+	Calculates the latest receive timestamp
+
+	return the last receive timestamp
+	*/
+	uint64_t getReceiveTimestamp();
+
+	/**
+	Calculates the current system timestamp inside the DW1000
+
+	return the system timestamp
+	*/
+	uint64_t getSystemTimestamp();
 	
 	/* receive quality information. (RX_FSQUAL) - reg:0x12 */
+
+	/**
+	Gets the receive power of the device (last receive)
+
+	returns the last receive power of the device
+	*/
 	float getReceivePower();
+
+	/**
+	Gets the power of the first path
+
+	returns the first path power
+	*/ 
 	float getFirstPathPower();
+
+	/**
+	Gets the last receive quality
+
+	returns last receive quality
+	*/
 	float getReceiveQuality();
 
-	/* Antenna delay calibration */
+	/**
+	Sets both tx and rx antenna delay value
+
+	@param [in] value the delay in UWB time
+	*/
 	void setAntennaDelay(uint16_t value);
+	
+	/**
+	Sets the tx antenna delay value
+
+	@param [in] value the delay in UWB time
+	*/
 	void setTxAntennaDelay(uint16_t value);
+
+	/**
+	Sets the rx antenna delay value
+
+	@param [in] value the delay in UWB time
+	*/
 	void setRxAntennaDelay(uint16_t value);
 
+	/**
+	Gets the tx antenna delay value
+
+	returns the value of the delay in UWB time
+	*/
 	uint16_t getTxAntennaDelay();
+
+	/**
+	Gets the rx antenna delay value
+
+	returns the value of the delay in UWB time
+	*/
 	uint16_t getRxAntennaDelay();
 
-	/* callback handler management. */
+	/**
+	Sets the function for error event handling
+
+	@param [in] handleError the target function
+	*/
 	void attachErrorHandler(void (* handleError)(void));
 	
+	/**
+	Sets the function for end of transission event handling
+
+	@param [in] handleSent the target function
+	*/
 	void attachSentHandler(void (* handleSent)(void));
 	
+	/**
+	Sets the function for end of receive event handling
+
+	@param [in] handleReceived the target function
+	*/
 	void attachReceivedHandler(void (* handleReceived)(void));
 	
+	/**
+	Sets the function for receive error event handling
+
+	@param [in] handleReceiveFailed the target function
+	*/
 	void attachReceiveFailedHandler(void (* handleReceiveFailed)(void));
 	
+	/**
+	Sets the function for receive timeout event handling
+
+	@param [in] handleReceiveTimeout the target function
+	*/
 	void attachReceiveTimeoutHandler(void (* handleReceiveTimeout)(void));
 	
-	void attachReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void));
+	/**
+	Sets the function for receive timestamp availabe event handling
 
+	@param [in] handleReceiveTimestampAvailable the target function
+	*/
+	void attachReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void));
+	
+	/**
+	Poll the DW1000 for system events and handles them
+	By default this is attached to the interrupt pin callback
+	*/
 	void pollForEvents();
 	
-	/* device state management. */
-	// force idle state
+	/**
+	Stops the transceiver immediately, this actually sets the device in Idle mode.
+	*/
 	void forceTRxOff();
 
+	/**
+	Sets the interrupt polarity
+
+	By default this is set to true by the DW1000
+
+	@param [in] val True here means active high
+	*/
 	void setInterruptPolarity(boolean val);
 
+	/**
+	Applies the target configuration to the DW1000
+
+	@param [in] config the configuration to apply to the DW1000
+	*/
 	void applyConfiguration(device_configuration_t config);
+
+	/**
+	Enables the interrupts for the target events
+
+	@param [in] interrupt_config the interrupt map to use
+	*/
 	void applyInterruptConfiguration(interrupt_configuration_t interrupt_config);
 
-	/* Configuration Getters */
+	/**
+	Gets the current channel in use
 
+	returns the current channel
+	*/
 	Channel getChannel();
 
+	/**
+	Gets the current PRF of the device
+
+	returns the current PRF
+	*/
 	PulseFrequency getPulseFrequency();
 	
 	/**
@@ -219,8 +435,10 @@ namespace DW1000Ng {
 
 	/**
 	Sets the timeout for SFD detection.
+	The recommended value is: PreambleLenght + SFD + 1.
+	The default value is 4096+64+1
 	
-	@param[in] PreambleLenght + SFD + 1. default value 4096+64+1 
+	@param[in] the sfd detection timeout 
 	*/
 	void setSfdDetectionTimeout(uint16_t preambleSymbols);
 
@@ -232,31 +450,73 @@ namespace DW1000Ng {
 	*/
 	void setReceiveFrameWaitTimeoutPeriod(uint16_t timeMicroSeconds);
 
-	// reception state
+	/**
+	Sets the device in receive mode
+
+	@param [in] mode IMMEDIATE or DELAYED receive
+	*/
 	void startReceive(ReceiveMode mode = ReceiveMode::IMMEDIATE);
 	
-	// transmission state
+	/**
+	Sets the device in transmission mode
+
+	@param [in] mode IMMEDIATE or DELAYED transmission
+	*/
 	void startTransmit(TransmitMode mode = TransmitMode::IMMEDIATE);
 	
-	/* host-initiated reading of temperature and battery voltage */
+	/**
+	Gets the temperature inside the DW1000 Device
+
+	@param [out] temp the temperature 
+	*/
 	void getTemperature(float& temp);
+
+	/**
+	Gets the voltage in input of the DW1000
+
+	@param [out] vbat the input voltage
+	*/
 	void getBatteryVoltage(float& vbat);
+
+	/**
+	Gets both temperature and voltage with a single read
+
+	@param [out] temp the temperature
+	@param [out] vbat the input voltage
+	*/ 
 	void getTemperatureAndBatteryVoltage(float& temp, float& vbat);
 
-	/* Allow MAC frame filtering */
-	// TODO auto-acknowledge
+	/**
+	Enables the frame filtering functionality using the provided configuration.
+	Messages must be formatted using 802.15.4-2011 format.
+
+	@param [in] config frame filtering configuration
+	*/
 	void enableFrameFiltering(frame_filtering_configuration_t config);
+
+	/**
+	Disables the frame filtering functionality
+	*/
 	void disableFrameFiltering();
 	
-	// note: not sure if going to be implemented for now
+	/**
+	WARNING: this just sets the relative bits inside the register.
+	You must refer to the DW1000 User manual to activate it properly.
+	*/
 	void setDoubleBuffering(boolean val);
-	// TODO is implemented, but needs testing
+
+	/**
+	Enables frames up to 1023 byte length
+
+	@param [in] val true or false
+	*/
 	void useExtendedFrameLength(boolean val);
 	
 	/**
 	Sets the time before the device enters receive after a transmission.
+	Use 0 here to deactivate it.
 
-	@param[in] time in μs. units = ~1μs(1.026μs) 
+	@param[in] time in μs. units = ~1μs(1.026μs)
 	*/
 	void setWait4Response(uint32_t timeMicroSeconds);
 

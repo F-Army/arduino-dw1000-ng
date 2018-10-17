@@ -28,7 +28,18 @@
 
 namespace DW1000NgRanging {
 
-    /* asymmetric two-way ranging (more computation intense, less error prone) */
+    /** 
+    Asymmetric two-way ranging algorithm (more computation intense, less error prone) 
+    
+    @param [in] timePollSent timestamp of poll transmission
+    @param [in] timePollReceived timestamp of poll receive
+    @param [in] timePollAckSent timestamp of response to poll transmission
+    @param [in] timePollAckReceived timestamp of response to poll receive
+    @param [in] timeRangeSent timestamp of final message transmission
+    @param [in] timeRangeReceived timestamp of final message receive
+
+    returns the range in meters
+    */
     double computeRangeAsymmetric(    
                                         uint64_t timePollSent, 
                                         uint64_t timePollReceived, 
@@ -39,5 +50,10 @@ namespace DW1000NgRanging {
                                  );
     //TODO Symmetric
 
+    /**
+    Removes bias from the target range
+    
+    returns the unbiased range
+    */
     double correctRange(double range);
 }
