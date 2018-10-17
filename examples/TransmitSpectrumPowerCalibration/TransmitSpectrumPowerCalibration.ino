@@ -35,7 +35,6 @@ byte data[] = { 0xC5, 0, 'D', 'E', 'C', 'A', 'W', 'A', 'V', 'E', 0, 0 };
 
 device_configuration_t POWERTEST_CONFIG = {
     false,
-    false,
     true,
     true,
     false,

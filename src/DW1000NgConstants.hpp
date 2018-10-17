@@ -142,11 +142,6 @@ enum class Channel : byte {
     CHANNEL_7 = 7
 };
 
-
-/* frame length settings. */
-constexpr byte FRAME_LENGTH_NORMAL   = 0x00;
-constexpr byte FRAME_LENGTH_EXTENDED = 0x03;
-
 /* Register is 6 bit, 7 = write, 6 = sub-adressing, 5-0 = register value
  * Total header with sub-adressing can be 15 bit. */
 constexpr byte WRITE      = 0x80; // regular write
@@ -161,17 +156,28 @@ constexpr byte SYS_XTI_CLOCK  = 0x01;
 constexpr byte SYS_PLL_CLOCK  = 0x02;
 constexpr byte TX_PLL_CLOCK = 0x20;
 
-/* range bias tables (500/900 MHz band, 16/64 MHz PRF), -61 to -95 dBm. */
-constexpr byte BIAS_500_16_ZERO = 10;
-constexpr byte BIAS_500_64_ZERO = 8;
-constexpr byte BIAS_900_16_ZERO = 7;
-constexpr byte BIAS_900_64_ZERO = 7;
+/* range bias tables - APS011*/
 
-/* range bias tables (500 MHz in [mm] and 900 MHz in [2mm] - to fit into bytes) */
-constexpr byte BIAS_500_16[] = {198, 187, 179, 163, 143, 127, 109, 84, 59, 31, 0, 36, 65, 84, 97, 106, 110, 112};
-constexpr byte BIAS_500_64[] = {110, 105, 100, 93, 82, 69, 51, 27, 0, 21, 35, 42, 49, 62, 71, 76, 81, 86};
-constexpr byte BIAS_900_16[] = {137, 122, 105, 88, 69, 47, 25, 0, 21, 48, 79, 105, 127, 147, 160, 169, 178, 197};
-constexpr byte BIAS_900_64[] = {147, 133, 117, 99, 75, 50, 29, 0, 24, 45, 63, 76, 87, 98, 116, 122, 132, 142};
+constexpr double BIAS_TABLE[18][5] = {
+    {61, -198, -110, -275, -295},
+    {63, -187, -105, -244, -266},
+    {65, -179, -100, -210, -235},
+    {67, -163, -93, -176, -199},
+    {69, -143, -82, -138, -150},
+    {71, -127, -69, -95, -100},
+    {73, -109, -51, -51, -58},
+    {75, -84, -27, 0, 0},
+    {77, -59, 0, 42, 49},
+    {79, -31, 21, 97, 91},
+    {81, 0, 35, 158, 127},
+    {83, 36, 42, 210, 153},
+    {85, 65, 49, 254, 175},
+    {87, 84, 62, 294, 197},
+    {89, 97, 71, 321, 233},
+    {91, 106, 76, 339, 245},
+    {93, 110, 81, 356, 264},
+    {95, 112, 86, 394, 284}
+};
 
 enum class DriverAmplifierValue : byte {
     dB_18,

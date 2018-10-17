@@ -118,6 +118,8 @@ namespace DW1000Ng {
 	@param[in] val An arbitrary numeric network identifier.
 	*/
 	void setNetworkId(uint16_t val);
+
+	void getNetworkId(byte id[]);
 	
 	/** 
 	(Re-)set the device address (i.e. short address) for the currently selected chip. This
@@ -126,6 +128,8 @@ namespace DW1000Ng {
 	@param[in] val An arbitrary numeric device address.
 	*/
 	void setDeviceAddress(uint16_t val);
+
+	void getDeviceAddress(byte address[]);
 	// TODO MAC and filters
 	
 	/**
@@ -143,6 +147,8 @@ namespace DW1000Ng {
 	@param[in] eui The raw bytes of the eui.
 	*/
 	void setEUI(byte eui[]);
+	
+	void getEUI(byte eui[]);
 
 	/**
 	Sets the transmission power of the device.
@@ -244,6 +250,28 @@ namespace DW1000Ng {
 
 	PulseFrequency getPulseFrequency();
 	
+	/**
+	Sets the timeout for Raceive Frame.
+
+	@param[in] Pac size based on current preamble lenght - 1
+	*/
+	void setPreambleDetectionTimeout(uint16_t pacSize);
+
+	/**
+	Sets the timeout for SFD detection.
+	
+	@param[in] PreambleLenght + SFD + 1. default value 4096+64+1 
+	*/
+	void setSfdDetectionTimeout(uint16_t preambleSymbols);
+
+	/**
+	Sets the timeout for Raceive Frame. Must be sets in idle mode.
+	Allow the external microprocessor to enter a low power state awaiting a valid receive frame.
+
+	@param[in] time in μs. units = ~1μs(1.026μs). 0 to disable 
+	*/
+	void setReceiveFrameWaitTimeoutPeriod(uint16_t timeMicroSeconds);
+
 	// reception state
 	void startReceive(ReceiveMode mode = ReceiveMode::IMMEDIATE);
 	
@@ -257,22 +285,20 @@ namespace DW1000Ng {
 
 	/* Allow MAC frame filtering */
 	// TODO auto-acknowledge
-	void setFrameFilter(boolean val);
-	void setFrameFilterBehaveCoordinator(boolean val);
-	void setFrameFilterAllowBeacon(boolean val);
-	//data type is used in the FC_1 0x41
-	void setFrameFilterAllowData(boolean val);
-	void setFrameFilterAllowAcknowledgement(boolean val);
-	void setFrameFilterAllowMAC(boolean val);
-	//Reserved is used for the Blink message
-	void setFrameFilterAllowReserved(boolean val);
+	void enableFrameFiltering(frame_filtering_configuration_t config);
+	void disableFrameFiltering();
 	
 	// note: not sure if going to be implemented for now
 	void setDoubleBuffering(boolean val);
 	// TODO is implemented, but needs testing
 	void useExtendedFrameLength(boolean val);
-	// TODO is implemented, but needs testing
-	void waitForResponse(boolean val);
+	
+	/**
+	Sets the time before the device enters receive after a transmission.
+
+	@param[in] time in μs. units = ~1μs(1.026μs) 
+	*/
+	void setWait4Response(uint32_t timeMicroSeconds);
 
 	#if DW1000NG_PRINTABLE
 
