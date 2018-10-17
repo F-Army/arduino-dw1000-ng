@@ -23,9 +23,9 @@
 */
 
 /* 
- * StandardTwoWayRangingAnchor.ino
+ * StandardRTLSAnchorB_TWR.ino
  * 
- * This is an example anchor in a RTLS using two way ranging ISO/IEC 24730-62_2013 messages
+ * This is an example slave anchor in a RTLS using two way ranging ISO/IEC 24730-62_2013 messages
  */
 
 #include <SPI.h>
@@ -43,26 +43,30 @@ const uint8_t PIN_SS = SS; // spi select pin
 volatile boolean sentAck = false;
 volatile boolean receivedAck = false;
 
-byte SEQ_NUMBER = 0;
+volatile byte SEQ_NUMBER = 0;
 
 // timestamps to remember
-uint64_t timePollSent;
-uint64_t timePollReceived;
-uint64_t timePollAckSent;
-uint64_t timePollAckReceived;
-uint64_t timeRangeSent;
-uint64_t timeRangeReceived;
+volatile uint64_t timePollSent;
+volatile uint64_t timePollReceived;
+volatile uint64_t timePollAckSent;
+volatile uint64_t timePollAckReceived;
+volatile uint64_t timeRangeSent;
+volatile uint64_t timeRangeReceived;
+
+volatile double distance;
 
 // watchdog and reset period
-uint32_t lastActivity;
-uint32_t resetPeriod = 250;
+volatile uint32_t lastActivity;
+volatile uint32_t resetPeriod = 250;
 // reply times (same on both sides for symm. ranging)
 uint16_t replyDelayTimeUS = 3000;
 
 byte target_eui[8];
 byte tag_shortAddress[] = {0x05, 0x00};
 
+byte main_anchor_address[] = {0x01, 0x00};
 byte next_anchor_range[] = {0x03, 0x00};
+
 
 device_configuration_t DEFAULT_CONFIG = {
     false,
@@ -162,16 +166,6 @@ void handleReceived() {
     receivedAck = true;
 }
 
-void transmitRangingInitiation() {
-    byte RangingInitiation[] = {DATA, SHORT_SRC_LONG_DEST, SEQ_NUMBER++, 0,0, 0,0,0,0,0,0,0,0,  0,0, RANGING_INITIATION, 0,0};
-    DW1000Ng::getNetworkId(&RangingInitiation[3]);
-    memcpy(&RangingInitiation[5], target_eui, 8);
-    DW1000Ng::getDeviceAddress(&RangingInitiation[13]);
-    memcpy(&RangingInitiation[16], tag_shortAddress, 2);
-    DW1000Ng::setTransmitData(RangingInitiation, sizeof(RangingInitiation));
-    DW1000Ng::startTransmit();
-}
-
 void transmitResponseToPoll() {
     byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONTINUE, 0, 0};
     DW1000Ng::getNetworkId(&pollAck[3]);
@@ -187,6 +181,16 @@ void transmitRangingConfirm() {
     memcpy(&rangingConfirm[5], tag_shortAddress, 2);
     DW1000Ng::getDeviceAddress(&rangingConfirm[7]);
     DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));
+    DW1000Ng::startTransmit();
+}
+
+void transmitRangeReport() {
+    byte rangingReport[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, 0x60, 0,0 };
+    DW1000Ng::getNetworkId(&rangingReport[3]);
+    memcpy(&rangingReport[5], main_anchor_address, 2);
+    DW1000Ng::getDeviceAddress(&rangingReport[7]);
+    DW1000NgUtils::writeValueToBytes(&rangingReport[10], static_cast<uint16_t>((distance*1000)), 2);
+    DW1000Ng::setTransmitData(rangingReport, sizeof(rangingReport));
     DW1000Ng::startTransmit();
 }
  
@@ -227,7 +231,7 @@ void loop() {
             timePollAckReceived = DW1000NgUtils::bytesAsValue(recv_data + 14, LENGTH_TIMESTAMP);
             timeRangeSent = DW1000NgUtils::bytesAsValue(recv_data + 18, LENGTH_TIMESTAMP);
             // (re-)compute range as two-way ranging is done
-            double distance = DW1000NgRanging::computeRangeAsymmetric(timePollSent,
+            distance = DW1000NgRanging::computeRangeAsymmetric(timePollSent,
                                                         timePollReceived, 
                                                         timePollAckSent, 
                                                         timePollAckReceived, 
@@ -235,12 +239,18 @@ void loop() {
                                                         timeRangeReceived);
             /* Apply bias correction */
             distance = DW1000NgRanging::correctRange(distance);
+
+            /* In case of wrong read due to bad device calibration */
+            if(distance <= 0) 
+                distance = 0.001;
             
             String rangeString = "Range: "; rangeString += distance; rangeString += " m";
             rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
             Serial.println(rangeString);
             
             transmitRangingConfirm();
+            noteActivity();
+            transmitRangeReport();
             noteActivity();
             return;
         }

@@ -225,12 +225,12 @@ namespace DW1000Ng {
 	void setSfdDetectionTimeout(uint16_t preambleSymbols);
 
 	/**
-	Sets the timeout for Raceive Frame.
+	Sets the timeout for Raceive Frame. Must be sets in idle mode.
 	Allow the external microprocessor to enter a low power state awaiting a valid receive frame.
 
-	@param[in] time in μs. units = ~1μs(1.026μs) 
+	@param[in] time in μs. units = ~1μs(1.026μs). 0 to disable 
 	*/
-	void useReceiveFrameWaitTimeoutPeriod(uint16_t timeMicroSeconds);
+	void setReceiveFrameWaitTimeoutPeriod(uint16_t timeMicroSeconds);
 
 	// reception state
 	void startReceive(ReceiveMode mode = ReceiveMode::IMMEDIATE);

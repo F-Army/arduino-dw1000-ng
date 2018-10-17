@@ -23,7 +23,7 @@
 */
 
 /* 
- * StandardTwoWayRangingTag.ino
+ * StandardRTLSTag_TWR.ino
  * 
  * This is an example tag in a RTLS using two way ranging ISO/IEC 24730-62_2013 messages
  */
@@ -51,12 +51,12 @@ byte SEQ_NUMBER = 0;
 byte anchor_address[2];
 
 // timestamps to remember
-uint64_t timePollSent;
-uint64_t timePollAckReceived;
-uint64_t timeRangeSent;
+volatile uint64_t timePollSent;
+volatile uint64_t timePollAckReceived;
+volatile uint64_t timeRangeSent;
 // watchdog and reset period
-uint32_t lastActivity;
-uint32_t resetPeriod = 250;
+volatile uint32_t lastActivity;
+volatile uint32_t resetPeriod = 250;
 // reply times (same on both sides for symm. ranging)
 uint16_t replyDelayTimeUS = 3000;
 
@@ -227,6 +227,23 @@ void loop() {
                 /* Received ranging confirm */
                 memcpy(anchor_address, &recv_data[11], 2);
                 transmitPoll();
+                noteActivity();
+                return;
+            } else if(recv_data[10] == ACTIVITY_FINISHED) {
+                resetPeriod = recv_data[11] + static_cast<uint32_t>(((recv_data[12] & 0x3F) << 8));
+                byte multiplier = ((recv_data[12] & 0xC0) >> 6);
+                if(multiplier  == 0x01) {
+                    resetPeriod *= 25;
+                } else if(multiplier == 0x02) {
+                    resetPeriod *= 1000;
+                }
+                
+                /* Sleep until next blink to save power */
+                DW1000Ng::deepSleep();
+                delay(resetPeriod);
+                DW1000Ng::spiWakeup();
+
+                transmitBlink();
                 noteActivity();
                 return;
             } else {

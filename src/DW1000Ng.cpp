@@ -1003,14 +1003,16 @@ namespace DW1000Ng {
 		}
 
 		void _interruptOnReceiveFailed(boolean val) {
-			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, LDEERR_BIT, val);
-			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXFCE_BIT, val);
 			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXPHE_BIT, val);
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXFCE_BIT, val);
 			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, RXRFSL_BIT, val);
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_STATUS, LDEERR_BIT, val);
 		}
 
 		void _interruptOnReceiveTimeout(boolean val) {
 			DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, RXRFTO_BIT, val);
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, RXPTO_BIT, val);
+			DW1000NgUtils::setBit(_sysmask, LEN_SYS_MASK, RXSFDTO_BIT, val);
 		}
 
 		void _interruptOnReceiveTimestampAvailable(boolean val) {
@@ -1092,9 +1094,9 @@ namespace DW1000Ng {
 		}
 
 		void _clearReceiveTimeoutStatus() {
-			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXSFDTO_BIT, true);
-			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXPTO_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXRFTO_BIT, true);
+			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXPTO_BIT, true);
+			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXSFDTO_BIT, true);
 			_writeBytesToRegister(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
@@ -1102,14 +1104,12 @@ namespace DW1000Ng {
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXPHE_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXFCE_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT, true);
-			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, RXSFDTO_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, AFFREJ_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT, true);
 			_writeBytesToRegister(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
 		void _clearTransmitStatus() {
-			// clear latched TX bits
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, AAT_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, TXFRB_BIT, true);
 			DW1000NgUtils::setBit(_sysstatus, LEN_SYS_STATUS, TXPRS_BIT, true);
@@ -1170,30 +1170,21 @@ namespace DW1000Ng {
 		}
 
 		boolean _isReceiveFailed() {
-			boolean ldeErr, rxCRCErr, rxHeaderErr, rxDecodeErr;
-			ldeErr      = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT);
-			rxCRCErr    = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXFCE_BIT);
-			rxHeaderErr = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXPHE_BIT);
-			rxDecodeErr = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT);
-			if(ldeErr || rxCRCErr || rxHeaderErr || rxDecodeErr) {
-				return true;
-			}
-			return false;
+			return (DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXPHE_BIT) ||
+					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXFCE_BIT) ||
+					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXRFSL_BIT) ||
+					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, LDEERR_BIT));
 		}
 
-		//Checks to see any of the three timeout bits in sysstatus are high (RXRFTO (Frame Wait timeout), RXPTO (Preamble timeout), RXSFDTO (Start frame delimiter(?) timeout).
 		boolean _isReceiveTimeout() {
-			return (DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXRFTO_BIT) | DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXPTO_BIT) | DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXSFDTO_BIT));
+			return (DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXRFTO_BIT) || 
+					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXPTO_BIT) || 
+					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RXSFDTO_BIT));
 		}
 
 		boolean _isClockProblem() {
-			boolean clkllErr, rfllErr;
-			clkllErr = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, CLKPLL_LL_BIT);
-			rfllErr  = DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RFPLL_LL_BIT);
-			if(clkllErr || rfllErr) {
-				return true;
-			}
-			return false;
+			return (DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, CLKPLL_LL_BIT) ||
+					DW1000NgUtils::getBit(_sysstatus, LEN_SYS_STATUS, RFPLL_LL_BIT));
 		}
 
 		void _disableSequencing() {
@@ -1727,14 +1718,19 @@ namespace DW1000Ng {
 		_writeBytesToRegister(DRX_TUNE, DRX_SFDTOC_SUB, drx_sfdtoc, LEN_DRX_SFDTOC);
 	}
 
-	void useReceiveFrameWaitTimeoutPeriod(uint16_t timeMicroSeconds){
-		forceTRxOff();
-		byte rx_wfto[LEN_RX_WFTO];
-		/* enable frame wait timeout bit */
-		DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXWTOE_BIT, true);
-		_writeSystemConfigurationRegister();
-		DW1000NgUtils::writeValueToBytes(rx_wfto, timeMicroSeconds, LEN_RX_WFTO);
-		_writeBytesToRegister(RX_WFTO, NO_SUB, rx_wfto, LEN_RX_WFTO);
+	void setReceiveFrameWaitTimeoutPeriod(uint16_t timeMicroSeconds) {
+		if (timeMicroSeconds > 0) {
+			byte rx_wfto[LEN_RX_WFTO];
+			DW1000NgUtils::writeValueToBytes(rx_wfto, timeMicroSeconds, LEN_RX_WFTO);
+			_writeBytesToRegister(RX_WFTO, NO_SUB, rx_wfto, LEN_RX_WFTO);
+			/* enable frame wait timeout bit */
+			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXWTOE_BIT, true);
+			_writeSystemConfigurationRegister();
+		} else {
+			/* disable frame wait timeout bit */
+			DW1000NgUtils::setBit(_syscfg, LEN_SYS_CFG, RXWTOE_BIT, false);
+			_writeSystemConfigurationRegister();
+		}
 	}
 
 	void applyInterruptConfiguration(interrupt_configuration_t interrupt_config) {
