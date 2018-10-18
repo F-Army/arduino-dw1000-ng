@@ -29,7 +29,7 @@ Features
 ![Ranging](https://img.shields.io/badge/Ranging-done-brightgreen.svg?&style=for-the-badge)
 ![Localization](https://img.shields.io/badge/Localization-done-brightgreen.svg?&style=for-the-badge)
 ![Frame filtering](https://img.shields.io/badge/Frame%20filtering-done-brightgreen.svg?&style=for-the-badge)
-![Antenna Calibration](https://img.shields.io/badge/Antenna%20calibration-done-brightgreen.svg?&style=for-the-badge)
+![Antenna Calibration](https://img.shields.io/badge/Antenna%20calibration-api-yellow.svg?&style=for-the-badge)
 ![Transmission power setup](https://img.shields.io/badge/Transmission%20power%20setup-done-brightgreen.svg?&style=for-the-badge)
 ![Deep sleep](https://img.shields.io/badge/Deep%20sleep%20-Simple-yellow.svg?&style=for-the-badge)
 ![Double buffering](https://img.shields.io/badge/Double%20buffering-TODO-red.svg?&style=for-the-badge)
