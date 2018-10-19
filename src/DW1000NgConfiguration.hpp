@@ -62,12 +62,18 @@ typedef struct frame_filtering_configuration_t {
 } frame_filtering_configuration_t;
 
 typedef struct deep_sleep_configuration_t {
-    boolean behaveAsCoordinator;
-    boolean allowBeacon;
-    boolean allowData;
-    boolean allowAcknowledgement;
-    boolean allowMacCommand;
-    boolean allowAllReserved;
-    boolean allowReservedFour;
-    boolean allowReservedFive;
+    boolean onWakeUpRunADC;
+    boolean onWakeUpReceive;
+    boolean onWakeUpLoadEUI;
+    boolean onWakeUpRestoreConfig;
+    boolean onWakeUpLoadL64Param;
+    boolean preserveSleep;
+    boolean onWakeUpLoadLDE;
+    boolean onWakeUpLoadLDO;
+    boolean wakePin;
+    boolean wakeSpi;
+    boolean wakeCnt;
+    boolean enableDivider;
+    uint16_t dividerCount;
+    uint16_t sleepTime;
 } deep_sleep_configuration_t;
