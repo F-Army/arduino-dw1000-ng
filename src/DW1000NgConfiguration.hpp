@@ -60,3 +60,14 @@ typedef struct frame_filtering_configuration_t {
     boolean allowReservedFour;
     boolean allowReservedFive;
 } frame_filtering_configuration_t;
+
+typedef struct deep_sleep_configuration_t {
+    boolean behaveAsCoordinator;
+    boolean allowBeacon;
+    boolean allowData;
+    boolean allowAcknowledgement;
+    boolean allowMacCommand;
+    boolean allowAllReserved;
+    boolean allowReservedFour;
+    boolean allowReservedFive;
+} deep_sleep_configuration_t;
