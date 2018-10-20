@@ -104,7 +104,11 @@ namespace DW1000Ng {
 		uint16_t		_antennaRxDelay = 0;
 
 		/* SPI relative variables */
+		#if defined(ESP32) || defined(ESP8266)
+		const SPISettings  _fastSPI = SPISettings(20000000L, MSBFIRST, SPI_MODE0);
+		#else
 		const SPISettings  _fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
+		#endif
 		const SPISettings  _slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
 		const SPISettings* _currentSPI = &_fastSPI;
 
@@ -1254,7 +1258,9 @@ namespace DW1000Ng {
 	}
 
 	void select() {
+		#if !defined(ESP32) && !defined(ESP8266)
 		SPI.usingInterrupt(digitalPinToInterrupt(_irq));
+		#endif
 		pinMode(_ss, OUTPUT);
 		digitalWrite(_ss, HIGH);
 	}
