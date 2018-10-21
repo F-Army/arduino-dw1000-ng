@@ -1351,7 +1351,7 @@ namespace DW1000Ng {
 		_writeBytesToRegister(GPIO_CTRL, GPIO_MODE_SUB, gpiomode, LEN_GPIO_MODE);
 	}
 
-	void applyDeepSleepConfiguration(deep_sleep_configuration_t deep_sleep_config) {
+	void applyGeneralSleepConfiguration(deep_sleep_configuration_t deep_sleep_config) {
 		byte aon_wcfg[LEN_AON_WCFG];
 		memset(aon_wcfg, 0, LEN_AON_WCFG);
 		_readBytes(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
@@ -1388,6 +1388,10 @@ namespace DW1000Ng {
 		_writeBytesToRegister(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
 	}
 
+	void sleep(){
+
+	}
+	
 	void deepSleep() {
 		byte aon_ctrl[LEN_AON_CTRL];
 		_readBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);

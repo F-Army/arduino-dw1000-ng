@@ -92,7 +92,12 @@ namespace DW1000Ng {
 	/**
 	 
 	*/
-	void applyDeepSleepConfiguration(deep_sleep_configuration_t deep_sleep_config);
+	void applyGeneralSleepConfiguration(deep_sleep_configuration_t deep_sleep_config);
+
+	/**
+	Enable sleep mode
+	*/
+	void sleep();
 
 	/**
 	Enable deep sleep mode
