@@ -28,6 +28,7 @@ Features
 ------------
 ![Ranging](https://img.shields.io/badge/Ranging-done-brightgreen.svg?&style=for-the-badge)
 ![Localization](https://img.shields.io/badge/Localization-done-brightgreen.svg?&style=for-the-badge)
+![NLOS Optimizations](https://img.shields.io/badge/NLOS%20Optimizations-done-brightgreen.svg?&style=for-the-badge)
 ![Frame filtering](https://img.shields.io/badge/Frame%20filtering-done-brightgreen.svg?&style=for-the-badge)
 ![Antenna Calibration](https://img.shields.io/badge/Antenna%20calibration-api-yellow.svg?&style=for-the-badge)
 ![Transmission power setup](https://img.shields.io/badge/Transmission%20power%20setup-done-brightgreen.svg?&style=for-the-badge)
