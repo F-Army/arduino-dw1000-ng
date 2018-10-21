@@ -289,8 +289,11 @@ constexpr uint16_t LEN_FS_XTALT = 1;
 // AON
 constexpr uint16_t AON = 0x2C;
 constexpr uint16_t AON_WCFG_SUB = 0x00;
-constexpr uint16_t ONW_RX = 1;
+constexpr uint16_t ONW_RADC_BIT = 0;
+constexpr uint16_t ONW_RX_BIT = 1;
+constexpr uint16_t ONW_LEUI_BIT = 3;
 constexpr uint16_t ONW_LDC_BIT = 6;
+constexpr uint16_t ONW_L64P_BIT = 7;
 constexpr uint16_t ONW_PRES_SLEEP_BIT = 8;
 constexpr uint16_t ONW_LLDE_BIT = 11;
 constexpr uint16_t ONW_LDD0_BIT = 12;

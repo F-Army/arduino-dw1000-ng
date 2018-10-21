@@ -1351,29 +1351,45 @@ namespace DW1000Ng {
 		_writeBytesToRegister(GPIO_CTRL, GPIO_MODE_SUB, gpiomode, LEN_GPIO_MODE);
 	}
 
-	void deepSleep() {
+	void applyDeepSleepConfiguration(deep_sleep_configuration_t deep_sleep_config) {
 		byte aon_wcfg[LEN_AON_WCFG];
 		memset(aon_wcfg, 0, LEN_AON_WCFG);
 		_readBytes(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
-		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LDC_BIT, true);
-		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_PRES_SLEEP_BIT, false);
-		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LLDE_BIT, true);
-		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LDD0_BIT, true);
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_RADC_BIT, deep_sleep_config.onWakeUpRunADC);
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_RX_BIT, deep_sleep_config.onWakeUpReceive);
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LEUI_BIT, deep_sleep_config.onWakeUpLoadEUI);
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LDC_BIT, deep_sleep_config.onWakeUpRestoreConfig);
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_L64P_BIT, deep_sleep_config.onWakeUpLoadL64Param);
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_PRES_SLEEP_BIT, deep_sleep_config.preserveSleep);
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LLDE_BIT, deep_sleep_config.onWakeUpLoadLDE);
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LDD0_BIT, deep_sleep_config.onWakeUpLoadLDO);
 		_writeBytesToRegister(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
 
 		byte aon_cfg0[LEN_AON_CFG0];
 		memset(aon_cfg0, 0, LEN_AON_CFG0);
 		_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_PIN_BIT, true);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_SPI_BIT, true);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, false);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, SLEEP_EN_BIT, true);
+		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_PIN_BIT, deep_sleep_config.wakePin);
+		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_SPI_BIT, deep_sleep_config.wakeSpi);
+		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, deep_sleep_config.wakeCnt);
+		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, SLEEP_EN_BIT, deep_sleep_config.sleepEnable);
+		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, LPDIV_EN_BIT, deep_sleep_config.enableDivider);
+		
+		DW1000NgUtils::writeValueToBytes
+		
 		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 
 		byte aon_ctrl[LEN_AON_CTRL];
 		memset(aon_ctrl, 0, LEN_AON_CTRL);
 		_readBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
-		//DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, UPL_CFG_BIT, true);
+		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, RESTORE_BIT, deep_sleep_config.restore);
+		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, UPL_CFG_BIT, deep_sleep_config.uploadConfigToAON);
+		_writeBytesToRegister(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
+	}
+
+	void deepSleep() {
+		byte aon_ctrl[LEN_AON_CTRL];
+		memset(aon_ctrl, 0, LEN_AON_CTRL);
+		_readBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
 		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, SAVE_BIT, true);
 		_writeBytesToRegister(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
 	}

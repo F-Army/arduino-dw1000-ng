@@ -90,6 +90,11 @@ namespace DW1000Ng {
 	void setGPIOMode(uint8_t msgp, uint8_t mode);
 
 	/**
+	 
+	*/
+	void applyDeepSleepConfiguration(deep_sleep_configuration_t deep_sleep_config);
+
+	/**
 	Enable deep sleep mode
 	*/
 	void deepSleep();
