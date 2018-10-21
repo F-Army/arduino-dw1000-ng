@@ -32,6 +32,7 @@ Features
 ![Antenna Calibration](https://img.shields.io/badge/Antenna%20calibration-api-yellow.svg?&style=for-the-badge)
 ![Transmission power setup](https://img.shields.io/badge/Transmission%20power%20setup-done-brightgreen.svg?&style=for-the-badge)
 ![Deep sleep](https://img.shields.io/badge/Deep%20sleep%20-Simple-yellow.svg?&style=for-the-badge)
+![Sleep](https://img.shields.io/badge/Sleep%20-TODO-red.svg?&style=for-the-badge)
 ![Double buffering](https://img.shields.io/badge/Double%20buffering-TODO-red.svg?&style=for-the-badge)
 ![Transmit Power Spectrum Test Mode](https://img.shields.io/badge/Transmit%20Power%20Spectrum%20Test%20Mode-DONE-brightgreen.svg?&style=for-the-badge)
 ![Continuous wave mode](https://img.shields.io/badge/Continuous%20Wave%20Mode-TODO-red.svg?&style=for-the-badge)
