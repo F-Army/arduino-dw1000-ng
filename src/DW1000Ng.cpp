@@ -1366,16 +1366,18 @@ namespace DW1000Ng {
 		_writeBytesToRegister(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
 
 		byte aon_cfg0[LEN_AON_CFG0];
+		byte lpclkdiva;
 		memset(aon_cfg0, 0, LEN_AON_CFG0);
 		_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
+		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, SLEEP_EN_BIT, deep_sleep_config.sleepEnable);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_PIN_BIT, deep_sleep_config.wakePin);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_SPI_BIT, deep_sleep_config.wakeSpi);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, deep_sleep_config.wakeCnt);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, SLEEP_EN_BIT, deep_sleep_config.sleepEnable);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, LPDIV_EN_BIT, deep_sleep_config.enableDivider);
-		
-		DW1000NgUtils::writeValueToBytes
-		
+		DW1000NgUtils::writeValueToBytes(&lpclkdiva, deep_sleep_config.dividerCount, 2);
+		aon_cfg0[0] |= ((lpclkdiva[0] << 5) & 0x00E0);
+		aon_cfg0[1] |= ((lpclkdiva[0] >> 3) | (lpclkdiva[1] >> 3) & 0xFF00);
+		DW1000NgUtils::writeValueToBytes(&aon_cfg0[2], deep_sleep_config.sleepTime, 2);
 		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 
 		byte aon_ctrl[LEN_AON_CTRL];
@@ -1388,7 +1390,6 @@ namespace DW1000Ng {
 
 	void deepSleep() {
 		byte aon_ctrl[LEN_AON_CTRL];
-		memset(aon_ctrl, 0, LEN_AON_CTRL);
 		_readBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
 		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, SAVE_BIT, true);
 		_writeBytesToRegister(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
