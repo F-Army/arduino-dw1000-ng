@@ -1351,7 +1351,7 @@ namespace DW1000Ng {
 		_writeBytesToRegister(GPIO_CTRL, GPIO_MODE_SUB, gpiomode, LEN_GPIO_MODE);
 	}
 
-	void applyGeneralSleepConfiguration(deep_sleep_configuration_t deep_sleep_config) {
+	void applyCommonSleepConfiguration(deep_sleep_configuration_t deep_sleep_config) {
 		byte aon_wcfg[LEN_AON_WCFG];
 		memset(aon_wcfg, 0, LEN_AON_WCFG);
 		_readBytes(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
@@ -1371,38 +1371,46 @@ namespace DW1000Ng {
 		memset(aon_cfg0, 0, LEN_AON_CFG0);
 		_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, SLEEP_EN_BIT, true);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, true);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, LPDIV_EN_BIT, enableDivider);
-		byte lpclkdiva;
-		DW1000NgUtils::writeValueToBytes(&lpclkdiva, deep_sleep_config.dividerCount, 2);
-		aon_cfg0[0] |= ((lpclkdiva[0] << 5) & 0x00E0);
-		aon_cfg0[1] |= ((lpclkdiva[0] >> 3) | (lpclkdiva[1] >> 3) & 0xFF00);
-		DW1000NgUtils::writeValueToBytes(&aon_cfg0[2], deep_sleep_config.sleepTime, 2);
+		if (enableDivider){
+			byte lpclkdiva[2];
+			DW1000NgUtils::writeValueToBytes(lpclkdiva, dividerCount, 2);
+			aon_cfg0[0] |= ((lpclkdiva[0] << 5) & 0x00E0);
+			aon_cfg0[1] |= ((lpclkdiva[0] >> 3) | (lpclkdiva[1] << 5) & 0xFF00);
+		}
+		DW1000NgUtils::writeValueToBytes(&aon_cfg0[2], sleepTime, 2);
 		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 
-		byte aon_ctrl[LEN_AON_CTRL];
-		memset(aon_ctrl, 0, LEN_AON_CTRL);
-		_readBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
-		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, RESTORE_BIT, false);
-		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, UPL_CFG_BIT, true);
-		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, SAVE_BIT, true);
-		_writeBytesToRegister(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
-	}
-
-	void deepSleep(WakeUpEvent event) {
-		byte aon_cfg0[LEN_AON_CFG0];
-		memset(aon_cfg0, 0, LEN_AON_CFG0);
-		_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, SLEEP_EN_BIT, true);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_PIN_BIT, true);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_SPI_BIT, true);
-		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
+		byte aon_cfg1[LEN_AON_CFG1];
+		memset(aon_cfg1, 0, LEN_AON_CFG1);
+		_readBytes(AON, AON_CFG1_SUB, aon_cfg1, LEN_AON_CFG1);
+		DW1000NgUtils::setBit(aon_cfg1, LEN_AON_CFG1, SLEEP_CEN_BIT, false);
+		DW1000NgUtils::setBit(aon_cfg1, LEN_AON_CFG1, SMXX_BIT, false);
+		DW1000NgUtils::setBit(aon_cfg1, LEN_AON_CFG1, LPOSC_CAL_BIT, false);
+		_writeBytesToRegister(AON, AON_CFG1_SUB, aon_cfg1, LEN_AON_CFG1);
 		
 		byte aon_ctrl[LEN_AON_CTRL];
 		memset(aon_ctrl, 0, LEN_AON_CTRL);
 		_readBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
 		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, RESTORE_BIT, false);
 		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, UPL_CFG_BIT, true);
+		_writeBytesToRegister(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
+		/* following the recommented operating procedure for set sleep counter */
+		DW1000NgUtils::writeValueToBytes(&aon_cfg0[2], sleepTime, 2);
+		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
+		DW1000NgUtils::setBit(aon_cfg1, LEN_AON_CFG1, SLEEP_CEN_BIT, true);
+		_writeBytesToRegister(AON, AON_CFG1_SUB, aon_cfg1, LEN_AON_CFG1);
+		/* finally apply the new sleep time and the IC goes to sleep */
+		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, UPL_CFG_BIT, true);
+		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, SAVE_BIT, true);
+		_writeBytesToRegister(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
+	}
+
+	void deepSleep() {
+		byte aon_ctrl[LEN_AON_CTRL];
+		memset(aon_ctrl, 0, LEN_AON_CTRL);
+		_readBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
+		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, RESTORE_BIT, false);
 		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, SAVE_BIT, true);
 		_writeBytesToRegister(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
 	}

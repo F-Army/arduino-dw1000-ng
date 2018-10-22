@@ -230,5 +230,3 @@ enum class SFDMode {STANDARD_SFD, DECAWAVE_SFD};
 enum class TransmitMode {IMMEDIATE, DELAYED};
 
 enum class ReceiveMode {IMMEDIATE, DELAYED};
-
-enum class WakeUpEvent {SPI, PIN, COUNTER};

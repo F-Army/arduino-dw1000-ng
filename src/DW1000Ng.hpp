@@ -94,17 +94,17 @@ namespace DW1000Ng {
 
 	@param [in] config the general sleep configuration to apply to the DW1000
 	*/
-	void applyGeneralSleepConfiguration(deep_sleep_configuration_t deep_sleep_config);
+	void applyCommonSleepConfiguration(deep_sleep_configuration_t deep_sleep_config);
 
 	/**
 	Enter in sleep mode
 	*/
-	void sleep(boolean enableDivider = false, uint16_t dividerCount = 2, uint16_t sleepTime);
+	void sleep(boolean enableDivider, uint16_t dividerCount, uint16_t sleepTime);
 
 	/**
 	Enter in deep sleep mode
 	*/
-	void deepSleep(WakeUpEvent event = WakeUpEvent::SPI);
+	void deepSleep();
 
 	/**
 	Wake-up from deep sleep by toggle chip select pin
