@@ -71,12 +71,4 @@ typedef struct deep_sleep_configuration_t {
     boolean onWakeUpLoadLDE;
     boolean onWakeUpLoadLDO;
     boolean restore;
-    boolean uploadConfigToAON;
-    boolean wakePin;
-    boolean wakeSpi;
-    boolean wakeCnt;
-    boolean sleepEnable;
-    boolean enableDivider;
-    uint16_t dividerCount;
-    uint16_t sleepTime;
 } deep_sleep_configuration_t;

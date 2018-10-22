@@ -90,19 +90,21 @@ namespace DW1000Ng {
 	void setGPIOMode(uint8_t msgp, uint8_t mode);
 
 	/**
-	 
+	Applies the general sleep configuration to the DW1000
+
+	@param [in] config the general sleep configuration to apply to the DW1000
 	*/
 	void applyGeneralSleepConfiguration(deep_sleep_configuration_t deep_sleep_config);
 
 	/**
-	Enable sleep mode
+	Enter in sleep mode
 	*/
-	void sleep();
+	void sleep(boolean enableDivider = false, uint16_t dividerCount = 2, uint16_t sleepTime);
 
 	/**
-	Enable deep sleep mode
+	Enter in deep sleep mode
 	*/
-	void deepSleep();
+	void deepSleep(WakeUpEvent event = WakeUpEvent::SPI);
 
 	/**
 	Wake-up from deep sleep by toggle chip select pin
