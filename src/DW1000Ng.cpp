@@ -1378,7 +1378,6 @@ namespace DW1000Ng {
 			aon_cfg0[0] |= ((lpclkdiva[0] << 5) & 0x00E0);
 			aon_cfg0[1] |= ((lpclkdiva[0] >> 3) | (lpclkdiva[1] << 5) & 0xFF00);
 		}
-		DW1000NgUtils::writeValueToBytes(&aon_cfg0[2], sleepTime, 2);
 		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 
 		byte aon_cfg1[LEN_AON_CFG1];
