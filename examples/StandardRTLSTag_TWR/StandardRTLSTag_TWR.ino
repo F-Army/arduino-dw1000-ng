@@ -48,6 +48,8 @@ volatile boolean receivedAck = false;
 
 byte SEQ_NUMBER = 0;
 
+char self_eui[8] = "AA:BB:CC:DD:EE:FF:00:00";
+
 byte anchor_address[2];
 
 // timestamps to remember
@@ -106,7 +108,7 @@ void setup() {
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
     DW1000Ng::enableFrameFiltering(TAG_FRAME_FILTER_CONFIG);
     
-    DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
+    DW1000Ng::setEUI(self_eui);
 
     DW1000Ng::setNetworkId(RTLS_APP_ID);
 
@@ -242,6 +244,7 @@ void loop() {
                 DW1000Ng::deepSleep();
                 delay(resetPeriod);
                 DW1000Ng::spiWakeup();
+                DW1000Ng::setEUI(self_eui);
 
                 transmitBlink();
                 noteActivity();
