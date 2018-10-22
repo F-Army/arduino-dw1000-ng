@@ -61,7 +61,7 @@ typedef struct frame_filtering_configuration_t {
     boolean allowReservedFive;
 } frame_filtering_configuration_t;
 
-typedef struct deep_sleep_configuration_t {
+typedef struct sleep_configuration_t {
     boolean onWakeUpRunADC;
     boolean onWakeUpReceive;
     boolean onWakeUpLoadEUI;
@@ -70,4 +70,4 @@ typedef struct deep_sleep_configuration_t {
     boolean preserveSleep;
     boolean onWakeUpLoadLDE;
     boolean onWakeUpLoadLDO;
-} deep_sleep_configuration_t;
+} sleep_configuration_t;

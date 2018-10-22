@@ -96,6 +96,17 @@ frame_filtering_configuration_t TAG_FRAME_FILTER_CONFIG = {
     false
 };
 
+sleep_configuration_t SLEEP_CONFIG = {
+    false,
+    false,
+    false,
+    true,
+    false,
+    false,
+    true,
+    true
+};
+
 void setup() {
     // DEBUG monitoring
     Serial.begin(115200);
@@ -106,6 +117,7 @@ void setup() {
     // general configuration
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
+    DW1000Ng::applyCommonSleepConfiguration(SLEEP_CONFIG);
     DW1000Ng::enableFrameFiltering(TAG_FRAME_FILTER_CONFIG);
     
     DW1000Ng::setEUI(self_eui);

@@ -94,7 +94,7 @@ namespace DW1000Ng {
 
 	@param [in] config the general sleep configuration to apply to the DW1000
 	*/
-	void applyCommonSleepConfiguration(deep_sleep_configuration_t deep_sleep_config);
+	void applyCommonSleepConfiguration(sleep_configuration_t sleep_config);
 
 	/**
 	Enter in sleep mode
