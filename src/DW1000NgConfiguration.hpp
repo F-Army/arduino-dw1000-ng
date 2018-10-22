@@ -70,5 +70,4 @@ typedef struct deep_sleep_configuration_t {
     boolean preserveSleep;
     boolean onWakeUpLoadLDE;
     boolean onWakeUpLoadLDO;
-    boolean restore;
 } deep_sleep_configuration_t;
