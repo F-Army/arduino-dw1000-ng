@@ -157,6 +157,17 @@ namespace DW1000Ng {
 			SPI.endTransaction();
 		}
 
+		void _writeBitToRegister(byte cmd, uint16_t offset, uint16_t selectedBit, boolean oneORzero) {
+			byte byteToWrite[1];
+			_readBytes(cmd, offset, byteToWrite, 1);
+			uint8_t bitPosition = (uint8_t)(selectedBtit / 8);
+			selectedBit %= 8;
+			oneORzero ? byte tempByte = 0x01 : byte tempByte = 0x00;
+			tempByte <<= selectedBit;
+			byteToWrite |= tempByte;
+			_writeBytesToRegister(cmd, bitPosition, byteToWrite, 1);
+		}
+
 		void _writeToRegister(byte cmd, uint16_t offset, uint32_t data, uint16_t data_size) { 
 			byte dataBytes[data_size];
 			DW1000NgUtils::writeValueToBytes(dataBytes, data, data_size);
