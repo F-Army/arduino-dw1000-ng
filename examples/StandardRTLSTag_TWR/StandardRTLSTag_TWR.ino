@@ -197,7 +197,8 @@ void loop() {
     if (!sentAck && !receivedAck) {
         // check if inactive
         if (millis() - lastActivity > resetPeriod) {
-            Serial.print("Time out! The lost anchor is:");Seirial.println(anchor_address);
+            String tempString= "Time out! The lost anchor is:" ; tempString += anchor_address[0] + anchor_address[1];
+            Serial.println(tempString);
             reset();
         }
         return;
@@ -222,14 +223,16 @@ void loop() {
                 timePollSent = DW1000Ng::getTransmitTimestamp();
                 timePollAckReceived = DW1000Ng::getReceiveTimestamp();
                 transmitFinalMessage();
-                Serial.print("Receiving messages from:"); Serial.print(anchor_address);Serial.println("\t and send it back.");
+                String tempString= "Receiving messages from:" ; tempString += anchor_address[0] + anchor_address[1]+"\t and send it back.";
+                Serial.println(tempString);
                 noteActivity();
                 return;
             } else if (recv_data[10] == RANGING_CONFIRM) {
                 /* Received ranging confirm */
                 memcpy(anchor_address, &recv_data[11], 2);
                 transmitPoll();
-                Serial.print("Sending messages to NEW Anchor:"); Serial.println(anchor_address);
+                String tempString= "Sending messages to NEW Anchor:" ; tempString += anchor_address[0] + anchor_address[1];
+                Serial.println(tempString);
                 noteActivity();
                 return;
             } else if(recv_data[10] == ACTIVITY_FINISHED) {
