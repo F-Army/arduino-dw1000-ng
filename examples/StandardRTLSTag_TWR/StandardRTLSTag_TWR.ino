@@ -197,6 +197,7 @@ void loop() {
     if (!sentAck && !receivedAck) {
         // check if inactive
         if (millis() - lastActivity > resetPeriod) {
+            Serial.print("Time out! The lost anchor is:");Seirial.println(anchor_address);
             reset();
         }
         return;
@@ -213,7 +214,7 @@ void loop() {
         size_t recv_len = DW1000Ng::getReceivedDataLength();
         byte recv_data[recv_len];
         DW1000Ng::getReceivedData(recv_data, recv_len);
-        
+
         /* RTLS standard message */
         if(recv_data[9] == ACTIVITY_CONTROL) {
             if (recv_data[10] == RANGING_CONTINUE) {
@@ -221,12 +222,14 @@ void loop() {
                 timePollSent = DW1000Ng::getTransmitTimestamp();
                 timePollAckReceived = DW1000Ng::getReceiveTimestamp();
                 transmitFinalMessage();
+                Serial.print("Receiving messages from:"); Serial.print(anchor_address);Serial.println("\t and send it back.");
                 noteActivity();
                 return;
             } else if (recv_data[10] == RANGING_CONFIRM) {
                 /* Received ranging confirm */
                 memcpy(anchor_address, &recv_data[11], 2);
                 transmitPoll();
+                Serial.print("Sending messages to NEW Anchor:"); Serial.println(anchor_address);
                 noteActivity();
                 return;
             } else if(recv_data[10] == ACTIVITY_FINISHED) {
@@ -256,6 +259,7 @@ void loop() {
             DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&recv_data[16], 2));
             memcpy(anchor_address, &recv_data[13], 2);
             transmitPoll();
+            Serial.print("Receiving messages from:"); Serial.print(anchor_address);Serial.println("\t and send it back.");
             noteActivity();
             return;
         }
