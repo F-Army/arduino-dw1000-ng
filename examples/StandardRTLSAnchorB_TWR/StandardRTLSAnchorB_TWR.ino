@@ -250,6 +250,7 @@ void loop() {
             
             transmitRangingConfirm();
             noteActivity();
+            delay(25);//Sending message to the DW1000 chip too frequently, the earlier messages won't send out successfully.
             transmitRangeReport();
             noteActivity();
             return;

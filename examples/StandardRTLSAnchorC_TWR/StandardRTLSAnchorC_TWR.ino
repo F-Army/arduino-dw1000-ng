@@ -249,6 +249,7 @@ void loop() {
             Serial.println(rangeString);
             
             transmitActivityFinished();
+            delay(25);//Sending message to the DW1000 chip too frequently, the earlier messages won't send out successfully.
             noteActivity();
             transmitRangeReport();
             return;
