@@ -1364,6 +1364,15 @@ namespace DW1000Ng {
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LLDE_BIT, sleep_config.onWakeUpLoadLDE);
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LLDO_BIT, sleep_config.onWakeUpLoadLDO);
 		_writeBytesToRegister(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
+
+		if (sleep_config.disableWakeSPI || sleep_config.disableWakePIN) {
+			byte aon_cfg0[LEN_AON_CFG0];
+			memset(aon_cfg0, 0, LEN_AON_CFG0);
+			_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
+			DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_PIN_BIT, !sleep_config.disableWakeSPI);
+			DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_SPI_BIT, !sleep_config.disableWakePIN);
+			_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
+		}
 	}
 
 	void sleep(boolean enableDivider, uint16_t dividerCount, uint16_t sleepTime){
@@ -1409,7 +1418,9 @@ namespace DW1000Ng {
 		byte aon_cfg0[LEN_AON_CFG0];
 		memset(aon_cfg0, 0, LEN_AON_CFG0);
 		_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
-		/* SPI and PIN WakeUp events are 1 to default */
+		if ((DW1000NgUtils::getBit(aon_cfg0, 4, WAKE_PIN_BIT) && DW1000NgUtils::getBit(aon_cfg0, 4, WAKE_SPI_BIT)) == 0) {
+			DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_SPI_BIT, true);
+		}
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, false);
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, SLEEP_EN_BIT, true);
 		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
