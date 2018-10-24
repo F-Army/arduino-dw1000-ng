@@ -197,7 +197,7 @@ void loop() {
     if (!sentAck && !receivedAck) {
         // check if inactive
         if (millis() - lastActivity > resetPeriod) {
-            String tempString= "Time out! The lost anchor is:" ; tempString += anchor_address[0] + anchor_address[1];
+            String tempString= "Time out! The lost anchor is:" ; tempString += (char)anchor_address[0] + (char)anchor_address[1];
             Serial.println(tempString);
             reset();
         }
@@ -223,7 +223,8 @@ void loop() {
                 timePollSent = DW1000Ng::getTransmitTimestamp();
                 timePollAckReceived = DW1000Ng::getReceiveTimestamp();
                 transmitFinalMessage();
-                String tempString= "Receiving messages from:" ; tempString += anchor_address[0] + anchor_address[1]+"\t and send it back.";
+                String tempString= "Receiving messages from:" ; tempString += (char)anchor_address[0] + (char)anchor_address[1];
+                tempString +=" and send it back.";
                 Serial.println(tempString);
                 noteActivity();
                 return;
@@ -231,7 +232,7 @@ void loop() {
                 /* Received ranging confirm */
                 memcpy(anchor_address, &recv_data[11], 2);
                 transmitPoll();
-                String tempString= "Sending messages to NEW Anchor:" ; tempString += anchor_address[0] + anchor_address[1];
+                String tempString= "Sending messages to NEW Anchor:" ; tempString += (char) anchor_address[0] + (char)anchor_address[1];
                 Serial.println(tempString);
                 noteActivity();
                 return;
@@ -243,7 +244,7 @@ void loop() {
                 } else if(multiplier == 0x02) {
                     resetPeriod *= 1000;
                 }
-                Serial.println("One Range is finishend, and the modules is going to sleep.")
+                Serial.println("One Range is finishend, and the modules is going to sleep.");
 
                 /* Sleep until next blink to save power */
                 DW1000Ng::deepSleep();
@@ -263,7 +264,9 @@ void loop() {
             DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&recv_data[16], 2));
             memcpy(anchor_address, &recv_data[13], 2);
             transmitPoll();
-            Serial.print("Receiving messages from:"); Serial.print(anchor_address);Serial.println("\t and send it back.");
+            String tempString= "Receiving messages from:" ; tempString += (char)anchor_address[0] + (char)anchor_address[1];
+            tempString +=" and send it back.";
+            Serial.println(tempString);
             noteActivity();
             return;
         }
