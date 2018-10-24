@@ -157,15 +157,22 @@ namespace DW1000Ng {
 			SPI.endTransaction();
 		}
 
-		void _writeBitToRegister(byte cmd, uint16_t offset, uint16_t selectedBit, boolean oneORzero) {
-			byte byteToWrite[1];
-			_readBytes(cmd, offset, byteToWrite, 1);
-			uint8_t bitPosition = (uint8_t)(selectedBtit / 8);
-			selectedBit %= 8;
-			oneORzero ? byte tempByte = 0x01 : byte tempByte = 0x00;
-			tempByte <<= selectedBit;
-			byteToWrite |= tempByte;
-			_writeBytesToRegister(cmd, bitPosition, byteToWrite, 1);
+		void _writeBitToRegister(byte registerOfTheBit, u_int16_t data_size, uint16_t selectedBit, boolean oneORzero) {
+			uint16_t idx;
+			uint8_t shift;
+
+			idx = selectedBit/8;
+			if(idx >= n) {
+				return; // TODO proper error handling: out of bounds
+			}
+			byte* targetByte = &data[idx];
+			shift = selectedBit%8;
+			if(oneORzero) {
+				bitSet(*targetByte, shift);
+			} else {
+				bitClear(*targetByte, shift);
+			}
+			_writeBytesToRegister(registerOfTheBit, idx, *targetByte, 1);
 		}
 
 		void _writeToRegister(byte cmd, uint16_t offset, uint32_t data, uint16_t data_size) { 
