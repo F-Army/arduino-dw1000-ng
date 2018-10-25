@@ -103,6 +103,8 @@ namespace DW1000Ng {
 		uint16_t		_antennaTxDelay = 0;
 		uint16_t		_antennaRxDelay = 0;
 
+		SPIClass * vspi = NULL;
+
 		/* SPI relative variables */
 		#if defined(ESP32) || defined(ESP8266)
 		const SPISettings  _fastSPI = SPISettings(20000000L, MSBFIRST, SPI_MODE0);
@@ -148,17 +150,17 @@ namespace DW1000Ng {
 					headerLen += 2;
 				}
 			}
-			SPI.beginTransaction(*_currentSPI);
+			vspi->beginTransaction(*_currentSPI);
 			digitalWrite(_ss, LOW);
 			for(i = 0; i < headerLen; i++) {
-				SPI.transfer(header[i]); // send header
+				vspi->transfer(header[i]); // send header
 			}
 			for(i = 0; i < data_size; i++) {
-				SPI.transfer(data[i]); // write values
+				vspi->transfer(data[i]); // write values
 			}
 			delayMicroseconds(5);
 			digitalWrite(_ss, HIGH);
-			SPI.endTransaction();
+			vspi->endTransaction();
 		}
 
 		void _writeToRegister(byte cmd, uint16_t offset, uint32_t data, uint16_t data_size) { 
@@ -201,17 +203,17 @@ namespace DW1000Ng {
 					headerLen += 2;
 				}
 			}
-			SPI.beginTransaction(*_currentSPI);
+			vspi->beginTransaction(*_currentSPI);
 			digitalWrite(_ss, LOW);
 			for(i = 0; i < headerLen; i++) {
-				SPI.transfer(header[i]); // send header
+				vspi->transfer(header[i]); // send header
 			}
 			for(i = 0; i < n; i++) {
-				data[i] = SPI.transfer(0x00); // read values
+				data[i] = vspi->transfer(0x00); // read values
 			}
 			delayMicroseconds(5);
 			digitalWrite(_ss, HIGH);
-			SPI.endTransaction();
+			vspi->endTransaction();
 		}
 
 		// always 4 bytes
@@ -1219,8 +1221,10 @@ namespace DW1000Ng {
 			// DW1000 data sheet v2.08 §5.6.1 page 20, the RSTn pin should not be driven high but left floating.
 			pinMode(_rst, INPUT);
 		}
+
+		vspi = new SPIClass(VSPI);
 		// start SPI
-		SPI.begin();
+		vspi->begin();
 		// pin and basic member setup
 		// attach interrupt
 		// TODO throw error if pin is not a interrupt pin
@@ -1259,14 +1263,14 @@ namespace DW1000Ng {
 
 	void select() {
 		#if !defined(ESP32) && !defined(ESP8266)
-		SPI.usingInterrupt(digitalPinToInterrupt(_irq));
+		vspi->usingInterrupt(digitalPinToInterrupt(_irq));
 		#endif
 		pinMode(_ss, OUTPUT);
 		digitalWrite(_ss, HIGH);
 	}
 
 	void end() {
-		SPI.end();
+		vspi->end();
 	}
 
 	/* callback handler management. */
