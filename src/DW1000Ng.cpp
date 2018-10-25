@@ -1227,8 +1227,8 @@ namespace DW1000Ng {
 		attachInterrupt(digitalPinToInterrupt(_irq), pollForEvents, RISING);
 		select();
 		// reset chip (either soft or hard)
-		
-		softwareReset();
+
+		reset();
 		
 		_enableClock(SYS_XTI_CLOCK);
 		delay(5);
@@ -1416,7 +1416,7 @@ namespace DW1000Ng {
 
 	void softwareReset() {
 		/* Sets SYS_XTI_CLOCK and write PMSC to all zero */
-		_disableSequencing(); 
+		_disableSequencing();
 		/* Clear AON and WakeUp configuration */
 		_writeToRegister(AON, AON_WCFG_SUB, 0x00, LEN_AON_WCFG);
 		_writeToRegister(AON, AON_CFG0_SUB, 0x00, LEN_AON_CFG0);
