@@ -39,6 +39,11 @@ Features
 ![Continuous wave mode](https://img.shields.io/badge/Continuous%20Wave%20Mode-TODO-red.svg?&style=for-the-badge)
 <br/>
 
+Devices
+------------
+![Arduino](https://img.shields.io/badge/Arduino-done-brightgreen.svg?&style=for-the-badge)
+![ESP8266/32](https://img.shields.io/badge/ESP8266/32-Experimental-yellow.svg?&style=for-the-badge)
+
 Installation
 ------------
 **Requires c++11 support**, Arduino IDE >= 1.6.6 support c++11.
