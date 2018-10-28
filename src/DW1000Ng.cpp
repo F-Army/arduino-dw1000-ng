@@ -231,7 +231,7 @@ namespace DW1000Ng {
 		}
 
 		void _writeBitToRegister(byte registerOfTheBit, uint16_t registerOfTheBit_LEN, uint16_t selectedBit, boolean oneORzero) {
-			uint8_t idx;
+			uint16_t idx;
 			uint8_t shift;
 
 			idx = selectedBit/8;
@@ -245,7 +245,7 @@ namespace DW1000Ng {
 			} else {
 				bitClear(targetByte, shift);
 			}
-			byte temp[1];
+			byte temp = 0x00;
 			_readBytes(registerOfTheBit, idx, temp, 1);
 			targetByte |= temp;
 			_writeBytesToRegister(registerOfTheBit, idx, targetByte, 1);
