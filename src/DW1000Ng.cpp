@@ -157,24 +157,6 @@ namespace DW1000Ng {
 			SPI.endTransaction();
 		}
 
-		void _writeBitToRegister(byte registerOfTheBit, u_int16_t data_size, uint16_t selectedBit, boolean oneORzero) {
-			uint16_t idx;
-			uint8_t shift;
-
-			idx = selectedBit/8;
-			if(idx >= n) {
-				return; // TODO proper error handling: out of bounds
-			}
-			byte* targetByte = &data[idx];
-			shift = selectedBit%8;
-			if(oneORzero) {
-				bitSet(*targetByte, shift);
-			} else {
-				bitClear(*targetByte, shift);
-			}
-			_writeBytesToRegister(registerOfTheBit, idx, *targetByte, 1);
-		}
-
 		void _writeToRegister(byte cmd, uint16_t offset, uint32_t data, uint16_t data_size) { 
 			byte dataBytes[data_size];
 			DW1000NgUtils::writeValueToBytes(dataBytes, data, data_size);
@@ -246,6 +228,27 @@ namespace DW1000Ng {
 			_readBytes(OTP_IF, OTP_RDAT_SUB, data, LEN_OTP_RDAT);
 			// end read mode
 			_writeByte(OTP_IF, OTP_CTRL_SUB, 0x00);
+		}
+
+		void _writeBitToRegister(byte registerOfTheBit, uint16_t registerOfTheBit_LEN, uint16_t selectedBit, boolean oneORzero) {
+			uint8_t idx;
+			uint8_t shift;
+
+			idx = selectedBit/8;
+			if(idx >= registerOfTheBit_LEN) {
+				return; // TODO proper error handling: out of bounds
+			}
+			byte targetByte = 0x00;
+			shift = selectedBit%8;
+			if(oneORzero) {
+				bitSet(targetByte, shift);
+			} else {
+				bitClear(targetByte, shift);
+			}
+			byte temp[1];
+			_readBytes(registerOfTheBit, idx, temp, 1);
+			targetByte |= temp;
+			_writeBytesToRegister(registerOfTheBit, idx, targetByte, 1);
 		}
 		
 		/* Steps used to get Temp and Voltage */
