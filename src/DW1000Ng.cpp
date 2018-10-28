@@ -238,14 +238,14 @@ namespace DW1000Ng {
 			if(idx >= registerOfTheBit_LEN) {
 				return; // TODO proper error handling: out of bounds
 			}
-			byte targetByte = 0x00;
+			byte targetByte; memset(&targetByte, 0, 1);
 			shift = selectedBit%8;
 			if(oneORzero) {
 				bitSet(targetByte, shift);
 			} else {
 				bitClear(targetByte, shift);
 			}
-			byte temp = 0x00;
+			byte temp; memset(&temp, 0, 1);
 			_readBytes(registerOfTheBit, idx, &temp, 1);
 			targetByte |= temp;
 			_writeBytesToRegister(registerOfTheBit, idx, &targetByte, 1);
