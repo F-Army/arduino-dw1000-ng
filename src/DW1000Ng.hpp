@@ -116,7 +116,7 @@ namespace DW1000Ng {
 	sleep_config should be set to allow for the appropriate DW1000 wakeup functionality.
 	This bit is cleared when the DW1000 wakes from sleep, unless the PRES_SLEEP bit is set.
 	*/
-	void enterDeepSleepAfterTX()
+	void enterDeepSleepAfterTX();
 
 	/**
 	Wake-up from deep sleep by toggle chip select pin
