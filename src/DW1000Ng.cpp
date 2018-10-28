@@ -246,9 +246,9 @@ namespace DW1000Ng {
 				bitClear(targetByte, shift);
 			}
 			byte temp = 0x00;
-			_readBytes(registerOfTheBit, idx, temp, 1);
+			_readBytes(registerOfTheBit, idx, &temp, 1);
 			targetByte |= temp;
-			_writeBytesToRegister(registerOfTheBit, idx, targetByte, 1);
+			_writeBytesToRegister(registerOfTheBit, idx, &targetByte, 1);
 		}
 		
 		/* Steps used to get Temp and Voltage */
