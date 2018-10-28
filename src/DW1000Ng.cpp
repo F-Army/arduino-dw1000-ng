@@ -1200,6 +1200,22 @@ namespace DW1000Ng {
             DW1000NgUtils::writeValueToBytes(enable_mask, 0x005FFF00, LEN_RX_CONF_SUB);
             _writeBytesToRegister(RF_CONF, RF_CONF_SUB, enable_mask, LEN_RX_CONF_SUB);
         }
+
+		/*Puts the device into sleep/deepSleep mode. This function also upload sleep config to AON.
+		  Whit this is  */
+		void _goToSleep() {
+			/* Clear the register */
+			_writeToRegister(AON, AON_CTRL_SUB, 0x00, LEN_AON_CTRL);
+			/* Write 1 in SAVE_BIT */
+			_writeToRegister(AON, AON_CTRL_SUB, 0x02, LEN_AON_CTRL);
+		}
+
+		void _uploadConfigToAON() {
+			/* Write 1 in UPL_CFG_BIT */
+			_writeToRegister(AON, AON_CTRL_SUB, 0x04, LEN_AON_CTRL);
+			/* Clear the register */
+			_writeToRegister(AON, AON_CTRL_SUB, 0x00, LEN_AON_CTRL);
+		}
 	}
 
 	/* ####################### PUBLIC ###################### */
@@ -1424,13 +1440,7 @@ namespace DW1000Ng {
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, false);
 		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 
-		byte aon_ctrl[LEN_AON_CTRL];
-		memset(aon_ctrl, 0, LEN_AON_CTRL);
-		_readBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
-		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, RESTORE_BIT, false);
-		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, UPL_CFG_BIT, true);
-		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, SAVE_BIT, true);
-		_writeBytesToRegister(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
+		_goToSleep();
 	}
 
 	void spiWakeup(){
