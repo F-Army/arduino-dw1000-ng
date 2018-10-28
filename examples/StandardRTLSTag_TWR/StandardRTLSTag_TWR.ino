@@ -105,8 +105,9 @@ sleep_configuration_t SLEEP_CONFIG = {
     false,
     true,
     true,
-    false,
-    true
+    true,
+    true,
+    false
 };
 
 void setup() {
