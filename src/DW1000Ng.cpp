@@ -1202,7 +1202,7 @@ namespace DW1000Ng {
         }
 
 		/*Puts the device into sleep/deepSleep mode. This function also upload sleep config to AON.
-		  Whit this is  */
+		  The DW1000 go to sleep only if SLEEP_EN_BIT has been set  */
 		void _goToSleep() {
 			/* Clear the register */
 			_writeToRegister(AON, AON_CTRL_SUB, 0x00, LEN_AON_CTRL);
@@ -1210,6 +1210,7 @@ namespace DW1000Ng {
 			_writeToRegister(AON, AON_CTRL_SUB, 0x02, LEN_AON_CTRL);
 		}
 
+		/*This function uploads sleep config to AON block */
 		void _uploadConfigToAON() {
 			/* Write 1 in UPL_CFG_BIT */
 			_writeToRegister(AON, AON_CTRL_SUB, 0x04, LEN_AON_CTRL);
@@ -1416,18 +1417,13 @@ namespace DW1000Ng {
 		byte aon_ctrl[LEN_AON_CTRL];
 		memset(aon_ctrl, 0, LEN_AON_CTRL);
 		_readBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
-		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, RESTORE_BIT, false);
-		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, UPL_CFG_BIT, true);
-		_writeBytesToRegister(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
 		/* following the recommented operating procedure for set sleep counter */
 		DW1000NgUtils::writeValueToBytes(&aon_cfg0[2], sleepTime, 2);
 		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 		DW1000NgUtils::setBit(aon_cfg1, LEN_AON_CFG1, SLEEP_CEN_BIT, true);
 		_writeBytesToRegister(AON, AON_CFG1_SUB, aon_cfg1, LEN_AON_CFG1);
 		/* finally apply the new sleep time and the IC goes to sleep */
-		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, UPL_CFG_BIT, true);
-		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, SAVE_BIT, true);
-		_writeBytesToRegister(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
+		_goToSleep();
 	}
 
 	void deepSleep() {
