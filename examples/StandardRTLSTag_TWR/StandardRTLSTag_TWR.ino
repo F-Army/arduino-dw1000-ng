@@ -48,7 +48,7 @@ volatile boolean receivedAck = false;
 
 byte SEQ_NUMBER = 0;
 
-char self_eui[8] = "AA:BB:CC:DD:EE:FF:00:00";
+char self_eui[24] = "AA:BB:CC:DD:EE:FF:00:00";
 
 byte anchor_address[2];
 
