@@ -1409,20 +1409,21 @@ namespace DW1000Ng {
 		byte aon_cfg1[LEN_AON_CFG1];
 		memset(aon_cfg1, 0, LEN_AON_CFG1);
 		_readBytes(AON, AON_CFG1_SUB, aon_cfg1, LEN_AON_CFG1);
+		/* (a) Set SLEEP_CEN (in AON_CFG1) to 0. */
 		DW1000NgUtils::setBit(aon_cfg1, LEN_AON_CFG1, SLEEP_CEN_BIT, false);
 		DW1000NgUtils::setBit(aon_cfg1, LEN_AON_CFG1, SMXX_BIT, false);
-		DW1000NgUtils::setBit(aon_cfg1, LEN_AON_CFG1, LPOSC_CAL_BIT, false);
 		_writeBytesToRegister(AON, AON_CFG1_SUB, aon_cfg1, LEN_AON_CFG1);
-		
-		byte aon_ctrl[LEN_AON_CTRL];
-		memset(aon_ctrl, 0, LEN_AON_CTRL);
-		_readBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
-		/* following the recommented operating procedure for set sleep counter */
+		/* (b) Set UPL_CFG (in AON_CTRL) to 1. */
+		_uploadConfigToAON();
+		/* (b1) Program the new value of SLEEP_TIM (in AON_CFG0). */
 		DW1000NgUtils::writeValueToBytes(&aon_cfg0[2], sleepTime, 2);
 		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
+		/* (c) Set SLEEP_CEN to 1. */
 		DW1000NgUtils::setBit(aon_cfg1, LEN_AON_CFG1, SLEEP_CEN_BIT, true);
 		_writeBytesToRegister(AON, AON_CFG1_SUB, aon_cfg1, LEN_AON_CFG1);
-		/* finally apply the new sleep time and the IC goes to sleep */
+		/* (c1) Set UPL_CFG to 1, to apply the new sleep time and enable the counter in the AON. */
+		_uploadConfigToAON();
+		/* finally apply the IC goes to sleep */
 		_goToSleep();
 	}
 
