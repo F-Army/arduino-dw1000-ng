@@ -104,7 +104,7 @@ namespace DW1000Ng {
 								Max value is 2047.
 	@param [in]	sleepTime		The sleep time count elapse value. The units depend on which timer is running. 
 	*/
-	void sleep(boolean enableDivider, uint16_t dividerCount, uint16_t sleepTime);
+	void sleep(boolean enableDivider, uint16_t sleepTime, uint16_t dividerCount = 1);
 
 	/**
 	Enter in deep sleep mode

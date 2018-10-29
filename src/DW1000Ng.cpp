@@ -1393,7 +1393,7 @@ namespace DW1000Ng {
 		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 	}
 
-	void sleep(boolean enableDivider, uint16_t dividerCount, uint16_t sleepTime){
+	void sleep(boolean enableDivider, uint16_t sleepTime, uint16_t dividerCount){
 		byte aon_cfg0[LEN_AON_CFG0];
 		memset(aon_cfg0, 0, LEN_AON_CFG0);
 		_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
