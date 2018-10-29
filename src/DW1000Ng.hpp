@@ -467,16 +467,16 @@ namespace DW1000Ng {
 	/**
 	Gets the temperature inside the DW1000 Device
 
-	@param [out] temp the temperature 
+	@param [out] temp The temperature 
 	*/
-	void getTemperature(float& temp);
+	float getTemperature();
 
 	/**
 	Gets the voltage in input of the DW1000
 
-	@param [out] vbat the input voltage
+	@param [out] vbat The input voltage
 	*/
-	void getBatteryVoltage(float& vbat);
+	float getBatteryVoltage();
 
 	/**
 	Gets both temperature and voltage with a single read
