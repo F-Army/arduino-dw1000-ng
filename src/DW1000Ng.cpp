@@ -233,6 +233,7 @@ namespace DW1000Ng {
 		void _writeBitToRegister(byte registerOfTheBit, uint16_t registerOfTheBit_LEN, uint16_t selectedBit, boolean oneORzero) {
 			uint16_t idx;
 			uint8_t shift;
+			boolean bitwiseAND = false;
 
 			idx = selectedBit/8;
 			if(idx >= registerOfTheBit_LEN) {
@@ -244,10 +245,11 @@ namespace DW1000Ng {
 				bitSet(targetByte, shift);
 			} else {
 				bitClear(targetByte, shift);
+				bitwiseAND = true;
 			}
 			byte temp; memset(&temp, 0, 1);
 			_readBytes(registerOfTheBit, idx, &temp, 1);
-			targetByte |= temp;
+			bitwiseAND ? targetByte &= temp : targetByte |= temp;
 			_writeBytesToRegister(registerOfTheBit, idx, &targetByte, 1);
 		}
 		
