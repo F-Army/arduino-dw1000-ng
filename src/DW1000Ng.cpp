@@ -234,27 +234,20 @@ namespace DW1000Ng {
 			_writeByte(OTP_IF, OTP_CTRL_SUB, 0x00);
 		}
 
-		void _writeBitToRegister(byte registerOfTheBit, uint16_t registerOfTheBit_LEN, uint16_t selectedBit, boolean oneORzero) {
+		void _writeBitToRegister(byte bitRegister, uint16_t bitRegister_LEN, uint16_t selectedBit, boolean value) {
 			uint16_t idx;
-			uint8_t shift;
-			boolean bitwiseAND = false;
+			uint8_t bitPosition;
 
 			idx = selectedBit/8;
-			if(idx >= registerOfTheBit_LEN) {
+			if(idx >= bitRegister_LEN) {
 				return; // TODO proper error handling: out of bounds
 			}
 			byte targetByte; memset(&targetByte, 0, 1);
-			shift = selectedBit%8;
-			if(oneORzero) {
-				bitSet(targetByte, shift);
-			} else {
-				bitClear(targetByte, shift);
-				bitwiseAND = true;
-			}
-			byte temp; memset(&temp, 0, 1);
-			_readBytes(registerOfTheBit, idx, &temp, 1);
-			bitwiseAND ? targetByte &= temp : targetByte |= temp;
-			_writeBytesToRegister(registerOfTheBit, idx, &targetByte, 1);
+			bitPosition = selectedBit%8;
+			_readBytes(bitRegister, idx, &targetByte, 1);
+			
+			value ? bitSet(targetByte, bitPosition) : bitClear(targetByte, bitPosition);
+			_writeBytesToRegister(bitRegister, idx, &targetByte, 1);
 		}
 		
 		/* Steps used to get Temp and Voltage */
