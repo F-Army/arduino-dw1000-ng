@@ -1455,6 +1455,14 @@ namespace DW1000Ng {
 		_writeBytesToRegister(PMSC, PMSC_CTRL1_SUB, pmsc_ctrl1, LEN_PMSC_CTRL1);
 	}
 
+	void enterSleepAfterRX() {
+		byte pmsc_ctrl1[LEN_PMSC_CTRL1];
+		memset(pmsc_ctrl1, 0, LEN_PMSC_CTRL1);
+		_readBytes(PMSC, PMSC_CTRL1_SUB, pmsc_ctrl1, LEN_PMSC_CTRL1);
+		DW1000NgUtils::setBit(pmsc_ctrl1, LEN_PMSC_CTRL1, ARXSLP_BIT, true);
+		_writeBytesToRegister(PMSC, PMSC_CTRL1_SUB, pmsc_ctrl1, LEN_PMSC_CTRL1);
+	}
+
 	void spiWakeup(){
 		byte deviceId[LEN_DEV_ID];
 		byte expectedDeviceId[LEN_DEV_ID];
