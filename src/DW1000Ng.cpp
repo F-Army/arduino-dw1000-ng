@@ -1415,21 +1415,17 @@ namespace DW1000Ng {
 	}
 
 	void softwareReset() {
-		/* Sets SYS_XTI_CLOCK and write PMSC to all zero */
+		/* Disable sequencing and go to state "INIT" - (a) Sets SYSCLKS to 01 */
 		_disableSequencing();
 		/* Clear AON and WakeUp configuration */
 		_writeToRegister(AON, AON_WCFG_SUB, 0x00, LEN_AON_WCFG);
 		_writeToRegister(AON, AON_CFG0_SUB, 0x00, LEN_AON_CFG0);
 		_writeToRegister(AON, AON_CTRL_SUB, 0x02, LEN_AON_CTRL);
-		/* Reset TX,RX and PMSC */
-		byte pmscctrl0[LEN_PMSC_CTRL0];
-		_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-		pmscctrl0[3] = 0x00;
-		_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-		delay(5);
-		/* Reset to all one softwareReset. Clock remain to SYS_XTI_CLOCK */
-		pmscctrl0[3] = 0xF0;
-		_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+		/* (b) Clear SOFTRESET to all zero’s */
+		_writeToRegister(PMSC, PMSC_SOFTRESET_SUB, 0x00, LEN_PMSC_SOFTRESET);
+		delay(1);
+		/* (c) Set SOFTRESET to all ones */
+		_writeToRegister(PMSC, PMSC_SOFTRESET_SUB, 0xF0, LEN_PMSC_SOFTRESET);
 	}
 
 	/* ###########################################################################
