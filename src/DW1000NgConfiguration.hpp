@@ -71,6 +71,10 @@ typedef struct sleep_configuration_t {
     boolean onWakeUpLoadLDE;
     boolean onWakeUpLoadLDO;
     boolean enableSLP;
-    boolean disableWakeSPI;
     boolean disableWakePIN;
+    boolean disableWakeSPI;
+    boolean disableWakeCNT;
+    boolean enableDivider; //True for enable clock divider, viceversa for disable
+    uint16_t dividerCount; //Spicifies a divider count for dividing the raw XTAL oscillator frequency. Max value is 2047.
+    uint16_t sleepTime; //The sleep time count elapse value. The units depend on which timer is running.
 } sleep_configuration_t;

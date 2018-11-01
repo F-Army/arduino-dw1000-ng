@@ -90,6 +90,14 @@ namespace DW1000Ng {
 	void setGPIOMode(uint8_t msgp, uint8_t mode);
 
 	/**
+	Configures the sleep time count elapse value. 
+	Use this only in sleep mode so, after proper applyCommonSleepConfiguration() configuration.
+
+	@param [in] sleepTime	time of the sleep. The unit depends on the osc.freq. of the IC in low powered(from 7 to 13 KHz).
+	*/
+	void setSleepTime(uint16_t sleepTime);
+
+	/**
 	Applies the common sleep configuration to the DW1000
 
 	@param [in] config struct	The common sleep configuration to apply to the DW1000
@@ -97,19 +105,9 @@ namespace DW1000Ng {
 	void applyCommonSleepConfiguration(sleep_configuration_t sleep_config);
 
 	/**
-	Enter in sleep mode
-
-	@param [in] enableDivider	True for enable clock divider, viceversa for disable
-	@param [in]	dividerCount	Spicifies a divider count for dividing the raw XTAL oscillator frequency. 
-								Max value is 2047.
-	@param [in]	sleepTime		The sleep time count elapse value. The units depend on which timer is running. 
+	Enter in sleep or deepSleep mode. applyCommonSleepConfiguration should be called first
 	*/
-	void sleep(uint16_t sleepTime, boolean enableDivider = false, uint16_t dividerCount = 0x00FF);
-
-	/**
-	Enter in deep sleep mode
-	*/
-	void deepSleep();
+	void sleep();
 
 	/**
 	Enter in deepSleep after TX.

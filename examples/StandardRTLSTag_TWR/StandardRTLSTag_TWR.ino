@@ -107,7 +107,11 @@ sleep_configuration_t SLEEP_CONFIG = {
     true,
     true,
     true,
-    false
+    false,
+    true,
+    false,
+    0x00FF,
+    0x50FF
 };
 
 void setup() {
@@ -256,7 +260,7 @@ void loop() {
                 }
                 
                 /* Sleep until next blink to save power */
-                DW1000Ng::deepSleep();
+                DW1000Ng::sleep();
                 delay(resetPeriod);
                 DW1000Ng::spiWakeup();
                 DW1000Ng::setEUI(self_eui);
