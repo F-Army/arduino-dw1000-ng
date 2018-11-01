@@ -80,6 +80,11 @@ namespace DW1000Ng {
 		byte       _chanctrl[LEN_CHAN_CTRL];
 		byte       _networkAndAddress[LEN_PANADR];
 
+		/* Sleep mode status */
+		boolean _wakeCounterDisabled;
+		boolean _wakePINDisabled;
+		boolean _wakeSPIDisabled;
+
 		/* Temperature and Voltage monitoring */
 		byte _vmeas3v3 = 0;
 		byte _tmeas23C = 0;
@@ -1368,8 +1373,7 @@ namespace DW1000Ng {
 		_writeBytesToRegister(GPIO_CTRL, GPIO_MODE_SUB, gpiomode, LEN_GPIO_MODE);
 	}
 
-	void setSleepTime(uint16_t sleepTime){
-		if(sleepTime != 0x50FF) {
+	void setSleepTime(uint16_t sleepTime) {
 			byte aon_cfg0[LEN_AON_CFG0];
 			memset(aon_cfg0, 0, LEN_AON_CFG0);
 			_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
@@ -1392,7 +1396,6 @@ namespace DW1000Ng {
 			_writeBytesToRegister(AON, AON_CFG1_SUB, aon_cfg1, LEN_AON_CFG1);
 			/* (e) Set UPL_CFG to 1, to apply the new sleep time and enable the counter in the AON. */
 			_uploadConfigToAON();
-		}
 	}
 
 	void applySleepConfiguration(sleep_configuration_t sleep_config) {
@@ -1400,7 +1403,7 @@ namespace DW1000Ng {
 		memset(aon_cfg0, 0, LEN_AON_CFG0);
 		_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 		
-		if(sleep_config.dividerCount != 0x00FF) {
+		if(sleep_config.dividerCount != NULL && sleep_config.enableDivider) {
 			byte lpclkdiva[2];
 			DW1000NgUtils::writeValueToBytes(lpclkdiva, sleep_config.dividerCount, 2);
 			/* Clear lplckdiva default value */
@@ -1409,11 +1412,16 @@ namespace DW1000Ng {
 
 			aon_cfg0[0] |= ((lpclkdiva[0] << 5) & 0xE0);
 			aon_cfg0[1] |= ((lpclkdiva[0] >> 3) | (lpclkdiva[1] << 5));
+			
+			//_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 		}
 
-		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
-
-		setSleepTime(sleep_config.sleepTime);
+		if(sleep_config.sleepTime != NULL && sleep_config.sleepTime > 0) {
+			setSleepTime(sleep_config.sleepTime);
+		} else {
+			/* Otherwise set default device value */
+			setSleepTime(0x50FF);
+		}
 
 		byte aon_wcfg[LEN_AON_WCFG];
 		memset(aon_wcfg, 0, LEN_AON_WCFG);
@@ -1429,18 +1437,44 @@ namespace DW1000Ng {
 		_writeBytesToRegister(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
 
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, SLEEP_EN_BIT, sleep_config.enableSLP);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_SPI_BIT, sleep_config.disableWakePIN);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_PIN_BIT, sleep_config.disableWakeSPI);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_PIN_BIT, sleep_config.disableWakeCNT);
-		if (sleep_config.disableWakePIN && sleep_config.disableWakeSPI && sleep_config.disableWakeCNT){
-			DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_PIN_BIT, true);
-		}
+		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_SPI_BIT, sleep_config.enableWakePIN);
+		_wakePINDisabled = !sleep_config.enableWakePIN;
+		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_PIN_BIT, sleep_config.enableWakeSPI);
+		_wakeSPIDisabled = !sleep_config.enableWakeSPI;
+		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, sleep_config.enableWakeCNT);
+		_wakeCounterDisabled = !sleep_config.enableWakeCNT;
+
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, LPDIV_EN_BIT, sleep_config.enableDivider);
 		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 	}
 
-	void sleep(){
+	void sleep() {
+		if(_wakeCounterDisabled) {
+			_wakeCounterDisabled = false;
+			byte aon_cfg0[LEN_AON_CFG0];
+			memset(aon_cfg0, 0, LEN_AON_CFG0);
+			_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
+			DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, true);
+			_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
+		}
 		_goToSleep();
+	}
+
+	boolean deepSleep() {
+		if(_wakePINDisabled && _wakeSPIDisabled)
+			return false;
+
+		if(!_wakeCounterDisabled) {
+			_wakeCounterDisabled = true;
+			byte aon_cfg0[LEN_AON_CFG0];
+			memset(aon_cfg0, 0, LEN_AON_CFG0);
+			_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
+			DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, false);
+			_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
+		}
+
+		_goToSleep();
+		return true;
 	}
 
 	void enterSleepAfterTX() {

@@ -106,12 +106,12 @@ sleep_configuration_t SLEEP_CONFIG = {
     true,
     true,
     true,
-    true,
     false,
     true,
     false,
-    0x00FF,
-    0x50FF
+    false,
+    NULL,
+    NULL
 };
 
 void setup() {
@@ -124,7 +124,7 @@ void setup() {
     // general configuration
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
 	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
-    DW1000Ng::applyCommonSleepConfiguration(SLEEP_CONFIG);
+    DW1000Ng::applySleepConfiguration(SLEEP_CONFIG);
     DW1000Ng::enableFrameFiltering(TAG_FRAME_FILTER_CONFIG);
     
     DW1000Ng::setEUI(self_eui);
@@ -260,7 +260,7 @@ void loop() {
                 }
                 
                 /* Sleep until next blink to save power */
-                DW1000Ng::sleep();
+                DW1000Ng::deepSleep();
                 delay(resetPeriod);
                 DW1000Ng::spiWakeup();
                 DW1000Ng::setEUI(self_eui);

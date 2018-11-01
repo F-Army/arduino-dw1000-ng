@@ -105,9 +105,17 @@ namespace DW1000Ng {
 	void applySleepConfiguration(sleep_configuration_t sleep_config);
 
 	/**
-	Enter in sleep or deepSleep mode. applySleepConfiguration should be called first
+	Enter in sleep mode. applySleepConfiguration must be called first
 	*/
 	void sleep();
+
+	/**
+	Enter in deepSleep mode. applySleepConfiguration must be called first
+	Either spi wakeup or pin wakeup must be enabled
+
+	return false if both spi wakeup and pin wakeup are disabled
+	*/
+	boolean deepSleep();
 
 	/**
 	Enter in deepSleep after TX.
