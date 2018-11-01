@@ -1395,7 +1395,7 @@ namespace DW1000Ng {
 		}
 	}
 
-	void applyCommonSleepConfiguration(sleep_configuration_t sleep_config) {
+	void applySleepConfiguration(sleep_configuration_t sleep_config) {
 		byte aon_cfg0[LEN_AON_CFG0];
 		memset(aon_cfg0, 0, LEN_AON_CFG0);
 		_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);

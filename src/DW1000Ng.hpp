@@ -102,10 +102,10 @@ namespace DW1000Ng {
 
 	@param [in] config struct	The common sleep configuration to apply to the DW1000
 	*/
-	void applyCommonSleepConfiguration(sleep_configuration_t sleep_config);
+	void applySleepConfiguration(sleep_configuration_t sleep_config);
 
 	/**
-	Enter in sleep or deepSleep mode. applyCommonSleepConfiguration should be called first
+	Enter in sleep or deepSleep mode. applySleepConfiguration should be called first
 	*/
 	void sleep();
 
