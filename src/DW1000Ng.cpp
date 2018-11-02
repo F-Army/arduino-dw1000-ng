@@ -244,7 +244,7 @@ namespace DW1000Ng {
 			}
 			byte targetByte; memset(&targetByte, 0, 1);
 			bitPosition = selectedBit%8;
-			_readBytes(bitRegister, idx, &targetByte, 1);
+			_readBytes(bitRegister, RegisterOffset+idx, &targetByte, 1);
 			
 			value ? bitSet(targetByte, bitPosition) : bitClear(targetByte, bitPosition);
 
