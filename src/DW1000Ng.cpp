@@ -234,7 +234,7 @@ namespace DW1000Ng {
 			_writeByte(OTP_IF, OTP_CTRL_SUB, 0x00);
 		}
 
-		void _writeBitToRegister(byte bitRegister, uint16_t bitRegister_LEN, uint16_t selectedBit, boolean value) {
+		void _writeBitToRegister(byte bitRegister, uint16_t RegisterOffset, uint16_t bitRegister_LEN, uint16_t selectedBit, boolean value) {
 			uint16_t idx;
 			uint8_t bitPosition;
 
@@ -247,7 +247,7 @@ namespace DW1000Ng {
 			_readBytes(bitRegister, idx, &targetByte, 1);
 			
 			value ? bitSet(targetByte, bitPosition) : bitClear(targetByte, bitPosition);
-			_writeBytesToRegister(bitRegister, idx, &targetByte, 1);
+			_writeBytesToRegister(bitRegister, RegisterOffset+idx, &targetByte, 1);
 		}
 		
 		/* Steps used to get Temp and Voltage */
