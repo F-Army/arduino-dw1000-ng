@@ -247,6 +247,10 @@ namespace DW1000Ng {
 			_readBytes(bitRegister, idx, &targetByte, 1);
 			
 			value ? bitSet(targetByte, bitPosition) : bitClear(targetByte, bitPosition);
+
+			if(RegisterOffset == NO_SUB)
+				RegisterOffset = 0x00;
+				
 			_writeBytesToRegister(bitRegister, RegisterOffset+idx, &targetByte, 1);
 		}
 		
