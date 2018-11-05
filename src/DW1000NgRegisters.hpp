@@ -322,17 +322,18 @@ constexpr uint16_t LEN_AON_CFG1 = 2;
 // PMSC
 constexpr uint16_t PMSC = 0x36;
 constexpr uint16_t PMSC_CTRL0_SUB = 0x00;
-constexpr uint16_t PMSC_CTRL1_SUB = 0x04;
-constexpr uint16_t PMSC_LEDC_SUB = 0x28;
-constexpr uint16_t LEN_PMSC_CTRL0 = 4;
-constexpr uint16_t LEN_PMSC_CTRL1 = 4;
-constexpr uint16_t LEN_PMSC_LEDC = 4;
 constexpr uint16_t GPDCE_BIT = 18;
 constexpr uint16_t KHZCLKEN_BIT = 23;
-constexpr uint16_t BLNKEN = 8;
-
+constexpr uint16_t PMSC_SOFTRESET_SUB = 0x03;
+constexpr uint16_t PMSC_CTRL1_SUB = 0x04;
 constexpr uint16_t ATXSLP_BIT = 11;
 constexpr uint16_t ARXSLP_BIT = 12;
+constexpr uint16_t PMSC_LEDC_SUB = 0x28;
+constexpr uint16_t BLNKEN = 8;
+constexpr uint16_t LEN_PMSC_CTRL0 = 4;
+constexpr uint16_t LEN_PMSC_SOFTRESET = 1;
+constexpr uint16_t LEN_PMSC_CTRL1 = 4;
+constexpr uint16_t LEN_PMSC_LEDC = 4;
 
 // TX_ANTD Antenna delays
 constexpr uint16_t TX_ANTD = 0x18;

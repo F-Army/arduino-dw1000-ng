@@ -109,7 +109,11 @@ namespace DW1000Ng {
 		uint16_t		_antennaRxDelay = 0;
 
 		/* SPI relative variables */
+		#if defined(ESP32) || defined(ESP8266)
+		const SPISettings  _fastSPI = SPISettings(20000000L, MSBFIRST, SPI_MODE0);
+		#else
 		const SPISettings  _fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
+		#endif
 		const SPISettings  _slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
 		const SPISettings* _currentSPI = &_fastSPI;
 
@@ -233,6 +237,26 @@ namespace DW1000Ng {
 			_readBytes(OTP_IF, OTP_RDAT_SUB, data, LEN_OTP_RDAT);
 			// end read mode
 			_writeByte(OTP_IF, OTP_CTRL_SUB, 0x00);
+		}
+
+		void _writeBitToRegister(byte bitRegister, uint16_t RegisterOffset, uint16_t bitRegister_LEN, uint16_t selectedBit, boolean value) {
+			uint16_t idx;
+			uint8_t bitPosition;
+
+			idx = selectedBit/8;
+			if(idx >= bitRegister_LEN) {
+				return; // TODO proper error handling: out of bounds
+			}
+			byte targetByte; memset(&targetByte, 0, 1);
+			bitPosition = selectedBit%8;
+			_readBytes(bitRegister, RegisterOffset+idx, &targetByte, 1);
+			
+			value ? bitSet(targetByte, bitPosition) : bitClear(targetByte, bitPosition);
+
+			if(RegisterOffset == NO_SUB)
+				RegisterOffset = 0x00;
+				
+			_writeBytesToRegister(bitRegister, RegisterOffset+idx, &targetByte, 1);
 		}
 		
 		/* Steps used to get Temp and Voltage */
@@ -1245,8 +1269,8 @@ namespace DW1000Ng {
 		attachInterrupt(digitalPinToInterrupt(_irq), pollForEvents, RISING);
 		select();
 		// reset chip (either soft or hard)
-		
-		softwareReset();
+
+		reset();
 		
 		_enableClock(SYS_XTI_CLOCK);
 		delay(5);
@@ -1276,7 +1300,9 @@ namespace DW1000Ng {
 	}
 
 	void select() {
+		#if !defined(ESP32) && !defined(ESP8266)
 		SPI.usingInterrupt(digitalPinToInterrupt(_irq));
+		#endif
 		pinMode(_ss, OUTPUT);
 		digitalWrite(_ss, HIGH);
 	}
@@ -1524,21 +1550,17 @@ namespace DW1000Ng {
 	}
 
 	void softwareReset() {
-		/* Sets SYS_XTI_CLOCK and write PMSC to all zero */
-		_disableSequencing(); 
+		/* Disable sequencing and go to state "INIT" - (a) Sets SYSCLKS to 01 */
+		_disableSequencing();
 		/* Clear AON and WakeUp configuration */
 		_writeToRegister(AON, AON_WCFG_SUB, 0x00, LEN_AON_WCFG);
 		_writeToRegister(AON, AON_CFG0_SUB, 0x00, LEN_AON_CFG0);
 		_writeToRegister(AON, AON_CTRL_SUB, 0x02, LEN_AON_CTRL);
-		/* Reset TX,RX and PMSC */
-		byte pmscctrl0[LEN_PMSC_CTRL0];
-		_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-		pmscctrl0[3] = 0x00;
-		_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-		delay(5);
-		/* Reset to all one softwareReset. Clock remain to SYS_XTI_CLOCK */
-		pmscctrl0[3] = 0xF0;
-		_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+		/* (b) Clear SOFTRESET to all zero’s */
+		_writeToRegister(PMSC, PMSC_SOFTRESET_SUB, 0x00, LEN_PMSC_SOFTRESET);
+		delay(1);
+		/* (c) Set SOFTRESET to all ones */
+		_writeToRegister(PMSC, PMSC_SOFTRESET_SUB, 0xF0, LEN_PMSC_SOFTRESET);
 	}
 
 	/* ###########################################################################
@@ -1686,16 +1708,16 @@ namespace DW1000Ng {
 		_readBytes(EUI, NO_SUB, eui, LEN_EUI);
 	}
 
-	void getTemperature(float& temp) {
+	float getTemperature() {
 		_vbatAndTempSteps();
 		byte sar_ltemp = 0; _readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
-		temp = (sar_ltemp - _tmeas23C) * 1.14f + 23.0f;
+		return (sar_ltemp - _tmeas23C) * 1.14f + 23.0f;
 	}
 
-	void getBatteryVoltage(float& vbat) {
+	float getBatteryVoltage() {
 		_vbatAndTempSteps();
 		byte sar_lvbat = 0; _readBytes(TX_CAL, 0x03, &sar_lvbat, 1);
-		vbat = (sar_lvbat - _vmeas3v3) / 173.0f + 3.3f;
+		return (sar_lvbat - _vmeas3v3) / 173.0f + 3.3f;
 	}
 
 	void getTemperatureAndBatteryVoltage(float& temp, float& vbat) {
