@@ -233,6 +233,26 @@ namespace DW1000Ng {
 			// end read mode
 			_writeByte(OTP_IF, OTP_CTRL_SUB, 0x00);
 		}
+
+		void _writeBitToRegister(byte bitRegister, uint16_t RegisterOffset, uint16_t bitRegister_LEN, uint16_t selectedBit, boolean value) {
+			uint16_t idx;
+			uint8_t bitPosition;
+
+			idx = selectedBit/8;
+			if(idx >= bitRegister_LEN) {
+				return; // TODO proper error handling: out of bounds
+			}
+			byte targetByte; memset(&targetByte, 0, 1);
+			bitPosition = selectedBit%8;
+			_readBytes(bitRegister, RegisterOffset+idx, &targetByte, 1);
+			
+			value ? bitSet(targetByte, bitPosition) : bitClear(targetByte, bitPosition);
+
+			if(RegisterOffset == NO_SUB)
+				RegisterOffset = 0x00;
+				
+			_writeBytesToRegister(bitRegister, RegisterOffset+idx, &targetByte, 1);
+		}
 		
 		/* Steps used to get Temp and Voltage */
 		void _vbatAndTempSteps() {
