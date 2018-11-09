@@ -728,24 +728,31 @@ namespace DW1000Ng {
 		}
 
 		/* TC_PGDELAY - reg:0x2A, sub-reg:0x0B, table 40 */
-		void _tcpgdelaytune() {
-			byte tcpgdelay[LEN_TC_PGDELAY];	
-			if(_channel == Channel::CHANNEL_1) {
-				DW1000NgUtils::writeValueToBytes(tcpgdelay, 0xC9, LEN_TC_PGDELAY);
-			} else if(_channel == Channel::CHANNEL_2) {
-				DW1000NgUtils::writeValueToBytes(tcpgdelay, 0xC2, LEN_TC_PGDELAY);
-			} else if(_channel == Channel::CHANNEL_3) {
-				DW1000NgUtils::writeValueToBytes(tcpgdelay, 0xC5, LEN_TC_PGDELAY);
-			} else if(_channel == Channel::CHANNEL_4) {
-				DW1000NgUtils::writeValueToBytes(tcpgdelay, 0x95, LEN_TC_PGDELAY);
-			} else if(_channel == Channel::CHANNEL_5) {
-				DW1000NgUtils::writeValueToBytes(tcpgdelay, 0xC0, LEN_TC_PGDELAY);
-			} else if(_channel == Channel::CHANNEL_7) {
-				DW1000NgUtils::writeValueToBytes(tcpgdelay, 0x93, LEN_TC_PGDELAY);
-			} else {
-				// TODO proper error/warning handling
+		DW1000NgStatus _tcpgdelaytune() {
+			byte tcpgdelay[LEN_TC_PGDELAY];
+
+			uint64_t value;
+
+			switch(_channel) {
+				case Channel::CHANNEL_1:
+					value = 0xC9; break;
+				case Channel::CHANNEL_2:
+					value = 0xC2; break;
+				case Channel::CHANNEL_3:
+					value = 0xC5; break;
+				case Channel::CHANNEL_4:
+					value = 0x95; break;
+				case Channel::CHANNEL_5:
+					value = 0xC0; break;
+				case Channel::CHANNEL_7:
+					value = 0x93; break;
+				default:
+					return DW1000NgStatus::INTERNAL_ERROR;
 			}
-			_writeBytesToRegister(TX_CAL, TC_PGDELAY_SUB, tcpgdelay, LEN_TC_PGDELAY);
+
+			DW1000NgUtils::writeValueToBytes(tcpgdelay, value, LEN_TC_PGDELAY);
+			
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		// FS_PLLCFG and FS_PLLTUNE - reg:0x2B, sub-reg:0x07-0x0B, tables 43-44
