@@ -426,16 +426,17 @@ namespace DW1000Ng {
 		}
 
 		/* LDE_CFG2 - reg 0x2E, sub-reg:0x1806, table 50 */
-		void _ldecfg2() {
+		DW1000NgStatus _ldecfg2() {
 			byte ldecfg2[LEN_LDE_CFG2];	
 			if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
-				_nlos == true ? DW1000NgUtils::writeValueToBytes(ldecfg2, 0x0003, LEN_LDE_CFG2) : DW1000NgUtils::writeValueToBytes(ldecfg2, 0x1607, LEN_LDE_CFG2);
+				DW1000NgUtils::writeValueToBytes(ldecfg2, _nlos ? 0x0003 : 0x1607, LEN_LDE_CFG2);
 			} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 				DW1000NgUtils::writeValueToBytes(ldecfg2, 0x0607, LEN_LDE_CFG2);
 			} else {
-				// TODO proper error/warning handling
+				DW1000NgStatus::INTERNAL_ERROR;
 			}
 			_writeBytesToRegister(LDE_IF, LDE_CFG2_SUB, ldecfg2, LEN_LDE_CFG2);
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		/* LDE_REPC - reg 0x2E, sub-reg:0x2804, table 51 */
