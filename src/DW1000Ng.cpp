@@ -751,12 +751,12 @@ namespace DW1000Ng {
 			}
 
 			DW1000NgUtils::writeValueToBytes(tcpgdelay, value, LEN_TC_PGDELAY);
-			
+
 			return DW1000NgStatus::NO_ERROR;
 		}
 
 		// FS_PLLCFG and FS_PLLTUNE - reg:0x2B, sub-reg:0x07-0x0B, tables 43-44
-		void _fspll() {
+		DW1000NgStatus _fspll() {
 			byte fspllcfg[LEN_FS_PLLCFG];
 			byte fsplltune[LEN_FS_PLLTUNE];
 			if(_channel == Channel::CHANNEL_1) {
@@ -772,10 +772,13 @@ namespace DW1000Ng {
 				DW1000NgUtils::writeValueToBytes(fspllcfg, 0x0800041DL, LEN_FS_PLLCFG);
 				DW1000NgUtils::writeValueToBytes(fsplltune, 0xBE, LEN_FS_PLLTUNE);
 			} else {
-				// TODO proper error/warning handling
+				return DW1000NgStatus::INTERNAL_ERROR;
 			}
+			
 			_writeBytesToRegister(FS_CTRL, FS_PLLTUNE_SUB, fsplltune, LEN_FS_PLLTUNE);
 			_writeBytesToRegister(FS_CTRL, FS_PLLCFG_SUB, fspllcfg, LEN_FS_PLLCFG);
+
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		/* Crystal calibration from OTP (if available)
