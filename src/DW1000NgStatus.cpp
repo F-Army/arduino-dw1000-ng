@@ -22,23 +22,17 @@
  * SOFTWARE.
 */
 
-#pragma once
+#include "DW1000NgStatus.hpp"
 
-#include <Arduino.h>
+DW1000NgStatus::DW1000NgStatus(StatusCode status, String message) {
+        _status = status;
+        _message = message;
+}
 
-enum class StatusCode {
-    NO_ERROR,
-    INPUT_ERROR
-};
+StatusCode DW1000NgStatus::getStatus() {
+    return _status;
+}
 
-class DW1000NgStatus {
-public:
-    DW1000NgStatus(StatusCode status, String message);
-
-    StatusCode getStatus();
-    String getMessage();
-    
-private:
-    StatusCode _status;
-    String _message;
-};
+String DW1000NgStatus::getMessage() {
+    return _message;
+}
