@@ -26,19 +26,9 @@
 
 #include <Arduino.h>
 
-enum class StatusCode {
+enum class DW1000NgStatus {
     NO_ERROR,
-    INPUT_ERROR
-};
-
-class DW1000NgStatus {
-public:
-    DW1000NgStatus(StatusCode status, String message);
-
-    StatusCode getStatus();
-    String getMessage();
-    
-private:
-    StatusCode _status;
-    String _message;
+    INPUT_ERROR,
+    INTERNAL_ERROR,
+    CONFIGURATION_ERROR
 };

@@ -242,7 +242,7 @@ namespace DW1000Ng {
 			idx = selectedBit/8;
 
 			if(idx >= bitRegister_LEN)
-				return DW1000NgStatus(StatusCode::INPUT_ERROR, "Index out of bound");
+				return DW1000NgStatus::INPUT_ERROR;
 			
 			byte targetByte; memset(&targetByte, 0, 1);
 			bitPosition = selectedBit%8;
@@ -255,7 +255,7 @@ namespace DW1000Ng {
 				
 			_writeBytesToRegister(bitRegister, RegisterOffset+idx, &targetByte, 1);
 
-			return DW1000NgStatus(StatusCode::NO_ERROR, "");
+			return DW1000NgStatus::NO_ERROR;
 		}
 		
 		/* Steps used to get Temp and Voltage */
@@ -268,16 +268,18 @@ namespace DW1000Ng {
 		}
 
 		/* AGC_TUNE1 - reg:0x23, sub-reg:0x04, table 24 */
-		void _agctune1() {
+		DW1000NgStatus _agctune1() {
 			byte agctune1[LEN_AGC_TUNE1];
 			if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 				DW1000NgUtils::writeValueToBytes(agctune1, 0x8870, LEN_AGC_TUNE1);
 			} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 				DW1000NgUtils::writeValueToBytes(agctune1, 0x889B, LEN_AGC_TUNE1);
 			} else {
-				// TODO proper error/warning handling
+				return DW1000NgStatus::INTERNAL_ERROR;
 			}
 			_writeBytesToRegister(AGC_TUNE, AGC_TUNE1_SUB, agctune1, LEN_AGC_TUNE1);
+
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		/* AGC_TUNE2 - reg:0x23, sub-reg:0x0C, table 25 */
@@ -295,7 +297,7 @@ namespace DW1000Ng {
 		}
 
 		/* DRX_TUNE0b - reg:0x27, sub-reg:0x02, table 30 */
-		void _drxtune0b() {
+		DW1000NgStatus _drxtune0b() {
 			byte drxtune0b[LEN_DRX_TUNE0b];
 			if(_dataRate == DataRate::RATE_110KBPS) {
 				if(!_standardSFD) {
@@ -316,48 +318,51 @@ namespace DW1000Ng {
 					DW1000NgUtils::writeValueToBytes(drxtune0b, 0x0001, LEN_DRX_TUNE0b);
 				}
 			} else {
-				// TODO proper error/warning handling
+				return DW1000NgStatus::INTERNAL_ERROR;
 			}
 			_writeBytesToRegister(DRX_TUNE, DRX_TUNE0b_SUB, drxtune0b, LEN_DRX_TUNE0b);
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		/* DRX_TUNE1a - reg:0x27, sub-reg:0x04, table 31 */
-		void _drxtune1a() {
+		DW1000NgStatus _drxtune1a() {
 			byte drxtune1a[LEN_DRX_TUNE1a];
 			if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
 				DW1000NgUtils::writeValueToBytes(drxtune1a, 0x0087, LEN_DRX_TUNE1a);
 			} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 				DW1000NgUtils::writeValueToBytes(drxtune1a, 0x008D, LEN_DRX_TUNE1a);
 			} else {
-				// TODO proper error/warning handling
+				return DW1000NgStatus::INTERNAL_ERROR;
 			}
 			_writeBytesToRegister(DRX_TUNE, DRX_TUNE1a_SUB, drxtune1a, LEN_DRX_TUNE1a);
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		/* DRX_TUNE1b - reg:0x27, sub-reg:0x06, table 32 */
-		void _drxtune1b() {
+		DW1000NgStatus _drxtune1b() {
 			byte drxtune1b[LEN_DRX_TUNE1b];
 			if(_preambleLength == PreambleLength::LEN_1536 || _preambleLength == PreambleLength::LEN_2048 ||
 				_preambleLength == PreambleLength::LEN_4096) {
 				if(_dataRate == DataRate::RATE_110KBPS) {
 					DW1000NgUtils::writeValueToBytes(drxtune1b, 0x0064, LEN_DRX_TUNE1b);
 				} else {
-					// TODO proper error/warning handling
+					return DW1000NgStatus::CONFIGURATION_ERROR;
 				}
 			} else if(_preambleLength != PreambleLength::LEN_64) {
 				if(_dataRate == DataRate::RATE_850KBPS || _dataRate == DataRate::RATE_6800KBPS) {
 					DW1000NgUtils::writeValueToBytes(drxtune1b, 0x0020, LEN_DRX_TUNE1b);
 				} else {
-					// TODO proper error/warning handling
+					return DW1000NgStatus::CONFIGURATION_ERROR;
 				}
 			} else {
 				if(_dataRate == DataRate::RATE_6800KBPS) {
 					DW1000NgUtils::writeValueToBytes(drxtune1b, 0x0010, LEN_DRX_TUNE1b);
 				} else {
-					// TODO proper error/warning handling
+					return DW1000NgStatus::CONFIGURATION_ERROR;
 				}
 			}
 			_writeBytesToRegister(DRX_TUNE, DRX_TUNE1b_SUB, drxtune1b, LEN_DRX_TUNE1b);
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		/* DRX_TUNE2 - reg:0x27, sub-reg:0x08, table 33 */
