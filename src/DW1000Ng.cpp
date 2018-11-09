@@ -284,17 +284,21 @@ namespace DW1000Ng {
 		}
 
 		/* AGC_TUNE2 - reg:0x23, sub-reg:0x0C, table 25 */
-		void _agctune2() {
+		DW1000NgStatus _agctune2() {
 			byte agctune2[LEN_AGC_TUNE2];
 			DW1000NgUtils::writeValueToBytes(agctune2, 0x2502A907L, LEN_AGC_TUNE2);
 			_writeBytesToRegister(AGC_TUNE, AGC_TUNE2_SUB, agctune2, LEN_AGC_TUNE2);
+			
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		/* AGC_TUNE3 - reg:0x23, sub-reg:0x12, table 26 */
-		void _agctune3() {
+		DW1000NgStatus _agctune3() {
 			byte agctune3[LEN_AGC_TUNE3];
 			DW1000NgUtils::writeValueToBytes(agctune3, 0x0035, LEN_AGC_TUNE3);
 			_writeBytesToRegister(AGC_TUNE, AGC_TUNE3_SUB, agctune3, LEN_AGC_TUNE3);
+
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		/* DRX_TUNE0b - reg:0x27, sub-reg:0x02, table 30 */
@@ -409,7 +413,7 @@ namespace DW1000Ng {
 		}
 
 		/* DRX_TUNE4H - reg:0x27, sub-reg:0x26, table 34 */
-		void _drxtune4H() {
+		DW1000NgStatus _drxtune4H() {
 			byte drxtune4H[LEN_DRX_TUNE4H];
 			if(_preambleLength == PreambleLength::LEN_64) {
 				DW1000NgUtils::writeValueToBytes(drxtune4H, 0x0010, LEN_DRX_TUNE4H);
@@ -417,13 +421,17 @@ namespace DW1000Ng {
 				DW1000NgUtils::writeValueToBytes(drxtune4H, 0x0028, LEN_DRX_TUNE4H);
 			}
 			_writeBytesToRegister(DRX_TUNE, DRX_TUNE4H_SUB, drxtune4H, LEN_DRX_TUNE4H);
+
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		/* LDE_CFG1 - reg 0x2E, sub-reg:0x0806 */
-		void _ldecfg1() {
+		DW1000NgStatus _ldecfg1() {
 			byte ldecfg1[LEN_LDE_CFG1];
 			DW1000NgUtils::writeValueToBytes(ldecfg1, _nlos ? 0x7 : 0xD, LEN_LDE_CFG1);
 			_writeBytesToRegister(LDE_IF, LDE_CFG1_SUB, ldecfg1, LEN_LDE_CFG1);
+
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		/* LDE_CFG2 - reg 0x2E, sub-reg:0x1806, table 50 */
@@ -695,7 +703,7 @@ namespace DW1000Ng {
 		}
 
 		/* RF_RXCTRLH - reg:0x28, sub-reg:0x0B, table 37 */
-		void _rfrxctrlh() {
+		DW1000NgStatus _rfrxctrlh() {
 			byte rfrxctrlh[LEN_RF_RXCTRLH];
 			if(_channel != Channel::CHANNEL_4 && _channel != Channel::CHANNEL_7) {
 				DW1000NgUtils::writeValueToBytes(rfrxctrlh, 0xD8, LEN_RF_RXCTRLH);
@@ -703,6 +711,8 @@ namespace DW1000Ng {
 				DW1000NgUtils::writeValueToBytes(rfrxctrlh, 0xBC, LEN_RF_RXCTRLH);
 			}
 			_writeBytesToRegister(RF_CONF, RF_RXCTRLH_SUB, rfrxctrlh, LEN_RF_RXCTRLH);
+			
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		/* RX_TXCTRL - reg:0x28, sub-reg:0x0C */
@@ -774,7 +784,7 @@ namespace DW1000Ng {
 			} else {
 				return DW1000NgStatus::INTERNAL_ERROR;
 			}
-			
+
 			_writeBytesToRegister(FS_CTRL, FS_PLLTUNE_SUB, fsplltune, LEN_FS_PLLTUNE);
 			_writeBytesToRegister(FS_CTRL, FS_PLLCFG_SUB, fspllcfg, LEN_FS_PLLCFG);
 
@@ -784,7 +794,7 @@ namespace DW1000Ng {
 		/* Crystal calibration from OTP (if available)
 		* FS_XTALT - reg:0x2B, sub-reg:0x0E
 		* OTP(one-time-programmable) memory map - table 10 */
-		void _fsxtalt() {
+		DW1000NgStatus _fsxtalt() {
 			byte fsxtalt[LEN_FS_XTALT];
 			byte buf_otp[4];
 			_readBytesOTP(0x01E, buf_otp); //0x01E -> byte[0]=XTAL_Trim
@@ -796,27 +806,40 @@ namespace DW1000Ng {
 			}
 			// write configuration back to chip
 			_writeBytesToRegister(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
+
+			return DW1000NgStatus::NO_ERROR;
 		}
 
-		void _tune() {
+		DW1000NgStatus _tune() {
 			// these registers are going to be tuned/configured
-			_agctune1();
-			_agctune2();
-			_agctune3();
-			_drxtune0b();
-			_drxtune1a();
-			_drxtune1b();
-			_drxtune2();
-			_drxtune4H();
-			_ldecfg1();
-			_ldecfg2();
-			_lderepc(); 
-			if(_autoTXPower) _txpowertune();
-			_rfrxctrlh();
-			_rftxctrl();
-			if(_autoTCPGDelay) _tcpgdelaytune();
-			_fspll();
-			_fsxtalt();
+			if( _agctune1() != DW1000NgStatus::NO_ERROR ||
+			    _agctune2() != DW1000NgStatus::NO_ERROR ||
+				_agctune3() != DW1000NgStatus::NO_ERROR || 
+				_drxtune0b() != DW1000NgStatus::NO_ERROR ||
+				_drxtune1a() != DW1000NgStatus::NO_ERROR ||
+				_drxtune1b() != DW1000NgStatus::NO_ERROR ||
+				_drxtune2() != DW1000NgStatus::NO_ERROR ||
+				_drxtune4H() != DW1000NgStatus::NO_ERROR ||
+				_ldecfg1() != DW1000NgStatus::NO_ERROR ||
+				_ldecfg2() != DW1000NgStatus::NO_ERROR ||
+				_lderepc() != DW1000NgStatus::NO_ERROR ||
+				_rfrxctrlh() != DW1000NgStatus::NO_ERROR || 
+				_rftxctrl() != DW1000NgStatus::NO_ERROR ||
+				_fspll() != DW1000NgStatus::NO_ERROR ||
+				_fsxtalt() != DW1000NgStatus::NO_ERROR
+			) return DW1000NgStatus::INTERNAL_ERROR;
+			
+			if(_autoTXPower) {
+				if(_txpowertune() != DW1000NgStatus::NO_ERROR)
+					return DW1000NgStatus::INTERNAL_ERROR;
+			}
+			
+			if(_autoTCPGDelay){
+				if(_tcpgdelaytune() != DW1000NgStatus::NO_ERROR)
+					return DW1000NgStatus::INTERNAL_ERROR;
+			}
+			
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		void _writeNetworkIdAndDeviceAddress() {
