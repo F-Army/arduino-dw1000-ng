@@ -21,7 +21,12 @@ end	KEYWORD2
 enableDebounceClock	KEYWORD2
 enableLedBlinking	KEYWORD2
 setGPIOMode	KEYWORD2
+setSleepTime KEYWORD2
+applySleepConfiguration KEYWORD2
+sleep KEYWORD2
 deepSleep	KEYWORD2
+enterSleepAfterTX   KEYWORD2
+enterSleepAfterRX   KEYWORD2
 spiWakeup	KEYWORD2
 reset	KEYWORD2
 softwareReset	KEYWORD2
