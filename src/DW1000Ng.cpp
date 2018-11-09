@@ -907,7 +907,7 @@ namespace DW1000Ng {
 				_txpowertune();
 		}
 
-		void _setSFDMode(SFDMode mode) {
+		DW1000NgStatus _setSFDMode(SFDMode mode) {
 			switch(mode) {
 				case SFDMode::STANDARD_SFD:
 					DW1000NgUtils::setBit(_chanctrl, LEN_CHAN_CTRL, DWSFD_BIT, false);
@@ -922,8 +922,10 @@ namespace DW1000Ng {
 					_standardSFD = false;
 					break;
 				default:
-					return; //TODO Proper error handling
+					return DW1000NgStatus::INPUT_ERROR;
 			}
+
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		void _setChannel(Channel channel) {
