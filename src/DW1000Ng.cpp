@@ -1430,16 +1430,22 @@ namespace DW1000Ng {
 		_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 		
 		if(sleep_config.dividerCount != NULL && sleep_config.enableDivider) {
-			byte lpclkdiva[2];
-			DW1000NgUtils::writeValueToBytes(lpclkdiva, sleep_config.dividerCount, 2);
-			/* Clear lplckdiva default value */
-			aon_cfg0[0] &= 0x1F;
-			aon_cfg0[1] &= 0x00;
+			if(sleep_config.dividerCount <= 2047){
+				byte lpclkdiva[2];
+				DW1000NgUtils::writeValueToBytes(lpclkdiva, sleep_config.dividerCount, 2);
+				/* Clear lplckdiva default value */
+				aon_cfg0[0] &= 0x1F;
+				aon_cfg0[1] &= 0x00;
 
-			aon_cfg0[0] |= ((lpclkdiva[0] << 5) & 0xE0);
-			aon_cfg0[1] |= ((lpclkdiva[0] >> 3) | (lpclkdiva[1] << 5));
-			
-			//_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
+				aon_cfg0[0] |= ((lpclkdiva[0] << 5) & 0xE0);
+				aon_cfg0[1] |= ((lpclkdiva[0] >> 3) | (lpclkdiva[1] << 5));
+
+				//_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
+			} else {
+				// TODO proper handleError
+			}
+		} else{
+			// TODO proper handleError
 		}
 
 		if(sleep_config.sleepTime != NULL && sleep_config.sleepTime > 0) {
