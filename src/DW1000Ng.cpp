@@ -1128,7 +1128,7 @@ namespace DW1000Ng {
 			_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
 		}
 
-		void _enableClock(byte clock) {
+		DW1000NgStatus _enableClock(byte clock) {
 			byte pmscctrl0[LEN_PMSC_CTRL0];
 			memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
 			_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
@@ -1150,9 +1150,11 @@ namespace DW1000Ng {
 				pmscctrl0[0] &= 0xCF;
 				pmscctrl0[0] |= TX_PLL_CLOCK;
 			} else {
-				// TODO deliver proper warning
+				return DW1000NgStatus::INPUT_ERROR;
 			}
+
 			_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		void _clearReceiveStatus() {
