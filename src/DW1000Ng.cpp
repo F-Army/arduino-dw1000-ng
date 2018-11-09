@@ -366,7 +366,7 @@ namespace DW1000Ng {
 		}
 
 		/* DRX_TUNE2 - reg:0x27, sub-reg:0x08, table 33 */
-		void _drxtune2() {
+		DW1000NgStatus _drxtune2() {
 			byte drxtune2[LEN_DRX_TUNE2];	
 			if(_pacSize == PacSize::SIZE_8) {
 				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
@@ -374,7 +374,7 @@ namespace DW1000Ng {
 				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 					DW1000NgUtils::writeValueToBytes(drxtune2, 0x313B006BL, LEN_DRX_TUNE2);
 				} else {
-					// TODO proper error/warning handling
+					return DW1000NgStatus::CONFIGURATION_ERROR;
 				}
 			} else if(_pacSize == PacSize::SIZE_16) {
 				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
@@ -382,7 +382,7 @@ namespace DW1000Ng {
 				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 					DW1000NgUtils::writeValueToBytes(drxtune2, 0x333B00BEL, LEN_DRX_TUNE2);
 				} else {
-					// TODO proper error/warning handling
+					return DW1000NgStatus::CONFIGURATION_ERROR;
 				}
 			} else if(_pacSize == PacSize::SIZE_32) {
 				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
@@ -390,7 +390,7 @@ namespace DW1000Ng {
 				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 					DW1000NgUtils::writeValueToBytes(drxtune2, 0x353B015EL, LEN_DRX_TUNE2);
 				} else {
-					// TODO proper error/warning handling
+					return DW1000NgStatus::CONFIGURATION_ERROR;
 				}
 			} else if(_pacSize == PacSize::SIZE_64) {
 				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
@@ -398,12 +398,13 @@ namespace DW1000Ng {
 				} else if(_pulseFrequency == PulseFrequency::FREQ_64MHZ) {
 					DW1000NgUtils::writeValueToBytes(drxtune2, 0x373B0296L, LEN_DRX_TUNE2);
 				} else {
-					// TODO proper error/warning handling
+					return DW1000NgStatus::CONFIGURATION_ERROR;
 				}
 			} else {
-				// TODO proper error/warning handling
+				return DW1000NgStatus::INTERNAL_ERROR;
 			}
 			_writeBytesToRegister(DRX_TUNE, DRX_TUNE2_SUB, drxtune2, LEN_DRX_TUNE2);
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		/* DRX_TUNE4H - reg:0x27, sub-reg:0x26, table 34 */
@@ -420,7 +421,7 @@ namespace DW1000Ng {
 		/* LDE_CFG1 - reg 0x2E, sub-reg:0x0806 */
 		void _ldecfg1() {
 			byte ldecfg1[LEN_LDE_CFG1];
-			_nlos == true ? DW1000NgUtils::writeValueToBytes(ldecfg1, 0x7, LEN_LDE_CFG1) : DW1000NgUtils::writeValueToBytes(ldecfg1, 0xD, LEN_LDE_CFG1);
+			DW1000NgUtils::writeValueToBytes(ldecfg1, _nlos ? 0x7 : 0xD, LEN_LDE_CFG1);
 			_writeBytesToRegister(LDE_IF, LDE_CFG1_SUB, ldecfg1, LEN_LDE_CFG1);
 		}
 
