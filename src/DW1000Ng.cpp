@@ -1016,11 +1016,11 @@ namespace DW1000Ng {
 				}
 				return false;
 			} else {
-				return false; //TODO Proper error handling
+				return false;
 			}
 		}
 
-		void _setValidPreambleCode() {
+		DW1000NgStatus _setValidPreambleCode() {
 			PreambleCode preamble_code;
 
 			switch(_channel) {
@@ -1039,7 +1039,7 @@ namespace DW1000Ng {
 					preamble_code = _pulseFrequency == PulseFrequency::FREQ_16MHZ ? PreambleCode::CODE_3 : PreambleCode::CODE_10;
 					break;
 				default:
-					return; //TODO Proper Error Handling
+					return DW1000NgStatus::INTERNAL_ERROR;
 			}
 			byte preacode = static_cast<byte>(preamble_code);
 			preacode &= 0x1F;
@@ -1049,9 +1049,11 @@ namespace DW1000Ng {
 			_chanctrl[3] = ((((preacode >> 2) & 0x07) | (preacode << 3)) & 0xFF);
 
 			_preambleCode = preamble_code;
+
+			return DW1000NgStatus::NO_ERROR;
 		}
 
-		void _setNonStandardSFDLength() {
+		DW1000NgStatus _setNonStandardSFDLength() {
 			switch(_dataRate) {
 				case DataRate::RATE_6800KBPS:
 					_writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
@@ -1063,8 +1065,10 @@ namespace DW1000Ng {
 					_writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
 					break;
 				default:
-					return; //TODO Proper error handling
+					return DW1000NgStatus::INTERNAL_ERROR;
 			}
+
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		void _interruptOnSent(boolean val) {
