@@ -440,7 +440,7 @@ namespace DW1000Ng {
 		}
 
 		/* LDE_REPC - reg 0x2E, sub-reg:0x2804, table 51 */
-		void _lderepc() {
+		DW1000NgStatus _lderepc() {
 			byte lderepc[LEN_LDE_REPC];
 			if(_preambleCode == PreambleCode::CODE_1 || _preambleCode == PreambleCode::CODE_2) {
 				if(_dataRate == DataRate::RATE_110KBPS) {
@@ -515,10 +515,11 @@ namespace DW1000Ng {
 					DW1000NgUtils::writeValueToBytes(lderepc, 0x47AE, LEN_LDE_REPC);
 				}
 			} else {
-				// TODO proper error/warning handling
+				return DW1000NgStatus::INTERNAL_ERROR;
 			}
 			
 			_writeBytesToRegister(LDE_IF, LDE_REPC_SUB, lderepc, LEN_LDE_REPC);
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		/* TX_POWER (enabled smart transmit power control) - reg:0x1E, tables 19-20
