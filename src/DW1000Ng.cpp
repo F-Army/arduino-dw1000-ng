@@ -51,6 +51,7 @@
 #include "DW1000NgRegisters.hpp"
 #include "DW1000Ng.hpp"
 #include "DW1000NgStatus.hpp"
+#include "DW1000NgCompileOptions.hpp"
 
 namespace DW1000Ng {
 	
@@ -524,7 +525,7 @@ namespace DW1000Ng {
 
 		/* TX_POWER (enabled smart transmit power control) - reg:0x1E, tables 19-20
 		* These values are based on a typical IC and an assumed IC to antenna loss of 1.5 dB with a 0 dBi antenna */
-		void _txpowertune() {
+		DW1000NgStatus _txpowertune() {
 			byte txpower[LEN_TX_POWER];
 			if(_channel == Channel::CHANNEL_1 || _channel == Channel::CHANNEL_2) {
 				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
@@ -556,7 +557,7 @@ namespace DW1000Ng {
 						#endif
 					}
 				} else {
-					// TODO proper error/warning handling
+					return DW1000NgStatus::INTERNAL_ERROR;
 				}
 			} else if(_channel == Channel::CHANNEL_3) {
 				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
@@ -588,7 +589,7 @@ namespace DW1000Ng {
 						#endif
 					}
 				} else {
-					// TODO proper error/warning handling
+					return DW1000NgStatus::INTERNAL_ERROR;
 				}
 			} else if(_channel == Channel::CHANNEL_4) {
 				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
@@ -620,7 +621,7 @@ namespace DW1000Ng {
 						#endif
 					}
 				} else {
-					// TODO proper error/warning handling
+					return DW1000NgStatus::INTERNAL_ERROR;
 				}
 			} else if(_channel == Channel::CHANNEL_5) {
 				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
@@ -652,7 +653,7 @@ namespace DW1000Ng {
 						#endif
 					}
 				} else {
-					// TODO proper error/warning handling
+					return DW1000NgStatus::INTERNAL_ERROR;
 				}
 			} else if(_channel == Channel::CHANNEL_7) {
 				if(_pulseFrequency == PulseFrequency::FREQ_16MHZ) {
@@ -684,12 +685,13 @@ namespace DW1000Ng {
 						#endif
 					}
 				} else {
-					// TODO proper error/warning handling
+					return DW1000NgStatus::INTERNAL_ERROR;
 				}
 			} else {
-				// TODO proper error/warning handling
+				return DW1000NgStatus::INTERNAL_ERROR;
 			}
 			_writeBytesToRegister(TX_POWER, NO_SUB, txpower, LEN_TX_POWER);
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		/* RF_RXCTRLH - reg:0x28, sub-reg:0x0B, table 37 */
@@ -704,7 +706,7 @@ namespace DW1000Ng {
 		}
 
 		/* RX_TXCTRL - reg:0x28, sub-reg:0x0C */
-		void _rftxctrl() {
+		DW1000NgStatus _rftxctrl() {
 			byte rftxctrl[LEN_RF_TXCTRL];
 			if(_channel == Channel::CHANNEL_1) {
 				DW1000NgUtils::writeValueToBytes(rftxctrl, 0x00005C40L, LEN_RF_TXCTRL);
@@ -719,9 +721,10 @@ namespace DW1000Ng {
 			} else if(_channel == Channel::CHANNEL_7) {
 				DW1000NgUtils::writeValueToBytes(rftxctrl, 0x001E7DE0L, LEN_RF_TXCTRL);
 			} else {
-				// TODO proper error/warning handling
+				return DW1000NgStatus::INTERNAL_ERROR;
 			}
 			_writeBytesToRegister(RF_CONF, RF_TXCTRL_SUB, rftxctrl, LEN_RF_TXCTRL);
+			return DW1000NgStatus::NO_ERROR;
 		}
 
 		/* TC_PGDELAY - reg:0x2A, sub-reg:0x0B, table 40 */
