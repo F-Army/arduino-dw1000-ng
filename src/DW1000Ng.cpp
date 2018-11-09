@@ -1905,15 +1905,15 @@ namespace DW1000Ng {
 		_writeBytesToRegister(DX_TIME, NO_SUB, futureTimeBytes, LEN_DX_TIME);
 	}
 
-	void setTransmitData(byte data[], uint16_t n) {
+	DW1000NgStatus setTransmitData(byte data[], uint16_t n) {
 		if(_frameCheck) {
 			n += 2; // two bytes CRC-16
 		}
 		if(n > LEN_EXT_UWB_FRAMES) {
-			return; // TODO proper error handling: frame/buffer size
+			return DW1000NgStatus::FRAME_LENGTH_EXCEEDED_ERROR;
 		}
 		if(n > LEN_UWB_FRAMES && !_extendedFrameLength) {
-			return; // TODO proper error handling: frame/buffer size
+			return DW1000NgStatus::FRAME_LENGTH_EXCEEDED_ERROR; 
 		}
 		// transmit data and length
 		_writeBytesToRegister(TX_BUFFER, NO_SUB, data, n);
@@ -1923,14 +1923,18 @@ namespace DW1000Ng {
 		_txfctrl[1] &= 0xE0;
 		_txfctrl[1] |= (byte)((n >> 8) & 0x03);  // 2 added bits if extended length
 		_writeTransmitFrameControlRegister();
+
+		return DW1000NgStatus::NO_ERROR;
 	}
 
-	void setTransmitData(const String& data) {
+	DW1000NgStatus setTransmitData(const String& data) {
 		uint16_t n = data.length()+1;
 		byte* dataBytes = (byte*)malloc(n);
 		data.getBytes(dataBytes, n);
-		setTransmitData(dataBytes, n);
+		DW1000NgStatus statusCode = setTransmitData(dataBytes, n);
 		free(dataBytes);
+
+		return statusCode;
 	}
 
 	// TODO reorder

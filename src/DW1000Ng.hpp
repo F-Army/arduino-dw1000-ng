@@ -51,6 +51,7 @@
 #include "DW1000NgConstants.hpp"
 #include "DW1000NgConfiguration.hpp"
 #include "DW1000NgCompileOptions.hpp"
+#include "DW1000NgStatus.hpp"
 
 namespace DW1000Ng {
 	/** 
@@ -226,14 +227,14 @@ namespace DW1000Ng {
 	@param [in] data the bytes to transmit
 	@param [in] n the length of the array of bytes
 	*/
-	void setTransmitData(byte data[], uint16_t n);
+	DW1000NgStatus setTransmitData(byte data[], uint16_t n);
 
 	/**
 	Sets the transmission bytes inside the tx buffer of the DW1000 based on the input string
 
 	@param [in] data the string to transmit
 	*/
-	void setTransmitData(const String& data);
+	DW1000NgStatus setTransmitData(const String& data);
 
 	/**
 	Gets the received bytes and stores them in a byte array
