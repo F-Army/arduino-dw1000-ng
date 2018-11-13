@@ -111,7 +111,7 @@ void setup() {
     DW1000Ng::attachSentHandler(handleSent);
     DW1000Ng::attachReceivedHandler(handleReceived);
     // anchor starts by transmitting a POLL message
-    transmitBlink();
+    DW1000NgRTLS::transmitShortBlink();
     noteActivity();
 }
 
@@ -123,7 +123,7 @@ void noteActivity() {
 void reset() {
     // tag returns to Idle and sends POLL
     DW1000Ng::forceTRxOff();
-    transmitBlink();
+    DW1000NgRTLS::transmitShortBlink();
     noteActivity();
 }
 
@@ -133,13 +133,6 @@ void handleSent() {
 
 void handleReceived() {
     receivedAck = true;
-}
-
-void transmitBlink() {
-    byte Blink[] = {BLINK, SEQ_NUMBER++, 0,0,0,0,0,0,0,0, NO_BATTERY_STATUS | NO_EX_ID, TAG_LISTENING_NOW};
-    DW1000Ng::getEUI(&Blink[2]);
-    DW1000Ng::setTransmitData(Blink, sizeof(Blink));
-    DW1000Ng::startTransmit();
 }
 
 void transmitPoll() {
@@ -235,7 +228,7 @@ void loop() {
                 delay(resetPeriod);
                 DW1000Ng::spiWakeup();
 
-                transmitBlink();
+                DW1000NgRTLS::transmitShortBlink();
                 noteActivity();
                 return;
             } else {
