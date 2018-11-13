@@ -1436,7 +1436,7 @@ namespace DW1000Ng {
 
 				//_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 			} else {
-				// TODO proper handleError
+				// TODO proper handleError, exceeded max input value
 			}
 		} else{
 			// TODO proper handleError
@@ -1444,9 +1444,6 @@ namespace DW1000Ng {
 
 		if(sleep_config.sleepTime != NULL && sleep_config.sleepTime > 0) {
 			setSleepTime(sleep_config.sleepTime);
-		} else {
-			/* Otherwise set default device value */
-			setSleepTime(0x50FF);
 		}
 
 		byte aon_wcfg[LEN_AON_WCFG];
@@ -1463,9 +1460,9 @@ namespace DW1000Ng {
 		_writeBytesToRegister(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
 
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, SLEEP_EN_BIT, sleep_config.enableSLP);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_SPI_BIT, sleep_config.enableWakePIN);
+		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_PIN_BIT, sleep_config.enableWakePIN);
 		_wakePINDisabled = !sleep_config.enableWakePIN;
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_PIN_BIT, sleep_config.enableWakeSPI);
+		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_SPI_BIT, sleep_config.enableWakeSPI);
 		_wakeSPIDisabled = !sleep_config.enableWakeSPI;
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, sleep_config.enableWakeCNT);
 		_wakeCounterDisabled = !sleep_config.enableWakeCNT;
