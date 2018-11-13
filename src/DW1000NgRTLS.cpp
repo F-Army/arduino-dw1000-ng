@@ -26,9 +26,11 @@
 #include "DW1000NgRTLS.hpp"
 #include "DW1000Ng.hpp"
 
+static byte SEQ_NUMBER = 0;
+
 namespace DW1000NgRTLS {
     void transmitShortBlink() {
-        byte Blink[] = {BLINK, DW1000Ng::getTxSequenceNumber(), 0,0,0,0,0,0,0,0, NO_BATTERY_STATUS | NO_EX_ID, TAG_LISTENING_NOW};
+        byte Blink[] = {BLINK, SEQ_NUMBER++, 0,0,0,0,0,0,0,0, NO_BATTERY_STATUS | NO_EX_ID, TAG_LISTENING_NOW};
         DW1000Ng::getEUI(&Blink[2]);
         DW1000Ng::setTransmitData(Blink, sizeof(Blink));
         DW1000Ng::startTransmit();
