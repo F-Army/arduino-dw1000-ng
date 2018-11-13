@@ -160,15 +160,6 @@ void handleReceived() {
     receivedAck = true;
 }
 
-void transmitRangingConfirm() {
-    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONFIRM, anchor_b[0], anchor_b[1]};
-    DW1000Ng::getNetworkId(&rangingConfirm[3]);
-    memcpy(&rangingConfirm[5], tag_shortAddress, 2);
-    DW1000Ng::getDeviceAddress(&rangingConfirm[7]);
-    DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));
-    DW1000Ng::startTransmit();
-}
-
 /* using https://math.stackexchange.com/questions/884807/find-x-location-using-3-known-x-y-location-using-trilateration */
 void calculatePosition(double &x, double &y) {
 
@@ -238,7 +229,7 @@ void loop() {
             rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
             Serial.println(rangeString);
             
-            transmitRangingConfirm();
+            DW1000NgRTLS::transmitRangingConfirm(tag_shortAddress, anchor_b);
             noteActivity();
             return;
         }
