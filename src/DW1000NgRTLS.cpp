@@ -25,6 +25,8 @@
 #include <Arduino.h>
 #include "DW1000NgRTLS.hpp"
 #include "DW1000Ng.hpp"
+#include "DW1000NgUtils.hpp"
+#include "DW1000NgTime.hpp"
 
 static byte SEQ_NUMBER = 0;
 
@@ -64,7 +66,31 @@ namespace DW1000NgRTLS {
         DW1000Ng::startTransmit();
     }
 
-    void transmitFinalMessage(uint16_t anchor_address, uint16_t reply_delay, uint64_t timePollSent, uint64_t timeResponseToPollReceived);
+    void transmitFinalMessage(byte anchor_address, uint16_t reply_delay, uint64_t timePollSent, uint64_t timeResponseToPollReceived) {
+        /* Calculation of future time */
+        byte futureTimeBytes[LENGTH_TIMESTAMP];
+
+	    uint64_t timeFinalMessageSent = DW1000Ng::getSystemTimestamp();
+	    timeFinalMessageSent += DW1000NgTime::microsecondsToUWBTime(reply_delay);
+        DW1000NgUtils::writeValueToBytes(futureTimeBytes, timeFinalMessageSent, LENGTH_TIMESTAMP);
+        DW1000Ng::setDelayedTRX(futureTimeBytes);
+        timeFinalMessageSent += DW1000Ng::getTxAntennaDelay();
+
+        byte finalMessage[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, RANGING_TAG_FINAL_RESPONSE_EMBEDDED, 
+            0,0,0,0,0,0,0,0,0,0,0,0
+        };
+
+        DW1000Ng::getNetworkId(&finalMessage[3]);
+        memcpy(&finalMessage[5], anchor_address, 2);
+        DW1000Ng::getDeviceAddress(&finalMessage[7]);
+
+        DW1000NgUtils::writeValueToBytes(finalMessage + 10, (uint32_t) timePollSent, 4);
+        DW1000NgUtils::writeValueToBytes(finalMessage + 14, (uint32_t) timeResponseToPollReceived, 4);
+        DW1000NgUtils::writeValueToBytes(finalMessage + 18, (uint32_t) timeFinalMessageSent, 4);
+        DW1000Ng::setTransmitData(finalMessage, sizeof(finalMessage));
+        DW1000Ng::startTransmit(TransmitMode::DELAYED);
+    }
+
     void transmitRangingConfirm(uint16_t tag_short_address, uint16_t next_anchor);
     void transmitActivityFinished(uint16_t tag_short_address, uint16_t blink_rate);
 }

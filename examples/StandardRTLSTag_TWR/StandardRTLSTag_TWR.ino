@@ -37,7 +37,6 @@ byte anchor_address[2];
 // timestamps to remember
 volatile uint64_t timePollSent;
 volatile uint64_t timePollAckReceived;
-volatile uint64_t timeRangeSent;
 // watchdog and reset period
 volatile uint32_t lastActivity;
 volatile uint32_t resetPeriod = 250;
@@ -135,31 +134,6 @@ void handleReceived() {
     receivedAck = true;
 }
 
-void transmitFinalMessage() {
-    /* Calculation of future time */
-    byte futureTimeBytes[LENGTH_TIMESTAMP];
-
-	timeRangeSent = DW1000Ng::getSystemTimestamp();
-	timeRangeSent += DW1000NgTime::microsecondsToUWBTime(replyDelayTimeUS);
-    DW1000NgUtils::writeValueToBytes(futureTimeBytes, timeRangeSent, LENGTH_TIMESTAMP);
-    DW1000Ng::setDelayedTRX(futureTimeBytes);
-    timeRangeSent += DW1000Ng::getTxAntennaDelay();
-
-    byte finalMessage[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, RANGING_TAG_FINAL_RESPONSE_EMBEDDED, 
-        0,0,0,0,0,0,0,0,0,0,0,0
-    };
-
-    DW1000Ng::getNetworkId(&finalMessage[3]);
-    memcpy(&finalMessage[5], anchor_address, 2);
-    DW1000Ng::getDeviceAddress(&finalMessage[7]);
-
-    DW1000NgUtils::writeValueToBytes(finalMessage + 10, (uint32_t) timePollSent, 4);
-    DW1000NgUtils::writeValueToBytes(finalMessage + 14, (uint32_t) timePollAckReceived, 4);
-    DW1000NgUtils::writeValueToBytes(finalMessage + 18, (uint32_t) timeRangeSent, 4);
-    DW1000Ng::setTransmitData(finalMessage, sizeof(finalMessage));
-    DW1000Ng::startTransmit(TransmitMode::DELAYED);
-}
-
 void loop() {
     if (!sentAck && !receivedAck) {
         // check if inactive
@@ -189,7 +163,7 @@ void loop() {
                 /* Received Response to poll */
                 timePollSent = DW1000Ng::getTransmitTimestamp();
                 timePollAckReceived = DW1000Ng::getReceiveTimestamp();
-                transmitFinalMessage();
+                DW1000NgRTLS::transmitFinalMessage(anchor_address, replyDelayTimeUS, timePollSent, timePollAckReceived);
                 String tempString= "Receiving messages from:" ; tempString += (char)anchor_address[0] + (char)anchor_address[1];
                 tempString +=" and send it back.";
                 Serial.println(tempString);
