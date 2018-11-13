@@ -1400,17 +1400,12 @@ namespace DW1000Ng {
 	}
 
 	void setSleepTime(uint16_t sleepTime) {
-			byte aon_cfg0[LEN_AON_CFG0];
-			memset(aon_cfg0, 0, LEN_AON_CFG0);
-			_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
-
 			/* (a) Set SLEEP_CEN (in AON_CFG1) to 0. */
 			DW1000Ng::_writeToRegister(AON, AON_CFG1_SUB, 0x00, 1);
 			/* (b) Set UPL_CFG (in AON_CTRL) to 1. */
 			_uploadConfigToAON();
 			/* (c) Program the new value of SLEEP_TIM (in AON_CFG0). */
-			DW1000NgUtils::writeValueToBytes(aon_cfg0[2], sleepTime, 2);
-			_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
+			DW1000Ng::_writeToRegister(AON, AON_CFG0_SLEEPTIME_SUB, sleepTime, LEN_AON_CFG0_SLEEPTIME_SUB);
 			_uploadConfigToAON();
 			/* (d) Set SLEEP_CEN to 1. */
 			DW1000Ng::_writeToRegister(AON, AON_CFG1_SUB, 0x01, 1);
