@@ -50,6 +50,8 @@ byte tag_shortAddress[] = {0x05, 0x00};
 
 byte main_anchor_address[] = {0x01, 0x00};
 
+byte blink_rate[2] = {0xC8, 0x00};
+
 device_configuration_t DEFAULT_CONFIG = {
     false,
     true,
@@ -148,26 +150,6 @@ void handleReceived() {
     receivedAck = true;
 }
 
-void transmitResponseToPoll() {
-    byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONTINUE, 0, 0};
-    DW1000Ng::getNetworkId(&pollAck[3]);
-    memcpy(&pollAck[5], tag_shortAddress, 2);
-    DW1000Ng::getDeviceAddress(&pollAck[7]);
-    DW1000Ng::setTransmitData(pollAck, sizeof(pollAck));
-    DW1000Ng::startTransmit();
-}
-
-void transmitActivityFinished() {
-    /* I send the new blink rate to the tag */
-    byte MS_200 = 0xC8;
-    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, ACTIVITY_FINISHED, MS_200, 0x00};
-    DW1000Ng::getNetworkId(&rangingConfirm[3]);
-    memcpy(&rangingConfirm[5], tag_shortAddress, 2);
-    DW1000Ng::getDeviceAddress(&rangingConfirm[7]);
-    DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));
-    DW1000Ng::startTransmit();
-}
-
 void transmitRangeReport() {
     byte rangingReport[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, 0x60, 0,0 };
     DW1000Ng::getNetworkId(&rangingReport[3]);
@@ -201,7 +183,7 @@ void loop() {
 
         if (recv_data[9] == RANGING_TAG_POLL) {
             timePollReceived = DW1000Ng::getReceiveTimestamp();
-            transmitResponseToPoll();
+            DW1000NgRTLS::transmitResponseToPoll(tag_shortAddress);
             noteActivity();
             return;
         } 
@@ -232,7 +214,7 @@ void loop() {
             rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
             Serial.println(rangeString);
             
-            transmitActivityFinished();
+            DW1000NgRTLS::transmitActivityFinished(tag_shortAddress, blink_rate);
             delay(1);//Sending message to the DW1000 chip too frequently, the earlier messages won't send out successfully.
             noteActivity();
             transmitRangeReport();

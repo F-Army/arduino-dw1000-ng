@@ -150,24 +150,6 @@ void handleReceived() {
     receivedAck = true;
 }
 
-void transmitResponseToPoll() {
-    byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONTINUE, 0, 0};
-    DW1000Ng::getNetworkId(&pollAck[3]);
-    memcpy(&pollAck[5], tag_shortAddress, 2);
-    DW1000Ng::getDeviceAddress(&pollAck[7]);
-    DW1000Ng::setTransmitData(pollAck, sizeof(pollAck));
-    DW1000Ng::startTransmit();
-}
-
-void transmitRangingConfirm() {
-    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONFIRM, next_anchor_range[0], next_anchor_range[1]};
-    DW1000Ng::getNetworkId(&rangingConfirm[3]);
-    memcpy(&rangingConfirm[5], tag_shortAddress, 2);
-    DW1000Ng::getDeviceAddress(&rangingConfirm[7]);
-    DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));
-    DW1000Ng::startTransmit();
-}
-
 void transmitRangeReport() {
     byte rangingReport[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, 0x60, 0,0 };
     DW1000Ng::getNetworkId(&rangingReport[3]);
@@ -201,7 +183,7 @@ void loop() {
 
         if (recv_data[9] == RANGING_TAG_POLL) {
             timePollReceived = DW1000Ng::getReceiveTimestamp();
-            transmitResponseToPoll();
+            DW1000NgRTLS::transmitResponseToPoll(tag_shortAddress);
             noteActivity();
             return;
         } 
@@ -232,7 +214,7 @@ void loop() {
             rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
             Serial.println(rangeString);
             
-            transmitRangingConfirm();
+            DW1000NgRTLS::transmitRangingConfirm(tag_shortAddress, next_anchor_range);
             noteActivity();
             delay(1);//Sending message to the DW1000 chip too frequently, the earlier messages won't send out successfully.
             transmitRangeReport();

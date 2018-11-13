@@ -160,34 +160,6 @@ void handleReceived() {
     receivedAck = true;
 }
 
-void transmitRangingInitiation() {
-    byte RangingInitiation[] = {DATA, SHORT_SRC_LONG_DEST, SEQ_NUMBER++, 0,0, 0,0,0,0,0,0,0,0,  0,0, RANGING_INITIATION, 0,0};
-    DW1000Ng::getNetworkId(&RangingInitiation[3]);
-    memcpy(&RangingInitiation[5], target_eui, 8);
-    DW1000Ng::getDeviceAddress(&RangingInitiation[13]);
-    memcpy(&RangingInitiation[16], tag_shortAddress, 2);
-    DW1000Ng::setTransmitData(RangingInitiation, sizeof(RangingInitiation));
-    DW1000Ng::startTransmit();
-}
-
-void transmitResponseToPoll() {
-    byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONTINUE, 0, 0};
-    DW1000Ng::getNetworkId(&pollAck[3]);
-    memcpy(&pollAck[5], tag_shortAddress, 2);
-    DW1000Ng::getDeviceAddress(&pollAck[7]);
-    DW1000Ng::setTransmitData(pollAck, sizeof(pollAck));
-    DW1000Ng::startTransmit();
-}
-
-void transmitRangingConfirm() {
-    byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONFIRM, anchor_b[0], anchor_b[1]};
-    DW1000Ng::getNetworkId(&rangingConfirm[3]);
-    memcpy(&rangingConfirm[5], tag_shortAddress, 2);
-    DW1000Ng::getDeviceAddress(&rangingConfirm[7]);
-    DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));
-    DW1000Ng::startTransmit();
-}
-
 /* using https://math.stackexchange.com/questions/884807/find-x-location-using-3-known-x-y-location-using-trilateration */
 void calculatePosition(double &x, double &y) {
 
@@ -226,7 +198,7 @@ void loop() {
 
         if (recv_data[9] == RANGING_TAG_POLL) {
             timePollReceived = DW1000Ng::getReceiveTimestamp();
-            transmitResponseToPoll();
+            DW1000NgRTLS::transmitResponseToPoll(tag_shortAddress);
             noteActivity();
             return;
         } 
@@ -257,7 +229,7 @@ void loop() {
             rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
             Serial.println(rangeString);
             
-            transmitRangingConfirm();
+            DW1000NgRTLS::transmitRangingConfirm(tag_shortAddress, anchor_b);
             noteActivity();
             return;
         }
@@ -286,7 +258,7 @@ void loop() {
         if(recv_data[0] == BLINK) {
             /* Is blink */
             memcpy(target_eui, &recv_data[2], 8);
-            transmitRangingInitiation();
+            DW1000NgRTLS::transmitRangingInitiation(target_eui, tag_shortAddress);
             noteActivity();
             return;
         }

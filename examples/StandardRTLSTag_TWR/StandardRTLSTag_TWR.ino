@@ -37,7 +37,6 @@ byte anchor_address[2];
 // timestamps to remember
 volatile uint64_t timePollSent;
 volatile uint64_t timePollAckReceived;
-volatile uint64_t timeRangeSent;
 // watchdog and reset period
 volatile uint32_t lastActivity;
 volatile uint32_t resetPeriod = 250;
@@ -111,7 +110,7 @@ void setup() {
     DW1000Ng::attachSentHandler(handleSent);
     DW1000Ng::attachReceivedHandler(handleReceived);
     // anchor starts by transmitting a POLL message
-    transmitBlink();
+    DW1000NgRTLS::transmitShortBlink();
     noteActivity();
 }
 
@@ -123,7 +122,7 @@ void noteActivity() {
 void reset() {
     // tag returns to Idle and sends POLL
     DW1000Ng::forceTRxOff();
-    transmitBlink();
+    DW1000NgRTLS::transmitShortBlink();
     noteActivity();
 }
 
@@ -133,48 +132,6 @@ void handleSent() {
 
 void handleReceived() {
     receivedAck = true;
-}
-
-void transmitBlink() {
-    byte Blink[] = {BLINK, SEQ_NUMBER++, 0,0,0,0,0,0,0,0, NO_BATTERY_STATUS | NO_EX_ID, TAG_LISTENING_NOW};
-    DW1000Ng::getEUI(&Blink[2]);
-    DW1000Ng::setTransmitData(Blink, sizeof(Blink));
-    DW1000Ng::startTransmit();
-}
-
-void transmitPoll() {
-    byte Poll[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0 , RANGING_TAG_POLL};
-    DW1000Ng::getNetworkId(&Poll[3]);
-    memcpy(&Poll[5], anchor_address, 2);
-    DW1000Ng::getDeviceAddress(&Poll[7]);
-    DW1000Ng::setTransmitData(Poll, sizeof(Poll));
-    DW1000Ng::startTransmit();
-}
-
-
-void transmitFinalMessage() {
-    /* Calculation of future time */
-    byte futureTimeBytes[LENGTH_TIMESTAMP];
-
-	timeRangeSent = DW1000Ng::getSystemTimestamp();
-	timeRangeSent += DW1000NgTime::microsecondsToUWBTime(replyDelayTimeUS);
-    DW1000NgUtils::writeValueToBytes(futureTimeBytes, timeRangeSent, LENGTH_TIMESTAMP);
-    DW1000Ng::setDelayedTRX(futureTimeBytes);
-    timeRangeSent += DW1000Ng::getTxAntennaDelay();
-
-    byte finalMessage[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, RANGING_TAG_FINAL_RESPONSE_EMBEDDED, 
-        0,0,0,0,0,0,0,0,0,0,0,0
-    };
-
-    DW1000Ng::getNetworkId(&finalMessage[3]);
-    memcpy(&finalMessage[5], anchor_address, 2);
-    DW1000Ng::getDeviceAddress(&finalMessage[7]);
-
-    DW1000NgUtils::writeValueToBytes(finalMessage + 10, (uint32_t) timePollSent, 4);
-    DW1000NgUtils::writeValueToBytes(finalMessage + 14, (uint32_t) timePollAckReceived, 4);
-    DW1000NgUtils::writeValueToBytes(finalMessage + 18, (uint32_t) timeRangeSent, 4);
-    DW1000Ng::setTransmitData(finalMessage, sizeof(finalMessage));
-    DW1000Ng::startTransmit(TransmitMode::DELAYED);
 }
 
 void loop() {
@@ -206,7 +163,7 @@ void loop() {
                 /* Received Response to poll */
                 timePollSent = DW1000Ng::getTransmitTimestamp();
                 timePollAckReceived = DW1000Ng::getReceiveTimestamp();
-                transmitFinalMessage();
+                DW1000NgRTLS::transmitFinalMessage(anchor_address, replyDelayTimeUS, timePollSent, timePollAckReceived);
                 String tempString= "Receiving messages from:" ; tempString += (char)anchor_address[0] + (char)anchor_address[1];
                 tempString +=" and send it back.";
                 Serial.println(tempString);
@@ -215,7 +172,7 @@ void loop() {
             } else if (recv_data[10] == RANGING_CONFIRM) {
                 /* Received ranging confirm */
                 memcpy(anchor_address, &recv_data[11], 2);
-                transmitPoll();
+                DW1000NgRTLS::transmitPoll(anchor_address);
                 String tempString= "Sending messages to NEW Anchor:" ; tempString += (char) anchor_address[0] + (char)anchor_address[1];
                 Serial.println(tempString);
                 noteActivity();
@@ -235,7 +192,7 @@ void loop() {
                 delay(resetPeriod);
                 DW1000Ng::spiWakeup();
 
-                transmitBlink();
+                DW1000NgRTLS::transmitShortBlink();
                 noteActivity();
                 return;
             } else {
@@ -247,7 +204,7 @@ void loop() {
         if(recv_data[15] == RANGING_INITIATION) {
             DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&recv_data[16], 2));
             memcpy(anchor_address, &recv_data[13], 2);
-            transmitPoll();
+            DW1000NgRTLS::transmitPoll(anchor_address);
             String tempString= "Receiving messages from:" ; tempString += (char)anchor_address[0] + (char)anchor_address[1];
             tempString +=" and send it back.";
             Serial.println(tempString);

@@ -463,18 +463,18 @@ namespace DW1000Ng {
 	@param [in] mode IMMEDIATE or DELAYED transmission
 	*/
 	void startTransmit(TransmitMode mode = TransmitMode::IMMEDIATE);
-	
+		
 	/**
 	Gets the temperature inside the DW1000 Device
 
-	@param [out] temp The temperature 
+	returns The temperature 
 	*/
 	float getTemperature();
 
 	/**
 	Gets the voltage in input of the DW1000
 
-	@param [out] vbat The input voltage
+	returns The input voltage
 	*/
 	float getBatteryVoltage();
 
