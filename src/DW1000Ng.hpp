@@ -463,14 +463,7 @@ namespace DW1000Ng {
 	@param [in] mode IMMEDIATE or DELAYED transmission
 	*/
 	void startTransmit(TransmitMode mode = TransmitMode::IMMEDIATE);
-
-	/**
-	Gets the next transmission sequence number 
-	
-	returns the next tx sequence number
-	*/ 
-	byte getTxSequenceNumber();
-	
+		
 	/**
 	Gets the temperature inside the DW1000 Device
 
