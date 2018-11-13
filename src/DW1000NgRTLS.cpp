@@ -55,7 +55,15 @@ namespace DW1000NgRTLS {
         DW1000Ng::startTransmit();
     }
 
-    void transmitResponseToPoll(uint16_t tag_short_address);
+    void transmitResponseToPoll(byte tag_short_address) {
+        byte pollAck[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, RANGING_CONTINUE, 0, 0};
+        DW1000Ng::getNetworkId(&pollAck[3]);
+        memcpy(&pollAck[5], tag_short_address, 2);
+        DW1000Ng::getDeviceAddress(&pollAck[7]);
+        DW1000Ng::setTransmitData(pollAck, sizeof(pollAck));
+        DW1000Ng::startTransmit();
+    }
+
     void transmitFinalMessage(uint16_t anchor_address, uint16_t reply_delay, uint64_t timePollSent, uint64_t timeResponseToPollReceived);
     void transmitRangingConfirm(uint16_t tag_short_address, uint16_t next_anchor);
     void transmitActivityFinished(uint16_t tag_short_address, uint16_t blink_rate);
