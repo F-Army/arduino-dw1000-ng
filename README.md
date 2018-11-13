@@ -23,6 +23,7 @@ The main reason for this fork is because the development there is really slow (d
 We also wanted to change how the ranging logic works.<br/>
 Rather than providing a ranging loop, we wanted to provide functions to send the different Two way ranging flow frames, giving the user more control over the program. <br />
 The base driver was also re-written in a lot of places, to make every API function more independent from each other.
+We also plan to make very high-level abstractions to hack projects fast.
 
 Features
 ------------
