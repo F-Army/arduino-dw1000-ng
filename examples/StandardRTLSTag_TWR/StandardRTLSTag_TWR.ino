@@ -135,16 +135,6 @@ void handleReceived() {
     receivedAck = true;
 }
 
-void transmitPoll() {
-    byte Poll[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0 , RANGING_TAG_POLL};
-    DW1000Ng::getNetworkId(&Poll[3]);
-    memcpy(&Poll[5], anchor_address, 2);
-    DW1000Ng::getDeviceAddress(&Poll[7]);
-    DW1000Ng::setTransmitData(Poll, sizeof(Poll));
-    DW1000Ng::startTransmit();
-}
-
-
 void transmitFinalMessage() {
     /* Calculation of future time */
     byte futureTimeBytes[LENGTH_TIMESTAMP];
@@ -208,7 +198,7 @@ void loop() {
             } else if (recv_data[10] == RANGING_CONFIRM) {
                 /* Received ranging confirm */
                 memcpy(anchor_address, &recv_data[11], 2);
-                transmitPoll();
+                DW1000NgRTLS::transmitPoll(anchor_address);
                 String tempString= "Sending messages to NEW Anchor:" ; tempString += (char) anchor_address[0] + (char)anchor_address[1];
                 Serial.println(tempString);
                 noteActivity();
@@ -240,7 +230,7 @@ void loop() {
         if(recv_data[15] == RANGING_INITIATION) {
             DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&recv_data[16], 2));
             memcpy(anchor_address, &recv_data[13], 2);
-            transmitPoll();
+            DW1000NgRTLS::transmitPoll(anchor_address);
             String tempString= "Receiving messages from:" ; tempString += (char)anchor_address[0] + (char)anchor_address[1];
             tempString +=" and send it back.";
             Serial.println(tempString);
