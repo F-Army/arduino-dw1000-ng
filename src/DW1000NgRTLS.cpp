@@ -100,5 +100,13 @@ namespace DW1000NgRTLS {
         DW1000Ng::startTransmit();
     }
 
-    void transmitActivityFinished(byte tag_short_address[], byte blink_rate[]);
+    void transmitActivityFinished(byte tag_short_address[], byte blink_rate[]) {
+        /* I send the new blink rate to the tag */
+        byte rangingConfirm[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, ACTIVITY_CONTROL, ACTIVITY_FINISHED, blink_rate[0], blink_rate[1]};
+        DW1000Ng::getNetworkId(&rangingConfirm[3]);
+        memcpy(&rangingConfirm[5], tag_short_address, 2);
+        DW1000Ng::getDeviceAddress(&rangingConfirm[7]);
+        DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));
+        DW1000Ng::startTransmit();
+    }
 }
