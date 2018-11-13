@@ -66,3 +66,13 @@ constexpr byte NO_EX_ID = 0x40;
 /* BLINK Ext Header */
 constexpr byte BLINK_RATE_AND_LISTENING = 0x01;
 constexpr byte TAG_LISTENING_NOW = 0x02;
+
+namespace DW1000NgRTLS {
+    void transmitShortBlink();
+    void transmitRangingInitiation(uint64_t tag_eui, uint16_t tag_short_address);
+    void transmitPoll(uint16_t anchor_address);
+    void transmitResponseToPoll(uint16_t tag_short_address);
+    void transmitFinalMessage(uint16_t anchor_address, uint16_t reply_delay, uint64_t timePollSent, uint64_t timeResponseToPollReceived);
+    void transmitRangingConfirm(uint16_t tag_short_address, uint16_t next_anchor);
+    void transmitActivityFinished(uint16_t tag_short_address, uint16_t blink_rate);
+}
