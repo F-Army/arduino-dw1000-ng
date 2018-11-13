@@ -36,7 +36,16 @@ namespace DW1000NgRTLS {
         DW1000Ng::startTransmit();
     }
 
-    void transmitRangingInitiation(uint64_t tag_eui, uint16_t tag_short_address);
+    void transmitRangingInitiation(byte tag_eui[], byte tag_short_address[]) {
+        byte RangingInitiation[] = {DATA, SHORT_SRC_LONG_DEST, SEQ_NUMBER++, 0,0, 0,0,0,0,0,0,0,0,  0,0, RANGING_INITIATION, 0,0};
+        DW1000Ng::getNetworkId(&RangingInitiation[3]);
+        memcpy(&RangingInitiation[5], tag_eui, 8);
+        DW1000Ng::getDeviceAddress(&RangingInitiation[13]);
+        memcpy(&RangingInitiation[16], tag_short_address, 2);
+        DW1000Ng::setTransmitData(RangingInitiation, sizeof(RangingInitiation));
+        DW1000Ng::startTransmit();
+    }
+
     void transmitPoll(uint16_t anchor_address);
     void transmitResponseToPoll(uint16_t tag_short_address);
     void transmitFinalMessage(uint16_t anchor_address, uint16_t reply_delay, uint64_t timePollSent, uint64_t timeResponseToPollReceived);
