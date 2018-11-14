@@ -93,8 +93,6 @@ sleep_configuration_t SLEEP_CONFIG = {
     false,
     true,
     false,
-    false,
-    NULL,
     NULL
 };
 

@@ -1413,38 +1413,11 @@ namespace DW1000Ng {
 		_uploadConfigToAON();
 	}
 
-	void _setDividerCount(uint16_t dividerCount) {
-		if(dividerCount != NULL && dividerCount <= 2047) {
-			byte aon_cfg0[2];
-			memset(aon_cfg0, 0, 2);
-			_readBytes(AON, AON_CFG0_SUB, aon_cfg0, 2);
-
-			byte lpclkdiva[2];
-			DW1000NgUtils::writeValueToBytes(lpclkdiva, dividerCount, 2);
-			/* Clear lplckdiva default value */
-			aon_cfg0[0] &= 0x1F;
-			aon_cfg0[1] &= 0x00;
-			aon_cfg0[0] |= ((lpclkdiva[0] << 5) & 0xE0);
-			aon_cfg0[1] |= ((lpclkdiva[0] >> 3) | (lpclkdiva[1] << 5));
-
-			_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, 2);
-
-			_uploadConfigToAON();
-		}
-	}
-
 	void applySleepConfiguration(sleep_configuration_t sleep_config) {
 		byte aon_cfg0[LEN_AON_CFG0];
 		memset(aon_cfg0, 0, LEN_AON_CFG0);
 		_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 		
-		if(sleep_config.enableDivider) {
-			_setDividerCount(sleep_config.dividerCount);
-		} else {
-			/* Otherwise set default device value */
-			_setDividerCount(0xFF);
-		}
-
 		if(sleep_config.sleepTime != NULL && sleep_config.sleepTime > 0) {
 			setSleepTime(sleep_config.sleepTime);
 		} else {
@@ -1473,7 +1446,6 @@ namespace DW1000Ng {
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, sleep_config.enableWakeCNT);
 		_wakeCounterDisabled = !sleep_config.enableWakeCNT;
 
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, LPDIV_EN_BIT, sleep_config.enableDivider);
 		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 	}
 
