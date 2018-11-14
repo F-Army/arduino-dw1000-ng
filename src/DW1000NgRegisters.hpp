@@ -306,14 +306,12 @@ constexpr uint16_t UPL_CFG_BIT = 2;
 constexpr uint16_t LEN_AON_CTRL = 1;
 
 constexpr uint16_t AON_CFG0_SUB = 0x06;
-constexpr uint16_t AON_CFG0_SLEEPTIME_SUB = 0x08;
 constexpr uint16_t SLEEP_EN_BIT = 0;
 constexpr uint16_t WAKE_PIN_BIT = 1;
 constexpr uint16_t WAKE_SPI_BIT = 2;
 constexpr uint16_t WAKE_CNT_BIT = 3;
 constexpr uint16_t LPDIV_EN_BIT = 4;
 constexpr uint16_t LEN_AON_CFG0 = 4;
-constexpr uint16_t LEN_AON_CFG0_SLEEPTIME_SUB = 2;
 
 constexpr uint16_t AON_CFG1_SUB = 0x0A;
 constexpr uint16_t SLEEP_CEN_BIT = 0;
