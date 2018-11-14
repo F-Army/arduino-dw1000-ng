@@ -1400,17 +1400,37 @@ namespace DW1000Ng {
 	}
 
 	void setSleepTime(uint16_t sleepTime) {
-			/* (a) Set SLEEP_CEN (in AON_CFG1) to 0. */
-			DW1000Ng::_writeToRegister(AON, AON_CFG1_SUB, 0x00, 1);
-			/* (b) Set UPL_CFG (in AON_CTRL) to 1. */
+		/* (a) Set SLEEP_CEN (in AON_CFG1) to 0. */
+		DW1000Ng::_writeToRegister(AON, AON_CFG1_SUB, 0x00, 1);
+		/* (b) Set UPL_CFG (in AON_CTRL) to 1. */
+		_uploadConfigToAON();
+		/* (c) Program the new value of SLEEP_TIM (in AON_CFG0). */
+		DW1000Ng::_writeToRegister(AON, AON_CFG0_SLEEPTIME_SUB, sleepTime, LEN_AON_CFG0_SLEEPTIME_SUB);
+		_uploadConfigToAON();
+		/* (d) Set SLEEP_CEN to 1. */
+		DW1000Ng::_writeToRegister(AON, AON_CFG1_SUB, 0x01, 1);
+		/* (e) Set UPL_CFG to 1, to apply the new sleep time and enable the counter in the AON. */
+		_uploadConfigToAON();
+	}
+
+	void _setDividerCount(uint16_t dividerCount) {
+		if(dividerCount != NULL && dividerCount <= 2047) {
+			byte aon_cfg0[2];
+			memset(aon_cfg0, 0, 2);
+			_readBytes(AON, AON_CFG0_SUB, aon_cfg0, 2);
+
+			byte lpclkdiva[2];
+			DW1000NgUtils::writeValueToBytes(lpclkdiva, dividerCount, 2);
+			/* Clear lplckdiva default value */
+			aon_cfg0[0] &= 0x1F;
+			aon_cfg0[1] &= 0x00;
+			aon_cfg0[0] |= ((lpclkdiva[0] << 5) & 0xE0);
+			aon_cfg0[1] |= ((lpclkdiva[0] >> 3) | (lpclkdiva[1] << 5));
+
+			_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, 2);
+
 			_uploadConfigToAON();
-			/* (c) Program the new value of SLEEP_TIM (in AON_CFG0). */
-			DW1000Ng::_writeToRegister(AON, AON_CFG0_SLEEPTIME_SUB, sleepTime, LEN_AON_CFG0_SLEEPTIME_SUB);
-			_uploadConfigToAON();
-			/* (d) Set SLEEP_CEN to 1. */
-			DW1000Ng::_writeToRegister(AON, AON_CFG1_SUB, 0x01, 1);
-			/* (e) Set UPL_CFG to 1, to apply the new sleep time and enable the counter in the AON. */
-			_uploadConfigToAON();
+		}
 	}
 
 	void applySleepConfiguration(sleep_configuration_t sleep_config) {
@@ -1418,27 +1438,18 @@ namespace DW1000Ng {
 		memset(aon_cfg0, 0, LEN_AON_CFG0);
 		_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
 		
-		if(sleep_config.dividerCount != NULL && sleep_config.enableDivider) {
-			if(sleep_config.dividerCount <= 2047){
-				byte lpclkdiva[2];
-				DW1000NgUtils::writeValueToBytes(lpclkdiva, sleep_config.dividerCount, 2);
-				/* Clear lplckdiva default value */
-				aon_cfg0[0] &= 0x1F;
-				aon_cfg0[1] &= 0x00;
-
-				aon_cfg0[0] |= ((lpclkdiva[0] << 5) & 0xE0);
-				aon_cfg0[1] |= ((lpclkdiva[0] >> 3) | (lpclkdiva[1] << 5));
-
-				//_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
-			} else {
-				// TODO proper handleError, exceeded max input value
-			}
-		} else{
-			// TODO proper handleError
+		if(sleep_config.enableDivider) {
+			_setDividerCount(sleep_config.dividerCount);
+		} else {
+			/* Otherwise set default device value */
+			_setDividerCount(0xFF);
 		}
 
 		if(sleep_config.sleepTime != NULL && sleep_config.sleepTime > 0) {
 			setSleepTime(sleep_config.sleepTime);
+		} else {
+			/* Otherwise set default device value */
+			setSleepTime(0x50FF);
 		}
 
 		byte aon_wcfg[LEN_AON_WCFG];
