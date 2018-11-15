@@ -210,10 +210,6 @@ void loop() {
             if(distance <= 0) 
                 distance = 0.001;
             
-            String rangeString = "Range: "; rangeString += distance; rangeString += " m";
-            rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
-            Serial.println(rangeString);
-            
             DW1000NgRTLS::transmitActivityFinished(tag_shortAddress, blink_rate);
             delay(1);//Sending message to the DW1000 chip too frequently, the earlier messages won't send out successfully.
             noteActivity();
