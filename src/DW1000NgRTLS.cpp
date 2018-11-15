@@ -139,4 +139,9 @@ namespace DW1000NgRTLS {
             DW1000Ng::getReceiveTimestamp()  // Response to poll receive time
         );
     }
+
+    uint64_t handlePoll(byte frame[], byte tagShortAddress[]) {
+        DW1000NgRTLS::transmitResponseToPoll(tagShortAddress);
+        return DW1000Ng::getReceiveTimestamp(); // Poll receive time
+    }
 }

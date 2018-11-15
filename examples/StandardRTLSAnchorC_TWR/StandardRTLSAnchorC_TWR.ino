@@ -181,8 +181,7 @@ void loop() {
         DW1000Ng::getReceivedData(recv_data, recv_len);
 
         if (recv_data[9] == RANGING_TAG_POLL) {
-            timePollReceived = DW1000Ng::getReceiveTimestamp();
-            DW1000NgRTLS::transmitResponseToPoll(tag_shortAddress);
+            timePollReceived = DW1000NgRTLS::handlePoll(recv_data, tag_shortAddress);
             noteActivity();
         } else if (recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
 
