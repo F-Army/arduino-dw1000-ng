@@ -30,12 +30,7 @@ volatile boolean receivedAck = false;
 volatile byte SEQ_NUMBER = 0;
 
 // timestamps to remember
-volatile uint64_t timePollSent;
 volatile uint64_t timePollReceived;
-volatile uint64_t timePollAckSent;
-volatile uint64_t timePollAckReceived;
-volatile uint64_t timeRangeSent;
-volatile uint64_t timeRangeReceived;
 
 volatile double distance;
 
