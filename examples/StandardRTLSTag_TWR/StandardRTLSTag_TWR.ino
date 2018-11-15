@@ -160,7 +160,7 @@ void loop() {
                 timePollAckReceived = DW1000Ng::getReceiveTimestamp();
                 DW1000NgRTLS::transmitFinalMessage(&recv_data[7], replyDelayTimeUS, timePollSent, timePollAckReceived);
                 noteActivity();
-            } else if (recv_data[10] == RANGING_CONFIRM) {
+            } else if (recv_len > 12 && recv_data[10] == RANGING_CONFIRM) {
                 /* Received ranging confirm */
                 DW1000NgRTLS::transmitPoll(&recv_data[11]);
                 noteActivity();
