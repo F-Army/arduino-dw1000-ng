@@ -130,4 +130,13 @@ namespace DW1000NgRTLS {
     void handleRangingConfirm(byte frame[]) {
         DW1000NgRTLS::transmitPoll(&frame[11]);
     }
+
+    void handleRangingContinueEmbedded(byte frame[], uint16_t replyDelayUs) {
+        DW1000NgRTLS::transmitFinalMessage(
+            &frame[7], 
+            replyDelayUs, 
+            DW1000Ng::getTransmitTimestamp(), // Poll transmit time
+            DW1000Ng::getReceiveTimestamp()  // Response to poll receive time
+        );
+    }
 }

@@ -156,9 +156,7 @@ void loop() {
         if(recv_len > 10 && recv_data[9] == ACTIVITY_CONTROL) {
             if (recv_data[10] == RANGING_CONTINUE) {
                 /* Received Response to poll */
-                timePollSent = DW1000Ng::getTransmitTimestamp();
-                timePollAckReceived = DW1000Ng::getReceiveTimestamp();
-                DW1000NgRTLS::transmitFinalMessage(&recv_data[7], replyDelayTimeUS, timePollSent, timePollAckReceived);
+                DW1000NgRTLS::handleRangingContinueEmbedded(recv_data, replyDelayTimeUS);
                 noteActivity();
             } else if (recv_len > 12 && recv_data[10] == RANGING_CONFIRM) {
                 /* Received ranging confirm */
