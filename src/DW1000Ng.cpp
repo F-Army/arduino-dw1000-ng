@@ -1400,7 +1400,7 @@ namespace DW1000Ng {
 	}
 
 	void setSleepTime(uint16_t sleepTime) {
-		if(sleep_config.sleepTime != NULL && sleep_config.sleepTime > 0) {
+		if(sleepTime != NULL && sleepTime > 0) {
 			_enableClock(SYS_XTI_CLOCK);
 
 			DW1000Ng::_writeToRegister(AON, AON_CFG0_SUB, 0x00, 1);
