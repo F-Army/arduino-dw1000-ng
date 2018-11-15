@@ -30,11 +30,6 @@ const uint8_t PIN_SS = SS; // spi select pin
 volatile boolean sentAck = false;
 volatile boolean receivedAck = false;
 
-byte SEQ_NUMBER = 0;
-
-// timestamps to remember
-volatile uint64_t timePollSent;
-volatile uint64_t timePollAckReceived;
 // watchdog and reset period
 volatile uint32_t lastActivity;
 volatile uint32_t resetPeriod = 250;
