@@ -207,11 +207,11 @@ void loop() {
                 distance = 0.001;
             
             DW1000NgRTLS::transmitRangingConfirm(tag_shortAddress, next_anchor_range);
-            noteActivity();
 
-            delay(4);//Sending message to the DW1000 chip too frequently, the earlier messages won't send out successfully.
-            transmitRangeReport();
+            delay(1);//Sending message to the DW1000 chip too frequently, the earlier messages won't send out successfully.
             noteActivity();
+            transmitRangeReport();
+            //noteActivity();
         }
     }
 }
