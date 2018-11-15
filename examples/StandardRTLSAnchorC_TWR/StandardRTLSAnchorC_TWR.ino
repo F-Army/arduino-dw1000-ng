@@ -175,10 +175,10 @@ void loop() {
         byte recv_data[recv_len];
         DW1000Ng::getReceivedData(recv_data, recv_len);
 
-        if (recv_data[9] == RANGING_TAG_POLL) {
+        if (recv_len > 9 && recv_data[9] == RANGING_TAG_POLL) {
             timePollReceived = DW1000NgRTLS::handlePoll(recv_data);
             noteActivity();
-        } else if (recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
+        } else if (recv_len > 18 && recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
 
             distance = DW1000NgRTLS::handleFinalMessageEmbedded(recv_data, timePollReceived, NextActivity::ACTIVITY_FINISHED, blink_rate);
             /* Apply bias correction */
