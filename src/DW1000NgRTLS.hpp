@@ -77,4 +77,5 @@ namespace DW1000NgRTLS {
     void transmitActivityFinished(byte tag_short_address[], byte blink_rate[]);
 
     uint32_t handleActivityFinished(byte frame[]);
+    void handleRangingInitiation(byte frame[]);
 }
