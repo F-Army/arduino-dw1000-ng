@@ -1424,13 +1424,12 @@ namespace DW1000Ng {
 	}
 
 	void applySleepConfiguration(sleep_configuration_t sleep_config) {
+		byte aon_wcfg[LEN_AON_WCFG];
+		memset(aon_wcfg, 0, LEN_AON_WCFG);
+
 		byte aon_cfg0[1];
 		memset(aon_cfg0, 0, 1);
 		
-		byte aon_wcfg[LEN_AON_WCFG];
-		memset(aon_wcfg, 0, LEN_AON_WCFG);
-		_readBytes(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
-
 		setSleepTime(sleep_config.sleepTime);
 
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_RADC_BIT, sleep_config.onWakeUpRunADC);
@@ -1443,12 +1442,12 @@ namespace DW1000Ng {
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LLDO_BIT, true);
 		_writeBytesToRegister(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
 
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, SLEEP_EN_BIT, sleep_config.enableSLP);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_PIN_BIT, sleep_config.enableWakePIN);
+		DW1000NgUtils::setBit(aon_cfg0, 1, SLEEP_EN_BIT, sleep_config.enableSLP);
+		DW1000NgUtils::setBit(aon_cfg0, 1, WAKE_PIN_BIT, sleep_config.enableWakePIN);
 		_wakePINDisabled = !sleep_config.enableWakePIN;
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_SPI_BIT, sleep_config.enableWakeSPI);
+		DW1000NgUtils::setBit(aon_cfg0, 1, WAKE_SPI_BIT, sleep_config.enableWakeSPI);
 		_wakeSPIDisabled = !sleep_config.enableWakeSPI;
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, sleep_config.enableWakeCNT);
+		DW1000NgUtils::setBit(aon_cfg0, 1, WAKE_CNT_BIT, sleep_config.enableWakeCNT);
 		_wakeCounterDisabled = !sleep_config.enableWakeCNT;
 
 		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, 1);
