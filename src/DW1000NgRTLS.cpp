@@ -134,7 +134,7 @@ namespace DW1000NgRTLS {
     }
 
     void handleRangingConfirm(byte frame[]) {
-        Serial.print(frame[2]);
+        Serial.println(frame[2]);
         DW1000NgRTLS::transmitPoll(&frame[11]);
     }
 
