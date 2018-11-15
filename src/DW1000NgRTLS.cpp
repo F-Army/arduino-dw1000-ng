@@ -27,6 +27,7 @@
 #include "DW1000Ng.hpp"
 #include "DW1000NgUtils.hpp"
 #include "DW1000NgTime.hpp"
+#include "DW1000NgRanging.hpp"
 
 static byte SEQ_NUMBER = 0;
 
@@ -143,5 +144,21 @@ namespace DW1000NgRTLS {
     uint64_t handlePoll(byte frame[], byte tagShortAddress[]) {
         DW1000NgRTLS::transmitResponseToPoll(tagShortAddress);
         return DW1000Ng::getReceiveTimestamp(); // Poll receive time
+    }
+
+    double handleFinalMessageEmbedded(byte frame[], uint64_t timePollReceived, NextActivity next, byte param[]) {
+
+        double range = DW1000NgRanging::computeRangeAsymmetric(
+                DW1000NgUtils::bytesAsValue(frame + 10, LENGTH_TIMESTAMP), // Poll send time
+                timePollReceived, 
+                DW1000Ng::getTransmitTimestamp(), // Response to poll sent time
+                DW1000NgUtils::bytesAsValue(frame + 14, LENGTH_TIMESTAMP), // Response to Poll Received
+                DW1000NgUtils::bytesAsValue(frame + 18, LENGTH_TIMESTAMP), // Final Message send time
+                DW1000Ng::getReceiveTimestamp() // Final message receive time
+        );
+
+        if(next == NextActivity::ACTIVITY_FINISHED) {
+            DW1000NgRTLS::transmitActivityFinished(&frame[7], param);
+        }
     }
 }

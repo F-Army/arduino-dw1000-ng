@@ -33,7 +33,6 @@ volatile byte SEQ_NUMBER = 0;
 volatile uint64_t timePollSent;
 volatile uint64_t timePollReceived;
 volatile uint64_t timePollAckSent;
-volatile uint64_t timePollAckReceived;
 volatile uint64_t timeRangeSent;
 volatile uint64_t timeRangeReceived;
 
@@ -185,19 +184,7 @@ void loop() {
             noteActivity();
         } else if (recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
 
-            timePollAckSent = DW1000Ng::getTransmitTimestamp();
-            timeRangeReceived = DW1000Ng::getReceiveTimestamp();
-
-            timePollSent = DW1000NgUtils::bytesAsValue(recv_data + 10, LENGTH_TIMESTAMP);
-            timePollAckReceived = DW1000NgUtils::bytesAsValue(recv_data + 14, LENGTH_TIMESTAMP);
-            timeRangeSent = DW1000NgUtils::bytesAsValue(recv_data + 18, LENGTH_TIMESTAMP);
-            // (re-)compute range as two-way ranging is done
-            distance = DW1000NgRanging::computeRangeAsymmetric(timePollSent,
-                                                        timePollReceived, 
-                                                        timePollAckSent, 
-                                                        timePollAckReceived, 
-                                                        timeRangeSent, 
-                                                        timeRangeReceived);
+            distance = DW1000NgRTLS::handleFinalMessageEmbedded(recv_data, timePollReceived, NextActivity::ACTIVITY_FINISHED, blink_rate);
             /* Apply bias correction */
             distance = DW1000NgRanging::correctRange(distance);
 
@@ -205,7 +192,6 @@ void loop() {
             if(distance <= 0) 
                 distance = 0.001;
             
-            DW1000NgRTLS::transmitActivityFinished(tag_shortAddress, blink_rate);
             delay(1);//Sending message to the DW1000 chip too frequently, the earlier messages won't send out successfully.
             noteActivity();
             transmitRangeReport();

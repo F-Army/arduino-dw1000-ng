@@ -67,6 +67,11 @@ constexpr byte NO_EX_ID = 0x40;
 constexpr byte BLINK_RATE_AND_LISTENING = 0x01;
 constexpr byte TAG_LISTENING_NOW = 0x02;
 
+enum class NextActivity {
+    ACTIVITY_FINISHED,
+    RANGING_CONFIRM
+};
+
 namespace DW1000NgRTLS {
     void transmitShortBlink();
     void transmitRangingInitiation(byte tag_eui[], byte tag_short_address[]);
@@ -81,4 +86,5 @@ namespace DW1000NgRTLS {
     void handleRangingConfirm(byte frame[]);
     void handleRangingContinueEmbedded(byte frame[], uint16_t replyDelayUs);
     uint64_t handlePoll(byte frame[], byte tagShortAddress[]);
+    double handleFinalMessageEmbedded(byte frame[], uint64_t timePollReceived, NextActivity next, byte param[]);
 }
