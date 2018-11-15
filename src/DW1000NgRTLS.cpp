@@ -160,5 +160,7 @@ namespace DW1000NgRTLS {
         if(next == NextActivity::ACTIVITY_FINISHED) {
             DW1000NgRTLS::transmitActivityFinished(&frame[7], param);
         }
+
+        return range;
     }
 }
