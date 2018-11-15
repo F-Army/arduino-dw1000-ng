@@ -196,7 +196,6 @@ void loop() {
 
             transmitReportNext = true;
             noteActivity();
-            
         }
     }
 }
