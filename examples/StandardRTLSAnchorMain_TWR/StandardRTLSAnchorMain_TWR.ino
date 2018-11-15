@@ -32,8 +32,6 @@ const uint8_t PIN_SS = SS; // spi select pin
 volatile boolean sentAck = false;
 volatile boolean receivedAck = false;
 
-volatile byte SEQ_NUMBER = 0;
-
 // timestamps to remember
 volatile uint64_t timePollReceived;
 
