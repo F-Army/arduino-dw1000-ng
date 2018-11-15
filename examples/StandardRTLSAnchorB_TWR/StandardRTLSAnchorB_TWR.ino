@@ -206,7 +206,7 @@ void loop() {
             if(distance <= 0) 
                 distance = 0.001;
             
-            delay(15);
+            delay(200);
             
             DW1000NgRTLS::transmitRangingConfirm(tag_shortAddress, next_anchor_range);
             noteActivity();
