@@ -166,7 +166,6 @@ void loop() {
         if (millis() - lastActivity > resetPeriod) {
             resetInactive();
         }
-        return;
     }
 
     if (sentAck) {
@@ -185,10 +184,7 @@ void loop() {
             timePollReceived = DW1000Ng::getReceiveTimestamp();
             DW1000NgRTLS::transmitResponseToPoll(tag_shortAddress);
             noteActivity();
-            return;
-        } 
-        
-        if (recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
+        } else if (recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
 
             timePollAckSent = DW1000Ng::getTransmitTimestamp();
             timeRangeReceived = DW1000Ng::getReceiveTimestamp();
@@ -210,16 +206,11 @@ void loop() {
             if(distance <= 0) 
                 distance = 0.001;
             
-            String rangeString = "Range: "; rangeString += distance; rangeString += " m";
-            rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
-            Serial.println(rangeString);
-            
             DW1000NgRTLS::transmitRangingConfirm(tag_shortAddress, next_anchor_range);
             noteActivity();
             delay(1);//Sending message to the DW1000 chip too frequently, the earlier messages won't send out successfully.
             transmitRangeReport();
             noteActivity();
-            return;
         }
     }
 }
