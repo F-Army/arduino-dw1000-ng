@@ -168,6 +168,7 @@ void loop() {
         if(transmitReportNext == true) {
             transmitReportNext = false;
             DW1000Ng::forceTRxOff();
+            delay(3);
             transmitRangeReport();
         }
         DW1000Ng::startReceive();
