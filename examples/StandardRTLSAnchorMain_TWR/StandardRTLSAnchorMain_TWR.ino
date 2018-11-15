@@ -181,7 +181,6 @@ void loop() {
         if (millis() - lastActivity > resetPeriod) {
             resetInactive();
         }
-        return;
     }
 
     if (sentAck) {
@@ -200,10 +199,7 @@ void loop() {
             timePollReceived = DW1000Ng::getReceiveTimestamp();
             DW1000NgRTLS::transmitResponseToPoll(tag_shortAddress);
             noteActivity();
-            return;
-        } 
-        
-        if (recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
+        } else if (recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
 
             timePollAckSent = DW1000Ng::getTransmitTimestamp();
             timeRangeReceived = DW1000Ng::getReceiveTimestamp();
@@ -231,10 +227,7 @@ void loop() {
             
             DW1000NgRTLS::transmitRangingConfirm(tag_shortAddress, anchor_b);
             noteActivity();
-            return;
-        }
-
-        if(recv_data[9] == 0x60) {
+        } else if(recv_data[9] == 0x60) {
             double range = static_cast<double>(DW1000NgUtils::bytesAsValue(&recv_data[10],2) / 1000.0);
             String rangeReportString = "Range from: "; rangeReportString += recv_data[7];
             rangeReportString += " = "; rangeReportString += range;
@@ -252,15 +245,11 @@ void loop() {
             }
             DW1000Ng::startReceive();
             noteActivity();
-            return;
-        }
-
-        if(recv_data[0] == BLINK) {
+        } else if(recv_data[0] == BLINK) {
             /* Is blink */
             memcpy(target_eui, &recv_data[2], 8);
             DW1000NgRTLS::transmitRangingInitiation(target_eui, tag_shortAddress);
             noteActivity();
-            return;
         }
 
     }
