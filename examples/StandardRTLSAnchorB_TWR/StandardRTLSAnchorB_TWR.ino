@@ -167,6 +167,7 @@ void loop() {
         sentAck = false;
         if(transmitReportNext == true) {
             transmitReportNext = false;
+            delay(3);
             transmitRangeReport();
         }
         DW1000Ng::startReceive();
