@@ -204,6 +204,9 @@ void loop() {
         if(recv_data[15] == RANGING_INITIATION) {
             DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&recv_data[16], 2));
             DW1000NgRTLS::transmitPoll(&recv_data[13]);
+            String tempString= "Receiving messages from:" ; tempString += (char)anchor_address[0] + (char)anchor_address[1];
+            tempString +=" and send it back.";
+            Serial.println(tempString);
             noteActivity();
             return;
         }
