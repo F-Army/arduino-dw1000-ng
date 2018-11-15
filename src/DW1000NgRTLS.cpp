@@ -116,6 +116,10 @@ namespace DW1000NgRTLS {
         DW1000Ng::startTransmit();
     }
 
+    void handleShortBlink(byte frame[], byte newTagShortAddress[]) {
+        DW1000NgRTLS::transmitRangingInitiation(&frame[2], newTagShortAddress);
+    }
+
     uint32_t handleActivityFinished(byte frame[]) {
         uint32_t blinkRate = frame[11] + static_cast<uint32_t>(((frame[12] & 0x3F) << 8));
         byte multiplier = ((frame[12] & 0xC0) >> 6);

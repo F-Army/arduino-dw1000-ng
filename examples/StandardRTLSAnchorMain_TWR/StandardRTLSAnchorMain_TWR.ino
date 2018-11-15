@@ -226,8 +226,7 @@ void loop() {
             noteActivity();
         } else if(recv_data[0] == BLINK) {
             /* Is blink */
-            memcpy(target_eui, &recv_data[2], 8);
-            DW1000NgRTLS::transmitRangingInitiation(target_eui, tag_shortAddress);
+            DW1000NgRTLS::handleShortBlink(recv_data, tag_shortAddress);
             noteActivity();
         }
 
