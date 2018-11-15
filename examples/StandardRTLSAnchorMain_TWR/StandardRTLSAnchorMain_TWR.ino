@@ -200,20 +200,8 @@ void loop() {
             noteActivity();
         } else if (recv_len > 18 && recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
 
-            timePollAckSent = DW1000Ng::getTransmitTimestamp();
-            timeRangeReceived = DW1000Ng::getReceiveTimestamp();
+            range_self = DW1000NgRTLS::handleFinalMessageEmbedded(recv_data, timePollReceived, NextActivity::RANGING_CONFIRM, anchor_b);
 
-            timePollSent = DW1000NgUtils::bytesAsValue(recv_data + 10, LENGTH_TIMESTAMP);
-            timePollAckReceived = DW1000NgUtils::bytesAsValue(recv_data + 14, LENGTH_TIMESTAMP);
-            timeRangeSent = DW1000NgUtils::bytesAsValue(recv_data + 18, LENGTH_TIMESTAMP);
-            // (re-)compute range as two-way ranging is done
-            range_self = DW1000NgRanging::computeRangeAsymmetric(timePollSent,
-                                                        timePollReceived, 
-                                                        timePollAckSent, 
-                                                        timePollAckReceived, 
-                                                        timeRangeSent, 
-                                                        timeRangeReceived);
-            /* Apply bias correction */
             range_self = DW1000NgRanging::correctRange(range_self);
 
             /* In case of wrong read due to bad device calibration */
@@ -224,7 +212,6 @@ void loop() {
             rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
             Serial.println(rangeString);
             
-            DW1000NgRTLS::transmitRangingConfirm(tag_shortAddress, anchor_b);
             noteActivity();
         } else if(recv_data[9] == 0x60) {
             double range = static_cast<double>(DW1000NgUtils::bytesAsValue(&recv_data[10],2) / 1000.0);
