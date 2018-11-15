@@ -68,8 +68,6 @@ typedef struct sleep_configuration_t {
     boolean onWakeUpRestoreConfig;
     boolean onWakeUpLoadL64Param;
     boolean preserveSleep;
-    boolean onWakeUpLoadLDE;
-    boolean onWakeUpLoadLDO;
     boolean enableSLP;
     boolean enableWakePIN;
     boolean enableWakeSPI;

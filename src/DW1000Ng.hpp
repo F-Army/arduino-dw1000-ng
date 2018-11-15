@@ -98,7 +98,8 @@ namespace DW1000Ng {
 	void setSleepTime(uint16_t sleepTime);
 
 	/**
-	Applies the common sleep configuration to the DW1000
+	Applies the common sleep configuration to the DW1000.
+	ONW_LLDO_BIT and ONW_LLDE_BIT are 1 to default.
 
 	@param [in] config struct	The sleep/deepsleep configuration to apply to the DW1000
 	*/

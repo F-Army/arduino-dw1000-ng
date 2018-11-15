@@ -1401,6 +1401,8 @@ namespace DW1000Ng {
 
 	void setSleepTime(uint16_t sleepTime) {
 		if(sleep_config.sleepTime != NULL && sleep_config.sleepTime > 0) {
+			_enableClock(SYS_XTI_CLOCK);
+
 			DW1000Ng::_writeToRegister(AON, AON_CFG0_SUB, 0x00, 1);
 			/* (a) Set SLEEP_CEN (in AON_CFG1) to 0. */
 			DW1000Ng::_writeToRegister(AON, AON_CFG1_SUB, 0x00, 1);
@@ -1413,6 +1415,8 @@ namespace DW1000Ng {
 			DW1000Ng::_writeToRegister(AON, AON_CFG1_SUB, 0x01, 1);
 			/* (e) Set UPL_CFG to 1, to apply the new sleep time and enable the counter in the AON. */
 			_uploadConfigToAON();
+
+			_enableClock(SYS_PLL_CLOCK);
 		} else {
 			/* Otherwise set default device value */
 			setSleepTime(0x50FF);
@@ -1435,8 +1439,8 @@ namespace DW1000Ng {
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LDC_BIT, sleep_config.onWakeUpRestoreConfig);
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_L64P_BIT, sleep_config.onWakeUpLoadL64Param);
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_PRES_SLEEP_BIT, sleep_config.preserveSleep);
-		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LLDE_BIT, sleep_config.onWakeUpLoadLDE);
-		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LLDO_BIT, sleep_config.onWakeUpLoadLDO);
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LLDE_BIT, true);
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LLDO_BIT, true);
 		_writeBytesToRegister(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
 
 		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, SLEEP_EN_BIT, sleep_config.enableSLP);
