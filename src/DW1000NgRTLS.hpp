@@ -78,4 +78,5 @@ namespace DW1000NgRTLS {
 
     uint32_t handleActivityFinished(byte frame[]);
     void handleRangingInitiation(byte frame[]);
+    void handleRangingConfirm(byte frame[]);
 }

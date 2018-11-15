@@ -162,7 +162,7 @@ void loop() {
                 noteActivity();
             } else if (recv_len > 12 && recv_data[10] == RANGING_CONFIRM) {
                 /* Received ranging confirm */
-                DW1000NgRTLS::transmitPoll(&recv_data[11]);
+                DW1000NgRTLS::handleRangingConfirm(recv_data);
                 noteActivity();
             } else if(recv_len > 12 && recv_data[10] == ACTIVITY_FINISHED) {
                 resetPeriod = DW1000NgRTLS::handleActivityFinished(recv_data);

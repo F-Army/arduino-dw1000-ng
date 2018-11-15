@@ -126,4 +126,8 @@ namespace DW1000NgRTLS {
         DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&frame[16], 2));
         DW1000NgRTLS::transmitPoll(&frame[13]);
     }
+
+    void handleRangingConfirm(byte frame[]) {
+        DW1000NgRTLS::transmitPoll(&frame[11]);
+    }
 }
