@@ -164,9 +164,6 @@ void loop() {
                 timePollSent = DW1000Ng::getTransmitTimestamp();
                 timePollAckReceived = DW1000Ng::getReceiveTimestamp();
                 DW1000NgRTLS::transmitFinalMessage(&recv_data[7], replyDelayTimeUS, timePollSent, timePollAckReceived);
-                String tempString= "Receiving messages from:" ; tempString += (char)anchor_address[0] + (char)anchor_address[1];
-                tempString +=" and send it back.";
-                Serial.println(tempString);
                 noteActivity();
                 return;
             } else if (recv_data[10] == RANGING_CONFIRM) {
