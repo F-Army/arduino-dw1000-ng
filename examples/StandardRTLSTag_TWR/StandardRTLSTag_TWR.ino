@@ -161,12 +161,10 @@ void loop() {
                 timePollAckReceived = DW1000Ng::getReceiveTimestamp();
                 DW1000NgRTLS::transmitFinalMessage(&recv_data[7], replyDelayTimeUS, timePollSent, timePollAckReceived);
                 noteActivity();
-                return;
             } else if (recv_data[10] == RANGING_CONFIRM) {
                 /* Received ranging confirm */
                 DW1000NgRTLS::transmitPoll(&recv_data[11]);
                 noteActivity();
-                return;
             } else if(recv_data[10] == ACTIVITY_FINISHED) {
                 resetPeriod = recv_data[11] + static_cast<uint32_t>(((recv_data[12] & 0x3F) << 8));
                 byte multiplier = ((recv_data[12] & 0xC0) >> 6);
@@ -183,18 +181,15 @@ void loop() {
 
                 DW1000NgRTLS::transmitShortBlink();
                 noteActivity();
-                return;
             } else {
                 reset();
-                return;
             }
-        }
-        
-        if(recv_data[15] == RANGING_INITIATION) {
+        } else if(recv_data[15] == RANGING_INITIATION) {
             DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&recv_data[16], 2));
             DW1000NgRTLS::transmitPoll(&recv_data[13]);
             noteActivity();
-            return;
         }
+        
+        
     }
 }
