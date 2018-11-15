@@ -178,7 +178,6 @@ void loop() {
                 } else if(multiplier == 0x02) {
                     resetPeriod *= 1000;
                 }
-                Serial.println("One Range is finishend, and the modules is going to sleep.");
 
                 /* Sleep until next blink to save power */
                 DW1000Ng::deepSleep();
