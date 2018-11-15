@@ -189,9 +189,6 @@ void loop() {
             timePollAckSent = DW1000Ng::getTransmitTimestamp();
             timeRangeReceived = DW1000Ng::getReceiveTimestamp();
 
-            DW1000NgRTLS::transmitRangingConfirm(tag_shortAddress, next_anchor_range);
-            noteActivity();
-
             timePollSent = DW1000NgUtils::bytesAsValue(recv_data + 10, LENGTH_TIMESTAMP);
             timePollAckReceived = DW1000NgUtils::bytesAsValue(recv_data + 14, LENGTH_TIMESTAMP);
             timeRangeSent = DW1000NgUtils::bytesAsValue(recv_data + 18, LENGTH_TIMESTAMP);
@@ -209,8 +206,10 @@ void loop() {
             if(distance <= 0) 
                 distance = 0.001;
             
-            
-            delay(1);//Sending message to the DW1000 chip too frequently, the earlier messages won't send out successfully.
+            DW1000NgRTLS::transmitRangingConfirm(tag_shortAddress, next_anchor_range);
+            noteActivity();
+
+            delay(3);//Sending message to the DW1000 chip too frequently, the earlier messages won't send out successfully.
             transmitRangeReport();
             noteActivity();
         }
