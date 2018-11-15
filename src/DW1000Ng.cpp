@@ -1449,7 +1449,6 @@ namespace DW1000Ng {
 		_wakeSPIDisabled = !sleep_config.enableWakeSPI;
 		DW1000NgUtils::setBit(aon_cfg0, 1, WAKE_CNT_BIT, sleep_config.enableWakeCNT);
 		_wakeCounterDisabled = !sleep_config.enableWakeCNT;
-
 		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, 1);
 	}
 
@@ -1471,11 +1470,11 @@ namespace DW1000Ng {
 
 		if(!_wakeCounterDisabled) {
 			_wakeCounterDisabled = true;
-			byte aon_cfg0[LEN_AON_CFG0];
-			memset(aon_cfg0, 0, LEN_AON_CFG0);
-			_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
-			DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, false);
-			_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
+			byte aon_cfg0[1];
+			memset(aon_cfg0, 0, 1);
+			_readBytes(AON, AON_CFG0_SUB, aon_cfg0, 1);
+			DW1000NgUtils::setBit(aon_cfg0, 1, WAKE_CNT_BIT, false);
+			_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, 1);
 		}
 
 		_goToSleep();
