@@ -85,6 +85,6 @@ namespace DW1000NgRTLS {
     void handleRangingInitiation(byte frame[]);
     void handleRangingConfirm(byte frame[]);
     void handleRangingContinueEmbedded(byte frame[], uint16_t replyDelayUs);
-    uint64_t handlePoll(byte frame[], byte tagShortAddress[]);
+    uint64_t handlePoll(byte frame[]);
     double handleFinalMessageEmbedded(byte frame[], uint64_t timePollReceived, NextActivity next, byte param[]);
 }
