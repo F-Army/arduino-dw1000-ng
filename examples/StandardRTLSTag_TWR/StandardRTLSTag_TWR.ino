@@ -138,7 +138,6 @@ void loop() {
         if (millis() - lastActivity > resetPeriod) {
             reset();
         }
-        return;
     }
 
     if (sentAck) {
