@@ -168,8 +168,6 @@ void loop() {
                 /* Received ranging confirm */
                 memcpy(anchor_address, &recv_data[11], 2);
                 DW1000NgRTLS::transmitPoll(anchor_address);
-                String tempString= "Sending messages to NEW Anchor:" ; tempString += (char) anchor_address[0] + (char)anchor_address[1];
-                Serial.println(tempString);
                 noteActivity();
                 return;
             } else if(recv_data[10] == ACTIVITY_FINISHED) {
