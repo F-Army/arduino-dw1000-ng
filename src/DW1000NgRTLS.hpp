@@ -73,6 +73,9 @@ enum class NextActivity {
 };
 
 namespace DW1000NgRTLS {
+
+    byte increaseSequenceNumber();
+
     void transmitShortBlink();
     void transmitRangingInitiation(byte tag_eui[], byte tag_short_address[]);
     void transmitPoll(byte anchor_address[]);

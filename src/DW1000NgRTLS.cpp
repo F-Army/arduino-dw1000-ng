@@ -32,6 +32,11 @@
 static byte SEQ_NUMBER = 0;
 
 namespace DW1000NgRTLS {
+
+    byte increaseSequenceNumber(){
+        return ++SEQ_NUMBER;
+    }
+
     void transmitShortBlink() {
         byte Blink[] = {BLINK, SEQ_NUMBER++, 0,0,0,0,0,0,0,0, NO_BATTERY_STATUS | NO_EX_ID, TAG_LISTENING_NOW};
         DW1000Ng::getEUI(&Blink[2]);

@@ -146,7 +146,7 @@ void handleReceived() {
 }
 
 void transmitRangeReport() {
-    byte rangingReport[] = {DATA, SHORT_SRC_AND_DEST, SEQ_NUMBER++, 0,0, 0,0, 0,0, 0x60, 0,0 };
+    byte rangingReport[] = {DATA, SHORT_SRC_AND_DEST, DW1000NgRTLS::increaseSequenceNumber(), 0,0, 0,0, 0,0, 0x60, 0,0 };
     DW1000Ng::getNetworkId(&rangingReport[3]);
     memcpy(&rangingReport[5], main_anchor_address, 2);
     DW1000Ng::getDeviceAddress(&rangingReport[7]);
