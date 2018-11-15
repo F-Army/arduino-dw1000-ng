@@ -164,6 +164,8 @@ namespace DW1000NgRTLS {
 
         if(next == NextActivity::ACTIVITY_FINISHED) {
             DW1000NgRTLS::transmitActivityFinished(&frame[7], param);
+        } else if(next == NextActivity::RANGING_CONFIRM) {
+            DW1000NgRTLS::transmitRangingConfirm(&frame[7], param);
         }
 
         return range;

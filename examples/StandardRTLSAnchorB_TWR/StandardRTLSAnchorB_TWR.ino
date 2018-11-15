@@ -185,27 +185,14 @@ void loop() {
             noteActivity();
         } else if (recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
 
-            timePollAckSent = DW1000Ng::getTransmitTimestamp();
-            timeRangeReceived = DW1000Ng::getReceiveTimestamp();
+            distance = DW1000NgRTLS::handleFinalMessageEmbedded(recv_data, timePollReceived, NextActivity::RANGING_CONFIRM, next_anchor_range);
 
-            timePollSent = DW1000NgUtils::bytesAsValue(recv_data + 10, LENGTH_TIMESTAMP);
-            timePollAckReceived = DW1000NgUtils::bytesAsValue(recv_data + 14, LENGTH_TIMESTAMP);
-            timeRangeSent = DW1000NgUtils::bytesAsValue(recv_data + 18, LENGTH_TIMESTAMP);
-            // (re-)compute range as two-way ranging is done
-            distance = DW1000NgRanging::computeRangeAsymmetric(timePollSent,
-                                                        timePollReceived, 
-                                                        timePollAckSent, 
-                                                        timePollAckReceived, 
-                                                        timeRangeSent, 
-                                                        timeRangeReceived);
             /* Apply bias correction */
             distance = DW1000NgRanging::correctRange(distance);
 
             /* In case of wrong read due to bad device calibration */
             if(distance <= 0) 
                 distance = 0.001;
-            
-            DW1000NgRTLS::transmitRangingConfirm(tag_shortAddress, next_anchor_range);
 
             delay(3);//Sending message to the DW1000 chip too frequently, the earlier messages won't send out successfully.
             noteActivity();
