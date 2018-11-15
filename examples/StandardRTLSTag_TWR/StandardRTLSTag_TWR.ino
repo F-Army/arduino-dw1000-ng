@@ -138,8 +138,6 @@ void loop() {
     if (!sentAck && !receivedAck) {
         // check if inactive
         if (millis() - lastActivity > resetPeriod) {
-            String tempString= "Time out! The lost anchor is:" ; tempString += (char)anchor_address[0] + (char)anchor_address[1];
-            Serial.println(tempString);
             reset();
         }
         return;
