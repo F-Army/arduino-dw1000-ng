@@ -206,8 +206,7 @@ void loop() {
             if(distance <= 0) 
                 distance = 0.001;
             
-            String rangeString = "Range: "; rangeString += distance; rangeString += " m";
-            Serial.println(rangeString);
+            delay(1);
             
             DW1000NgRTLS::transmitRangingConfirm(tag_shortAddress, next_anchor_range);
             noteActivity();
