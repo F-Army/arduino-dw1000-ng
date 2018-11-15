@@ -153,7 +153,7 @@ void loop() {
         DW1000Ng::getReceivedData(recv_data, recv_len);
 
         /* RTLS standard message */
-        if(recv_data[9] == ACTIVITY_CONTROL) {
+        if(recv_len > 10 && recv_data[9] == ACTIVITY_CONTROL) {
             if (recv_data[10] == RANGING_CONTINUE) {
                 /* Received Response to poll */
                 timePollSent = DW1000Ng::getTransmitTimestamp();
