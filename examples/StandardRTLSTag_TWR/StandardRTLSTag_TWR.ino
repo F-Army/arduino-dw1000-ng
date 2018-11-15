@@ -32,8 +32,6 @@ volatile boolean receivedAck = false;
 
 byte SEQ_NUMBER = 0;
 
-byte anchor_address[2];
-
 // timestamps to remember
 volatile uint64_t timePollSent;
 volatile uint64_t timePollAckReceived;
@@ -166,8 +164,7 @@ void loop() {
                 return;
             } else if (recv_data[10] == RANGING_CONFIRM) {
                 /* Received ranging confirm */
-                memcpy(anchor_address, &recv_data[11], 2);
-                DW1000NgRTLS::transmitPoll(anchor_address);
+                DW1000NgRTLS::transmitPoll(&recv_data[11]);
                 noteActivity();
                 return;
             } else if(recv_data[10] == ACTIVITY_FINISHED) {
