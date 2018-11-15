@@ -207,7 +207,6 @@ void loop() {
                 distance = 0.001;
             
             String rangeString = "Range: "; rangeString += distance; rangeString += " m";
-            rangeString += "\t RX power: ";  rangeString += " dBm";
             Serial.println(rangeString);
             
             DW1000NgRTLS::transmitRangingConfirm(tag_shortAddress, next_anchor_range);
