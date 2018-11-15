@@ -165,13 +165,7 @@ void loop() {
                 DW1000NgRTLS::transmitPoll(&recv_data[11]);
                 noteActivity();
             } else if(recv_len > 12 && recv_data[10] == ACTIVITY_FINISHED) {
-                resetPeriod = recv_data[11] + static_cast<uint32_t>(((recv_data[12] & 0x3F) << 8));
-                byte multiplier = ((recv_data[12] & 0xC0) >> 6);
-                if(multiplier  == 0x01) {
-                    resetPeriod *= 25;
-                } else if(multiplier == 0x02) {
-                    resetPeriod *= 1000;
-                }
+                resetPeriod = DW1000NgRTLS::handleActivityFinished(recv_data);
 
                 /* Sleep until next blink to save power */
                 DW1000Ng::deepSleep();

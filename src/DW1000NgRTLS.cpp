@@ -109,4 +109,16 @@ namespace DW1000NgRTLS {
         DW1000Ng::setTransmitData(rangingConfirm, sizeof(rangingConfirm));
         DW1000Ng::startTransmit();
     }
+
+    uint32_t handleActivityFinished(byte frame[]) {
+        uint32_t blinkRate = frame[11] + static_cast<uint32_t>(((frame[12] & 0x3F) << 8));
+        byte multiplier = ((frame[12] & 0xC0) >> 6);
+        if(multiplier  == 0x01) {
+            blinkRate *= 25;
+        } else if(multiplier == 0x02) {
+            blinkRate *= 1000;
+        }
+
+        return blinkRate;
+    }
 }

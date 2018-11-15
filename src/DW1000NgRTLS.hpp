@@ -75,4 +75,6 @@ namespace DW1000NgRTLS {
     void transmitFinalMessage(byte anchor_address[], uint16_t reply_delay, uint64_t timePollSent, uint64_t timeResponseToPollReceived);
     void transmitRangingConfirm(byte tag_short_address[], byte next_anchor[]);
     void transmitActivityFinished(byte tag_short_address[], byte blink_rate[]);
+
+    uint32_t handleActivityFinished(byte frame[]);
 }
