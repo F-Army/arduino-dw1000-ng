@@ -188,7 +188,7 @@ void loop() {
             if(distance <= 0) 
                 distance = 0.001;
             
-            delay(1);//Sending message to the DW1000 chip too frequently, the earlier messages won't send out successfully.
+            delay(3);//Sending message to the DW1000 chip too frequently, the earlier messages won't send out successfully.
             noteActivity();
             transmitRangeReport();
         }
