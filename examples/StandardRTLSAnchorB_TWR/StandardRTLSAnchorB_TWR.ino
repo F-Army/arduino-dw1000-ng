@@ -166,7 +166,6 @@ void loop() {
         if (millis() - lastActivity > resetPeriod) {
             resetInactive();
         }
-        return;
     }
 
     if (sentAck) {
@@ -185,10 +184,7 @@ void loop() {
             timePollReceived = DW1000Ng::getReceiveTimestamp();
             DW1000NgRTLS::transmitResponseToPoll(tag_shortAddress);
             noteActivity();
-            return;
-        } 
-        
-        if (recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
+        } else if (recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
 
             timePollAckSent = DW1000Ng::getTransmitTimestamp();
             timeRangeReceived = DW1000Ng::getReceiveTimestamp();
@@ -219,7 +215,6 @@ void loop() {
             delay(1);//Sending message to the DW1000 chip too frequently, the earlier messages won't send out successfully.
             transmitRangeReport();
             noteActivity();
-            return;
         }
     }
 }
