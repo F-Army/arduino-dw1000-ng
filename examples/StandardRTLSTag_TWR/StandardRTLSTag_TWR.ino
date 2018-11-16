@@ -89,11 +89,15 @@ void loop() {
 
     DW1000NgRTLS::transmitTwrShortBlink();
 
-    while(!DW1000Ng::isTransmitDone()) {}
+    while(!DW1000Ng::isTransmitDone()) {
+        Serial.print("0");
+    }
     DW1000Ng::clearTransmitStatus();
 
     DW1000Ng::startReceive();
-    while(!DW1000Ng::isReceiveDone()) {}
+    while(!DW1000Ng::isReceiveDone()) {
+        Serial.print("1");
+    }
     DW1000Ng::clearReceiveStatus();
 
     size_t init_len = DW1000Ng::getReceivedDataLength();
@@ -107,11 +111,15 @@ void loop() {
         return;
     }
 
-    while(!DW1000Ng::isTransmitDone()) {}
+    while(!DW1000Ng::isTransmitDone()) {
+        Serial.print("2");
+    }
     DW1000Ng::clearTransmitStatus();
 
     DW1000Ng::startReceive();
-    while(!DW1000Ng::isReceiveDone()) {}
+    while(!DW1000Ng::isReceiveDone()) {
+        Serial.print("3");
+    }
     DW1000Ng::clearReceiveStatus();
 
     size_t cont_len = DW1000Ng::getReceivedDataLength();
@@ -126,11 +134,15 @@ void loop() {
         return;
     }
 
-    while(!DW1000Ng::isTransmitDone()) {}
+    while(!DW1000Ng::isTransmitDone()) {
+        Serial.print("4");
+    }
     DW1000Ng::clearTransmitStatus();
 
     DW1000Ng::startReceive();
-    while(!DW1000Ng::isReceiveDone()) {}
+    while(!DW1000Ng::isReceiveDone()) {
+        Serial.print("5");
+    }
     DW1000Ng::clearReceiveStatus();
 
     size_t act_len = DW1000Ng::getReceivedDataLength();
