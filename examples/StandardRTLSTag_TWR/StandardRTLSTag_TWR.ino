@@ -59,7 +59,7 @@ void setup() {
     Serial.begin(115200);
     Serial.println(F("### DW1000Ng-arduino-ranging-tag ###"));
     // initialize the driver
-    DW1000Ng::initializeNoInterrupt(PIN_SS, PIN_RST);
+    DW1000Ng::initializeNoInterrupt(PIN_SS);
     Serial.println("DW1000Ng initialized ...");
     // general configuration
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
@@ -95,6 +95,18 @@ void waitForTransmission() {
     DW1000Ng::clearTransmitStatus();
 }
 
+boolean receive() {
+    DW1000Ng::startReceive();
+    while(!DW1000Ng::isReceiveDone()) {
+        if(DW1000Ng::isReceiveTimeout()) {
+            DW1000Ng::clearReceiveTimeoutStatus();
+            return false;
+        }
+    }
+    DW1000Ng::clearReceiveStatus();
+    return true;
+}
+
 
 void loop() {
 
@@ -102,14 +114,7 @@ void loop() {
 
     waitForTransmission();
 
-    DW1000Ng::startReceive();
-    while(!DW1000Ng::isReceiveDone()) {
-        if(DW1000Ng::isReceiveTimeout()) {
-            DW1000Ng::clearReceiveTimeoutStatus();
-            return;
-        }
-    }
-    DW1000Ng::clearReceiveStatus();
+    if(!receive()) return;
 
     size_t init_len = DW1000Ng::getReceivedDataLength();
     byte init_recv[init_len];
@@ -123,14 +128,7 @@ void loop() {
     /* Start of poll control for range */
     waitForTransmission();
 
-    DW1000Ng::startReceive();
-    while(!DW1000Ng::isReceiveDone()) {
-        if(DW1000Ng::isReceiveTimeout()) {
-            DW1000Ng::clearReceiveTimeoutStatus();
-            return;
-        }
-    }
-    DW1000Ng::clearReceiveStatus();
+    if(!receive()) return;
 
     size_t cont_len = DW1000Ng::getReceivedDataLength();
     byte cont_recv[cont_len];
@@ -145,14 +143,7 @@ void loop() {
 
     waitForTransmission();
 
-    DW1000Ng::startReceive();
-    while(!DW1000Ng::isReceiveDone()) {
-        if(DW1000Ng::isReceiveTimeout()) {
-            DW1000Ng::clearReceiveTimeoutStatus();
-            return;
-        }
-    }
-    DW1000Ng::clearReceiveStatus();
+    if(!receive()) return;
 
     size_t act_len = DW1000Ng::getReceivedDataLength();
     byte act_recv[act_len];
