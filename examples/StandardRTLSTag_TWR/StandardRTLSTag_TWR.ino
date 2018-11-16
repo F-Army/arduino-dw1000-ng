@@ -21,20 +21,12 @@
 #include <DW1000NgRTLS.hpp>
 
 // connection pins
-const uint8_t PIN_RST = 9; // reset pin
-const uint8_t PIN_IRQ = 2; // irq pin
 const uint8_t PIN_SS = SS; // spi select pin
 
-// message flow state
-// message sent/received state
-volatile boolean sentAck = false;
-volatile boolean receivedAck = false;
-
-// watchdog and reset period
-volatile uint32_t lastActivity;
-volatile uint32_t resetPeriod = 250;
 // reply times (same on both sides for symm. ranging)
 uint16_t replyDelayTimeUS = 3000;
+
+volatile uint32_t blink_rate = 200;
 
 device_configuration_t DEFAULT_CONFIG = {
     false,
@@ -48,15 +40,6 @@ device_configuration_t DEFAULT_CONFIG = {
     PulseFrequency::FREQ_16MHZ,
     PreambleLength::LEN_256,
     PreambleCode::CODE_3
-};
-
-interrupt_configuration_t DEFAULT_INTERRUPT_CONFIG = {
-    true,
-    true,
-    false,
-    false,
-    false,
-    false
 };
 
 frame_filtering_configuration_t TAG_FRAME_FILTER_CONFIG = {
@@ -75,11 +58,10 @@ void setup() {
     Serial.begin(115200);
     Serial.println(F("### DW1000Ng-arduino-ranging-tag ###"));
     // initialize the driver
-    DW1000Ng::initialize(PIN_SS, PIN_IRQ, PIN_RST);
+    DW1000Ng::initialize(PIN_SS);
     Serial.println("DW1000Ng initialized ...");
     // general configuration
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
-	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
     DW1000Ng::enableFrameFiltering(TAG_FRAME_FILTER_CONFIG);
     
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
@@ -99,77 +81,75 @@ void setup() {
     Serial.print("Network ID & Device Address: "); Serial.println(msg);
     DW1000Ng::getPrintableDeviceMode(msg);
     Serial.print("Device mode: "); Serial.println(msg);
-    // attach callback for (successfully) sent and received messages
-    DW1000Ng::attachSentHandler(handleSent);
-    DW1000Ng::attachReceivedHandler(handleReceived);
     // anchor starts by transmitting a POLL message
-    DW1000NgRTLS::transmitTwrShortBlink();
-    noteActivity();
-}
-
-void noteActivity() {
-    // update activity timestamp, so that we do not reach "resetPeriod"
-    lastActivity = millis();
-}
-
-void reset() {
-    // tag returns to Idle and sends POLL
-    DW1000Ng::forceTRxOff();
-    DW1000NgRTLS::transmitTwrShortBlink();
-    noteActivity();
-}
-
-void handleSent() {
-    sentAck = true;
-}
-
-void handleReceived() {
-    receivedAck = true;
+    
 }
 
 void loop() {
-    if (!sentAck && !receivedAck) {
-        // check if inactive
-        if (millis() - lastActivity > resetPeriod) {
-            reset();
+
+    DW1000NgRTLS::transmitTwrShortBlink();
+
+    while(!DW1000Ng::isTransmitDone()) {}
+    DW1000Ng::clearTransmitStatus();
+
+    DW1000Ng::startReceive();
+    while(!DW1000Ng::isReceiveDone()) {}
+    DW1000Ng::clearReceiveStatus();
+
+    size_t init_len = DW1000Ng::getReceivedDataLength();
+    byte init_recv[init_len];
+    DW1000Ng::getReceivedData(init_recv, init_len);
+
+    if(init_len > 17 && init_recv[15] == RANGING_INITIATION) {
+        DW1000NgRTLS::handleRangingInitiation(init_recv);
+    } else {
+        Serial.print("No initiation");
+        return;
+    }
+
+    while(!DW1000Ng::isTransmitDone()) {}
+    DW1000Ng::clearTransmitStatus();
+
+    DW1000Ng::startReceive();
+    while(!DW1000Ng::isReceiveDone()) {}
+    DW1000Ng::clearReceiveStatus();
+
+    size_t cont_len = DW1000Ng::getReceivedDataLength();
+    byte cont_recv[cont_len];
+    DW1000Ng::getReceivedData(cont_recv, cont_len);
+
+    if (cont_len > 10 && cont_recv[9] == ACTIVITY_CONTROL && cont_recv[10] == RANGING_CONTINUE) {
+        /* Received Response to poll */
+        DW1000NgRTLS::handleRangingContinueEmbedded(cont_recv, replyDelayTimeUS);
+    } else {
+        Serial.print("No continue");
+        return;
+    }
+
+    while(!DW1000Ng::isTransmitDone()) {}
+    DW1000Ng::clearTransmitStatus();
+
+    DW1000Ng::startReceive();
+    while(!DW1000Ng::isReceiveDone()) {}
+    DW1000Ng::clearReceiveStatus();
+
+    size_t act_len = DW1000Ng::getReceivedDataLength();
+    byte act_recv[act_len];
+    DW1000Ng::getReceivedData(act_recv, act_len);
+
+    if(act_len > 10 && act_recv[9] == ACTIVITY_CONTROL) {
+        if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
+            /* Received ranging confirm */
+            DW1000NgRTLS::handleRangingConfirm(act_recv);
+        } else if(act_len > 12 && act_recv[10] == ACTIVITY_FINISHED) {
+            blink_rate = DW1000NgRTLS::handleActivityFinished(act_recv); 
         }
+    } else {
+        Serial.print("No act control");
     }
 
-    if (sentAck) {
-        sentAck = false;
-        DW1000Ng::startReceive();
-    }
-
-    if (receivedAck) {
-        receivedAck = false;
-        noteActivity();
-        /* Parse received message */
-        size_t recv_len = DW1000Ng::getReceivedDataLength();
-        byte recv_data[recv_len];
-        DW1000Ng::getReceivedData(recv_data, recv_len);
-
-        /* RTLS standard message */
-        if(recv_len > 10 && recv_data[9] == ACTIVITY_CONTROL) {
-            if (recv_data[10] == RANGING_CONTINUE) {
-                /* Received Response to poll */
-                DW1000NgRTLS::handleRangingContinueEmbedded(recv_data, replyDelayTimeUS);
-            } else if (recv_len > 12 && recv_data[10] == RANGING_CONFIRM) {
-                /* Received ranging confirm */
-                DW1000NgRTLS::handleRangingConfirm(recv_data);
-            } else if(recv_len > 12 && recv_data[10] == ACTIVITY_FINISHED) {
-                resetPeriod = DW1000NgRTLS::handleActivityFinished(recv_data);
-
-                /* Sleep until next blink to save power */
-                DW1000Ng::deepSleep();
-                delay(resetPeriod);
-                DW1000Ng::spiWakeup();
-
-                DW1000NgRTLS::transmitTwrShortBlink();
-            }
-        } else if(recv_len > 17 && recv_data[15] == RANGING_INITIATION) {
-            DW1000NgRTLS::handleRangingInitiation(recv_data);
-        }
-        
-        
-    }
+    /* Sleep until next blink to save power */
+    DW1000Ng::deepSleep();
+    delay(blink_rate);
+    DW1000Ng::spiWakeup();
 }
