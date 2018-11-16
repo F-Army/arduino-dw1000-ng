@@ -104,6 +104,7 @@ void setup() {
     DW1000Ng::attachReceivedHandler(handleReceived);
     // anchor starts by transmitting a POLL message
     DW1000NgRTLS::transmitTwrShortBlink();
+    noteActivity();
 }
 
 void noteActivity() {
@@ -115,6 +116,7 @@ void reset() {
     // tag returns to Idle and sends POLL
     DW1000Ng::forceTRxOff();
     DW1000NgRTLS::transmitTwrShortBlink();
+    noteActivity();
 }
 
 void handleSent() {
@@ -135,7 +137,6 @@ void loop() {
 
     if (sentAck) {
         sentAck = false;
-        noteActivity();
         DW1000Ng::startReceive();
     }
 
@@ -151,10 +152,11 @@ void loop() {
             if (recv_data[10] == RANGING_CONTINUE) {
                 /* Received Response to poll */
                 DW1000NgRTLS::handleRangingContinueEmbedded(recv_data, replyDelayTimeUS);
-                
+                noteActivity();
             } else if (recv_len > 12 && recv_data[10] == RANGING_CONFIRM) {
                 /* Received ranging confirm */
                 DW1000NgRTLS::handleRangingConfirm(recv_data);
+                noteActivity();
             } else if(recv_len > 12 && recv_data[10] == ACTIVITY_FINISHED) {
                 resetPeriod = DW1000NgRTLS::handleActivityFinished(recv_data);
 
@@ -164,9 +166,11 @@ void loop() {
                 DW1000Ng::spiWakeup();
 
                 DW1000NgRTLS::transmitTwrShortBlink();
+                noteActivity();
             }
         } else if(recv_len > 17 && recv_data[15] == RANGING_INITIATION) {
             DW1000NgRTLS::handleRangingInitiation(recv_data);
+            noteActivity();
         }
         
         
