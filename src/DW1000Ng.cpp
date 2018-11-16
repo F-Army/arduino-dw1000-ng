@@ -1244,7 +1244,8 @@ namespace DW1000Ng {
 		// pin and basic member setup
 		// attach interrupt
 		// TODO throw error if pin is not a interrupt pin
-		attachInterrupt(digitalPinToInterrupt(_irq), interruptServiceRoutine, RISING);
+		if(_irq != 0xff)
+			attachInterrupt(digitalPinToInterrupt(_irq), interruptServiceRoutine, RISING);
 		select();
 		// reset chip (either soft or hard)
 
@@ -1277,9 +1278,14 @@ namespace DW1000Ng {
 		_writeToRegister(AON, AON_CFG1_SUB, 0x00, LEN_AON_CFG1);
 	}
 
+	void initialize(uint8_t ss, uint8_t rst = 0xff) {
+		initialize(ss, 0xff, rst);
+	}
+
 	void select() {
 		#if !defined(ESP32) && !defined(ESP8266)
-		SPI.usingInterrupt(digitalPinToInterrupt(_irq));
+		if(_irq != 0xff)
+			SPI.usingInterrupt(digitalPinToInterrupt(_irq));
 		#endif
 		pinMode(_ss, OUTPUT);
 		digitalWrite(_ss, HIGH);
