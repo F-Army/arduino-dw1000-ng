@@ -155,11 +155,10 @@ void loop() {
 
     if(init_len > 17 && init_recv[15] == RANGING_INITIATION) {
         DW1000NgRTLS::handleRangingInitiation(init_recv);
+        if(!rangingEnd()) return;
     } else {
         return;
     }
-
-    if(!rangingEnd()) return;
 
     size_t act_len = DW1000Ng::getReceivedDataLength();
     byte act_recv[act_len];
