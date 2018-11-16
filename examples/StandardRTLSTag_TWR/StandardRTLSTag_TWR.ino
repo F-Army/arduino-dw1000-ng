@@ -114,6 +114,32 @@ boolean receive() {
     return true;
 }
 
+boolean rangingEnd() {
+    /* Start of poll control for range */
+    waitForTransmission();
+
+    if(!receive()) return false;
+
+    size_t cont_len = DW1000Ng::getReceivedDataLength();
+    byte cont_recv[cont_len];
+    DW1000Ng::getReceivedData(cont_recv, cont_len);
+
+    if (cont_len > 10 && cont_recv[9] == ACTIVITY_CONTROL && cont_recv[10] == RANGING_CONTINUE) {
+        /* Received Response to poll */
+        DW1000NgRTLS::handleRangingContinueEmbedded(cont_recv, replyDelayTimeUS);
+    } else {
+        return false;
+    }
+
+    waitForTransmission();
+
+    if(!receive()) return false;
+
+    return true;
+    /* end of ranging */
+}
+
+
 
 void loop() {
 
@@ -132,25 +158,8 @@ void loop() {
     } else {
         return;
     }
-    /* Start of poll control for range */
-    waitForTransmission();
 
-    if(!receive()) return;
-
-    size_t cont_len = DW1000Ng::getReceivedDataLength();
-    byte cont_recv[cont_len];
-    DW1000Ng::getReceivedData(cont_recv, cont_len);
-
-    if (cont_len > 10 && cont_recv[9] == ACTIVITY_CONTROL && cont_recv[10] == RANGING_CONTINUE) {
-        /* Received Response to poll */
-        DW1000NgRTLS::handleRangingContinueEmbedded(cont_recv, replyDelayTimeUS);
-    } else {
-        return;
-    }
-
-    waitForTransmission();
-
-    if(!receive()) return;
+    if(!rangingEnd()) return;
 
     size_t act_len = DW1000Ng::getReceivedDataLength();
     byte act_recv[act_len];
