@@ -386,6 +386,22 @@ namespace DW1000Ng {
 	*/
 	void interruptServiceRoutine();
 	
+	boolean isTransmitDone();
+
+	void clearTransmitStatus();
+
+	boolean isReceiveDone();
+
+	void clearReceiveStatus();
+
+	boolean isReceiveFailed();
+
+	void clearReceiveFailedStatus();
+
+	boolean isReceiveTimeout();
+
+	void clearReceiveTimeoutStatus();
+
 	/**
 	Stops the transceiver immediately, this actually sets the device in Idle mode.
 	*/

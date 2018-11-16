@@ -1355,6 +1355,46 @@ namespace DW1000Ng {
 		}
 	}
 
+	boolean isTransmitDone(){
+		_readSystemEventStatusRegister();
+		return _isTransmitDone();
+	}
+
+	void clearTransmitStatus() {
+		_clearTransmitStatus();
+	}
+
+	boolean isReceiveDone() {
+		_readSystemEventStatusRegister();
+		return _isReceiveDone();
+	}
+
+	void clearReceiveStatus() {
+		_clearReceiveStatus();
+	}
+
+	boolean isReceiveFailed() {
+		_readSystemEventStatusRegister();
+		return _isReceiveFailed();
+	}
+
+	void clearReceiveFailedStatus() {
+		_clearReceiveFailedStatus();
+		forceTRxOff();
+		_resetReceiver();
+	}
+
+	boolean isReceiveTimeout() {
+		_readSystemEventMaskRegister();
+		return _isReceiveTimeout();
+	}
+
+	void clearReceiveTimeoutStatus() {
+		_clearReceiveTimeoutStatus();
+		forceTRxOff();
+		_resetReceiver();
+	}
+
 	void enableDebounceClock() {
 		byte pmscctrl0[LEN_PMSC_CTRL0];
 		memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
