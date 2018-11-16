@@ -1278,7 +1278,7 @@ namespace DW1000Ng {
 		_writeToRegister(AON, AON_CFG1_SUB, 0x00, LEN_AON_CFG1);
 	}
 
-	void initialize(uint8_t ss, uint8_t rst = 0xff) {
+	void initialize(uint8_t ss, uint8_t rst) {
 		initialize(ss, 0xff, rst);
 	}
 
