@@ -90,13 +90,13 @@ void loop() {
     DW1000NgRTLS::transmitTwrShortBlink();
 
     while(!DW1000Ng::isTransmitDone()) {
-        Serial.print("0");
+        Serial.println("0");
     }
     DW1000Ng::clearTransmitStatus();
 
     DW1000Ng::startReceive();
     while(!DW1000Ng::isReceiveDone()) {
-        Serial.print("1");
+        Serial.println("1");
     }
     DW1000Ng::clearReceiveStatus();
 
@@ -107,18 +107,18 @@ void loop() {
     if(init_len > 17 && init_recv[15] == RANGING_INITIATION) {
         DW1000NgRTLS::handleRangingInitiation(init_recv);
     } else {
-        Serial.print("No initiation");
+        Serial.println("No initiation");
         return;
     }
 
     while(!DW1000Ng::isTransmitDone()) {
-        Serial.print("2");
+        Serial.println("2");
     }
     DW1000Ng::clearTransmitStatus();
 
     DW1000Ng::startReceive();
     while(!DW1000Ng::isReceiveDone()) {
-        Serial.print("3");
+        Serial.println("3");
     }
     DW1000Ng::clearReceiveStatus();
 
@@ -130,18 +130,18 @@ void loop() {
         /* Received Response to poll */
         DW1000NgRTLS::handleRangingContinueEmbedded(cont_recv, replyDelayTimeUS);
     } else {
-        Serial.print("No continue");
+        Serial.println("No continue");
         return;
     }
 
     while(!DW1000Ng::isTransmitDone()) {
-        Serial.print("4");
+        Serial.println("4");
     }
     DW1000Ng::clearTransmitStatus();
 
     DW1000Ng::startReceive();
     while(!DW1000Ng::isReceiveDone()) {
-        Serial.print("5");
+        Serial.println("5");
     }
     DW1000Ng::clearReceiveStatus();
 
@@ -157,7 +157,7 @@ void loop() {
             blink_rate = DW1000NgRTLS::handleActivityFinished(act_recv); 
         }
     } else {
-        Serial.print("No act control");
+        Serial.println("No act control");
     }
 
     /* Sleep until next blink to save power */
