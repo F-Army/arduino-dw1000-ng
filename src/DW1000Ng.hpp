@@ -349,6 +349,8 @@ namespace DW1000Ng {
 	@param [in] handleSent the target function
 	*/
 	void attachSentHandler(void (* handleSent)(void));
+
+	void (*getSentHandler(void))(void);
 	
 	/**
 	Sets the function for end of receive event handling
@@ -356,6 +358,8 @@ namespace DW1000Ng {
 	@param [in] handleReceived the target function
 	*/
 	void attachReceivedHandler(void (* handleReceived)(void));
+
+	void (*getReceiveHandler(void))(void);
 	
 	/**
 	Sets the function for receive error event handling
