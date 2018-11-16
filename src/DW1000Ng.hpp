@@ -63,7 +63,7 @@ namespace DW1000Ng {
 	*/
 	void initialize(uint8_t ss, uint8_t irq, uint8_t rst = 0xff);
 
-	void initialize(uint8_t ss, uint8_t rst = 0xff);
+	void initializeNoInterrupt(uint8_t ss, uint8_t rst = 0xff);
 	
 	/** 
 	(Re-)selects a specific DW1000 chip for communication. Used in case you switched SPI to another device.

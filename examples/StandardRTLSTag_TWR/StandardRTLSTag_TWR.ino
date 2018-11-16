@@ -22,6 +22,7 @@
 
 // connection pins
 const uint8_t PIN_SS = SS; // spi select pin
+const uint8_t PIN_RST = 9;
 
 // reply times (same on both sides for symm. ranging)
 uint16_t replyDelayTimeUS = 3000;
@@ -58,7 +59,7 @@ void setup() {
     Serial.begin(115200);
     Serial.println(F("### DW1000Ng-arduino-ranging-tag ###"));
     // initialize the driver
-    DW1000Ng::initialize(PIN_SS);
+    DW1000Ng::initializeNoInterrupt(PIN_SS, PIN_RST);
     Serial.println("DW1000Ng initialized ...");
     // general configuration
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
