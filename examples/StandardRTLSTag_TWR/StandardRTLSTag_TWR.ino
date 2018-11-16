@@ -91,6 +91,8 @@ void setup() {
 
 void loop() {
 
+    DW1000Ng::forceTRxOff();
+
     DW1000NgRTLS::transmitTwrShortBlink();
 
     while(!DW1000Ng::isTransmitDone()) {
