@@ -168,7 +168,7 @@ void loop() {
         sentAck = false;
         if(transmitReportNext == true) {
             transmitReportNext = false;
-            delay(4);
+            delayMicroseconds(4000); // just to be sure to not interfere with tag
             transmitRangeReport();
         }
         DW1000Ng::startReceive();
