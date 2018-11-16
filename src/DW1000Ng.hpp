@@ -379,10 +379,10 @@ namespace DW1000Ng {
 	void attachReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void));
 	
 	/**
-	Poll the DW1000 for system events and handles them
+	Handles dw1000 events triggered by interrupt
 	By default this is attached to the interrupt pin callback
 	*/
-	void pollForEvents();
+	void interruptServiceRoutine();
 	
 	/**
 	Stops the transceiver immediately, this actually sets the device in Idle mode.
