@@ -118,7 +118,7 @@ namespace DW1000NgRTLS {
         DW1000Ng::startTransmit();
     }
 
-    void handleShortBlink(byte frame[], byte newTagShortAddress[]) {
+    void handleTwrShortBlink(byte frame[], byte newTagShortAddress[]) {
         DW1000NgRTLS::transmitRangingInitiation(&frame[2], newTagShortAddress);
     }
 

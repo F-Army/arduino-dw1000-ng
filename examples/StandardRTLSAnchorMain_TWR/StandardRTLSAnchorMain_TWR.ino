@@ -226,7 +226,7 @@ void loop() {
             noteActivity();
         } else if(recv_data[0] == BLINK) {
             /* Is blink */
-            DW1000NgRTLS::handleShortBlink(recv_data, tag_shortAddress);
+            DW1000NgRTLS::handleTwrShortBlink(recv_data, tag_shortAddress);
             noteActivity();
         }
 
