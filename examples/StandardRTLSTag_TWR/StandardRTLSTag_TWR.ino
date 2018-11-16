@@ -168,6 +168,7 @@ void loop() {
         if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
             /* Received ranging confirm */
             DW1000NgRTLS::handleRangingConfirm(act_recv);
+            if(!rangingEnd()) return;
         } else if(act_len > 12 && act_recv[10] == ACTIVITY_FINISHED) {
             blink_rate = DW1000NgRTLS::handleActivityFinished(act_recv); 
         }
