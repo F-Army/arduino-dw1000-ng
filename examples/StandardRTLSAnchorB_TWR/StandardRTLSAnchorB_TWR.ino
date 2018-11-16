@@ -32,6 +32,9 @@ volatile uint64_t timePollReceived;
 
 volatile double distance;
 
+volatile boolean transmitReportNext = false;
+
+
 // watchdog and reset period
 volatile uint32_t lastActivity;
 volatile uint32_t resetPeriod = 250;
@@ -163,6 +166,11 @@ void loop() {
 
     if (sentAck) {
         sentAck = false;
+        if(transmitReportNext == true) {
+            transmitReportNext = false;
+            delay(4);
+            transmitRangeReport();
+        }
         DW1000Ng::startReceive();
     }
 
@@ -186,10 +194,10 @@ void loop() {
             /* In case of wrong read due to bad device calibration */
             if(distance <= 0) 
                 distance = 0.001;
+            
+            transmitReportNext = true;
 
-            delay(3);//Sending message to the DW1000 chip too frequently, the earlier messages won't send out successfully.
             noteActivity();
-            transmitRangeReport();
         }
     }
 }
