@@ -90,12 +90,17 @@ void setup() {
     
 }
 
+void waitForTransmission() {
+    while(!DW1000Ng::isTransmitDone()) {}
+    DW1000Ng::clearTransmitStatus();
+}
+
+
 void loop() {
 
     DW1000NgRTLS::transmitTwrShortBlink();
 
-    while(!DW1000Ng::isTransmitDone()) {}
-    DW1000Ng::clearTransmitStatus();
+    waitForTransmission();
 
     DW1000Ng::startReceive();
     while(!DW1000Ng::isReceiveDone()) {
@@ -115,9 +120,8 @@ void loop() {
     } else {
         return;
     }
-
-    while(!DW1000Ng::isTransmitDone()) {}
-    DW1000Ng::clearTransmitStatus();
+    /* Start of poll control for range */
+    waitForTransmission();
 
     DW1000Ng::startReceive();
     while(!DW1000Ng::isReceiveDone()) {
@@ -139,9 +143,7 @@ void loop() {
         return;
     }
 
-    while(!DW1000Ng::isTransmitDone()) {
-    }
-    DW1000Ng::clearTransmitStatus();
+    waitForTransmission();
 
     DW1000Ng::startReceive();
     while(!DW1000Ng::isReceiveDone()) {
