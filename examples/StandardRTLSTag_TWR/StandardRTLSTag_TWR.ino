@@ -21,9 +21,12 @@
 #include <DW1000NgRTLS.hpp>
 
 // connection pins
+#if defined(ESP8266)
+const uint8_t PIN_SS = 15;
+#else
 const uint8_t PIN_SS = SS; // spi select pin
 const uint8_t PIN_RST = 9;
-
+#endif
 // reply times (same on both sides for symm. ranging)
 uint16_t replyDelayTimeUS = 3000;
 
@@ -59,7 +62,11 @@ void setup() {
     Serial.begin(115200);
     Serial.println(F("### DW1000Ng-arduino-ranging-tag ###"));
     // initialize the driver
+    #if defined(ESP8266)
     DW1000Ng::initializeNoInterrupt(PIN_SS);
+    #else
+    DW1000Ng::initializeNoInterrupt(PIN_SS, PIN_RST);
+    #endif
     Serial.println("DW1000Ng initialized ...");
     // general configuration
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
