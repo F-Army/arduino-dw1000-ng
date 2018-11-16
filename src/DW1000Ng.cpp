@@ -1297,17 +1297,9 @@ namespace DW1000Ng {
 	void attachSentHandler(void (* handleSent)(void)) {
 		_handleSent = handleSent;
 	}
-
-	void (*getSentHandler(void))(void) {
-		return _handleSent;
-	}
 	
 	void attachReceivedHandler(void (* handleReceived)(void)) {
 		_handleReceived = handleReceived;
-	}
-
-	void (*getReceiveHandler(void))(void) {
-		return _handleReceived;
 	}
 	
 	void attachReceiveFailedHandler(void (* handleReceiveFailed)(void)) {
