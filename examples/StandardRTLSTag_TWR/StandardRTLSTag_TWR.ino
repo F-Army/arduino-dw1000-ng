@@ -69,6 +69,10 @@ void setup() {
     DW1000Ng::setNetworkId(RTLS_APP_ID);
 
     DW1000Ng::setAntennaDelay(16436);
+
+    DW1000Ng::setPreambleDetectionTimeout(8);
+    DW1000Ng::setSfdDetectionTimeout(256);    
+    DW1000Ng::setReceiveFrameWaitTimeoutPeriod(4000);
     
     Serial.println(F("Committed configuration ..."));
     // DEBUG chip info and registers pretty printed
@@ -96,6 +100,10 @@ void loop() {
 
     DW1000Ng::startReceive();
     while(!DW1000Ng::isReceiveDone()) {
+        if(DW1000Ng::isReceiveTimeout()) {
+            DW1000Ng::clearReceiveTimeoutStatus();
+            return;
+        }
         Serial.println("1");
     }
     DW1000Ng::clearReceiveStatus();
@@ -118,6 +126,10 @@ void loop() {
 
     DW1000Ng::startReceive();
     while(!DW1000Ng::isReceiveDone()) {
+        if(DW1000Ng::isReceiveTimeout()) {
+            DW1000Ng::clearReceiveTimeoutStatus();
+            return;
+        }
         Serial.println("3");
     }
     DW1000Ng::clearReceiveStatus();
@@ -141,6 +153,10 @@ void loop() {
 
     DW1000Ng::startReceive();
     while(!DW1000Ng::isReceiveDone()) {
+        if(DW1000Ng::isReceiveTimeout()) {
+            DW1000Ng::clearReceiveTimeoutStatus();
+            return;
+        }
         Serial.println("5");
     }
     DW1000Ng::clearReceiveStatus();
@@ -158,6 +174,7 @@ void loop() {
         }
     } else {
         Serial.println("No act control");
+        return;
     }
 
     /* Sleep until next blink to save power */
