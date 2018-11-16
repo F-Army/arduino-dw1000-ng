@@ -103,7 +103,7 @@ void setup() {
     DW1000Ng::attachSentHandler(handleSent);
     DW1000Ng::attachReceivedHandler(handleReceived);
     // anchor starts by transmitting a POLL message
-    DW1000NgRTLS::transmitShortBlink();
+    DW1000NgRTLS::transmitTwrShortBlink();
     noteActivity();
 }
 
@@ -115,7 +115,7 @@ void noteActivity() {
 void reset() {
     // tag returns to Idle and sends POLL
     DW1000Ng::forceTRxOff();
-    DW1000NgRTLS::transmitShortBlink();
+    DW1000NgRTLS::transmitTwrShortBlink();
     noteActivity();
 }
 
@@ -165,7 +165,7 @@ void loop() {
                 delay(resetPeriod);
                 DW1000Ng::spiWakeup();
 
-                DW1000NgRTLS::transmitShortBlink();
+                DW1000NgRTLS::transmitTwrShortBlink();
                 noteActivity();
             }
         } else if(recv_len > 17 && recv_data[15] == RANGING_INITIATION) {

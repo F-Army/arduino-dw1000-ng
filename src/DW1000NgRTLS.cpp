@@ -37,7 +37,9 @@ namespace DW1000NgRTLS {
         return ++SEQ_NUMBER;
     }
 
-    void transmitShortBlink() {
+
+
+    void transmitTwrShortBlink() {
         byte Blink[] = {BLINK, SEQ_NUMBER++, 0,0,0,0,0,0,0,0, NO_BATTERY_STATUS | NO_EX_ID, TAG_LISTENING_NOW};
         DW1000Ng::getEUI(&Blink[2]);
         DW1000Ng::setTransmitData(Blink, sizeof(Blink));

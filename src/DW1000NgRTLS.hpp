@@ -76,7 +76,7 @@ namespace DW1000NgRTLS {
 
     byte increaseSequenceNumber();
 
-    void transmitShortBlink();
+    void transmitTwrShortBlink();
     void transmitRangingInitiation(byte tag_eui[], byte tag_short_address[]);
     void transmitPoll(byte anchor_address[]);
     void transmitResponseToPoll(byte tag_short_address[]);
