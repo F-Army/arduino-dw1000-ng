@@ -114,11 +114,15 @@ boolean receive() {
     return true;
 }
 
+boolean nextRangingStep() {
+    waitForTransmission();
+    if(!receive()) return false;
+    return true;
+}
+
 boolean rangingEnd() {
     /* Start of poll control for range */
-    waitForTransmission();
-
-    if(!receive()) return false;
+    if(!nextRangingStep()) return false;
 
     size_t cont_len = DW1000Ng::getReceivedDataLength();
     byte cont_recv[cont_len];
@@ -131,9 +135,7 @@ boolean rangingEnd() {
         return false;
     }
 
-    waitForTransmission();
-
-    if(!receive()) return false;
+    if(!nextRangingStep()) return false;
 
     return true;
     /* end of ranging */
@@ -145,9 +147,7 @@ void loop() {
 
     DW1000NgRTLS::transmitTwrShortBlink();
 
-    waitForTransmission();
-
-    if(!receive()) return;
+    if(!nextRangingStep()) return;
 
     size_t init_len = DW1000Ng::getReceivedDataLength();
     byte init_recv[init_len];
