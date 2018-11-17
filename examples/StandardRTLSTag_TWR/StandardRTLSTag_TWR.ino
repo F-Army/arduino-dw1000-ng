@@ -115,10 +115,7 @@ boolean receive() {
 }
 
 boolean isRangingInitiation(byte recv_data[], size_t recv_len) {
-    if(recv_len > 17 && recv_data[15] == RANGING_INITIATION)
-        return true;
-    else
-        return false;
+    return (recv_len > 17 && recv_data[15] == RANGING_INITIATION) ? true : false;
 }
 
 boolean nextRangingStep() {
