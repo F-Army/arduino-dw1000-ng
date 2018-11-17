@@ -142,20 +142,22 @@ boolean range(byte target_anchor[]) {
     /* end of ranging */
 }
 
-
+boolean isRangingInitiation(byte receivedFrame[], size_t frameLength) {
+    (frameLength > 17 && receivedFrame[15] == RANGING_INITIATION) ? true : false;
+}
 
 void loop() {
 
     DW1000NgRTLS::transmitTwrShortBlink();
-
     waitForTransmission();
+
     if(!receive()) return;
 
     size_t init_len = DW1000Ng::getReceivedDataLength();
     byte init_recv[init_len];
     DW1000Ng::getReceivedData(init_recv, init_len);
 
-    if(init_len > 17 && init_recv[15] == RANGING_INITIATION) {
+    if(isRangingInitiation(init_recv, init_len)) {
         DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&init_recv[16], 2));
     } else {
         return;
