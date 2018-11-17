@@ -120,7 +120,8 @@ boolean nextRangingStep() {
     return true;
 }
 
-boolean rangingEnd() {
+boolean range(byte target_anchor[]) {
+    DW1000NgRTLS::transmitPoll(target_anchor);
     /* Start of poll control for range */
     if(!nextRangingStep()) return false;
 
@@ -155,8 +156,7 @@ void loop() {
 
     if(init_len > 17 && init_recv[15] == RANGING_INITIATION) {
         DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&init_recv[16], 2));
-        DW1000NgRTLS::transmitPoll(&init_recv[13]);
-        if(!rangingEnd()) return;
+        if(!range(&init_recv[13])) return;
     } else {
         return;
     }
@@ -168,8 +168,7 @@ void loop() {
     if(act_len > 10 && act_recv[9] == ACTIVITY_CONTROL) {
         if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
             /* Received ranging confirm */
-            DW1000NgRTLS::transmitPoll(&act_recv[11]);
-            if(!rangingEnd()) return;
+            if(!range(&act_recv[11])) return;
         } else if(act_len > 12 && act_recv[10] == ACTIVITY_FINISHED) {
             blink_rate = DW1000NgRTLS::handleActivityFinished(act_recv); 
         }
