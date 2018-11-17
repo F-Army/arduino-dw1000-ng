@@ -163,6 +163,8 @@ void loop() {
     size_t act_len = DW1000Ng::getReceivedDataLength();
     byte act_recv[act_len];
     DW1000Ng::getReceivedData(act_recv, act_len);
+    Serial.print(act_recv[11]);
+    Serial.println(act_recv[12]);
 
     if(act_len > 10 && act_recv[9] == ACTIVITY_CONTROL) {
         if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
