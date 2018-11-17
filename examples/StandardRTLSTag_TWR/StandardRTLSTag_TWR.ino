@@ -154,7 +154,8 @@ void loop() {
     DW1000Ng::getReceivedData(init_recv, init_len);
 
     if(init_len > 17 && init_recv[15] == RANGING_INITIATION) {
-        DW1000NgRTLS::handleRangingInitiation(init_recv);
+        DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&init_recv[16], 2));
+        DW1000NgRTLS::transmitPoll(&init_recv[13]);
         if(!rangingEnd()) return;
     } else {
         return;
@@ -163,13 +164,11 @@ void loop() {
     size_t act_len = DW1000Ng::getReceivedDataLength();
     byte act_recv[act_len];
     DW1000Ng::getReceivedData(act_recv, act_len);
-    Serial.print(act_recv[11]);
-    Serial.println(act_recv[12]);
 
     if(act_len > 10 && act_recv[9] == ACTIVITY_CONTROL) {
         if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
             /* Received ranging confirm */
-            DW1000NgRTLS::handleRangingConfirm(act_recv);
+            DW1000NgRTLS::transmitPoll(&act_recv[11]);
             waitForTransmission();
         } else if(act_len > 12 && act_recv[10] == ACTIVITY_FINISHED) {
             blink_rate = DW1000NgRTLS::handleActivityFinished(act_recv); 
