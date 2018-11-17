@@ -157,10 +157,11 @@ void loop() {
 
     if(init_len > 17 && init_recv[15] == RANGING_INITIATION) {
         DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&init_recv[16], 2));
-        if(!range(&init_recv[13])) return;
     } else {
         return;
     }
+
+    if(!range(&init_recv[13])) return;
 
     size_t act_len = DW1000Ng::getReceivedDataLength();
     byte act_recv[act_len];
