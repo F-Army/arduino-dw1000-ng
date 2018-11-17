@@ -148,7 +148,8 @@ void loop() {
 
     DW1000NgRTLS::transmitTwrShortBlink();
 
-    if(!nextRangingStep()) return;
+    waitForTransmission();
+    if(!receive()) return;
 
     size_t init_len = DW1000Ng::getReceivedDataLength();
     byte init_recv[init_len];
