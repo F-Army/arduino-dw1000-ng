@@ -124,28 +124,6 @@ boolean nextRangingStep() {
     return true;
 }
 
-byte* handleRangingInitiation(byte initFrame[], size_t initFrameLen ) {
-    DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&initFrame[16], 2));
-    return &initFrame[13];
-}
-
-byte* rangeRequest() {
-    DW1000NgRTLS::transmitTwrShortBlink();
-    waitForTransmission();
-
-    if(!receive()) return nullptr;
-
-    size_t init_len = DW1000Ng::getReceivedDataLength();
-    byte init_recv[init_len];
-    DW1000Ng::getReceivedData(init_recv, init_len);
-
-    if(!isRangingInitiation(init_recv, init_len)) {
-        return nullptr;
-    }
-
-    return handleRangingInitiation(init_recv, init_len);
-}
-
 boolean range(byte target_anchor[]) {
     DW1000NgRTLS::transmitPoll(target_anchor);
     /* Start of poll control for range */
@@ -168,11 +146,27 @@ boolean range(byte target_anchor[]) {
     /* end of ranging */
 }
 
+byte* handleRangingInitiation(byte initFrame[], size_t initFrameLen ) {
+    DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&initFrame[16], 2));
+    return &initFrame[13];
+}
+
 void loop() {
 
-    byte* next_anchor = rangeRequest();
+    DW1000NgRTLS::transmitTwrShortBlink();
+    waitForTransmission();
 
-    if(next_anchor == nullptr) return;
+    if(!receive()) return;
+
+    size_t init_len = DW1000Ng::getReceivedDataLength();
+    byte init_recv[init_len];
+    DW1000Ng::getReceivedData(init_recv, init_len);
+
+    if(!isRangingInitiation(init_recv, init_len)) {
+        return;
+    }
+
+    byte* next_anchor = handleRangingInitiation(init_recv, init_len);
 
     if(!range(next_anchor)) return;
 
