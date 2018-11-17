@@ -114,6 +114,13 @@ boolean receive() {
     return true;
 }
 
+boolean isRangingInitiation(byte recv_data[], size_t recv_len) {
+    if(recv_len > 17 && recv_data[15] == RANGING_INITIATION)
+        return true;
+    else
+        return false;
+}
+
 boolean nextRangingStep() {
     waitForTransmission();
     if(!receive()) return false;
@@ -155,7 +162,7 @@ void loop() {
     byte init_recv[init_len];
     DW1000Ng::getReceivedData(init_recv, init_len);
 
-    if(init_len > 17 && init_recv[15] == RANGING_INITIATION) {
+    if(isRangingInitiation(init_recv, init_len)) {
         DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&init_recv[16], 2));
     } else {
         return;
