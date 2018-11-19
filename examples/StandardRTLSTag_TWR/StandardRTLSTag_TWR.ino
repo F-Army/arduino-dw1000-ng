@@ -126,11 +126,8 @@ boolean nextRangingStep() {
 
 boolean range(byte target_anchor[]) {
     DW1000NgRTLS::transmitPoll(target_anchor);
-    Serial.print(target_anchor[0]);
-    Serial.println(target_anchor[1]);
     /* Start of poll control for range */
     if(!nextRangingStep()) return false;
-    Serial.print("1");
 
     size_t cont_len = DW1000Ng::getReceivedDataLength();
     byte cont_recv[cont_len];
@@ -139,13 +136,11 @@ boolean range(byte target_anchor[]) {
     if (cont_len > 10 && cont_recv[9] == ACTIVITY_CONTROL && cont_recv[10] == RANGING_CONTINUE) {
         /* Received Response to poll */
         DW1000NgRTLS::handleRangingContinueEmbedded(cont_recv, replyDelayTimeUS);
-        Serial.print("2");
     } else {
         return false;
     }
 
     if(!nextRangingStep()) return false;
-    Serial.print("3");
 
     return true;
     /* end of ranging */
