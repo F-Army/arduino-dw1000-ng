@@ -153,7 +153,7 @@ byte* handleRangingInitiation(byte initFrame[], size_t initFrameLen ) {
 }
 
 void loop() {
-
+    DW1000Ng::forceTRxOff();
     DW1000NgRTLS::transmitTwrShortBlink();
     waitForTransmission();
 
