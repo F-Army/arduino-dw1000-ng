@@ -151,6 +151,13 @@ boolean rangeRequest() {
     return true;
 }
 
+byte* getResponseIndex() {
+    size_t init_len = DW1000Ng::getReceivedDataLength();
+    byte init_recv[init_len];
+    DW1000Ng::getReceivedData(init_recv, init_len);
+    return init_recv;
+}
+
 void loop() {
     DW1000Ng::deepSleep();
     delay(blink_rate);
@@ -159,9 +166,8 @@ void loop() {
 
     if(!rangeRequest()) return;
 
-    size_t init_len = DW1000Ng::getReceivedDataLength();
-    byte init_recv[init_len];
-    DW1000Ng::getReceivedData(init_recv, init_len);
+    byte* init_recv = getResponseIndex();
+    size_t init_len = 18;
 
     if(!isRangingInitiation(init_recv, init_len)) {
         return;
