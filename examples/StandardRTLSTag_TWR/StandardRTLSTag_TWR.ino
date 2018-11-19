@@ -32,6 +32,7 @@ const uint8_t PIN_RST = 9;
 
 volatile uint32_t blink_rate = 200;
 
+
 typedef struct RangeResult {
     boolean success;
     boolean next;
@@ -130,7 +131,7 @@ boolean nextRangingStep() {
     return true;
 }
 
-RangeResult range(byte target_anchor[], byte next_anchor[]) {
+RangeResult range(byte target_anchor[], byte next_anchor[], uint16_t replyDelayUs) {
     DW1000NgRTLS::transmitPoll(target_anchor);
     /* Start of poll control for range */
     if(!nextRangingStep()) return {false, false, 0};
@@ -140,7 +141,7 @@ RangeResult range(byte target_anchor[], byte next_anchor[]) {
 
     if (cont_len > 10 && cont_recv[9] == ACTIVITY_CONTROL && cont_recv[10] == RANGING_CONTINUE) {
         /* Received Response to poll */
-        DW1000NgRTLS::handleRangingContinueEmbedded(cont_recv, 3000);
+        DW1000NgRTLS::handleRangingContinueEmbedded(cont_recv, replyDelayUs);
     } else {
         return {false, false, 0};
     }
@@ -193,10 +194,10 @@ void loop() {
     byte next_anchor[2];
     if(!rangeRequest(next_anchor)) return;
 
-    RangeResult result = range(next_anchor, next_anchor);
+    RangeResult result = range(next_anchor, next_anchor, 3000);
 
     while(result.success && result.next) {
-        result = range(next_anchor, next_anchor);
+        result = range(next_anchor, next_anchor, 3000);
     }
 
     if(result.success && result.new_blink_rate != 0) {
