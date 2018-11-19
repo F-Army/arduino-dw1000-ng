@@ -166,9 +166,9 @@ void loop() {
 
     byte* next_anchor = handleRangingInitiation(init_recv, init_len);
 
-    Serial.println("Iniziato range");
+    Serial.println("I");
     if(range(next_anchor)) {
-        Serial.println("Finito range");
+        Serial.println("F");
 
         size_t act_len = DW1000Ng::getReceivedDataLength();
         byte act_recv[act_len];
