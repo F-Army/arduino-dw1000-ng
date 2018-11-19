@@ -131,7 +131,7 @@ boolean nextRangingStep() {
     return true;
 }
 
-RangeResult range(byte target_anchor[], byte next_anchor[], uint16_t replyDelayUs) {
+RangeResult range(byte target_anchor[], uint16_t replyDelayUs) {
     DW1000NgRTLS::transmitPoll(target_anchor);
     /* Start of poll control for range */
     if(!nextRangingStep()) return {false, false, 0};
@@ -154,7 +154,7 @@ RangeResult range(byte target_anchor[], byte next_anchor[], uint16_t replyDelayU
 
     if(act_len > 10 && act_recv[9] == ACTIVITY_CONTROL) {
         if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
-            memcpy(next_anchor, &act_recv[11], 2);
+            memcpy(target_anchor, &act_recv[11], 2);
             return {true, true, 0};
         } else if(act_len > 12 && act_recv[10] == ACTIVITY_FINISHED) {
             blink_rate = DW1000NgRTLS::handleActivityFinished(act_recv);
@@ -194,10 +194,10 @@ void loop() {
     byte next_anchor[2];
     if(!rangeRequest(next_anchor)) return;
 
-    RangeResult result = range(next_anchor, next_anchor, 3000);
+    RangeResult result = range(next_anchor,3000);
 
     while(result.success && result.next) {
-        result = range(next_anchor, next_anchor, 3000);
+        result = range(next_anchor,3000);
     }
 
     if(result.success && result.new_blink_rate != 0) {
