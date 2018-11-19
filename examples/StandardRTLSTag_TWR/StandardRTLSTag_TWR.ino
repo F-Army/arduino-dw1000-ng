@@ -35,6 +35,7 @@ volatile uint32_t blink_rate = 200;
 typedef struct RangeResult {
     boolean success;
     boolean next;
+    uint32_t new_blink_rate;
 } RangeResult;
 
 device_configuration_t DEFAULT_CONFIG = {
@@ -129,10 +130,10 @@ boolean nextRangingStep() {
     return true;
 }
 
-RangeResult range(byte target_anchor[]) {
+RangeResult range(byte target_anchor[], byte next_anchor[]) {
     DW1000NgRTLS::transmitPoll(target_anchor);
     /* Start of poll control for range */
-    if(!nextRangingStep()) return {false, false};
+    if(!nextRangingStep()) return {false, false, 0};
     size_t cont_len = DW1000Ng::getReceivedDataLength();
     byte cont_recv[cont_len];
     DW1000Ng::getReceivedData(cont_recv, cont_len);
@@ -141,11 +142,26 @@ RangeResult range(byte target_anchor[]) {
         /* Received Response to poll */
         DW1000NgRTLS::handleRangingContinueEmbedded(cont_recv, replyDelayTimeUS);
     } else {
-        return {false, false};
+        return {false, false, 0};
     }
 
-    if(!nextRangingStep()) return {false, false};
-    return {true, true};
+    if(!nextRangingStep()) return {false, false, 0};
+
+    size_t act_len = DW1000Ng::getReceivedDataLength();
+    byte act_recv[act_len];
+    DW1000Ng::getReceivedData(act_recv, act_len);
+
+    if(act_len > 10 && act_recv[9] == ACTIVITY_CONTROL) {
+        if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
+            memcpy(next_anchor, &act_recv[11], 2);
+            return {true, true, 0};
+        } else if(act_len > 12 && act_recv[10] == ACTIVITY_FINISHED) {
+            blink_rate = DW1000NgRTLS::handleActivityFinished(act_recv);
+            return {true, false, blink_rate};
+        }
+    } else {
+        return {false, false, 0};
+    }
     /* end of ranging */
 }
 
@@ -177,34 +193,13 @@ void loop() {
     byte next_anchor[2];
     if(!rangeRequest(next_anchor)) return;
 
-    if(range(next_anchor).success) {
-        size_t act_len = DW1000Ng::getReceivedDataLength();
-        byte act_recv[act_len];
-        DW1000Ng::getReceivedData(act_recv, act_len);
-        Serial.println("b");
+    RangeResult result = range(next_anchor, next_anchor);
 
-        if(act_len > 10 && act_recv[9] == ACTIVITY_CONTROL) {
-            if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
-                if(!range(&act_recv[11]).success) return;
-            }
-        }
-        return;
-    }
-    
-
-
-    /*
-
-    if(act_len > 10 && act_recv[9] == ACTIVITY_CONTROL) {
-        if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
-            if(!range(&act_recv[11])) return;
-        } else if(act_len > 12 && act_recv[10] == ACTIVITY_FINISHED) {
-            blink_rate = DW1000NgRTLS::handleActivityFinished(act_recv); 
-        }
-    } else {
-        return;
+    while(result.success && result.next) {
+        result = range(next_anchor, next_anchor);
     }
 
-    */
-    
+    if(result.success && result.new_blink_rate != 0) {
+        blink_rate = result.new_blink_rate;
+    }
 }
