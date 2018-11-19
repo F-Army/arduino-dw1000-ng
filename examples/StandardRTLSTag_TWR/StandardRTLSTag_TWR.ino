@@ -32,6 +32,11 @@ const uint8_t PIN_RST = 9;
 
 volatile uint32_t blink_rate = 200;
 
+typedef struct RangeRequestResult {
+    boolean success;
+    uint16_t target_anchor;
+} RangeRequestResult;
+
 
 typedef struct RangeResult {
     boolean success;
@@ -166,22 +171,21 @@ RangeResult range(byte target_anchor[], uint16_t replyDelayUs) {
     /* end of ranging */
 }
 
-boolean rangeRequest(byte target_address[]) {
+RangeRequestResult rangeRequest() {
     DW1000NgRTLS::transmitTwrShortBlink();
     waitForTransmission();
-    if(!receive()) return false;
+    if(!receive()) return { false, 0};
 
     size_t init_len = DW1000Ng::getReceivedDataLength();
     byte init_recv[init_len];
     DW1000Ng::getReceivedData(init_recv, init_len);
 
     if(!isRangingInitiation(init_recv, init_len)) {
-        return false;
+        return { false, 0};
     }
 
     DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&init_recv[16], 2));
-    memcpy(target_address, &init_recv[13], 2);
-    return true;
+    return { true, DW1000NgUtils::bytesAsValue(&init_recv[13], 2) };
 }
 
 void loop() {
@@ -191,8 +195,11 @@ void loop() {
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
 
 
+    RangeRequestResult request_result = rangeRequest();
+    if(!request_result.success) return;
+
     byte next_anchor[2];
-    if(!rangeRequest(next_anchor)) return;
+    DW1000NgUtils::writeValueToBytes(next_anchor, request_result.target_anchor, 2);
 
     RangeResult result = range(next_anchor,3000);
 
