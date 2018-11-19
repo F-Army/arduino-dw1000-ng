@@ -27,8 +27,8 @@ const uint8_t PIN_SS = 15;
 const uint8_t PIN_SS = SS; // spi select pin
 const uint8_t PIN_RST = 9;
 #endif
-// reply times (same on both sides for symm. ranging)
-uint16_t replyDelayTimeUS = 3000;
+
+
 
 volatile uint32_t blink_rate = 200;
 
