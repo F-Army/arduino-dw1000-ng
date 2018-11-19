@@ -136,13 +136,11 @@ boolean range(byte target_anchor[]) {
     if (cont_len > 10 && cont_recv[9] == ACTIVITY_CONTROL && cont_recv[10] == RANGING_CONTINUE) {
         /* Received Response to poll */
         DW1000NgRTLS::handleRangingContinueEmbedded(cont_recv, replyDelayTimeUS);
-        Serial.println("f");
     } else {
         return false;
     }
 
     if(!nextRangingStep()) return false;
-    Serial.println("na");
     return true;
     /* end of ranging */
 }
