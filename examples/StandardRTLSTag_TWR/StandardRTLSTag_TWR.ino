@@ -153,7 +153,9 @@ void loop() {
     DW1000Ng::deepSleep();
     delay(blink_rate);
     DW1000Ng::spiWakeup();
-    
+
+    DW1000Ng::forceTRxOff();
+
     DW1000NgRTLS::transmitTwrShortBlink();
     waitForTransmission();
 
