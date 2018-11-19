@@ -105,11 +105,12 @@ void waitForTransmission() {
 boolean receive() {
     DW1000Ng::startReceive();
     while(!DW1000Ng::isReceiveDone()) {
+        /*
         if(DW1000Ng::isReceiveTimeout()) {
             DW1000Ng::clearReceiveTimeoutStatus();
-            Serial.println("to");
             return false;
         }
+        */
     }
     DW1000Ng::clearReceiveStatus();
     return true;
