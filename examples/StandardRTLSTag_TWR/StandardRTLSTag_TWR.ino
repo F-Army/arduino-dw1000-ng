@@ -78,11 +78,9 @@ void setup() {
 
     DW1000Ng::setAntennaDelay(16436);
 
-    /*
     DW1000Ng::setPreambleDetectionTimeout(16);
     DW1000Ng::setSfdDetectionTimeout(273);
     DW1000Ng::setReceiveFrameWaitTimeoutPeriod(3000);
-    */
     
     Serial.println(F("Committed configuration ..."));
     // DEBUG chip info and registers pretty printed
@@ -108,8 +106,8 @@ boolean receive() {
     DW1000Ng::startReceive();
     unsigned long timeout = micros();
     while(!DW1000Ng::isReceiveDone()) {
-        if(timeout > (micros() + 3000) ) {
-            //DW1000Ng::clearReceiveTimeoutStatus();
+        if(DW1000Ng::isReceiveTimeout() ) {
+            DW1000Ng::clearReceiveTimeoutStatus();
             Serial.println("to");
             return false;
         }
@@ -154,7 +152,6 @@ byte* handleRangingInitiation(byte initFrame[], size_t initFrameLen ) {
 }
 
 void loop() {
-    DW1000Ng::forceTRxOff();
     DW1000NgRTLS::transmitTwrShortBlink();
     waitForTransmission();
 
