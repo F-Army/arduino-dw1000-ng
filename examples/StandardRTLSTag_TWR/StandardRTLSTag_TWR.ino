@@ -140,7 +140,7 @@ RangeResult range(byte target_anchor[], byte next_anchor[]) {
 
     if (cont_len > 10 && cont_recv[9] == ACTIVITY_CONTROL && cont_recv[10] == RANGING_CONTINUE) {
         /* Received Response to poll */
-        DW1000NgRTLS::handleRangingContinueEmbedded(cont_recv, replyDelayTimeUS);
+        DW1000NgRTLS::handleRangingContinueEmbedded(cont_recv, 3000);
     } else {
         return {false, false, 0};
     }
