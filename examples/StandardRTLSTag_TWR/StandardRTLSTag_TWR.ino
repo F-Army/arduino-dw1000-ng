@@ -78,8 +78,8 @@ void setup() {
 
     DW1000Ng::setAntennaDelay(16436);
 
-    DW1000Ng::setPreambleDetectionTimeout(15);
-    DW1000Ng::setSfdDetectionTimeout(273);
+    DW1000Ng::setPreambleDetectionTimeout(16);
+    DW1000Ng::setSfdDetectionTimeout(321);
     DW1000Ng::setReceiveFrameWaitTimeoutPeriod(4000);
     
     Serial.println(F("Committed configuration ..."));
