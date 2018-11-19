@@ -144,20 +144,15 @@ boolean range(byte target_anchor[]) {
     /* end of ranging */
 }
 
-boolean rangeRequest() {
-    DW1000NgRTLS::transmitTwrShortBlink();
-    waitForTransmission();
-    if(!receive()) return false;
-    return true;
-}
-
 void loop() {
     DW1000Ng::deepSleep();
     delay(blink_rate);
     DW1000Ng::spiWakeup();
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
 
-    if(!rangeRequest()) return;
+    DW1000NgRTLS::transmitTwrShortBlink();
+    waitForTransmission();
+    if(!receive()) return;
 
     size_t init_len = DW1000Ng::getReceivedDataLength();
     byte init_recv[init_len];
