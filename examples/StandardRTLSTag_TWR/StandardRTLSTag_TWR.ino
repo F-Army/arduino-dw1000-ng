@@ -144,10 +144,6 @@ boolean range(byte target_anchor[]) {
     /* end of ranging */
 }
 
-byte* handleRangingInitiation(byte initFrame[], size_t initFrameLen ) {
-    DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&initFrame[16], 2));
-    return &initFrame[13];
-}
 
 void loop() {
     DW1000Ng::deepSleep();
