@@ -32,6 +32,11 @@ const uint8_t PIN_RST = 9;
 
 volatile uint32_t blink_rate = 200;
 
+typedef struct RangeInfrastructureResult {
+    boolean success;
+    uint16_t new_blink_rate;
+} RangeInfrastructureResult;
+
 typedef struct RangeRequestResult {
     boolean success;
     uint16_t target_anchor;
@@ -190,6 +195,24 @@ RangeRequestResult rangeRequest() {
     return { true, DW1000NgUtils::bytesAsValue(&init_recv[13], 2) };
 }
 
+RangeInfrastructureResult rangeInfrastructure(uint16_t first_anchor) {
+    RangeResult result = range(first_anchor, 3000);
+    if(!result.success) return {false , 0};
+
+    while(result.success && result.next) {
+        result = range(result.next_anchor,3000);
+        if(!result.success) return {false , 0};
+    }
+
+    if(result.success && result.new_blink_rate != 0) {
+        return { true, result.new_blink_rate };
+    } else {
+        if(!result.success)
+            return { false , 0 };
+    }
+};
+
+
 void loop() {
     DW1000Ng::deepSleep();
     delay(blink_rate);
@@ -200,13 +223,7 @@ void loop() {
     RangeRequestResult request_result = rangeRequest();
     if(!request_result.success) return;
 
-    RangeResult result = range(request_result.target_anchor, 3000);
-
-    while(result.success && result.next) {
-        result = range(result.next_anchor,3000);
-    }
-
-    if(result.success && result.new_blink_rate != 0) {
+    RangeInfrastructureResult result = rangeInfrastructure(request_result.target_anchor);
+    if(result.success)
         blink_rate = result.new_blink_rate;
-    }
 }
