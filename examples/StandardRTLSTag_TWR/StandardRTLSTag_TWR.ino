@@ -221,9 +221,12 @@ void loop() {
 
 
     RangeRequestResult request_result = rangeRequest();
-    if(!request_result.success) return;
 
-    RangeInfrastructureResult result = rangeInfrastructure(request_result.target_anchor);
-    if(result.success)
-        blink_rate = result.new_blink_rate;
+    if(request_result.success) {
+        
+        RangeInfrastructureResult result = rangeInfrastructure(request_result.target_anchor);
+
+        if(result.success)
+            blink_rate = result.new_blink_rate;
+    }
 }
