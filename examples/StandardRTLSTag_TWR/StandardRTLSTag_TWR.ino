@@ -41,6 +41,7 @@ typedef struct RangeRequestResult {
 typedef struct RangeResult {
     boolean success;
     boolean next;
+    uint16_t next_anchor;
     uint32_t new_blink_rate;
 } RangeResult;
 
@@ -136,10 +137,12 @@ boolean nextRangingStep() {
     return true;
 }
 
-RangeResult range(byte target_anchor[], uint16_t replyDelayUs) {
+RangeResult range(uint16_t anchor, uint16_t replyDelayUs) {
+    byte target_anchor[2];
+    DW1000NgUtils::writeValueToBytes(target_anchor, anchor, 2);
     DW1000NgRTLS::transmitPoll(target_anchor);
     /* Start of poll control for range */
-    if(!nextRangingStep()) return {false, false, 0};
+    if(!nextRangingStep()) return {false, false, 0, 0};
     size_t cont_len = DW1000Ng::getReceivedDataLength();
     byte cont_recv[cont_len];
     DW1000Ng::getReceivedData(cont_recv, cont_len);
@@ -148,10 +151,10 @@ RangeResult range(byte target_anchor[], uint16_t replyDelayUs) {
         /* Received Response to poll */
         DW1000NgRTLS::handleRangingContinueEmbedded(cont_recv, replyDelayUs);
     } else {
-        return {false, false, 0};
+        return {false, false, 0, 0};
     }
 
-    if(!nextRangingStep()) return {false, false, 0};
+    if(!nextRangingStep()) return {false, false, 0, 0};
 
     size_t act_len = DW1000Ng::getReceivedDataLength();
     byte act_recv[act_len];
@@ -159,14 +162,13 @@ RangeResult range(byte target_anchor[], uint16_t replyDelayUs) {
 
     if(act_len > 10 && act_recv[9] == ACTIVITY_CONTROL) {
         if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
-            memcpy(target_anchor, &act_recv[11], 2);
-            return {true, true, 0};
+            return {true, true, DW1000NgUtils::bytesAsValue(&act_recv[11], 2), 0};
         } else if(act_len > 12 && act_recv[10] == ACTIVITY_FINISHED) {
             blink_rate = DW1000NgRTLS::handleActivityFinished(act_recv);
-            return {true, false, blink_rate};
+            return {true, false, 0, blink_rate};
         }
     } else {
-        return {false, false, 0};
+        return {false, false, 0, 0};
     }
     /* end of ranging */
 }
@@ -198,13 +200,10 @@ void loop() {
     RangeRequestResult request_result = rangeRequest();
     if(!request_result.success) return;
 
-    byte next_anchor[2];
-    DW1000NgUtils::writeValueToBytes(next_anchor, request_result.target_anchor, 2);
-
-    RangeResult result = range(next_anchor,3000);
+    RangeResult result = range(request_result.target_anchor, 3000);
 
     while(result.success && result.next) {
-        result = range(next_anchor,3000);
+        result = range(result.next_anchor,3000);
     }
 
     if(result.success && result.new_blink_rate != 0) {
