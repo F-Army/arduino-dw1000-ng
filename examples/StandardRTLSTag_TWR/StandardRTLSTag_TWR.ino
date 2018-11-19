@@ -178,7 +178,7 @@ void loop() {
 
 
     /*
-    
+
     if(act_len > 10 && act_recv[9] == ACTIVITY_CONTROL) {
         if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
             if(!range(&act_recv[11])) return;
@@ -192,7 +192,7 @@ void loop() {
     */
 
     /* Sleep until next blink to save power */
-    DW1000Ng::deepSleep();
+    //DW1000Ng::deepSleep();
     delay(blink_rate);
-    DW1000Ng::spiWakeup();
+    //DW1000Ng::spiWakeup();
 }
