@@ -177,6 +177,13 @@ void loop() {
         byte act_recv[act_len];
         DW1000Ng::getReceivedData(act_recv, act_len);
         Serial.println("b");
+
+        if(act_len > 10 && act_recv[9] == ACTIVITY_CONTROL) {
+            if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
+                if(!range(&act_recv[11])) return;
+            }
+        }
+        return;
     }
     
 
