@@ -78,8 +78,8 @@ void setup() {
 
     DW1000Ng::setAntennaDelay(16436);
 
-    DW1000Ng::setPreambleDetectionTimeout(16);
-    DW1000Ng::setSfdDetectionTimeout(321);
+    DW1000Ng::setPreambleDetectionTimeout(15);
+    DW1000Ng::setSfdDetectionTimeout(273);
     DW1000Ng::setReceiveFrameWaitTimeoutPeriod(4000);
     
     Serial.println(F("Committed configuration ..."));
@@ -153,7 +153,6 @@ byte* handleRangingInitiation(byte initFrame[], size_t initFrameLen ) {
 }
 
 void loop() {
-    DW1000Ng::forceTRxOff();
     DW1000NgRTLS::transmitTwrShortBlink();
     waitForTransmission();
 
@@ -195,7 +194,7 @@ void loop() {
     */
 
     /* Sleep until next blink to save power */
-    //DW1000Ng::deepSleep();
+    DW1000Ng::deepSleep();
     delay(blink_rate);
-    //DW1000Ng::spiWakeup();
+    DW1000Ng::spiWakeup();
 }
