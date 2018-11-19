@@ -155,8 +155,6 @@ void loop() {
     DW1000Ng::spiWakeup();
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
 
-    DW1000Ng::forceTRxOff();
-
     DW1000NgRTLS::transmitTwrShortBlink();
     waitForTransmission();
 
