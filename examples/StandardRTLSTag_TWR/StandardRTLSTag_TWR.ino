@@ -176,9 +176,11 @@ void loop() {
     byte act_recv[act_len];
     DW1000Ng::getReceivedData(act_recv, act_len);
 
+
+    /*
+    
     if(act_len > 10 && act_recv[9] == ACTIVITY_CONTROL) {
         if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
-            /* Received ranging confirm */
             if(!range(&act_recv[11])) return;
         } else if(act_len > 12 && act_recv[10] == ACTIVITY_FINISHED) {
             blink_rate = DW1000NgRTLS::handleActivityFinished(act_recv); 
@@ -186,6 +188,8 @@ void loop() {
     } else {
         return;
     }
+
+    */
 
     /* Sleep until next blink to save power */
     DW1000Ng::deepSleep();
