@@ -150,6 +150,10 @@ byte* handleRangingInitiation(byte initFrame[], size_t initFrameLen ) {
 }
 
 void loop() {
+    DW1000Ng::deepSleep();
+    delay(blink_rate);
+    DW1000Ng::spiWakeup();
+    
     DW1000NgRTLS::transmitTwrShortBlink();
     waitForTransmission();
 
@@ -187,9 +191,5 @@ void loop() {
     }
 
     */
-
-    /* Sleep until next blink to save power */
-    DW1000Ng::deepSleep();
-    delay(blink_rate);
-    DW1000Ng::spiWakeup();
+    
 }
