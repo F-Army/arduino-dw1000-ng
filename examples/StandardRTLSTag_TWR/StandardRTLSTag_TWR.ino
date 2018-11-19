@@ -124,15 +124,10 @@ boolean nextRangingStep() {
     return true;
 }
 
-typedef struct RangeResult {
-    boolean success;
-    boolean next;
-} RangeResult;
-
-RangeResult range(byte target_anchor[]) {
+boolean range(byte target_anchor[]) {
     DW1000NgRTLS::transmitPoll(target_anchor);
     /* Start of poll control for range */
-    if(!nextRangingStep()) return {false, false};
+    if(!nextRangingStep()) return false;
     size_t cont_len = DW1000Ng::getReceivedDataLength();
     byte cont_recv[cont_len];
     DW1000Ng::getReceivedData(cont_recv, cont_len);
@@ -141,11 +136,11 @@ RangeResult range(byte target_anchor[]) {
         /* Received Response to poll */
         DW1000NgRTLS::handleRangingContinueEmbedded(cont_recv, replyDelayTimeUS);
     } else {
-        return {false, false};
+        return false;
     }
 
-    if(!nextRangingStep()) return {false, false};
-    return {true, true};
+    if(!nextRangingStep()) return false;
+    return true;
     /* end of ranging */
 }
 
@@ -177,7 +172,7 @@ void loop() {
     byte next_anchor[2];
     if(!rangeRequest(next_anchor)) return;
 
-    if(range(next_anchor).success) {
+    if(range(next_anchor)) {
         size_t act_len = DW1000Ng::getReceivedDataLength();
         byte act_recv[act_len];
         DW1000Ng::getReceivedData(act_recv, act_len);
@@ -185,7 +180,7 @@ void loop() {
 
         if(act_len > 10 && act_recv[9] == ACTIVITY_CONTROL) {
             if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
-                if(!range(&act_recv[11]).success) return;
+                if(!range(&act_recv[11])) return;
             }
         }
         return;
