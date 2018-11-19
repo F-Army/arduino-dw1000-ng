@@ -92,9 +92,7 @@ void setup() {
     DW1000Ng::getPrintableNetworkIdAndShortAddress(msg);
     Serial.print("Network ID & Device Address: "); Serial.println(msg);
     DW1000Ng::getPrintableDeviceMode(msg);
-    Serial.print("Device mode: "); Serial.println(msg);
-    // anchor starts by transmitting a POLL message
-    
+    Serial.print("Device mode: "); Serial.println(msg);    
 }
 
 void waitForTransmission() {
@@ -167,9 +165,7 @@ void loop() {
 
     byte* next_anchor = handleRangingInitiation(init_recv, init_len);
 
-    Serial.println("I");
     if(range(next_anchor)) {
-        Serial.println("F");
 
         size_t act_len = DW1000Ng::getReceivedDataLength();
         byte act_recv[act_len];
