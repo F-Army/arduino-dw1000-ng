@@ -149,26 +149,37 @@ byte* handleRangingInitiation(byte initFrame[], size_t initFrameLen ) {
     return &initFrame[13];
 }
 
-void loop() {
-    DW1000Ng::deepSleep();
-    delay(blink_rate);
-    DW1000Ng::spiWakeup();
-    DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
-
+byte* rangeRequest() {
     DW1000NgRTLS::transmitTwrShortBlink();
     waitForTransmission();
 
-    if(!receive()) return;
+    if(!receive()) return nullptr;
 
     size_t init_len = DW1000Ng::getReceivedDataLength();
     byte init_recv[init_len];
     DW1000Ng::getReceivedData(init_recv, init_len);
 
     if(!isRangingInitiation(init_recv, init_len)) {
-        return;
+        return nullptr;
     }
 
-    byte* next_anchor = handleRangingInitiation(init_recv, init_len);
+    return handleRangingInitiation(init_recv, init_len);
+}
+
+void loop() {
+    DW1000Ng::deepSleep();
+    delay(blink_rate);
+    DW1000Ng::spiWakeup();
+    DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
+
+    
+
+    byte* next_anchor = rangeRequest();
+
+    if(next_anchor == nullptr) {
+        Serial.println("Nnx");
+        return;
+    }
 
     if(range(next_anchor)) {
         size_t act_len = DW1000Ng::getReceivedDataLength();
