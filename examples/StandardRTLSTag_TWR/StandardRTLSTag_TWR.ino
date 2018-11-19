@@ -155,6 +155,8 @@ void loop() {
     DW1000Ng::spiWakeup();
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
 
+    rangeRequest();
+
     if(!receive()) return;
 
     size_t init_len = DW1000Ng::getReceivedDataLength();
