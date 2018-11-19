@@ -126,10 +126,8 @@ boolean nextRangingStep() {
 
 boolean range(byte target_anchor[]) {
     DW1000NgRTLS::transmitPoll(target_anchor);
-    Serial.println("p");
     /* Start of poll control for range */
     if(!nextRangingStep()) return false;
-    Serial.println("pa");
     size_t cont_len = DW1000Ng::getReceivedDataLength();
     byte cont_recv[cont_len];
     DW1000Ng::getReceivedData(cont_recv, cont_len);
