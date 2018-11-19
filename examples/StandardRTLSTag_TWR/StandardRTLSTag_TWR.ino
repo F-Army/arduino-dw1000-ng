@@ -118,11 +118,6 @@ boolean isRangingInitiation(byte recv_data[], size_t recv_len) {
     return (recv_len > 17 && recv_data[15] == RANGING_INITIATION) ? true : false;
 }
 
-byte* handleRangingInitiation(byte initFrame[], size_t initFrameLen ) {
-    DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&initFrame[16], 2));
-    return &initFrame[13];
-}
-
 boolean nextRangingStep() {
     waitForTransmission();
     if(!receive()) return false;
@@ -149,6 +144,11 @@ boolean range(byte target_anchor[]) {
 
     return true;
     /* end of ranging */
+}
+
+byte* handleRangingInitiation(byte initFrame[], size_t initFrameLen ) {
+    DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&initFrame[16], 2));
+    return &initFrame[13];
 }
 
 void loop() {
