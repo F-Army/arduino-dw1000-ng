@@ -144,6 +144,24 @@ boolean range(byte target_anchor[]) {
     /* end of ranging */
 }
 
+byte* rangeRequest() {
+    DW1000NgRTLS::transmitTwrShortBlink();
+    waitForTransmission();
+
+    if(!receive()) return nullptr;
+
+    size_t init_len = DW1000Ng::getReceivedDataLength();
+    byte init_recv[init_len];
+    DW1000Ng::getReceivedData(init_recv, init_len);
+
+    if(!isRangingInitiation(init_recv, init_len)) {
+        return nullptr;
+    }
+
+    DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&init_recv[16], 2));
+    return &init_recv[13];
+}
+
 
 void loop() {
     DW1000Ng::deepSleep();
@@ -151,22 +169,10 @@ void loop() {
     DW1000Ng::spiWakeup();
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
 
-    DW1000NgRTLS::transmitTwrShortBlink();
-    waitForTransmission();
 
-    if(!receive()) return;
+    byte* next_anchor = rangeRequest();
 
-    size_t init_len = DW1000Ng::getReceivedDataLength();
-    byte init_recv[init_len];
-    DW1000Ng::getReceivedData(init_recv, init_len);
-
-    if(!isRangingInitiation(init_recv, init_len)) {
-        return;
-    }
-
-    DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&init_recv[16], 2));
-
-    byte* next_anchor = &init_recv[13];
+    if(next_anchor == nullptr) return;
 
     if(range(next_anchor)) {
         size_t act_len = DW1000Ng::getReceivedDataLength();
