@@ -168,7 +168,9 @@ void loop() {
         return;
     }
 
-    byte* next_anchor = handleRangingInitiation(init_recv, init_len);
+    DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&init_recv[16], 2));
+
+    byte* next_anchor = &init_recv[13];
 
     if(range(next_anchor)) {
         size_t act_len = DW1000Ng::getReceivedDataLength();
