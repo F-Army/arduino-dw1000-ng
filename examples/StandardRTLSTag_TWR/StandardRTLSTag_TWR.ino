@@ -78,8 +78,8 @@ void setup() {
 
     DW1000Ng::setAntennaDelay(16436);
 
-    DW1000Ng::setPreambleDetectionTimeout(8);
-    DW1000Ng::setSfdDetectionTimeout(256);    
+    DW1000Ng::setPreambleDetectionTimeout(15);
+    DW1000Ng::setSfdDetectionTimeout(273);
     DW1000Ng::setReceiveFrameWaitTimeoutPeriod(4000);
     
     Serial.println(F("Committed configuration ..."));
@@ -105,12 +105,10 @@ void waitForTransmission() {
 boolean receive() {
     DW1000Ng::startReceive();
     while(!DW1000Ng::isReceiveDone()) {
-        /*
         if(DW1000Ng::isReceiveTimeout()) {
             DW1000Ng::clearReceiveTimeoutStatus();
             return false;
         }
-        */
     }
     DW1000Ng::clearReceiveStatus();
     return true;
