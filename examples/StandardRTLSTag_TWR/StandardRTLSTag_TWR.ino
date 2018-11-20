@@ -132,10 +132,6 @@ boolean receive() {
     return true;
 }
 
-boolean isRangingInitiation(byte recv_data[], size_t recv_len) {
-    return (recv_len > 17 && recv_data[15] == RANGING_INITIATION) ? true : false;
-}
-
 boolean nextRangingStep() {
     waitForTransmission();
     if(!receive()) return false;
@@ -187,7 +183,7 @@ RangeRequestResult rangeRequest() {
     byte init_recv[init_len];
     DW1000Ng::getReceivedData(init_recv, init_len);
 
-    if(!isRangingInitiation(init_recv, init_len)) {
+    if(!(init_len > 17 && init_recv[15] == RANGING_INITIATION)) {
         return { false, 0};
     }
 
