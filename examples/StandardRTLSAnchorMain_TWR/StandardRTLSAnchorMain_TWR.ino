@@ -172,10 +172,10 @@ void loop() {
 
     } else if (recv_len > 18 && recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
 
-        DW1000NgRTLS::transmitRangingConfirm(&recv_data[7], anchor_b);
-
         uint64_t timeResponseToPoll = DW1000Ng::getTransmitTimestamp();
         uint64_t timeFinalMessageReceive = DW1000Ng::getReceiveTimestamp();
+
+        DW1000NgRTLS::transmitRangingConfirm(&recv_data[7], anchor_b);
         
         range_self = DW1000NgRanging::computeRangeAsymmetric(
                 DW1000NgUtils::bytesAsValue(recv_data + 10, LENGTH_TIMESTAMP), // Poll send time
