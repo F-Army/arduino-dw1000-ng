@@ -31,8 +31,6 @@ const uint8_t PIN_RST = 9;
 const uint8_t PIN_SS = SS; // spi select pin
 #endif
 
-// timestamps to remember
-volatile uint64_t timePollReceived;
 
 Position position_self = {0,0};
 Position position_B = {3,0};
@@ -163,7 +161,7 @@ void loop() {
         DW1000Ng::getReceivedData(poll_data, poll_len);
 
         if(poll_len > 9 && poll_data[9] == RANGING_TAG_POLL) {
-            timePollReceived = DW1000Ng::getReceiveTimestamp();
+            uint64_t timePollReceived = DW1000Ng::getReceiveTimestamp();
             DW1000NgRTLS::transmitResponseToPoll(&poll_data[7]);
             waitForTransmission();
             uint64_t timeResponseToPoll = DW1000Ng::getTransmitTimestamp();
