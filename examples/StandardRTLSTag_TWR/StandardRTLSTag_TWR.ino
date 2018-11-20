@@ -208,14 +208,7 @@ RangeInfrastructureResult rangeInfrastructure(uint16_t first_anchor) {
     }
 };
 
-
-void loop() {
-    DW1000Ng::deepSleep();
-    delay(blink_rate);
-    DW1000Ng::spiWakeup();
-    DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
-
-
+boolean localizeTWR() {
     RangeRequestResult request_result = rangeRequest();
 
     if(request_result.success) {
@@ -224,5 +217,18 @@ void loop() {
 
         if(result.success)
             blink_rate = result.new_blink_rate;
+            return true;
     }
+    return false;
+}
+
+
+void loop() {
+    DW1000Ng::deepSleep();
+    delay(blink_rate);
+    DW1000Ng::spiWakeup();
+    DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
+
+    localizeTWR(); // Can also check if it failed
+    
 }
