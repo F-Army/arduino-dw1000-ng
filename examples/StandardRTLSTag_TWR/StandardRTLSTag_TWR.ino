@@ -124,7 +124,6 @@ boolean receive() {
     while(!DW1000Ng::isReceiveDone()) {
         if(DW1000Ng::isReceiveTimeout() ) {
             DW1000Ng::clearReceiveTimeoutStatus();
-            Serial.println("to");
             return false;
         }
     }
