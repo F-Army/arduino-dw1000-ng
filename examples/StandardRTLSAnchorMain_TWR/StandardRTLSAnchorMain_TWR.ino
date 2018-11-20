@@ -48,6 +48,7 @@ byte target_eui[8];
 byte tag_shortAddress[] = {0x05, 0x00};
 
 byte anchor_b[] = {0x02, 0x00};
+uint16_t next_anchor = 2;
 byte anchor_c[] = {0x03, 0x00};
 
 device_configuration_t DEFAULT_CONFIG = {
@@ -142,7 +143,7 @@ void waitForTransmission() {
     DW1000Ng::clearTransmitStatus();
 }
 
-double continueRange() {
+double continueRange(NextActivity next, uint16_t value) {
     double range;
     if(!receive()) return;
 
@@ -164,7 +165,13 @@ double continueRange() {
         if(rfinal_len > 18 && rfinal_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
             uint64_t timeFinalMessageReceive = DW1000Ng::getReceiveTimestamp();
 
-            DW1000NgRTLS::transmitRangingConfirm(&rfinal_data[7], anchor_b);
+            byte finishValue[2];
+            DW1000NgUtils::writeValueToBytes(finishValue, value, 2);
+
+            if(next == NextActivity::RANGING_CONFIRM)
+                DW1000NgRTLS::transmitRangingConfirm(&rfinal_data[7], finishValue);
+            else
+                DW1000NgRTLS::transmitActivityFinished(&rfinal_data[7], finishValue);
 
             range = DW1000NgRanging::computeRangeAsymmetric(
                 DW1000NgUtils::bytesAsValue(rfinal_data + 10, LENGTH_TIMESTAMP), // Poll send time
@@ -198,7 +205,7 @@ void loop() {
         DW1000NgRTLS::transmitRangingInitiation(&recv_data[2], tag_shortAddress);
         waitForTransmission();
 
-        range_self = continueRange();
+        range_self = continueRange(NextActivity::RANGING_CONFIRM, next_anchor);
 
         String rangeString = "Range: "; rangeString += range_self; rangeString += " m";
         rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
