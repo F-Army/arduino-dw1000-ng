@@ -124,23 +124,20 @@ void setup() {
     DW1000Ng::attachReceivedHandler(handleReceived);
     
     // anchor starts in receiving mode, awaiting a ranging poll message
-    receive();
+    DW1000Ng::startReceive();
+    noteActivity();
 }
 
 void noteActivity() {
     // update activity timestamp, so that we do not reach "resetPeriod"
     lastActivity = millis();
 }
-
-void receive() {
-    DW1000Ng::startReceive();
-    noteActivity();
-}
  
 void resetInactive() {
     // anchor listens for POLL
     DW1000Ng::forceTRxOff();
-    receive();
+    DW1000Ng::startReceive();
+    noteActivity();
 }
 
 void handleSent() {
