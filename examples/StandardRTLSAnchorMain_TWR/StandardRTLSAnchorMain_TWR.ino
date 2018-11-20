@@ -141,20 +141,10 @@ void waitForTransmission() {
     while(!DW1000Ng::isTransmitDone()) {}
     DW1000Ng::clearTransmitStatus();
 }
- 
-void loop() {
+
+double continueRange() {
+    double range;
     if(!receive()) return;
-
-    size_t recv_len = DW1000Ng::getReceivedDataLength();
-    byte recv_data[recv_len];
-    DW1000Ng::getReceivedData(recv_data, recv_len);
-
-
-    if(recv_data[0] == BLINK) {
-        /* Is blink */
-        DW1000NgRTLS::transmitRangingInitiation(&recv_data[2], tag_shortAddress);
-        waitForTransmission();
-        if(!receive()) return;
 
         size_t poll_len = DW1000Ng::getReceivedDataLength();
         byte poll_data[poll_len];
@@ -176,7 +166,7 @@ void loop() {
 
                 DW1000NgRTLS::transmitRangingConfirm(&rfinal_data[7], anchor_b);
 
-                range_self = DW1000NgRanging::computeRangeAsymmetric(
+                range = DW1000NgRanging::computeRangeAsymmetric(
                     DW1000NgUtils::bytesAsValue(rfinal_data + 10, LENGTH_TIMESTAMP), // Poll send time
                     timePollReceived, 
                     timeResponseToPoll, // Response to poll sent time
@@ -185,18 +175,35 @@ void loop() {
                     timeFinalMessageReceive // Final message receive time
                 );
 
-                range_self = DW1000NgRanging::correctRange(range_self);
+                range = DW1000NgRanging::correctRange(range);
     
                 /* In case of wrong read due to bad device calibration */
-                if(range_self <= 0) 
-                    range_self = 0.000001;
+                if(range <= 0) 
+                    range = 0.000001;
 
-                String rangeString = "Range: "; rangeString += range_self; rangeString += " m";
-                rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
-                Serial.println(rangeString);
-
+                return range;
             }
         }
+}
+ 
+void loop() {
+    if(!receive()) return;
+
+    size_t recv_len = DW1000Ng::getReceivedDataLength();
+    byte recv_data[recv_len];
+    DW1000Ng::getReceivedData(recv_data, recv_len);
+
+
+    if(recv_data[0] == BLINK) {
+        /* Is blink */
+        DW1000NgRTLS::transmitRangingInitiation(&recv_data[2], tag_shortAddress);
+        waitForTransmission();
+
+        range_self = continueRange();
+
+        String rangeString = "Range: "; rangeString += range_self; rangeString += " m";
+        rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
+        Serial.println(rangeString);
 
     } else if(recv_data[9] == 0x60) {
         double range = static_cast<double>(DW1000NgUtils::bytesAsValue(&recv_data[10],2) / 1000.0);
