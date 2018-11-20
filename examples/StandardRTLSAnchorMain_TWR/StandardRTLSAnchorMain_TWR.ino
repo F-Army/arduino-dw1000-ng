@@ -166,34 +166,40 @@ void loop() {
             timePollReceived = DW1000Ng::getReceiveTimestamp();
             DW1000NgRTLS::transmitResponseToPoll(&poll_data[7]);
             waitForTransmission();
+
+            if(!receive()) return;
+
+            size_t rfinal_len = DW1000Ng::getReceivedDataLength();
+            byte rfinal_data[rfinal_len];
+            DW1000Ng::getReceivedData(rfinal_data, rfinal_len);
+            if(rfinal_len > 18 && rfinal_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
+                uint64_t timeResponseToPoll = DW1000Ng::getTransmitTimestamp();
+                uint64_t timeFinalMessageReceive = DW1000Ng::getReceiveTimestamp();
+
+                DW1000NgRTLS::transmitRangingConfirm(&rfinal_data[7], anchor_b);
+
+                range_self = DW1000NgRanging::computeRangeAsymmetric(
+                    DW1000NgUtils::bytesAsValue(rfinal_data + 10, LENGTH_TIMESTAMP), // Poll send time
+                    timePollReceived, 
+                    timeResponseToPoll, // Response to poll sent time
+                    DW1000NgUtils::bytesAsValue(rfinal_data + 14, LENGTH_TIMESTAMP), // Response to Poll Received
+                    DW1000NgUtils::bytesAsValue(rfinal_data + 18, LENGTH_TIMESTAMP), // Final Message send time
+                    timeFinalMessageReceive // Final message receive time
+                );
+
+                range_self = DW1000NgRanging::correctRange(range_self);
+
+                /* In case of wrong read due to bad device calibration */
+                if(range_self <= 0) 
+                    range_self = 0.001;
+
+                String rangeString = "Range: "; rangeString += range_self; rangeString += " m";
+                rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
+                Serial.println(rangeString);
+
+            }
         }
 
-    } else if (recv_len > 18 && recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
-
-        uint64_t timeResponseToPoll = DW1000Ng::getTransmitTimestamp();
-        uint64_t timeFinalMessageReceive = DW1000Ng::getReceiveTimestamp();
-
-        DW1000NgRTLS::transmitRangingConfirm(&recv_data[7], anchor_b);
-        
-        range_self = DW1000NgRanging::computeRangeAsymmetric(
-                DW1000NgUtils::bytesAsValue(recv_data + 10, LENGTH_TIMESTAMP), // Poll send time
-                timePollReceived, 
-                timeResponseToPoll, // Response to poll sent time
-                DW1000NgUtils::bytesAsValue(recv_data + 14, LENGTH_TIMESTAMP), // Response to Poll Received
-                DW1000NgUtils::bytesAsValue(recv_data + 18, LENGTH_TIMESTAMP), // Final Message send time
-                timeFinalMessageReceive // Final message receive time
-        );
-
-        range_self = DW1000NgRanging::correctRange(range_self);
-
-        /* In case of wrong read due to bad device calibration */
-        if(range_self <= 0) 
-            range_self = 0.001;
-        
-        String rangeString = "Range: "; rangeString += range_self; rangeString += " m";
-        rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
-        Serial.println(rangeString);
-        
     } else if(recv_data[9] == 0x60) {
         double range = static_cast<double>(DW1000NgUtils::bytesAsValue(&recv_data[10],2) / 1000.0);
         String rangeReportString = "Range from: "; rangeReportString += recv_data[7];
