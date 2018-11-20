@@ -172,19 +172,22 @@ void loop() {
 
     } else if (recv_len > 18 && recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
 
+        uint64_t timeResponseToPoll = DW1000Ng::getTransmitTimestamp();
+        uint64_t timeFinalMessageReceive = DW1000Ng::getReceiveTimestamp();
+        
         range_self = DW1000NgRanging::computeRangeAsymmetric(
                 DW1000NgUtils::bytesAsValue(recv_data + 10, LENGTH_TIMESTAMP), // Poll send time
                 timePollReceived, 
-                DW1000Ng::getTransmitTimestamp(), // Response to poll sent time
+                timeResponseToPoll, // Response to poll sent time
                 DW1000NgUtils::bytesAsValue(recv_data + 14, LENGTH_TIMESTAMP), // Response to Poll Received
                 DW1000NgUtils::bytesAsValue(recv_data + 18, LENGTH_TIMESTAMP), // Final Message send time
-                DW1000Ng::getReceiveTimestamp() // Final message receive time
+                timeFinalMessageReceive // Final message receive time
         );
-            
-        DW1000NgRTLS::transmitRangingConfirm(&recv_data[7], anchor_b);
 
         range_self = DW1000NgRanging::correctRange(range_self);
 
+        DW1000NgRTLS::transmitRangingConfirm(&recv_data[7], anchor_b);
+        
         /* In case of wrong read due to bad device calibration */
         if(range_self <= 0) 
             range_self = 0.001;
