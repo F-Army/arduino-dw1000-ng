@@ -166,6 +166,7 @@ void loop() {
             timePollReceived = DW1000Ng::getReceiveTimestamp();
             DW1000NgRTLS::transmitResponseToPoll(&poll_data[7]);
             waitForTransmission();
+            uint64_t timeResponseToPoll = DW1000Ng::getTransmitTimestamp();
 
             if(!receive()) return;
 
@@ -173,7 +174,6 @@ void loop() {
             byte rfinal_data[rfinal_len];
             DW1000Ng::getReceivedData(rfinal_data, rfinal_len);
             if(rfinal_len > 18 && rfinal_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
-                uint64_t timeResponseToPoll = DW1000Ng::getTransmitTimestamp();
                 uint64_t timeFinalMessageReceive = DW1000Ng::getReceiveTimestamp();
 
                 DW1000NgRTLS::transmitRangingConfirm(&rfinal_data[7], anchor_b);
@@ -188,7 +188,7 @@ void loop() {
                 );
 
                 range_self = DW1000NgRanging::correctRange(range_self);
-
+    
                 /* In case of wrong read due to bad device calibration */
                 if(range_self <= 0) 
                     range_self = 0.001;
