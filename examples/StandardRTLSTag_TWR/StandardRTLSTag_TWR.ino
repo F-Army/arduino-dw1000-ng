@@ -119,7 +119,6 @@ void waitForTransmission() {
 
 boolean receive() {
     DW1000Ng::startReceive();
-    unsigned long timeout = micros();
     while(!DW1000Ng::isReceiveDone()) {
         if(DW1000Ng::isReceiveTimeout() ) {
             DW1000Ng::clearReceiveTimeoutStatus();
