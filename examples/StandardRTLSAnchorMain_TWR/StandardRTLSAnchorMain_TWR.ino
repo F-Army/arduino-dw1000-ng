@@ -154,7 +154,7 @@ void loop() {
 
     if(recv_data[0] == BLINK) {
         /* Is blink */
-        DW1000NgRTLS::handleTwrShortBlink(recv_data, tag_shortAddress);
+        DW1000NgRTLS::transmitRangingInitiation(&recv_data[2], tag_shortAddress);
     } else if (recv_len > 9 && recv_data[9] == RANGING_TAG_POLL) {
         DW1000NgRTLS::transmitResponseToPoll(&recv_data[7]);
         waitForTransmission();
