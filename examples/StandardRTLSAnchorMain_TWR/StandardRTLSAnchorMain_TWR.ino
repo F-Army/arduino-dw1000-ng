@@ -156,11 +156,19 @@ void loop() {
         /* Is blink */
         DW1000NgRTLS::transmitRangingInitiation(&recv_data[2], tag_shortAddress);
         waitForTransmission();
-        
-    } else if (recv_len > 9 && recv_data[9] == RANGING_TAG_POLL) {
-        DW1000NgRTLS::transmitResponseToPoll(&recv_data[7]);
-        waitForTransmission();
-        timePollReceived = DW1000Ng::getReceiveTimestamp();
+        if(!receive()) return;
+
+        size_t poll_len = DW1000Ng::getReceivedDataLength();
+        byte poll_data[poll_len];
+        DW1000Ng::getReceivedData(poll_data, poll_len);
+        if(poll_len > 9 && poll_data[9] == RANGING_TAG_POLL) {
+            DW1000NgRTLS::transmitResponseToPoll(&poll_data[7]);
+            waitForTransmission();
+            timePollReceived = DW1000Ng::getReceiveTimestamp();
+        } else {
+            return;
+        }
+
     } else if (recv_len > 18 && recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
 
         range_self = DW1000NgRTLS::handleFinalMessageEmbedded(recv_data, timePollReceived, NextActivity::RANGING_CONFIRM, anchor_b);
