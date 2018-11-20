@@ -163,9 +163,9 @@ void loop() {
         DW1000Ng::getReceivedData(poll_data, poll_len);
 
         if(poll_len > 9 && poll_data[9] == RANGING_TAG_POLL) {
+            timePollReceived = DW1000Ng::getReceiveTimestamp();
             DW1000NgRTLS::transmitResponseToPoll(&poll_data[7]);
             waitForTransmission();
-            timePollReceived = DW1000Ng::getReceiveTimestamp();
         }
 
     } else if (recv_len > 18 && recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
