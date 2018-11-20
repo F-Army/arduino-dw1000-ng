@@ -138,6 +138,11 @@ boolean receive() {
     DW1000Ng::clearReceiveStatus();
     return true;
 }
+
+void waitForTransmission() {
+    while(!DW1000Ng::isTransmitDone()) {}
+    DW1000Ng::clearTransmitStatus();
+}
  
 void loop() {
     if(!receive()) return;
@@ -148,6 +153,7 @@ void loop() {
 
     if (recv_len > 9 && recv_data[9] == RANGING_TAG_POLL) {
         DW1000NgRTLS::transmitResponseToPoll(&recv_data[7]);
+        waitForTransmission();
         timePollReceived = DW1000Ng::getReceiveTimestamp();
     } else if (recv_len > 18 && recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
 
@@ -184,4 +190,3 @@ void loop() {
         DW1000NgRTLS::handleTwrShortBlink(recv_data, tag_shortAddress);
     }
 }
-
