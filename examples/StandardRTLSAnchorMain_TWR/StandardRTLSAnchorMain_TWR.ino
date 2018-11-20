@@ -195,7 +195,6 @@ void loop() {
 
 
     if(recv_data[0] == BLINK) {
-        /* Is blink */
         DW1000NgRTLS::transmitRangingInitiation(&recv_data[2], tag_shortAddress);
         waitForTransmission();
 
