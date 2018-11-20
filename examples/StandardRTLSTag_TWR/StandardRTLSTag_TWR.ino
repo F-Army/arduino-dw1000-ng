@@ -32,16 +32,10 @@ const uint8_t PIN_RST = 9;
 
 volatile uint32_t blink_rate = 200;
 
-typedef struct RangeInfrastructureResult {
-    boolean success;
-    uint16_t new_blink_rate;
-} RangeInfrastructureResult;
-
 typedef struct RangeRequestResult {
     boolean success;
     uint16_t target_anchor;
 } RangeRequestResult;
-
 
 typedef struct RangeResult {
     boolean success;
@@ -49,6 +43,11 @@ typedef struct RangeResult {
     uint16_t next_anchor;
     uint32_t new_blink_rate;
 } RangeResult;
+
+typedef struct RangeInfrastructureResult {
+    boolean success;
+    uint16_t new_blink_rate;
+} RangeInfrastructureResult;
 
 device_configuration_t DEFAULT_CONFIG = {
     false,
@@ -207,7 +206,7 @@ RangeInfrastructureResult rangeInfrastructure(uint16_t first_anchor) {
     }
 };
 
-boolean localizeTWR() {
+RangeInfrastructureResult localizeTWR() {
     RangeRequestResult request_result = rangeRequest();
 
     if(request_result.success) {
@@ -215,10 +214,9 @@ boolean localizeTWR() {
         RangeInfrastructureResult result = rangeInfrastructure(request_result.target_anchor);
 
         if(result.success)
-            blink_rate = result.new_blink_rate;
-            return true;
+            return result;
     }
-    return false;
+    return {false, 0};
 }
 
 
@@ -228,6 +226,7 @@ void loop() {
     DW1000Ng::spiWakeup();
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
 
-    localizeTWR(); // Can also check if it failed
-    
+    RangeInfrastructureResult res = localizeTWR();
+    if(res.success)
+        blink_rate = res.new_blink_rate;
 }
