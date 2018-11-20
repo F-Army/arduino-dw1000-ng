@@ -161,6 +161,7 @@ void loop() {
         size_t poll_len = DW1000Ng::getReceivedDataLength();
         byte poll_data[poll_len];
         DW1000Ng::getReceivedData(poll_data, poll_len);
+
         if(poll_len > 9 && poll_data[9] == RANGING_TAG_POLL) {
             DW1000NgRTLS::transmitResponseToPoll(&poll_data[7]);
             waitForTransmission();
@@ -171,7 +172,16 @@ void loop() {
 
     } else if (recv_len > 18 && recv_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
 
-        range_self = DW1000NgRTLS::handleFinalMessageEmbedded(recv_data, timePollReceived, NextActivity::RANGING_CONFIRM, anchor_b);
+        range_self = DW1000NgRanging::computeRangeAsymmetric(
+                DW1000NgUtils::bytesAsValue(recv_data + 10, LENGTH_TIMESTAMP), // Poll send time
+                timePollReceived, 
+                DW1000Ng::getTransmitTimestamp(), // Response to poll sent time
+                DW1000NgUtils::bytesAsValue(recv_data + 14, LENGTH_TIMESTAMP), // Response to Poll Received
+                DW1000NgUtils::bytesAsValue(recv_data + 18, LENGTH_TIMESTAMP), // Final Message send time
+                DW1000Ng::getReceiveTimestamp() // Final message receive time
+        );
+            
+        DW1000NgRTLS::transmitRangingConfirm(&recv_data[7], anchor_b);
 
         range_self = DW1000NgRanging::correctRange(range_self);
 
