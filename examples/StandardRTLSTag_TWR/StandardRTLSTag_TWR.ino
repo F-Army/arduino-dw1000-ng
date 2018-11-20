@@ -180,8 +180,8 @@ RangeResult range(uint16_t anchor, uint16_t replyDelayUs) {
 
 RangeRequestResult rangeRequest() {
     DW1000NgRTLS::transmitTwrShortBlink();
-    waitForTransmission();
-    if(!receive()) return { false, 0};
+    
+    if(!nextRangingStep()) return {false, 0};
 
     size_t init_len = DW1000Ng::getReceivedDataLength();
     byte init_recv[init_len];
