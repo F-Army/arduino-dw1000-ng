@@ -151,7 +151,11 @@ void loop() {
     byte recv_data[recv_len];
     DW1000Ng::getReceivedData(recv_data, recv_len);
 
-    if (recv_len > 9 && recv_data[9] == RANGING_TAG_POLL) {
+
+    if(recv_data[0] == BLINK) {
+        /* Is blink */
+        DW1000NgRTLS::handleTwrShortBlink(recv_data, tag_shortAddress);
+    } else if (recv_len > 9 && recv_data[9] == RANGING_TAG_POLL) {
         DW1000NgRTLS::transmitResponseToPoll(&recv_data[7]);
         waitForTransmission();
         timePollReceived = DW1000Ng::getReceiveTimestamp();
@@ -185,8 +189,5 @@ void loop() {
             positioning += y;
             Serial.println(positioning);
         }
-    } else if(recv_data[0] == BLINK) {
-        /* Is blink */
-        DW1000NgRTLS::handleTwrShortBlink(recv_data, tag_shortAddress);
     }
 }
