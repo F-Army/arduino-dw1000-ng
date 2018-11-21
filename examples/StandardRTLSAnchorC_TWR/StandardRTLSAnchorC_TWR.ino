@@ -154,6 +154,8 @@ ContinueRangeResult continueRange(NextActivity next, uint16_t value) {
             else
                 DW1000NgRTLS::transmitActivityFinished(&rfinal_data[7], finishValue);
 
+            waitForTransmission();
+
             range = DW1000NgRanging::computeRangeAsymmetric(
                 DW1000NgUtils::bytesAsValue(rfinal_data + 10, LENGTH_TIMESTAMP), // Poll send time
                 timePollReceived, 
@@ -178,7 +180,6 @@ void loop() {
      ContinueRangeResult result = continueRange(NextActivity::ACTIVITY_FINISHED, blink_rate);
      if(result.success) {
         range_self = result.range;
-        waitForTransmission();
         transmitRangeReport();
 
         String rangeString = "Range: "; rangeString += range_self; rangeString += " m";

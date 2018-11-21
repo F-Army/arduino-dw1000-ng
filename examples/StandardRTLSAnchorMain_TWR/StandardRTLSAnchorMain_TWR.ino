@@ -175,6 +175,8 @@ ContinueRangeResult continueRange(NextActivity next, uint16_t value) {
                 DW1000NgRTLS::transmitRangingConfirm(&rfinal_data[7], finishValue);
             else
                 DW1000NgRTLS::transmitActivityFinished(&rfinal_data[7], finishValue);
+            
+            waitForTransmission();
 
             range = DW1000NgRanging::computeRangeAsymmetric(
                 DW1000NgUtils::bytesAsValue(rfinal_data + 10, LENGTH_TIMESTAMP), // Poll send time
