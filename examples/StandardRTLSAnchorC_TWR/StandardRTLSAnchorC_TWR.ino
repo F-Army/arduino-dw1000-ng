@@ -178,6 +178,7 @@ void loop() {
      ContinueRangeResult result = continueRange(NextActivity::ACTIVITY_FINISHED, blink_rate);
      if(result.success) {
         range_self = result.range;
+        delay(1);
         transmitRangeReport();
 
         String rangeString = "Range: "; rangeString += range_self; rangeString += " m";
