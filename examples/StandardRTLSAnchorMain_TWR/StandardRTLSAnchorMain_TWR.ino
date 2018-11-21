@@ -45,6 +45,8 @@ double range_self;
 double range_B;
 double range_C;
 
+boolean received_B = false;
+
 byte target_eui[8];
 byte tag_shortAddress[] = {0x05, 0x00};
 
@@ -218,9 +220,10 @@ void loop() {
             String rangeReportString = "Range from: "; rangeReportString += recv_data[7];
             rangeReportString += " = "; rangeReportString += range;
             Serial.println(rangeReportString);
-            if(recv_data[7] == anchor_b[0] && recv_data[8] == anchor_b[1]) {
+            if(received_B == false && recv_data[7] == anchor_b[0] && recv_data[8] == anchor_b[1]) {
                 range_B = range;
-            } else if(recv_data[7] == anchor_c[0] && recv_data[8] == anchor_c[1]){
+                received_B = true;
+            } else if(received_B == true && recv_data[7] == anchor_c[0] && recv_data[8] == anchor_c[1]){
                 range_C = range;
                 double x,y;
                 calculatePosition(x,y);
@@ -228,6 +231,9 @@ void loop() {
                 positioning += x; positioning +=" y: ";
                 positioning += y;
                 Serial.println(positioning);
+                received_B = false;
+            } else {
+                received_B = false;
             }
         }
     }
