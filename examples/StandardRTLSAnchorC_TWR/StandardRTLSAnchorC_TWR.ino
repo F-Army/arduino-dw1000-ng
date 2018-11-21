@@ -179,7 +179,7 @@ ContinueRangeResult continueRange(NextActivity next, uint16_t value) {
 void loop() {
      ContinueRangeResult result = continueRange(NextActivity::ACTIVITY_FINISHED, blink_rate);
      if(result.success) {
-        delay(1);
+        delay(1); // Tweak based on your hardware
         range_self = result.range;
         transmitRangeReport();
 
