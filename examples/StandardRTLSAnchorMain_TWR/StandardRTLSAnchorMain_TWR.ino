@@ -23,6 +23,11 @@ typedef struct Position {
     double y;
 } Position;
 
+typedef struct ContinueRangeResult {
+    boolean success;
+    double range;
+} ContinueRangeResult;
+
 // connection pins
 #if defined(ESP8266)
 const uint8_t PIN_SS = 15;
@@ -139,9 +144,9 @@ void waitForTransmission() {
     DW1000Ng::clearTransmitStatus();
 }
 
-double continueRange(NextActivity next, uint16_t value) {
+ContinueRangeResult continueRange(NextActivity next, uint16_t value) {
     double range;
-    if(!receive()) return;
+    if(!receive()) return {false, 0};
 
     size_t poll_len = DW1000Ng::getReceivedDataLength();
     byte poll_data[poll_len];
@@ -153,7 +158,7 @@ double continueRange(NextActivity next, uint16_t value) {
         waitForTransmission();
         uint64_t timeResponseToPoll = DW1000Ng::getTransmitTimestamp();
 
-        if(!receive()) return;
+        if(!receive()) return {false, 0};
 
         size_t rfinal_len = DW1000Ng::getReceivedDataLength();
         byte rfinal_data[rfinal_len];
@@ -184,7 +189,7 @@ double continueRange(NextActivity next, uint16_t value) {
             if(range <= 0) 
                 range = 0.000001;
 
-            return range;
+            return {true, range};
         }
     }
 }
@@ -200,7 +205,9 @@ void loop() {
             DW1000NgRTLS::transmitRangingInitiation(&recv_data[2], tag_shortAddress);
             waitForTransmission();
 
-            range_self = continueRange(NextActivity::RANGING_CONFIRM, next_anchor);
+            ContinueRangeResult result = continueRange(NextActivity::RANGING_CONFIRM, next_anchor);
+            if(!result.success) return;
+            range_self = result.range;
 
             String rangeString = "Range: "; rangeString += range_self; rangeString += " m";
             rangeString += "\t RX power: "; rangeString += DW1000Ng::getReceivePower(); rangeString += " dBm";
