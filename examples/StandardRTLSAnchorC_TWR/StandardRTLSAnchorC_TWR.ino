@@ -179,6 +179,7 @@ ContinueRangeResult continueRange(NextActivity next, uint16_t value) {
 void loop() {
      ContinueRangeResult result = continueRange(NextActivity::ACTIVITY_FINISHED, blink_rate);
      if(result.success) {
+        delay(1);
         range_self = result.range;
         transmitRangeReport();
 
