@@ -67,7 +67,11 @@ void setup() {
     Serial.begin(115200);
     Serial.println(F("### arduino-DW1000Ng-ranging-anchor-C ###"));
     // initialize the driver
+    #if defined(ESP8266)
+    DW1000Ng::initializeNoInterrupt(PIN_SS);
+    #else
     DW1000Ng::initializeNoInterrupt(PIN_SS, PIN_RST);
+    #endif
     Serial.println(F("DW1000Ng initialized ..."));
     // general configuration
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
