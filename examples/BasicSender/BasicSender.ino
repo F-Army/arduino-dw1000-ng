@@ -126,8 +126,11 @@ void transmit() {
   DW1000Ng::startTransmit(TransmitMode::IMMEDIATE);
   delaySent = millis();
   while(!DW1000Ng::isTransmitDone()) {
-
+    #if defined(ESP8266)
+    yield();
+    #endif
   }
+  sentNum++;
   DW1000Ng::clearTransmitStatus();
 }
 
@@ -137,5 +140,4 @@ void loop() {
     Serial.print("ARDUINO delay sent [ms] ... "); Serial.println(millis() - delaySent);
     uint64_t newSentTime = DW1000Ng::getTransmitTimestamp();
     Serial.print("Processed packet ... #"); Serial.println(sentNum);
-    sentNum++;
 }
