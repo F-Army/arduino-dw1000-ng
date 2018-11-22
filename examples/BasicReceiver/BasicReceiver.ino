@@ -50,10 +50,15 @@
 #include <SPI.h>
 #include <DW1000Ng.hpp>
 
-// connection pins
+#if defined(ESP8266)
+const uint8_t PIN_RST = 5; // reset pin
+const uint8_t PIN_IRQ = 4; // irq pin
+const uint8_t PIN_SS = 15; // spi select pin
+#else
 const uint8_t PIN_RST = 9; // reset pin
 const uint8_t PIN_IRQ = 2; // irq pin
 const uint8_t PIN_SS = SS; // spi select pin
+#endif
 
 // DEBUG packet sent status and count
 volatile boolean received = false;
