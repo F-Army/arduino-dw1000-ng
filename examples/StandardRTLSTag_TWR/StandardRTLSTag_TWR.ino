@@ -196,11 +196,11 @@ RangeRequestResult rangeRequest() {
 }
 
 RangeInfrastructureResult rangeInfrastructure(uint16_t first_anchor) {
-    RangeResult result = range(first_anchor, 3000);
+    RangeResult result = range(first_anchor, 1500);
     if(!result.success) return {false , 0};
 
     while(result.success && result.next) {
-        result = range(result.next_anchor,3000);
+        result = range(result.next_anchor, 1500);
         if(!result.success) return {false , 0};
 
         #if defined(ESP8266)
