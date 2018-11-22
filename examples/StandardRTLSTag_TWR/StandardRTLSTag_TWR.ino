@@ -113,7 +113,11 @@ void setup() {
 }
 
 void waitForTransmission() {
-    while(!DW1000Ng::isTransmitDone()) {}
+    while(!DW1000Ng::isTransmitDone()) {
+    #if defined(ESP8266)
+    yield();
+    #endif
+    }
     DW1000Ng::clearTransmitStatus();
 }
 
@@ -124,6 +128,9 @@ boolean receive() {
             DW1000Ng::clearReceiveTimeoutStatus();
             return false;
         }
+        #if defined(ESP8266)
+        yield();
+        #endif
     }
     DW1000Ng::clearReceiveStatus();
     return true;
@@ -195,6 +202,10 @@ RangeInfrastructureResult rangeInfrastructure(uint16_t first_anchor) {
     while(result.success && result.next) {
         result = range(result.next_anchor,3000);
         if(!result.success) return {false , 0};
+        
+        #if defined(ESP8266)
+        yield();
+        #endif
     }
 
     if(result.success && result.new_blink_rate != 0) {

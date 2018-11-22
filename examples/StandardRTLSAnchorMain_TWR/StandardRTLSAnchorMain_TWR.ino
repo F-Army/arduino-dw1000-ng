@@ -140,13 +140,20 @@ boolean receive() {
             DW1000Ng::clearReceiveTimeoutStatus();
             return false;
         }
+        #if defined(ESP8266)
+        yield();
+        #endif
     }
     DW1000Ng::clearReceiveStatus();
     return true;
 }
 
 void waitForTransmission() {
-    while(!DW1000Ng::isTransmitDone()) {}
+    while(!DW1000Ng::isTransmitDone()) {
+        #if defined(ESP8266)
+        yield();
+        #endif
+    }
     DW1000Ng::clearTransmitStatus();
 }
 
