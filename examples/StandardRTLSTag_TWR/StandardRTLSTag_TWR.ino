@@ -95,9 +95,9 @@ void setup() {
 
     DW1000Ng::setAntennaDelay(16436);
 
-    DW1000Ng::setPreambleDetectionTimeout(16);
+    DW1000Ng::setPreambleDetectionTimeout(15);
     DW1000Ng::setSfdDetectionTimeout(273);
-    DW1000Ng::setReceiveFrameWaitTimeoutPeriod(3000);
+    DW1000Ng::setReceiveFrameWaitTimeoutPeriod(2000);
     
     Serial.println(F("Committed configuration ..."));
     // DEBUG chip info and registers pretty printed
@@ -202,7 +202,7 @@ RangeInfrastructureResult rangeInfrastructure(uint16_t first_anchor) {
     while(result.success && result.next) {
         result = range(result.next_anchor,3000);
         if(!result.success) return {false , 0};
-        
+
         #if defined(ESP8266)
         yield();
         #endif
