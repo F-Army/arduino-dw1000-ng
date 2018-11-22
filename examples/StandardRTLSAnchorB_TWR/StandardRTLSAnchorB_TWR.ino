@@ -78,9 +78,9 @@ void setup() {
     
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:02");
 
-    DW1000Ng::setPreambleDetectionTimeout(16);
+    DW1000Ng::setPreambleDetectionTimeout(64);
     DW1000Ng::setSfdDetectionTimeout(273);
-    DW1000Ng::setReceiveFrameWaitTimeoutPeriod(6000);
+    DW1000Ng::setReceiveFrameWaitTimeoutPeriod(5000);
 
     DW1000Ng::setNetworkId(RTLS_APP_ID);
     DW1000Ng::setDeviceAddress(2);
@@ -118,13 +118,20 @@ boolean receive() {
             DW1000Ng::clearReceiveTimeoutStatus();
             return false;
         }
+        #if defined(ESP8266)
+        yield();
+        #endif
     }
     DW1000Ng::clearReceiveStatus();
     return true;
 }
 
 void waitForTransmission() {
-    while(!DW1000Ng::isTransmitDone()) {}
+    while(!DW1000Ng::isTransmitDone()) {
+        #if defined(ESP8266)
+        yield();
+        #endif
+    }
     DW1000Ng::clearTransmitStatus();
 }
 
@@ -141,7 +148,7 @@ ContinueRangeResult continueRange(NextActivity next, uint16_t value) {
         DW1000NgRTLS::transmitResponseToPoll(&poll_data[7]);
         waitForTransmission();
         uint64_t timeResponseToPoll = DW1000Ng::getTransmitTimestamp();
-
+        delayMicroseconds(1500);
         if(!receive()) return {false, 0};
 
         size_t rfinal_len = DW1000Ng::getReceivedDataLength();
@@ -157,7 +164,7 @@ ContinueRangeResult continueRange(NextActivity next, uint16_t value) {
                 DW1000NgRTLS::transmitRangingConfirm(&rfinal_data[7], finishValue);
             else
                 DW1000NgRTLS::transmitActivityFinished(&rfinal_data[7], finishValue);
-
+            
             waitForTransmission();
 
             range = DW1000NgRanging::computeRangeAsymmetric(
