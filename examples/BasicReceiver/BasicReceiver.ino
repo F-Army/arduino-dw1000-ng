@@ -106,7 +106,6 @@ void setup() {
 
 void loop() {
   DW1000Ng::startReceive();
-  unsigned long beginning = millis();
   while(!DW1000Ng::isReceiveDone()) {
     #if defined(ESP8266)
     yield();
