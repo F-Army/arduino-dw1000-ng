@@ -170,7 +170,7 @@ ContinueRangeResult continueRange(NextActivity next, uint16_t value) {
         DW1000NgRTLS::transmitResponseToPoll(&poll_data[7]);
         waitForTransmission();
         uint64_t timeResponseToPoll = DW1000Ng::getTransmitTimestamp();
-
+        delayMicroseconds(1500);
         if(!receive()) return {false, 0};
 
         size_t rfinal_len = DW1000Ng::getReceivedDataLength();
