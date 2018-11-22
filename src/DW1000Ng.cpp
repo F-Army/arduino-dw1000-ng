@@ -80,11 +80,6 @@ namespace DW1000Ng {
 		byte       _chanctrl[LEN_CHAN_CTRL];
 		byte       _networkAndAddress[LEN_PANADR];
 
-		/* Sleep mode status */
-		boolean _wakeCounterDisabled;
-		boolean _wakePINDisabled;
-		boolean _wakeSPIDisabled;
-
 		/* Temperature and Voltage monitoring */
 		byte _vmeas3v3 = 0;
 		byte _tmeas23C = 0;
@@ -1230,15 +1225,6 @@ namespace DW1000Ng {
             _writeBytesToRegister(RF_CONF, RF_CONF_SUB, enable_mask, LEN_RX_CONF_SUB);
         }
 
-		/*Puts the device into sleep/deepSleep mode. This function also upload sleep config to AON.
-		  The DW1000 go to sleep only if SLEEP_EN_BIT has been set  */
-		void _goToSleep() {
-			/* Clear the register */
-			_writeToRegister(AON, AON_CTRL_SUB, 0x00, LEN_AON_CTRL);
-			/* Write 1 in SAVE_BIT */
-			_writeToRegister(AON, AON_CTRL_SUB, 0x02, LEN_AON_CTRL);
-		}
-
 		/*This function uploads sleep config to AON block */
 		void _uploadConfigToAON() {
 			/* Write 1 in UPL_CFG_BIT */
@@ -1442,43 +1428,21 @@ namespace DW1000Ng {
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LLDO_BIT, true);
 		_writeBytesToRegister(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
 
-		DW1000NgUtils::setBit(aon_cfg0, 1, SLEEP_EN_BIT, sleep_config.enableSLP);
 		DW1000NgUtils::setBit(aon_cfg0, 1, WAKE_PIN_BIT, sleep_config.enableWakePIN);
-		_wakePINDisabled = !sleep_config.enableWakePIN;
 		DW1000NgUtils::setBit(aon_cfg0, 1, WAKE_SPI_BIT, sleep_config.enableWakeSPI);
-		_wakeSPIDisabled = !sleep_config.enableWakeSPI;
-		DW1000NgUtils::setBit(aon_cfg0, 1, WAKE_CNT_BIT, sleep_config.enableWakeCNT);
-		_wakeCounterDisabled = !sleep_config.enableWakeCNT;
+		if(sleep_config.enableSLP) { /* Only if enableSLP is enabled the DW1000 will go to SLEEP */
+			DW1000NgUtils::setBit(aon_cfg0, 1, SLEEP_EN_BIT, true);
+			DW1000NgUtils::setBit(aon_cfg0, 1, WAKE_CNT_BIT, true);
+		}
 		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, 1);
 	}
 
+	/*Puts the device into sleep/deepSleep mode. This function also upload sleep config to AON. */
 	void sleep() {
-		if(_wakeCounterDisabled) {
-			_wakeCounterDisabled = false;
-			byte aon_cfg0[LEN_AON_CFG0];
-			memset(aon_cfg0, 0, LEN_AON_CFG0);
-			_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
-			DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, true);
-			_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
-		}
-		_goToSleep();
-	}
-
-	boolean deepSleep() {
-		if(_wakePINDisabled && _wakeSPIDisabled)
-			return false;
-
-		if(!_wakeCounterDisabled) {
-			_wakeCounterDisabled = true;
-			byte aon_cfg0[1];
-			memset(aon_cfg0, 0, 1);
-			_readBytes(AON, AON_CFG0_SUB, aon_cfg0, 1);
-			DW1000NgUtils::setBit(aon_cfg0, 1, WAKE_CNT_BIT, false);
-			_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, 1);
-		}
-
-		_goToSleep();
-		return true;
+		/* Clear the register */
+		_writeToRegister(AON, AON_CTRL_SUB, 0x00, LEN_AON_CTRL);
+		/* Write 1 in SAVE_BIT */
+		_writeToRegister(AON, AON_CTRL_SUB, 0x02, LEN_AON_CTRL);
 	}
 
 	void enterSleepAfterTX() {

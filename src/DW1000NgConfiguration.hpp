@@ -70,6 +70,5 @@ typedef struct sleep_configuration_t {
     boolean enableSLP;      /* Use this only for SLEEP, not for DEEPSLEEP */
     boolean enableWakePIN;
     boolean enableWakeSPI;
-    boolean enableWakeCNT;  /* This will be changed by sleep() and deepsleep() functions, this is here just for performance reasons. */
     uint16_t sleepTime;     /* The sleep time count elapse value. The units depend on which timer is running. */
 } sleep_configuration_t;

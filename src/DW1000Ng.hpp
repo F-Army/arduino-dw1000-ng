@@ -98,7 +98,7 @@ namespace DW1000Ng {
 	void setSleepTime(uint16_t sleepTime);
 
 	/**
-	Applies the common sleep configuration to the DW1000.
+	Applies the common sleep configuration and on-wake mode to the DW1000 for both DEEP_SLEEP and SLEEP modes.
 	ONW_LLDO_BIT and ONW_LLDE_BIT are 1 to default.
 
 	@param [in] config struct	The sleep/deepsleep configuration to apply to the DW1000
@@ -106,27 +106,20 @@ namespace DW1000Ng {
 	void applySleepConfiguration(sleep_configuration_t sleep_config);
 
 	/**
-	Enter in sleep mode. applySleepConfiguration must be called first
+	Enter in DeepSleep or Sleep mode. applySleepConfiguration must be called first.
+	Either spi wakeup or pin wakeup must be enabled.
 	*/
 	void sleep();
 
 	/**
-	Enter in deepSleep mode. applySleepConfiguration must be called first
-	Either spi wakeup or pin wakeup must be enabled
-
-	return false if both spi wakeup and pin wakeup are disabled
-	*/
-	boolean deepSleep();
-
-	/**
-	Enter in deepSleep after TX.
+	Enter in DeepSleep or Sleep mode after TX.
 	sleep_config should be set to allow for the appropriate DW1000 wakeup functionality.
 	This bit is cleared when the DW1000 wakes from sleep, unless the PRES_SLEEP bit is set.
 	*/
-	void enterDeepSleepAfterTX();
+	void enterSleepAfterTX();
 	
 	/**
-	Enter in deepSleep after RX.
+	Enter in DeepSleep or Sleep mode after TX.
 	sleep_config should be set to allow for the appropriate DW1000 wakeup functionality.
 	This bit is cleared when the DW1000 wakes from sleep, unless the PRES_SLEEP bit is set.
 	*/
