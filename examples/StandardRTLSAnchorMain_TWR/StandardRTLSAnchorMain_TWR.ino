@@ -96,9 +96,9 @@ void setup() {
     
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:01");
 
-    DW1000Ng::setPreambleDetectionTimeout(16);
+    DW1000Ng::setPreambleDetectionTimeout(64);
     DW1000Ng::setSfdDetectionTimeout(273);
-    DW1000Ng::setReceiveFrameWaitTimeoutPeriod(6000);
+    DW1000Ng::setReceiveFrameWaitTimeoutPeriod(5000);
 
     DW1000Ng::setNetworkId(RTLS_APP_ID);
     DW1000Ng::setDeviceAddress(1);
