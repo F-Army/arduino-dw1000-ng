@@ -112,42 +112,12 @@ void setup() {
     Serial.print("Device mode: "); Serial.println(msg);    
 }
 
-void waitForTransmission() {
-    while(!DW1000Ng::isTransmitDone()) {
-    #if defined(ESP8266)
-    yield();
-    #endif
-    }
-    DW1000Ng::clearTransmitStatus();
-}
-
-boolean receive() {
-    DW1000Ng::startReceive();
-    while(!DW1000Ng::isReceiveDone()) {
-        if(DW1000Ng::isReceiveTimeout() ) {
-            DW1000Ng::clearReceiveTimeoutStatus();
-            return false;
-        }
-        #if defined(ESP8266)
-        yield();
-        #endif
-    }
-    DW1000Ng::clearReceiveStatus();
-    return true;
-}
-
-boolean nextRangingStep() {
-    waitForTransmission();
-    if(!receive()) return false;
-    return true;
-}
-
 RangeResult range(uint16_t anchor, uint16_t replyDelayUs) {
     byte target_anchor[2];
     DW1000NgUtils::writeValueToBytes(target_anchor, anchor, 2);
     DW1000NgRTLS::transmitPoll(target_anchor);
     /* Start of poll control for range */
-    if(!nextRangingStep()) return {false, false, 0, 0};
+    if(!DW1000NgRTLS::nextRangingStep()) return {false, false, 0, 0};
     size_t cont_len = DW1000Ng::getReceivedDataLength();
     byte cont_recv[cont_len];
     DW1000Ng::getReceivedData(cont_recv, cont_len);
@@ -159,7 +129,7 @@ RangeResult range(uint16_t anchor, uint16_t replyDelayUs) {
         return {false, false, 0, 0};
     }
 
-    if(!nextRangingStep()) return {false, false, 0, 0};
+    if(!DW1000NgRTLS::nextRangingStep()) return {false, false, 0, 0};
 
     size_t act_len = DW1000Ng::getReceivedDataLength();
     byte act_recv[act_len];
@@ -181,7 +151,7 @@ RangeResult range(uint16_t anchor, uint16_t replyDelayUs) {
 RangeRequestResult rangeRequest() {
     DW1000NgRTLS::transmitTwrShortBlink();
     
-    if(!nextRangingStep()) return {false, 0};
+    if(!DW1000NgRTLS::nextRangingStep()) return {false, 0};
 
     size_t init_len = DW1000Ng::getReceivedDataLength();
     byte init_recv[init_len];

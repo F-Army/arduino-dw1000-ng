@@ -171,4 +171,34 @@ namespace DW1000NgRTLS {
 
         return range;
     }
+
+    static void waitForTransmission() {
+        while(!DW1000Ng::isTransmitDone()) {
+            #if defined(ESP8266)
+            yield();
+            #endif
+        }
+        DW1000Ng::clearTransmitStatus();
+    }
+
+    static boolean receive() {
+        DW1000Ng::startReceive();
+        while(!DW1000Ng::isReceiveDone()) {
+            if(DW1000Ng::isReceiveTimeout() ) {
+                DW1000Ng::clearReceiveTimeoutStatus();
+                return false;
+            }
+            #if defined(ESP8266)
+            yield();
+            #endif
+        }
+        DW1000Ng::clearReceiveStatus();
+        return true;
+    }
+
+    boolean nextRangingStep() {
+        waitForTransmission();
+        if(!receive()) return false;
+        return true;
+    }
 }
