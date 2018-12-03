@@ -30,11 +30,6 @@ const uint8_t PIN_RST = 9;
 
 volatile uint32_t blink_rate = 200;
 
-typedef struct RangeInfrastructureResult {
-    boolean success;
-    uint16_t new_blink_rate;
-} RangeInfrastructureResult;
-
 device_configuration_t DEFAULT_CONFIG = {
     false,
     true,
@@ -98,33 +93,12 @@ void setup() {
     Serial.print("Device mode: "); Serial.println(msg);    
 }
 
-RangeInfrastructureResult rangeInfrastructure(uint16_t first_anchor) {
-    RangeResult result = DW1000NgRTLS::range(first_anchor, 1500);
-    if(!result.success) return {false , 0};
-
-    while(result.success && result.next) {
-        result = DW1000NgRTLS::range(result.next_anchor, 1500);
-        if(!result.success) return {false , 0};
-
-        #if defined(ESP8266)
-        yield();
-        #endif
-    }
-
-    if(result.success && result.new_blink_rate != 0) {
-        return { true, result.new_blink_rate };
-    } else {
-        if(!result.success)
-            return { false , 0 };
-    }
-};
-
 RangeInfrastructureResult localizeTWR() {
     RangeRequestResult request_result = DW1000NgRTLS::rangeRequest();
 
     if(request_result.success) {
         
-        RangeInfrastructureResult result = rangeInfrastructure(request_result.target_anchor);
+        RangeInfrastructureResult result = DW1000NgRTLS::rangeInfrastructure(request_result.target_anchor);
 
         if(result.success)
             return result;

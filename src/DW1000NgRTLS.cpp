@@ -253,4 +253,25 @@ namespace DW1000NgRTLS {
         }
         /* end of ranging */
     }
+
+    RangeInfrastructureResult rangeInfrastructure(uint16_t first_anchor) {
+        RangeResult result = DW1000NgRTLS::range(first_anchor, 1500);
+        if(!result.success) return {false , 0};
+
+        while(result.success && result.next) {
+            result = DW1000NgRTLS::range(result.next_anchor, 1500);
+            if(!result.success) return {false , 0};
+
+            #if defined(ESP8266)
+            yield();
+            #endif
+        }
+
+        if(result.success && result.new_blink_rate != 0) {
+            return { true, result.new_blink_rate };
+        } else {
+            if(!result.success)
+                return { false , 0 };
+        }
+    }
 }
