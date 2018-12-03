@@ -130,11 +130,6 @@ namespace DW1000NgRTLS {
         return blinkRate;
     }
 
-    uint64_t handlePoll(byte frame[]) {
-        DW1000NgRTLS::transmitResponseToPoll(&frame[7]);
-        return DW1000Ng::getReceiveTimestamp(); // Poll receive time
-    }
-
     double handleFinalMessageEmbedded(byte frame[], uint64_t timePollReceived, NextActivity next, byte param[]) {
 
         double range = DW1000NgRanging::computeRangeAsymmetric(
