@@ -218,4 +218,39 @@ namespace DW1000NgRTLS {
         DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&init_recv[16], 2));
         return { true, DW1000NgUtils::bytesAsValue(&init_recv[13], 2) };
     }
+
+    RangeResult range(uint16_t anchor, uint16_t replyDelayUs) {
+        byte target_anchor[2];
+        DW1000NgUtils::writeValueToBytes(target_anchor, anchor, 2);
+        DW1000NgRTLS::transmitPoll(target_anchor);
+        /* Start of poll control for range */
+        if(!DW1000NgRTLS::nextRangingStep()) return {false, false, 0, 0};
+        size_t cont_len = DW1000Ng::getReceivedDataLength();
+        byte cont_recv[cont_len];
+        DW1000Ng::getReceivedData(cont_recv, cont_len);
+
+        if (cont_len > 10 && cont_recv[9] == ACTIVITY_CONTROL && cont_recv[10] == RANGING_CONTINUE) {
+            /* Received Response to poll */
+            DW1000NgRTLS::handleRangingContinueEmbedded(cont_recv, replyDelayUs);
+        } else {
+            return {false, false, 0, 0};
+        }
+
+        if(!DW1000NgRTLS::nextRangingStep()) return {false, false, 0, 0};
+
+        size_t act_len = DW1000Ng::getReceivedDataLength();
+        byte act_recv[act_len];
+        DW1000Ng::getReceivedData(act_recv, act_len);
+
+        if(act_len > 10 && act_recv[9] == ACTIVITY_CONTROL) {
+            if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
+                return {true, true, DW1000NgUtils::bytesAsValue(&act_recv[11], 2), 0};
+            } else if(act_len > 12 && act_recv[10] == ACTIVITY_FINISHED) {
+                return {true, false, 0, DW1000NgRTLS::handleActivityFinished(act_recv)};
+            }
+        } else {
+            return {false, false, 0, 0};
+        }
+        /* end of ranging */
+    }
 }

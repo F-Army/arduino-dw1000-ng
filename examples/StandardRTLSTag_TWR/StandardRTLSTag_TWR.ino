@@ -30,13 +30,6 @@ const uint8_t PIN_RST = 9;
 
 volatile uint32_t blink_rate = 200;
 
-typedef struct RangeResult {
-    boolean success;
-    boolean next;
-    uint16_t next_anchor;
-    uint32_t new_blink_rate;
-} RangeResult;
-
 typedef struct RangeInfrastructureResult {
     boolean success;
     uint16_t new_blink_rate;
@@ -105,48 +98,12 @@ void setup() {
     Serial.print("Device mode: "); Serial.println(msg);    
 }
 
-RangeResult range(uint16_t anchor, uint16_t replyDelayUs) {
-    byte target_anchor[2];
-    DW1000NgUtils::writeValueToBytes(target_anchor, anchor, 2);
-    DW1000NgRTLS::transmitPoll(target_anchor);
-    /* Start of poll control for range */
-    if(!DW1000NgRTLS::nextRangingStep()) return {false, false, 0, 0};
-    size_t cont_len = DW1000Ng::getReceivedDataLength();
-    byte cont_recv[cont_len];
-    DW1000Ng::getReceivedData(cont_recv, cont_len);
-
-    if (cont_len > 10 && cont_recv[9] == ACTIVITY_CONTROL && cont_recv[10] == RANGING_CONTINUE) {
-        /* Received Response to poll */
-        DW1000NgRTLS::handleRangingContinueEmbedded(cont_recv, replyDelayUs);
-    } else {
-        return {false, false, 0, 0};
-    }
-
-    if(!DW1000NgRTLS::nextRangingStep()) return {false, false, 0, 0};
-
-    size_t act_len = DW1000Ng::getReceivedDataLength();
-    byte act_recv[act_len];
-    DW1000Ng::getReceivedData(act_recv, act_len);
-
-    if(act_len > 10 && act_recv[9] == ACTIVITY_CONTROL) {
-        if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
-            return {true, true, DW1000NgUtils::bytesAsValue(&act_recv[11], 2), 0};
-        } else if(act_len > 12 && act_recv[10] == ACTIVITY_FINISHED) {
-            blink_rate = DW1000NgRTLS::handleActivityFinished(act_recv);
-            return {true, false, 0, blink_rate};
-        }
-    } else {
-        return {false, false, 0, 0};
-    }
-    /* end of ranging */
-}
-
 RangeInfrastructureResult rangeInfrastructure(uint16_t first_anchor) {
-    RangeResult result = range(first_anchor, 1500);
+    RangeResult result = DW1000NgRTLS::range(first_anchor, 1500);
     if(!result.success) return {false , 0};
 
     while(result.success && result.next) {
-        result = range(result.next_anchor, 1500);
+        result = DW1000NgRTLS::range(result.next_anchor, 1500);
         if(!result.success) return {false , 0};
 
         #if defined(ESP8266)
