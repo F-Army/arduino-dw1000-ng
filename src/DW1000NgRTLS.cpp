@@ -152,7 +152,7 @@ namespace DW1000NgRTLS {
         return true;
     }
 
-    boolean nextRangingStep() {
+    static boolean waitForNextRangingStep() {
         DW1000NgRTLS::waitForTransmission();
         if(!DW1000NgRTLS::receiveFrame()) return false;
         return true;
@@ -161,7 +161,7 @@ namespace DW1000NgRTLS {
     RangeRequestResult rangeRequest() {
         DW1000NgRTLS::transmitTwrShortBlink();
         
-        if(!DW1000NgRTLS::nextRangingStep()) return {false, 0};
+        if(!DW1000NgRTLS::waitForNextRangingStep()) return {false, 0};
 
         size_t init_len = DW1000Ng::getReceivedDataLength();
         byte init_recv[init_len];
@@ -180,7 +180,7 @@ namespace DW1000NgRTLS {
         DW1000NgUtils::writeValueToBytes(target_anchor, anchor, 2);
         DW1000NgRTLS::transmitPoll(target_anchor);
         /* Start of poll control for range */
-        if(!DW1000NgRTLS::nextRangingStep()) return {false, false, 0, 0};
+        if(!DW1000NgRTLS::waitForNextRangingStep()) return {false, false, 0, 0};
         size_t cont_len = DW1000Ng::getReceivedDataLength();
         byte cont_recv[cont_len];
         DW1000Ng::getReceivedData(cont_recv, cont_len);
@@ -197,7 +197,7 @@ namespace DW1000NgRTLS {
             return {false, false, 0, 0};
         }
 
-        if(!DW1000NgRTLS::nextRangingStep()) return {false, false, 0, 0};
+        if(!DW1000NgRTLS::waitForNextRangingStep()) return {false, false, 0, 0};
 
         size_t act_len = DW1000Ng::getReceivedDataLength();
         byte act_recv[act_len];
