@@ -274,4 +274,18 @@ namespace DW1000NgRTLS {
                 return { false , 0 };
         }
     }
+
+    RangeInfrastructureResult localizeTWR() {
+        RangeRequestResult request_result = DW1000NgRTLS::rangeRequest();
+
+        if(request_result.success) {
+            
+            RangeInfrastructureResult result = DW1000NgRTLS::rangeInfrastructure(request_result.target_anchor);
+
+            if(result.success)
+                return result;
+        }
+        return {false, 0};
+    }
+
 }

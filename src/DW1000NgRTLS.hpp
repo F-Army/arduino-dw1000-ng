@@ -112,4 +112,5 @@ namespace DW1000NgRTLS {
     RangeRequestResult rangeRequest();
     RangeResult range(uint16_t anchor, uint16_t replyDelayUs);
     RangeInfrastructureResult rangeInfrastructure(uint16_t first_anchor);
+    RangeInfrastructureResult localizeTWR();
 }

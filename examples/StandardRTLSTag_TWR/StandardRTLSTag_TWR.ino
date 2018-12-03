@@ -93,27 +93,13 @@ void setup() {
     Serial.print("Device mode: "); Serial.println(msg);    
 }
 
-RangeInfrastructureResult localizeTWR() {
-    RangeRequestResult request_result = DW1000NgRTLS::rangeRequest();
-
-    if(request_result.success) {
-        
-        RangeInfrastructureResult result = DW1000NgRTLS::rangeInfrastructure(request_result.target_anchor);
-
-        if(result.success)
-            return result;
-    }
-    return {false, 0};
-}
-
-
 void loop() {
     DW1000Ng::deepSleep();
     delay(blink_rate);
     DW1000Ng::spiWakeup();
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
 
-    RangeInfrastructureResult res = localizeTWR();
+    RangeInfrastructureResult res = DW1000NgRTLS::localizeTWR();
     if(res.success)
         blink_rate = res.new_blink_rate;
 }
