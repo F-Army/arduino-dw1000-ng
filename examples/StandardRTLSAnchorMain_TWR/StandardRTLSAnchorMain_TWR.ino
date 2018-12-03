@@ -129,7 +129,7 @@ void calculatePosition(double &x, double &y) {
 }
 
 void loop() {
-    if(DW1000NgRTLS::receive()){
+    if(DW1000NgRTLS::receiveFrame()){
         size_t recv_len = DW1000Ng::getReceivedDataLength();
         byte recv_data[recv_len];
         DW1000Ng::getReceivedData(recv_data, recv_len);

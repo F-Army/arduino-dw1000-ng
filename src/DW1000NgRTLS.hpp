@@ -106,7 +106,7 @@ namespace DW1000NgRTLS {
     void transmitRangingConfirm(byte tag_short_address[], byte next_anchor[]);
     void transmitActivityFinished(byte tag_short_address[], byte blink_rate[]);
     
-    boolean receive();
+    boolean receiveFrame();
     void waitForTransmission();
     boolean nextRangingStep();
     RangeRequestResult rangeRequest();

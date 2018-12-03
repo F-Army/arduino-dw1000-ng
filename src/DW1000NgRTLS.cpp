@@ -37,8 +37,6 @@ namespace DW1000NgRTLS {
         return ++SEQ_NUMBER;
     }
 
-
-
     void transmitTwrShortBlink() {
         byte Blink[] = {BLINK, SEQ_NUMBER++, 0,0,0,0,0,0,0,0, NO_BATTERY_STATUS | NO_EX_ID, TAG_LISTENING_NOW};
         DW1000Ng::getEUI(&Blink[2]);
@@ -139,7 +137,7 @@ namespace DW1000NgRTLS {
         DW1000Ng::clearTransmitStatus();
     }
 
-    boolean receive() {
+    boolean receiveFrame() {
         DW1000Ng::startReceive();
         while(!DW1000Ng::isReceiveDone()) {
             if(DW1000Ng::isReceiveTimeout() ) {
@@ -156,7 +154,7 @@ namespace DW1000NgRTLS {
 
     boolean nextRangingStep() {
         DW1000NgRTLS::waitForTransmission();
-        if(!DW1000NgRTLS::receive()) return false;
+        if(!DW1000NgRTLS::receiveFrame()) return false;
         return true;
     }
 
@@ -252,7 +250,7 @@ namespace DW1000NgRTLS {
 
     ContinueRangeResult continueRange(NextActivity next, uint16_t value) {
         double range;
-        if(!DW1000NgRTLS::receive()) return {false, 0};
+        if(!DW1000NgRTLS::receiveFrame()) return {false, 0};
 
         size_t poll_len = DW1000Ng::getReceivedDataLength();
         byte poll_data[poll_len];
@@ -264,7 +262,7 @@ namespace DW1000NgRTLS {
             DW1000NgRTLS::waitForTransmission();
             uint64_t timeResponseToPoll = DW1000Ng::getTransmitTimestamp();
             delayMicroseconds(1500);
-            if(!DW1000NgRTLS::receive()) return {false, 0};
+            if(!DW1000NgRTLS::receiveFrame()) return {false, 0};
 
             size_t rfinal_len = DW1000Ng::getReceivedDataLength();
             byte rfinal_data[rfinal_len];
