@@ -18,11 +18,6 @@
 #include <DW1000NgRanging.hpp>
 #include <DW1000NgRTLS.hpp>
 
-typedef struct ContinueRangeResult {
-    boolean success;
-    double range;
-} ContinueRangeResult;
-
 // connection pins
 #if defined(ESP8266)
 const uint8_t PIN_SS = 15;
@@ -111,84 +106,8 @@ void transmitRangeReport() {
     DW1000Ng::startTransmit();
 }
  
-boolean receive() {
-    DW1000Ng::startReceive();
-    while(!DW1000Ng::isReceiveDone()) {
-        if(DW1000Ng::isReceiveTimeout() ) {
-            DW1000Ng::clearReceiveTimeoutStatus();
-            return false;
-        }
-        #if defined(ESP8266)
-        yield();
-        #endif
-    }
-    DW1000Ng::clearReceiveStatus();
-    return true;
-}
-
-void waitForTransmission() {
-    while(!DW1000Ng::isTransmitDone()) {
-        #if defined(ESP8266)
-        yield();
-        #endif
-    }
-    DW1000Ng::clearTransmitStatus();
-}
-
-ContinueRangeResult continueRange(NextActivity next, uint16_t value) {
-    double range;
-    if(!receive()) return {false, 0};
-
-    size_t poll_len = DW1000Ng::getReceivedDataLength();
-    byte poll_data[poll_len];
-    DW1000Ng::getReceivedData(poll_data, poll_len);
-
-    if(poll_len > 9 && poll_data[9] == RANGING_TAG_POLL) {
-        uint64_t timePollReceived = DW1000Ng::getReceiveTimestamp();
-        DW1000NgRTLS::transmitResponseToPoll(&poll_data[7]);
-        waitForTransmission();
-        uint64_t timeResponseToPoll = DW1000Ng::getTransmitTimestamp();
-        delayMicroseconds(1500);
-        if(!receive()) return {false, 0};
-
-        size_t rfinal_len = DW1000Ng::getReceivedDataLength();
-        byte rfinal_data[rfinal_len];
-        DW1000Ng::getReceivedData(rfinal_data, rfinal_len);
-        if(rfinal_len > 18 && rfinal_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
-            uint64_t timeFinalMessageReceive = DW1000Ng::getReceiveTimestamp();
-
-            byte finishValue[2];
-            DW1000NgUtils::writeValueToBytes(finishValue, value, 2);
-
-            if(next == NextActivity::RANGING_CONFIRM)
-                DW1000NgRTLS::transmitRangingConfirm(&rfinal_data[7], finishValue);
-            else
-                DW1000NgRTLS::transmitActivityFinished(&rfinal_data[7], finishValue);
-            
-            waitForTransmission();
-
-            range = DW1000NgRanging::computeRangeAsymmetric(
-                DW1000NgUtils::bytesAsValue(rfinal_data + 10, LENGTH_TIMESTAMP), // Poll send time
-                timePollReceived, 
-                timeResponseToPoll, // Response to poll sent time
-                DW1000NgUtils::bytesAsValue(rfinal_data + 14, LENGTH_TIMESTAMP), // Response to Poll Received
-                DW1000NgUtils::bytesAsValue(rfinal_data + 18, LENGTH_TIMESTAMP), // Final Message send time
-                timeFinalMessageReceive // Final message receive time
-            );
-
-            range = DW1000NgRanging::correctRange(range);
-
-            /* In case of wrong read due to bad device calibration */
-            if(range <= 0) 
-                range = 0.000001;
-
-            return {true, range};
-        }
-    }
-}
- 
 void loop() {     
-        ContinueRangeResult result = continueRange(NextActivity::RANGING_CONFIRM, next_anchor);
+        ContinueRangeResult result = DW1000NgRTLS::continueRange(NextActivity::RANGING_CONFIRM, next_anchor);
         if(result.success) {
             delay(3); // Tweak based on your hardware
             range_self = result.range;
