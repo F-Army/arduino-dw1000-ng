@@ -105,8 +105,6 @@ namespace DW1000NgRTLS {
     void transmitFinalMessage(byte anchor_address[], uint16_t reply_delay, uint64_t timePollSent, uint64_t timeResponseToPollReceived);
     void transmitRangingConfirm(byte tag_short_address[], byte next_anchor[]);
     void transmitActivityFinished(byte tag_short_address[], byte blink_rate[]);
-
-    double handleFinalMessageEmbedded(byte frame[], uint64_t timePollReceived, NextActivity next, byte param[]);
     
     boolean receive();
     void waitForTransmission();

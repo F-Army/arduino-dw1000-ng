@@ -130,26 +130,6 @@ namespace DW1000NgRTLS {
         return blinkRate;
     }
 
-    double handleFinalMessageEmbedded(byte frame[], uint64_t timePollReceived, NextActivity next, byte param[]) {
-
-        double range = DW1000NgRanging::computeRangeAsymmetric(
-                DW1000NgUtils::bytesAsValue(frame + 10, LENGTH_TIMESTAMP), // Poll send time
-                timePollReceived, 
-                DW1000Ng::getTransmitTimestamp(), // Response to poll sent time
-                DW1000NgUtils::bytesAsValue(frame + 14, LENGTH_TIMESTAMP), // Response to Poll Received
-                DW1000NgUtils::bytesAsValue(frame + 18, LENGTH_TIMESTAMP), // Final Message send time
-                DW1000Ng::getReceiveTimestamp() // Final message receive time
-        );
-
-        if(next == NextActivity::ACTIVITY_FINISHED) {
-            DW1000NgRTLS::transmitActivityFinished(&frame[7], param);
-        } else if(next == NextActivity::RANGING_CONFIRM) {
-            DW1000NgRTLS::transmitRangingConfirm(&frame[7], param);
-        }
-
-        return range;
-    }
-
     void waitForTransmission() {
         while(!DW1000Ng::isTransmitDone()) {
             #if defined(ESP8266)
