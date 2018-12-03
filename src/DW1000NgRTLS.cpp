@@ -201,4 +201,21 @@ namespace DW1000NgRTLS {
         if(!receive()) return false;
         return true;
     }
+
+    RangeRequestResult rangeRequest() {
+        DW1000NgRTLS::transmitTwrShortBlink();
+        
+        if(!DW1000NgRTLS::nextRangingStep()) return {false, 0};
+
+        size_t init_len = DW1000Ng::getReceivedDataLength();
+        byte init_recv[init_len];
+        DW1000Ng::getReceivedData(init_recv, init_len);
+
+        if(!(init_len > 17 && init_recv[15] == RANGING_INITIATION)) {
+            return { false, 0};
+        }
+
+        DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&init_recv[16], 2));
+        return { true, DW1000NgUtils::bytesAsValue(&init_recv[13], 2) };
+    }
 }

@@ -72,6 +72,11 @@ enum class NextActivity {
     RANGING_CONFIRM
 };
 
+typedef struct RangeRequestResult {
+    boolean success;
+    uint16_t target_anchor;
+} RangeRequestResult;
+
 namespace DW1000NgRTLS {
 
     byte increaseSequenceNumber();
@@ -92,4 +97,5 @@ namespace DW1000NgRTLS {
     double handleFinalMessageEmbedded(byte frame[], uint64_t timePollReceived, NextActivity next, byte param[]);
     
     boolean nextRangingStep();
+    RangeRequestResult rangeRequest();
 }
