@@ -118,7 +118,7 @@ namespace DW1000NgRTLS {
         DW1000Ng::startTransmit();
     }
 
-    uint32_t handleActivityFinished(byte frame[]) {
+    static uint32_t calculateNewBlinkRate(byte frame[]) {
         uint32_t blinkRate = frame[11] + static_cast<uint32_t>(((frame[12] & 0x3F) << 8));
         byte multiplier = ((frame[12] & 0xC0) >> 6);
         if(multiplier  == 0x01) {
@@ -242,12 +242,11 @@ namespace DW1000NgRTLS {
             if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
                 return {true, true, DW1000NgUtils::bytesAsValue(&act_recv[11], 2), 0};
             } else if(act_len > 12 && act_recv[10] == ACTIVITY_FINISHED) {
-                return {true, false, 0, DW1000NgRTLS::handleActivityFinished(act_recv)};
+                return {true, false, 0, calculateNewBlinkRate(act_recv)};
             }
         } else {
             return {false, false, 0, 0};
         }
-        /* end of ranging */
     }
 
     RangeInfrastructureResult rangeInfrastructure(uint16_t first_anchor) {
