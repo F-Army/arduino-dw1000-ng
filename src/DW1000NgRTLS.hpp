@@ -108,6 +108,8 @@ namespace DW1000NgRTLS {
     uint64_t handlePoll(byte frame[]);
     double handleFinalMessageEmbedded(byte frame[], uint64_t timePollReceived, NextActivity next, byte param[]);
     
+    boolean receive();
+    void waitForTransmission();
     boolean nextRangingStep();
     RangeRequestResult rangeRequest();
     RangeResult range(uint16_t anchor, uint16_t replyDelayUs);

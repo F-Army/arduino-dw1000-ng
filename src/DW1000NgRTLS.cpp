@@ -172,7 +172,7 @@ namespace DW1000NgRTLS {
         return range;
     }
 
-    static void waitForTransmission() {
+    void waitForTransmission() {
         while(!DW1000Ng::isTransmitDone()) {
             #if defined(ESP8266)
             yield();
@@ -181,7 +181,7 @@ namespace DW1000NgRTLS {
         DW1000Ng::clearTransmitStatus();
     }
 
-    static boolean receive() {
+    boolean receive() {
         DW1000Ng::startReceive();
         while(!DW1000Ng::isReceiveDone()) {
             if(DW1000Ng::isReceiveTimeout() ) {
@@ -197,8 +197,8 @@ namespace DW1000NgRTLS {
     }
 
     boolean nextRangingStep() {
-        waitForTransmission();
-        if(!receive()) return false;
+        DW1000NgRTLS::waitForTransmission();
+        if(!DW1000NgRTLS::receive()) return false;
         return true;
     }
 
