@@ -130,15 +130,6 @@ namespace DW1000NgRTLS {
         return blinkRate;
     }
 
-    void handleRangingContinueEmbedded(byte frame[], uint16_t replyDelayUs) {
-        DW1000NgRTLS::transmitFinalMessage(
-            &frame[7], 
-            replyDelayUs, 
-            DW1000Ng::getTransmitTimestamp(), // Poll transmit time
-            DW1000Ng::getReceiveTimestamp()  // Response to poll receive time
-        );
-    }
-
     uint64_t handlePoll(byte frame[]) {
         DW1000NgRTLS::transmitResponseToPoll(&frame[7]);
         return DW1000Ng::getReceiveTimestamp(); // Poll receive time
@@ -223,7 +214,12 @@ namespace DW1000NgRTLS {
 
         if (cont_len > 10 && cont_recv[9] == ACTIVITY_CONTROL && cont_recv[10] == RANGING_CONTINUE) {
             /* Received Response to poll */
-            DW1000NgRTLS::handleRangingContinueEmbedded(cont_recv, replyDelayUs);
+            DW1000NgRTLS::transmitFinalMessage(
+                &cont_recv[7], 
+                replyDelayUs, 
+                DW1000Ng::getTransmitTimestamp(), // Poll transmit time
+                DW1000Ng::getReceiveTimestamp()  // Response to poll receive time
+            );
         } else {
             return {false, false, 0, 0};
         }
