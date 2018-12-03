@@ -110,9 +110,7 @@ namespace DW1000NgRTLS {
     void waitForTransmission();
     boolean nextRangingStep();
     RangeRequestResult rangeRequest();
-    RangeResult range(uint16_t anchor, uint16_t replyDelayUs);
+    ContinueRangeResult continueRange(NextActivity next, uint16_t value);
     RangeInfrastructureResult rangeInfrastructure(uint16_t first_anchor);
     RangeInfrastructureResult localizeTWR();
-
-    ContinueRangeResult continueRange(NextActivity next, uint16_t value);
 }

@@ -177,7 +177,7 @@ namespace DW1000NgRTLS {
         return { true, DW1000NgUtils::bytesAsValue(&init_recv[13], 2) };
     }
 
-    RangeResult range(uint16_t anchor, uint16_t replyDelayUs) {
+    static RangeResult tagFinishRange(uint16_t anchor, uint16_t replyDelayUs) {
         byte target_anchor[2];
         DW1000NgUtils::writeValueToBytes(target_anchor, anchor, 2);
         DW1000NgRTLS::transmitPoll(target_anchor);
@@ -217,11 +217,11 @@ namespace DW1000NgRTLS {
     }
 
     RangeInfrastructureResult rangeInfrastructure(uint16_t first_anchor) {
-        RangeResult result = DW1000NgRTLS::range(first_anchor, 1500);
+        RangeResult result = tagFinishRange(first_anchor, 1500);
         if(!result.success) return {false , 0};
 
         while(result.success && result.next) {
-            result = DW1000NgRTLS::range(result.next_anchor, 1500);
+            result = tagFinishRange(result.next_anchor, 1500);
             if(!result.success) return {false , 0};
 
             #if defined(ESP8266)
