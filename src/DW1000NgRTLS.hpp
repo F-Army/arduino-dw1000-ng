@@ -106,7 +106,6 @@ namespace DW1000NgRTLS {
     void transmitRangingConfirm(byte tag_short_address[], byte next_anchor[]);
     void transmitActivityFinished(byte tag_short_address[], byte blink_rate[]);
 
-    void handleTwrShortBlink(byte frame[], byte newTagShortAddress[]);
     uint32_t handleActivityFinished(byte frame[]);
     void handleRangingConfirm(byte frame[]);
     void handleRangingContinueEmbedded(byte frame[], uint16_t replyDelayUs);
