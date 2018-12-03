@@ -130,10 +130,6 @@ namespace DW1000NgRTLS {
         return blinkRate;
     }
 
-    void handleRangingConfirm(byte frame[]) {
-        DW1000NgRTLS::transmitPoll(&frame[11]);
-    }
-
     void handleRangingContinueEmbedded(byte frame[], uint16_t replyDelayUs) {
         DW1000NgRTLS::transmitFinalMessage(
             &frame[7], 
