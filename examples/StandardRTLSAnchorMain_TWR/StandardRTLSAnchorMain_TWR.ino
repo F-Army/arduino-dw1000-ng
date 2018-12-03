@@ -133,33 +133,9 @@ void calculatePosition(double &x, double &y) {
     y = (C*D-A*F) / (B*D-A*E);
 }
 
-boolean receive() {
-    DW1000Ng::startReceive();
-    while(!DW1000Ng::isReceiveDone()) {
-        if(DW1000Ng::isReceiveTimeout() ) {
-            DW1000Ng::clearReceiveTimeoutStatus();
-            return false;
-        }
-        #if defined(ESP8266)
-        yield();
-        #endif
-    }
-    DW1000Ng::clearReceiveStatus();
-    return true;
-}
-
-void waitForTransmission() {
-    while(!DW1000Ng::isTransmitDone()) {
-        #if defined(ESP8266)
-        yield();
-        #endif
-    }
-    DW1000Ng::clearTransmitStatus();
-}
-
 ContinueRangeResult continueRange(NextActivity next, uint16_t value) {
     double range;
-    if(!receive()) return {false, 0};
+    if(!DW1000NgRTLS::receive()) return {false, 0};
 
     size_t poll_len = DW1000Ng::getReceivedDataLength();
     byte poll_data[poll_len];
@@ -168,10 +144,10 @@ ContinueRangeResult continueRange(NextActivity next, uint16_t value) {
     if(poll_len > 9 && poll_data[9] == RANGING_TAG_POLL) {
         uint64_t timePollReceived = DW1000Ng::getReceiveTimestamp();
         DW1000NgRTLS::transmitResponseToPoll(&poll_data[7]);
-        waitForTransmission();
+        DW1000NgRTLS::waitForTransmission();
         uint64_t timeResponseToPoll = DW1000Ng::getTransmitTimestamp();
         delayMicroseconds(1500);
-        if(!receive()) return {false, 0};
+        if(!DW1000NgRTLS::receive()) return {false, 0};
 
         size_t rfinal_len = DW1000Ng::getReceivedDataLength();
         byte rfinal_data[rfinal_len];
@@ -187,7 +163,7 @@ ContinueRangeResult continueRange(NextActivity next, uint16_t value) {
             else
                 DW1000NgRTLS::transmitActivityFinished(&rfinal_data[7], finishValue);
             
-            waitForTransmission();
+            DW1000NgRTLS::waitForTransmission();
 
             range = DW1000NgRanging::computeRangeAsymmetric(
                 DW1000NgUtils::bytesAsValue(rfinal_data + 10, LENGTH_TIMESTAMP), // Poll send time
@@ -210,7 +186,7 @@ ContinueRangeResult continueRange(NextActivity next, uint16_t value) {
 }
  
 void loop() {
-    if(receive()){
+    if(DW1000NgRTLS::receive()){
         size_t recv_len = DW1000Ng::getReceivedDataLength();
         byte recv_data[recv_len];
         DW1000Ng::getReceivedData(recv_data, recv_len);
@@ -218,7 +194,7 @@ void loop() {
 
         if(recv_data[0] == BLINK) {
             DW1000NgRTLS::transmitRangingInitiation(&recv_data[2], tag_shortAddress);
-            waitForTransmission();
+            DW1000NgRTLS::waitForTransmission();
 
             ContinueRangeResult result = continueRange(NextActivity::RANGING_CONFIRM, next_anchor);
             if(!result.success) return;
