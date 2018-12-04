@@ -214,12 +214,12 @@ namespace DW1000NgRTLS {
         }
     }
 
-    RangeInfrastructureResult tagRangeInfrastructure(uint16_t first_anchor) {
-        RangeResult result = tagFinishRange(first_anchor, 1500);
+    RangeInfrastructureResult tagRangeInfrastructure(uint16_t first_anchor, uint16_t finalMessageDelay) {
+        RangeResult result = tagFinishRange(first_anchor, finalMessageDelay);
         if(!result.success) return {false , 0};
 
         while(result.success && result.next) {
-            result = tagFinishRange(result.next_anchor, 1500);
+            result = tagFinishRange(result.next_anchor, finalMessageDelay);
             if(!result.success) return {false , 0};
 
             #if defined(ESP8266)
@@ -235,12 +235,12 @@ namespace DW1000NgRTLS {
         }
     }
 
-    RangeInfrastructureResult tagTwrLocalize() {
+    RangeInfrastructureResult tagTwrLocalize(uint16_t finalMessageDelay) {
         RangeRequestResult request_result = DW1000NgRTLS::tagRangeRequest();
 
         if(request_result.success) {
             
-            RangeInfrastructureResult result = DW1000NgRTLS::tagRangeInfrastructure(request_result.target_anchor);
+            RangeInfrastructureResult result = DW1000NgRTLS::tagRangeInfrastructure(request_result.target_anchor, finalMessageDelay);
 
             if(result.success)
                 return result;
