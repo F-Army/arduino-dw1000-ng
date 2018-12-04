@@ -99,7 +99,7 @@ void loop() {
     DW1000Ng::spiWakeup();
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
 
-    RangeInfrastructureResult res = DW1000NgRTLS::localizeTWR();
+    RangeInfrastructureResult res = DW1000NgRTLS::tagTwrLocalize();
     if(res.success)
         blink_rate = res.new_blink_rate;
 }

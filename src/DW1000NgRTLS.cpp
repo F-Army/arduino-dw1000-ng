@@ -235,7 +235,7 @@ namespace DW1000NgRTLS {
         }
     }
 
-    RangeInfrastructureResult localizeTWR() {
+    RangeInfrastructureResult tagTwrLocalize() {
         RangeRequestResult request_result = DW1000NgRTLS::tagRangeRequest();
 
         if(request_result.success) {

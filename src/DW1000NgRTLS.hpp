@@ -112,5 +112,5 @@ namespace DW1000NgRTLS {
     RangeRequestResult tagRangeRequest();
     RangeAcceptResult anchorRangeAccept(NextActivity next, uint16_t value);
     RangeInfrastructureResult tagRangeInfrastructure(uint16_t first_anchor);
-    RangeInfrastructureResult localizeTWR();
+    RangeInfrastructureResult tagTwrLocalize();
 }
