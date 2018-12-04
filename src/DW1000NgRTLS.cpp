@@ -214,7 +214,7 @@ namespace DW1000NgRTLS {
         }
     }
 
-    RangeInfrastructureResult rangeInfrastructure(uint16_t first_anchor) {
+    RangeInfrastructureResult tagRangeInfrastructure(uint16_t first_anchor) {
         RangeResult result = tagFinishRange(first_anchor, 1500);
         if(!result.success) return {false , 0};
 
@@ -240,7 +240,7 @@ namespace DW1000NgRTLS {
 
         if(request_result.success) {
             
-            RangeInfrastructureResult result = DW1000NgRTLS::rangeInfrastructure(request_result.target_anchor);
+            RangeInfrastructureResult result = DW1000NgRTLS::tagRangeInfrastructure(request_result.target_anchor);
 
             if(result.success)
                 return result;
