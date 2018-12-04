@@ -248,7 +248,7 @@ namespace DW1000NgRTLS {
         return {false, 0};
     }
 
-    ContinueRangeResult continueRange(NextActivity next, uint16_t value) {
+    RangeAcceptResult anchorRangeAccept(NextActivity next, uint16_t value) {
         double range;
         if(!DW1000NgRTLS::receiveFrame()) return {false, 0};
 

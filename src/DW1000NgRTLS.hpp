@@ -89,10 +89,10 @@ typedef struct RangeInfrastructureResult {
     uint16_t new_blink_rate;
 } RangeInfrastructureResult;
 
-typedef struct ContinueRangeResult {
+typedef struct RangeAcceptResult {
     boolean success;
     double range;
-} ContinueRangeResult;
+} RangeAcceptResult;
 
 namespace DW1000NgRTLS {
 
@@ -110,7 +110,7 @@ namespace DW1000NgRTLS {
     void waitForTransmission();
     
     RangeRequestResult tagRangeRequest();
-    ContinueRangeResult continueRange(NextActivity next, uint16_t value);
+    RangeAcceptResult anchorRangeAccept(NextActivity next, uint16_t value);
     RangeInfrastructureResult rangeInfrastructure(uint16_t first_anchor);
     RangeInfrastructureResult localizeTWR();
 }

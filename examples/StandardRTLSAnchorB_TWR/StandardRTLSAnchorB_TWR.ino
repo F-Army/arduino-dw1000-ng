@@ -107,7 +107,7 @@ void transmitRangeReport() {
 }
  
 void loop() {     
-        ContinueRangeResult result = DW1000NgRTLS::continueRange(NextActivity::RANGING_CONFIRM, next_anchor);
+        RangeAcceptResult result = DW1000NgRTLS::anchorRangeAccept(NextActivity::RANGING_CONFIRM, next_anchor);
         if(result.success) {
             delay(3); // Tweak based on your hardware
             range_self = result.range;
