@@ -158,7 +158,7 @@ namespace DW1000NgRTLS {
         return true;
     }
 
-    RangeRequestResult rangeRequest() {
+    RangeRequestResult tagRangeRequest() {
         DW1000NgRTLS::transmitTwrShortBlink();
         
         if(!DW1000NgRTLS::waitForNextRangingStep()) return {false, 0};
@@ -236,7 +236,7 @@ namespace DW1000NgRTLS {
     }
 
     RangeInfrastructureResult localizeTWR() {
-        RangeRequestResult request_result = DW1000NgRTLS::rangeRequest();
+        RangeRequestResult request_result = DW1000NgRTLS::tagRangeRequest();
 
         if(request_result.success) {
             
