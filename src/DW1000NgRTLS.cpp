@@ -214,8 +214,8 @@ namespace DW1000NgRTLS {
         }
     }
 
-    RangeInfrastructureResult tagRangeInfrastructure(uint16_t first_anchor, uint16_t finalMessageDelay) {
-        RangeResult result = tagFinishRange(first_anchor, finalMessageDelay);
+    RangeInfrastructureResult tagRangeInfrastructure(uint16_t target_anchor, uint16_t finalMessageDelay) {
+        RangeResult result = tagFinishRange(target_anchor, finalMessageDelay);
         if(!result.success) return {false , 0};
 
         while(result.success && result.next) {
