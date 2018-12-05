@@ -1244,7 +1244,8 @@ namespace DW1000Ng {
 		// pin and basic member setup
 		// attach interrupt
 		// TODO throw error if pin is not a interrupt pin
-		attachInterrupt(digitalPinToInterrupt(_irq), pollForEvents, RISING);
+		if(_irq != 0xff)
+			attachInterrupt(digitalPinToInterrupt(_irq), interruptServiceRoutine, RISING);
 		select();
 		// reset chip (either soft or hard)
 
@@ -1277,9 +1278,14 @@ namespace DW1000Ng {
 		_writeToRegister(AON, AON_CFG1_SUB, 0x00, LEN_AON_CFG1);
 	}
 
+	void initializeNoInterrupt(uint8_t ss, uint8_t rst) {
+		initialize(ss, 0xff, rst);
+	}
+
 	void select() {
 		#if !defined(ESP32) && !defined(ESP8266)
-		SPI.usingInterrupt(digitalPinToInterrupt(_irq));
+		if(_irq != 0xff)
+			SPI.usingInterrupt(digitalPinToInterrupt(_irq));
 		#endif
 		pinMode(_ss, OUTPUT);
 		digitalWrite(_ss, HIGH);
@@ -1314,7 +1320,7 @@ namespace DW1000Ng {
 		_handleReceiveTimestampAvailable = handleReceiveTimestampAvailable;
 	}
 
-	void pollForEvents() {
+	void interruptServiceRoutine() {
 		// read current status and handle via callbacks
 		_readSystemEventStatusRegister();
 		if(_isClockProblem() /* TODO and others */ && _handleError != 0) {
@@ -1347,6 +1353,46 @@ namespace DW1000Ng {
 			if(_handleReceived != nullptr)
 				(*_handleReceived)();
 		}
+	}
+
+	boolean isTransmitDone(){
+		_readSystemEventStatusRegister();
+		return _isTransmitDone();
+	}
+
+	void clearTransmitStatus() {
+		_clearTransmitStatus();
+	}
+
+	boolean isReceiveDone() {
+		_readSystemEventStatusRegister();
+		return _isReceiveDone();
+	}
+
+	void clearReceiveStatus() {
+		_clearReceiveStatus();
+	}
+
+	boolean isReceiveFailed() {
+		_readSystemEventStatusRegister();
+		return _isReceiveFailed();
+	}
+
+	void clearReceiveFailedStatus() {
+		_clearReceiveFailedStatus();
+		forceTRxOff();
+		_resetReceiver();
+	}
+
+	boolean isReceiveTimeout() {
+		_readSystemEventMaskRegister();
+		return _isReceiveTimeout();
+	}
+
+	void clearReceiveTimeoutStatus() {
+		_clearReceiveTimeoutStatus();
+		forceTRxOff();
+		_resetReceiver();
 	}
 
 	void enableDebounceClock() {
