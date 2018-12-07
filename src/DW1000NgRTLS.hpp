@@ -66,3 +66,68 @@ constexpr byte NO_EX_ID = 0x40;
 /* BLINK Ext Header */
 constexpr byte BLINK_RATE_AND_LISTENING = 0x01;
 constexpr byte TAG_LISTENING_NOW = 0x02;
+
+enum class NextActivity {
+    ACTIVITY_FINISHED,
+    RANGING_CONFIRM
+};
+
+typedef struct RangeRequestResult {
+    boolean success;
+    uint16_t target_anchor;
+} RangeRequestResult;
+
+typedef struct RangeResult {
+    boolean success;
+    boolean next;
+    uint16_t next_anchor;
+    uint32_t new_blink_rate;
+} RangeResult;
+
+typedef struct RangeInfrastructureResult {
+    boolean success;
+    uint16_t new_blink_rate;
+} RangeInfrastructureResult;
+
+typedef struct RangeAcceptResult {
+    boolean success;
+    double range;
+} RangeAcceptResult;
+
+namespace DW1000NgRTLS {
+    /*** TWR functions used in ISO/IEC 24730-62:2013, refer to the standard or the decawave manual for details about TWR ***/
+    byte increaseSequenceNumber();
+    void transmitTwrShortBlink();
+    void transmitRangingInitiation(byte tag_eui[], byte tag_short_address[]);
+    void transmitPoll(byte anchor_address[]);
+    void transmitResponseToPoll(byte tag_short_address[]);
+    void transmitFinalMessage(byte anchor_address[], uint16_t reply_delay, uint64_t timePollSent, uint64_t timeResponseToPollReceived);
+    void transmitRangingConfirm(byte tag_short_address[], byte next_anchor[]);
+    void transmitActivityFinished(byte tag_short_address[], byte blink_rate[]);
+    
+    boolean receiveFrame();
+    void waitForTransmission();
+    /*** End of TWR functions ***/
+    
+    /* Send a request range from tag to the rtls infrastructure */
+    RangeRequestResult tagRangeRequest();
+
+    /* Used by an anchor to accept an incoming tagRangeRequest by means of the infrastructure
+       NextActivity is used to indicate the tag what to do next after the ranging process (Activity finished is to return to blink (range request), 
+        Continue range is to tell the tag to range a new anchor)
+       value is the value relative to the next activity (Activity finished = new blink rante, continue range = new anchor address)
+    */
+    RangeAcceptResult anchorRangeAccept(NextActivity next, uint16_t value);
+
+    /* Used by tag to range after range request accept of the infrastructure 
+       Target anchor is given after a range request success
+       Finalmessagedelay is used in the process of TWR, a value of 1500 works on 8mhz-80mhz range devices,
+        you could try to decrease it to improve system performance.
+    */
+    RangeInfrastructureResult tagRangeInfrastructure(uint16_t target_anchor, uint16_t finalMessageDelay);
+
+    /* Can be used as a single function start the localization process from the tag.
+        Finalmessagedelay is the same as in function tagRangeInfrastructure
+    */
+    RangeInfrastructureResult tagTwrLocalize(uint16_t finalMessageDelay);
+}

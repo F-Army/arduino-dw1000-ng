@@ -49,14 +49,17 @@
 #include <SPI.h>
 #include <DW1000Ng.hpp>
 
-// connection pins
-const uint8_t PIN_RST = 9; // reset pin
-const uint8_t PIN_IRQ = 2; // irq pin
+#if defined(ESP8266)
+//const uint8_t PIN_RST = 5; // reset pin
+//const uint8_t PIN_IRQ = 4; // irq pin
+const uint8_t PIN_SS = 15; // spi select pin
+#else
+//const uint8_t PIN_RST = 9; // reset pin
+//const uint8_t PIN_IRQ = 2; // irq pin
 const uint8_t PIN_SS = SS; // spi select pin
+#endif
 
 // DEBUG packet sent status and count
-boolean sent = false;
-volatile boolean sentAck = false;
 volatile unsigned long delaySent = 0;
 int16_t sentNum = 0; // todo check int type
 
@@ -74,24 +77,16 @@ device_configuration_t DEFAULT_CONFIG = {
     PreambleCode::CODE_3
 };
 
-interrupt_configuration_t DEFAULT_INTERRUPT_CONFIG = {
-    true,
-    true,
-    true,
-    false,
-    true
-};
-
 void setup() {
   // DEBUG monitoring
   Serial.begin(9600);
   Serial.println(F("### DW1000Ng-arduino-sender-test ###"));
   // initialize the driver
-  DW1000Ng::initialize(PIN_SS, PIN_IRQ, PIN_RST);
+  DW1000Ng::initializeNoInterrupt(PIN_SS);
   Serial.println(F("DW1000Ng initialized ..."));
 
   DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
-	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
+	//DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
 
   DW1000Ng::setDeviceAddress(5);
   DW1000Ng::setNetworkId(10);
@@ -109,15 +104,17 @@ void setup() {
   DW1000Ng::getPrintableDeviceMode(msg);
   Serial.print("Device mode: "); Serial.println(msg);
   // attach callback for (successfully) sent messages
-  DW1000Ng::attachSentHandler(handleSent);
+  //DW1000Ng::attachSentHandler(handleSent);
   // start a transmission
   transmit();
 }
 
+/*
 void handleSent() {
   // status change on sent success
   sentAck = true;
 }
+*/
 
 void transmit() {
   // transmit some data
@@ -128,19 +125,19 @@ void transmit() {
   delay(1000);
   DW1000Ng::startTransmit(TransmitMode::IMMEDIATE);
   delaySent = millis();
+  while(!DW1000Ng::isTransmitDone()) {
+    #if defined(ESP8266)
+    yield();
+    #endif
+  }
+  sentNum++;
+  DW1000Ng::clearTransmitStatus();
 }
 
 void loop() {
-  if (sentAck) {
-    // continue on success confirmation
-    // (we are here after the given amount of send delay time has passed)
-    sentAck = false;
+    transmit();
     // update and print some information about the sent message
     Serial.print("ARDUINO delay sent [ms] ... "); Serial.println(millis() - delaySent);
     uint64_t newSentTime = DW1000Ng::getTransmitTimestamp();
     Serial.print("Processed packet ... #"); Serial.println(sentNum);
-    sentNum++;
-    // again, transmit some data
-    transmit();
-  }
 }

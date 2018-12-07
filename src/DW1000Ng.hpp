@@ -62,6 +62,8 @@ namespace DW1000Ng {
 	@param[in] rst The reset line/pin for hard resets of ICs that connect to the Arduino. Value 0xff means soft reset.
 	*/
 	void initialize(uint8_t ss, uint8_t irq, uint8_t rst = 0xff);
+
+	void initializeNoInterrupt(uint8_t ss, uint8_t rst = 0xff);
 	
 	/** 
 	(Re-)selects a specific DW1000 chip for communication. Used in case you switched SPI to another device.
@@ -379,11 +381,27 @@ namespace DW1000Ng {
 	void attachReceiveTimestampAvailableHandler(void (* handleReceiveTimestampAvailable)(void));
 	
 	/**
-	Poll the DW1000 for system events and handles them
+	Handles dw1000 events triggered by interrupt
 	By default this is attached to the interrupt pin callback
 	*/
-	void pollForEvents();
+	void interruptServiceRoutine();
 	
+	boolean isTransmitDone();
+
+	void clearTransmitStatus();
+
+	boolean isReceiveDone();
+
+	void clearReceiveStatus();
+
+	boolean isReceiveFailed();
+
+	void clearReceiveFailedStatus();
+
+	boolean isReceiveTimeout();
+
+	void clearReceiveTimeoutStatus();
+
 	/**
 	Stops the transceiver immediately, this actually sets the device in Idle mode.
 	*/
@@ -463,18 +481,18 @@ namespace DW1000Ng {
 	@param [in] mode IMMEDIATE or DELAYED transmission
 	*/
 	void startTransmit(TransmitMode mode = TransmitMode::IMMEDIATE);
-	
+		
 	/**
 	Gets the temperature inside the DW1000 Device
 
-	@param [out] temp The temperature 
+	returns The temperature 
 	*/
 	float getTemperature();
 
 	/**
 	Gets the voltage in input of the DW1000
 
-	@param [out] vbat The input voltage
+	returns The input voltage
 	*/
 	float getBatteryVoltage();
 

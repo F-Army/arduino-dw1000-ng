@@ -50,15 +50,17 @@
 #include <SPI.h>
 #include <DW1000Ng.hpp>
 
-// connection pins
-const uint8_t PIN_RST = 9; // reset pin
-const uint8_t PIN_IRQ = 2; // irq pin
+#if defined(ESP8266)
+//const uint8_t PIN_RST = 5; // reset pin
+//const uint8_t PIN_IRQ = 4; // irq pin
+const uint8_t PIN_SS = 15; // spi select pin
+#else
+//const uint8_t PIN_RST = 9; // reset pin
+//const uint8_t PIN_IRQ = 2; // irq pin
 const uint8_t PIN_SS = SS; // spi select pin
+#endif
 
-// DEBUG packet sent status and count
-volatile boolean received = false;
-volatile boolean error = false;
-volatile int16_t numReceived = 0; // todo check int type
+int16_t numReceived = 0; // todo check int type
 String message;
 
 device_configuration_t DEFAULT_CONFIG = {
@@ -75,24 +77,15 @@ device_configuration_t DEFAULT_CONFIG = {
     PreambleCode::CODE_3
 };
 
-interrupt_configuration_t DEFAULT_INTERRUPT_CONFIG = {
-    true,
-    true,
-    true,
-    false,
-    true
-};
-
 void setup() {
   // DEBUG monitoring
   Serial.begin(9600);
   Serial.println(F("### DW1000Ng-arduino-receiver-test ###"));
   // initialize the driver
-  DW1000Ng::initialize(PIN_SS, PIN_IRQ, PIN_RST);
+  DW1000Ng::initializeNoInterrupt(PIN_SS);
   Serial.println(F("DW1000Ng initialized ..."));
 
   DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
-	DW1000Ng::applyInterruptConfiguration(DEFAULT_INTERRUPT_CONFIG);
 
   DW1000Ng::setDeviceAddress(6);
   DW1000Ng::setNetworkId(10);
@@ -109,40 +102,21 @@ void setup() {
   Serial.print("Network ID & Device Address: "); Serial.println(msg);
   DW1000Ng::getPrintableDeviceMode(msg);
   Serial.print("Device mode: "); Serial.println(msg);
-  // attach callback for (successfully) received messages
-  DW1000Ng::attachReceivedHandler(handleReceived);
-  DW1000Ng::attachReceiveFailedHandler(handleError);
-  DW1000Ng::attachErrorHandler(handleError);
-  // start reception
-  DW1000Ng::startReceive();
-}
-
-void handleReceived() {
-  // status change on reception success
-  received = true;
-}
-
-void handleError() {
-  error = true;
 }
 
 void loop() {
-  // enter on confirmation of ISR status change (successfully received)
-  if (received) {
-    received = false;
-    numReceived++;
-    // get data as string
-    DW1000Ng::getReceivedData(message);
-    Serial.print("Received message ... #"); Serial.println(numReceived);
-    Serial.print("Data is ... "); Serial.println(message);
-    Serial.print("RX power is [dBm] ... "); Serial.println(DW1000Ng::getReceivePower());
-    Serial.print("Signal quality is ... "); Serial.println(DW1000Ng::getReceiveQuality());
-    DW1000Ng::startReceive();
+  DW1000Ng::startReceive();
+  while(!DW1000Ng::isReceiveDone()) {
+    #if defined(ESP8266)
+    yield();
+    #endif
   }
-  if (error) {
-    error = false;
-    Serial.println("Error receiving a message");
-    DW1000Ng::getReceivedData(message);
-    Serial.print("Error data is ... "); Serial.println(message);
-  }
+  DW1000Ng::clearReceiveStatus();
+  numReceived++;
+  // get data as string
+  DW1000Ng::getReceivedData(message);
+  Serial.print("Received message ... #"); Serial.println(numReceived);
+  Serial.print("Data is ... "); Serial.println(message);
+  Serial.print("RX power is [dBm] ... "); Serial.println(DW1000Ng::getReceivePower());
+  Serial.print("Signal quality is ... "); Serial.println(DW1000Ng::getReceiveQuality());
 }
