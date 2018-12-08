@@ -60,3 +60,15 @@ typedef struct frame_filtering_configuration_t {
     boolean allowReservedFour;
     boolean allowReservedFive;
 } frame_filtering_configuration_t;
+
+typedef struct sleep_configuration_t {
+    boolean onWakeUpRunADC;
+    boolean onWakeUpReceive;
+    boolean onWakeUpLoadEUI;
+    boolean onWakeUpLoadL64Param;
+    boolean preserveSleep;
+    boolean enableSLP;      /* Use this only for SLEEP, not for DEEPSLEEP */
+    boolean enableWakePIN;
+    boolean enableWakeSPI;
+    uint16_t sleepTime;     /* The sleep time count elapse value. The units depend on which timer is running. */
+} sleep_configuration_t;

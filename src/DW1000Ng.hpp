@@ -92,9 +92,26 @@ namespace DW1000Ng {
 	void setGPIOMode(uint8_t msgp, uint8_t mode);
 
 	/**
-	Enable deep sleep mode
+	Configures the sleep time count elapse value. 
+	Use this only in sleep mode so, after proper applyCommonSleepConfiguration() configuration.
+
+	@param [in] sleepTime	time of the sleep. The unit depends on the osc.freq. of the IC in low powered(from 7 to 13 KHz).
 	*/
-	void deepSleep();
+	void setSleepTime(uint16_t sleepTime);
+
+	/**
+	Applies the common sleep configuration and on-wake mode to the DW1000 for both DEEP_SLEEP and SLEEP modes.
+	ONW_LLDO_BIT and ONW_LLDE_BIT are 1 to default.
+
+	@param [in] config struct	The sleep/deepsleep configuration to apply to the DW1000
+	*/
+	void applySleepConfiguration(sleep_configuration_t sleep_config);
+
+	/**
+	Enter in DeepSleep or Sleep mode. applySleepConfiguration must be called first.
+	Either spi wakeup or pin wakeup must be enabled.
+	*/
+	void sleep();
 
 	/**
 	Wake-up from deep sleep by toggle chip select pin

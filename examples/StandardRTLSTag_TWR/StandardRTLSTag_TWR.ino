@@ -55,6 +55,18 @@ frame_filtering_configuration_t TAG_FRAME_FILTER_CONFIG = {
     false
 };
 
+sleep_configuration_t SLEEP_CONFIG = {
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    true,
+    NULL
+};
+
 void setup() {
     // DEBUG monitoring
     Serial.begin(115200);
@@ -94,7 +106,7 @@ void setup() {
 }
 
 void loop() {
-    DW1000Ng::deepSleep();
+    DW1000Ng::sleep();
     delay(blink_rate);
     DW1000Ng::spiWakeup();
     DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
