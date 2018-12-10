@@ -67,7 +67,7 @@ typedef struct sleep_configuration_t {
     boolean onWakeUpLoadEUI;
     boolean onWakeUpLoadL64Param;
     boolean preserveSleep;
-    boolean enableSLP;      /* Use this only for SLEEP, not for DEEPSLEEP */
+    boolean enableSLP;
     boolean enableWakePIN;
     boolean enableWakeSPI;
     uint16_t sleepTime;     /* The sleep time count elapse value. The units depend on which timer is running. */

@@ -61,7 +61,7 @@ sleep_configuration_t SLEEP_CONFIG = {
     false,
     false,
     false,
-    false,
+    true,
     false,
     true,
     NULL
@@ -87,6 +87,8 @@ void setup() {
     DW1000Ng::setNetworkId(RTLS_APP_ID);
 
     DW1000Ng::setAntennaDelay(16436);
+
+    DW1000Ng::applySleepConfiguration(SLEEP_CONFIG);
 
     DW1000Ng::setPreambleDetectionTimeout(15);
     DW1000Ng::setSfdDetectionTimeout(273);
