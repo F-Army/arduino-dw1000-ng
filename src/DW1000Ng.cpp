@@ -1143,12 +1143,10 @@ namespace DW1000Ng {
 		}
 
 		void _resetReceiver() {
-			byte pmscctrl0[LEN_PMSC_CTRL0];
-			_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-			pmscctrl0[3] = 0xE0;
-			_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-			pmscctrl0[3] = 0xF0;
-			_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			/* Set to 0 only bit 28 */
+			_writeToRegister(PMSC, PMSC_SOFTRESET_SUB, 0xE0, LEN_PMSC_SOFTRESET);
+			/* Set SOFTRESET to all ones */
+			_writeToRegister(PMSC, PMSC_SOFTRESET_SUB, 0xF0, LEN_PMSC_SOFTRESET);
 		}
 
 		/* Internal helpers to read configuration */
