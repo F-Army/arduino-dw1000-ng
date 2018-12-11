@@ -103,15 +103,6 @@ namespace DW1000Ng {
 		uint16_t		_antennaTxDelay = 0;
 		uint16_t		_antennaRxDelay = 0;
 
-		/* SPI relative variables */
-		#if defined(ESP32) || defined(ESP8266)
-		const SPISettings  _fastSPI = SPISettings(20000000L, MSBFIRST, SPI_MODE0);
-		#else
-		const SPISettings  _fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
-		#endif
-		const SPISettings  _slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
-		const SPISettings* _currentSPI = &_fastSPI;
-
 		/* ############################# PRIVATE METHODS ################################### */
 		/*
 		* Write bytes to the DW1000Ng. Single bytes can be written to registers via sub-addressing.
@@ -148,7 +139,7 @@ namespace DW1000Ng {
 					headerLen += 2;
 				}
 			}
-			SPI.beginTransaction(*_currentSPI);
+			SPI.beginTransaction(*DW1000NgUtils::getSPIclock());
 			digitalWrite(_ss, LOW);
 			for(i = 0; i < headerLen; i++) {
 				SPI.transfer(header[i]); // send header
@@ -201,7 +192,7 @@ namespace DW1000Ng {
 					headerLen += 2;
 				}
 			}
-			SPI.beginTransaction(*_currentSPI);
+			SPI.beginTransaction(*DW1000NgUtils::getSPIclock());
 			digitalWrite(_ss, LOW);
 			for(i = 0; i < headerLen; i++) {
 				SPI.transfer(header[i]); // send header
@@ -1080,19 +1071,15 @@ namespace DW1000Ng {
 			_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 			/* SYSCLKS */
 			if(clock == SYS_AUTO_CLOCK) {
-				_currentSPI = &_fastSPI;
 				pmscctrl0[0] = SYS_AUTO_CLOCK;
 				pmscctrl0[1] &= 0xFE;
 			} else if(clock == SYS_XTI_CLOCK) {
-				_currentSPI = &_slowSPI;
 				pmscctrl0[0] &= 0xFC;
 				pmscctrl0[0] |= SYS_XTI_CLOCK;
 			} else if(clock == SYS_PLL_CLOCK) {
-				_currentSPI = &_fastSPI;
 				pmscctrl0[0] &= 0xFC;
 				pmscctrl0[0] |= SYS_PLL_CLOCK;
 			} else if (clock == TX_PLL_CLOCK) { /* NOT SYSCLKS but TX */
-				_currentSPI = &_fastSPI;
 				pmscctrl0[0] &= 0xCF;
 				pmscctrl0[0] |= TX_PLL_CLOCK;
 			} else {
@@ -1249,6 +1236,7 @@ namespace DW1000Ng {
 
 		reset();
 		
+		DW1000NgUtils::setSpiClock(0);
 		_enableClock(SYS_XTI_CLOCK);
 		delay(5);
 		// load LDE micro-code
@@ -1264,6 +1252,7 @@ namespace DW1000Ng {
 		_tmeas23C = buf_otp[0];
 
 		_enableClock(SYS_AUTO_CLOCK);
+		DW1000NgUtils::setSpiClock(1);
 		delay(5);
 
 		_readNetworkIdAndDeviceAddress();
@@ -1274,6 +1263,7 @@ namespace DW1000Ng {
 
 		/* Cleared AON:CFG1(0x2C:0x0A) for proper operation of deepSleep */
 		_writeToRegister(AON, AON_CFG1_SUB, 0x00, LEN_AON_CFG1);
+		
 	}
 
 	void initializeNoInterrupt(uint8_t ss, uint8_t rst) {

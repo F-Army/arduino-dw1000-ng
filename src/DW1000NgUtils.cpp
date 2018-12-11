@@ -43,11 +43,35 @@
  */
 
 #include <Arduino.h>
+#include <SPI.h>
 #include "DW1000NgUtils.hpp"
 #include "DW1000NgConstants.hpp"
 #include "DW1000NgRegisters.hpp"
 
 namespace DW1000NgUtils {
+	
+	/* SPI relative variables */
+		#if defined(ESP32) || defined(ESP8266)
+		const SPISettings  _fastSPI = SPISettings(20000000L, MSBFIRST, SPI_MODE0);
+		#else
+		const SPISettings  _fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
+		#endif
+		const SPISettings  _slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
+		const SPISettings* _currentSPI = &_fastSPI;
+
+
+	SPISettings* getSPIclock(){
+		return _currentSPI;
+	}
+
+	void setSpiClock(boolean value) {
+		if(value = 1) {
+			_currentSPI = &_fastSPI;
+		 } else{
+			_currentSPI = &_slowSPI;
+		 }	 
+	}
+	
 	/*
 	* Set the value of a bit in an array of bytes that are considered
 	* consecutive and stored from MSB to LSB.
@@ -136,4 +160,5 @@ namespace DW1000NgUtils {
 		}
 		memcpy(bytes, eui_byte, LEN_EUI);
 	}
+	
 }

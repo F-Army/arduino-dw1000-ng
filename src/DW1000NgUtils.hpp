@@ -47,6 +47,16 @@
 #include <Arduino.h>
 
 namespace DW1000NgUtils {
+    
+    SPISettings* getSPIclock();
+
+    /**
+    Sets speed of SPI clock, fast or slow(20MHz or 2MHz)
+
+    @param [in] 1 fast, 0 slow
+    */
+    void setSpiClock(boolean value);
+
     /**
     Returns target bit value inside a byte array
 
