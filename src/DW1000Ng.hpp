@@ -110,6 +110,7 @@ namespace DW1000Ng {
 	/**
 	Enter in DeepSleep or Sleep mode. applySleepConfiguration must be called first.
 	Either spi wakeup or pin wakeup must be enabled.
+	In case of Sleep mode, you must reset proper antenna delay with setTxAntennaDelay() after wakeUp event.
 	*/
 	void sleep();
 
