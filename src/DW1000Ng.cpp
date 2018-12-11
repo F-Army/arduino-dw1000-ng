@@ -1481,7 +1481,6 @@ namespace DW1000Ng {
 
 	/*Puts the device into sleep/deepSleep mode. This function also upload sleep config to AON. */
 	void sleep() {
-		_writeBitToRegister(AON, AON_CFG0_SUB, LEN_AON_CFG0, SLEEP_EN_BIT, true);
 		/* Clear the register */
 		_writeToRegister(AON, AON_CTRL_SUB, 0x00, LEN_AON_CTRL);
 		/* Write 1 in SAVE_BIT */
