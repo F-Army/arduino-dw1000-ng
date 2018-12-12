@@ -1218,7 +1218,7 @@ namespace DW1000Ng {
 
 		reset();
 		
-		DW1000NgUtils::setSpiClock(0);
+		DW1000NgUtils::setSPIclock(SPIClock::SLOW);
 		_enableClock(SYS_XTI_CLOCK);
 		delay(5);
 		// load LDE micro-code
@@ -1234,7 +1234,7 @@ namespace DW1000Ng {
 		_tmeas23C = buf_otp[0];
 
 		_enableClock(SYS_AUTO_CLOCK);
-		DW1000NgUtils::setSpiClock(1);
+		DW1000NgUtils::setSPIclock(SPIClock::FAST);
 		delay(5);
 
 		_readNetworkIdAndDeviceAddress();

@@ -231,4 +231,4 @@ enum class TransmitMode {IMMEDIATE, DELAYED};
 
 enum class ReceiveMode {IMMEDIATE, DELAYED};
 
-enum class SPIClock {FAST, SLOW};
+enum class SPIClock {SLOW, FAST};

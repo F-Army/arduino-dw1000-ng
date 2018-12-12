@@ -90,16 +90,24 @@ namespace DW1000NgUtils {
 		delayMicroseconds(5);
 	}
 
-	SPISettings* getSPIclock() {
-		return _currentSPI;
+	void setSPIclock(SPIClock speed) {
+		if(speed == SPIClock::FAST) {
+			_currentSPI = &_fastSPI;
+		 } else if(speed == SPIClock::SLOW) {
+			_currentSPI = &_slowSPI;
+		 } else {
+			 // TODO error
+		 }
 	}
 
-	void setSpiClock(boolean value) {
-		if(value = 1) {
-			_currentSPI = &_fastSPI;
-		 } else{
-			_currentSPI = &_slowSPI;
-		 }	 
+	int getSPIclock() {
+		/*if(_currentSPI == SPIClock::FAST) {
+			return 1;
+		} else if(_currentSPI == SPIClock::SLOW) {
+			return 0;
+		} else {
+			 // TODO error
+		} */
 	}
 	
 	/*

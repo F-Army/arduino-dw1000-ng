@@ -45,6 +45,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include "DW1000NgConstants.hpp"
 
 namespace DW1000NgUtils {
 
@@ -87,17 +88,17 @@ namespace DW1000NgUtils {
     /**
     Sets speed of SPI clock, fast or slow(20MHz or 2MHz)
 
-    @param [in] 1 fast, 0 slow
+    @param [in] SPIClock FAST or SLOW
     */
-    void setSpiClock(boolean value);
+    void setSPIclock(SPIClock speed);
 
     /**
     Sets speed of SPI clock, fast or slow(20MHz or 2MHz)
 
-    @param [in] 1 fast, 0 slow
+    @param [out] 1 SPIClock FAST, 0 SPIClock SLOW
     */
-    SPISettings* getSPIclock();
-    
+    int getSPIclock();
+
     /**
     Returns target bit value inside a byte array
 
