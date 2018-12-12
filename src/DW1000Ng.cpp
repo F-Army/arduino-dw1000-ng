@@ -167,7 +167,6 @@ namespace DW1000Ng {
 		void _readBytes(byte cmd, uint16_t offset, byte data[], uint16_t data_size) {
 			byte header[3];
 			uint8_t headerLen = 1;
-			uint16_t i = 0;
 			
 			// build SPI header
 			if(offset == NO_SUB) {

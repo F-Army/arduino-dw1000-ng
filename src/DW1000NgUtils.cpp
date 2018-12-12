@@ -71,22 +71,20 @@ namespace DW1000NgUtils {
 	}
 
 	void writeToSPI(uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]) {
-		uint16_t i = 0;
-		for(i = 0; i < headerLen; i++) {
+		for(auto i = 0; i < headerLen; i++) {
 			SPI.transfer(header[i]); // send header
 		}
-		for(i = 0; i < dataLen; i++) {
+		for(auto i = 0; i < dataLen; i++) {
 			SPI.transfer(data[i]); // write values
 		}
 		delayMicroseconds(5);
 	}
 
     void readFromSPI(uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]){
-		uint16_t i = 0;
-		for(i = 0; i < headerLen; i++) {
+		for(auto i = 0; i < headerLen; i++) {
 			SPI.transfer(header[i]); // send header
 		}
-		for(i = 0; i < dataLen; i++) {
+		for(auto i = 0; i < dataLen; i++) {
 			data[i] = SPI.transfer(0x00); // read values
 		}
 		delayMicroseconds(5);
