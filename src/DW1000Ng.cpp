@@ -121,8 +121,7 @@ namespace DW1000Ng {
 
 		void _writeBytesToRegister(byte cmd, uint16_t offset, byte data[], uint16_t data_size) {
 			byte header[3];
-			uint8_t  headerLen = 1;
-			uint16_t  i = 0;
+			uint8_t headerLen = 1;
 			
 			// TODO proper error handling: address out of bounds
 			// build SPI header
@@ -140,13 +139,7 @@ namespace DW1000Ng {
 				}
 			}
 			DW1000NgUtils::openSPI(_ss);
-			for(i = 0; i < headerLen; i++) {
-				SPI.transfer(header[i]); // send header
-			}
-			for(i = 0; i < data_size; i++) {
-				SPI.transfer(data[i]); // write values
-			}
-			delayMicroseconds(5);
+			DW1000NgUtils::writeToSPI(headerLen, header, data_size, data);
 			DW1000NgUtils::closeSPI(_ss);
 		}
 
@@ -174,6 +167,7 @@ namespace DW1000Ng {
 		void _readBytes(byte cmd, uint16_t offset, byte data[], uint16_t n) {
 			byte header[3];
 			uint8_t headerLen = 1;
+			uint16_t i = 0;
 			
 			// build SPI header
 			if(offset == NO_SUB) {
@@ -190,7 +184,13 @@ namespace DW1000Ng {
 				}
 			}
 			DW1000NgUtils::openSPI(_ss);
-			DW1000NgUtils::writeToSPI(headerLen, header, n, data);
+			for(i = 0; i < headerLen; i++) {
+				SPI.transfer(header[i]); // send header
+			}
+			for(i = 0; i < n; i++) {
+				data[i] = SPI.transfer(0x00); // read values
+			}
+			delayMicroseconds(5);
 			DW1000NgUtils::closeSPI(_ss);
 		}
 

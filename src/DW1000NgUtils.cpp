@@ -76,7 +76,7 @@ namespace DW1000NgUtils {
 			SPI.transfer(header[i]); // send header
 		}
 		for(i = 0; i < dataLen; i++) {
-			data[i] = SPI.transfer(0x00); // read values
+			SPI.transfer(data[i]); // write values
 		}
 		delayMicroseconds(5);
 	}
