@@ -66,7 +66,7 @@ namespace DW1000NgUtils {
 		SPI.begin();
 	}
 
-	void end() {
+	void SPIend() {
 		SPI.end();
 	}
 
