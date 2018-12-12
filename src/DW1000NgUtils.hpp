@@ -47,6 +47,33 @@
 #include <Arduino.h>
 
 namespace DW1000NgUtils {
+
+    /**
+    Arduino function to open and initialise access to the SPI device.
+
+    @param [in] SPI chip selector 
+    */
+    void openSPI(uint8_t chipSelectPin);
+
+    /**
+    Arduino function to close the SPI device.
+
+    @param [in] SPI chip selector 
+    */
+    void closeSPI(uint8_t chipSelectPin);
+
+    /**
+    Arduino function to write to the SPI.
+    Takes two separate byte buffers for write header and write data
+
+    @param [in] Header lenght
+    @param [in] Header array built before 
+    @param [in] Data lenght
+    @param [in] Data array 
+    */
+    void writeToSPI(uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]);
+
+    void readFromSPI();
     
     SPISettings* getSPIclock();
 

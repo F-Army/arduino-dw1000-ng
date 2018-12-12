@@ -60,7 +60,32 @@ namespace DW1000NgUtils {
 		const SPISettings* _currentSPI = &_fastSPI;
 
 
-	SPISettings* getSPIclock(){
+	void openSPI(uint8_t chipSelectPin) {
+		SPI.beginTransaction(*_currentSPI);
+		digitalWrite(chipSelectPin, LOW);
+	}
+
+    void closeSPI(uint8_t chipSelectPin) {
+		digitalWrite(chipSelectPin, HIGH);
+		SPI.endTransaction();
+	}
+
+	void writeToSPI(uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]) {
+		uint16_t i = 0;
+		for(i = 0; i < headerLen; i++) {
+			SPI.transfer(header[i]); // send header
+		}
+		for(i = 0; i < dataLen; i++) {
+			data[i] = SPI.transfer(0x00); // read values
+		}
+		delayMicroseconds(5);
+	}
+
+    void readFromSPI(){
+		;
+	}
+
+	SPISettings* getSPIclock() {
 		return _currentSPI;
 	}
 

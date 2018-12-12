@@ -139,8 +139,7 @@ namespace DW1000Ng {
 					headerLen += 2;
 				}
 			}
-			SPI.beginTransaction(*DW1000NgUtils::getSPIclock());
-			digitalWrite(_ss, LOW);
+			DW1000NgUtils::openSPI(_ss);
 			for(i = 0; i < headerLen; i++) {
 				SPI.transfer(header[i]); // send header
 			}
@@ -148,8 +147,7 @@ namespace DW1000Ng {
 				SPI.transfer(data[i]); // write values
 			}
 			delayMicroseconds(5);
-			digitalWrite(_ss, HIGH);
-			SPI.endTransaction();
+			DW1000NgUtils::closeSPI(_ss);
 		}
 
 		void _writeToRegister(byte cmd, uint16_t offset, uint32_t data, uint16_t data_size) { 
@@ -176,7 +174,6 @@ namespace DW1000Ng {
 		void _readBytes(byte cmd, uint16_t offset, byte data[], uint16_t n) {
 			byte header[3];
 			uint8_t headerLen = 1;
-			uint16_t i = 0;
 			
 			// build SPI header
 			if(offset == NO_SUB) {
@@ -192,17 +189,9 @@ namespace DW1000Ng {
 					headerLen += 2;
 				}
 			}
-			SPI.beginTransaction(*DW1000NgUtils::getSPIclock());
-			digitalWrite(_ss, LOW);
-			for(i = 0; i < headerLen; i++) {
-				SPI.transfer(header[i]); // send header
-			}
-			for(i = 0; i < n; i++) {
-				data[i] = SPI.transfer(0x00); // read values
-			}
-			delayMicroseconds(5);
-			digitalWrite(_ss, HIGH);
-			SPI.endTransaction();
+			DW1000NgUtils::openSPI(_ss);
+			DW1000NgUtils::writeToSPI(headerLen, header, n, data);
+			DW1000NgUtils::closeSPI(_ss);
 		}
 
 		// always 4 bytes
