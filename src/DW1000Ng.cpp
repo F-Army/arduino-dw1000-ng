@@ -44,7 +44,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <SPI.h>
 #include <string.h>
 #include "DW1000NgUtils.hpp"
 #include "DW1000NgConstants.hpp"

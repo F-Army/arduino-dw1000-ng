@@ -47,7 +47,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <Arduino.h>
-#include <SPI.h>
 #include "DW1000NgConstants.hpp"
 #include "DW1000NgConfiguration.hpp"
 #include "DW1000NgCompileOptions.hpp"
