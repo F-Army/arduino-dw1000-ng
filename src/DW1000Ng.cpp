@@ -1207,7 +1207,7 @@ namespace DW1000Ng {
 			pinMode(_rst, INPUT);
 		}
 		// start SPI
-		SPI.begin();
+		DW1000NgUtils::SPIinit();
 		// pin and basic member setup
 		// attach interrupt
 		// TODO throw error if pin is not a interrupt pin
@@ -1259,10 +1259,6 @@ namespace DW1000Ng {
 		#endif
 		pinMode(_ss, OUTPUT);
 		digitalWrite(_ss, HIGH);
-	}
-
-	void end() {
-		SPI.end();
 	}
 
 	/* callback handler management. */

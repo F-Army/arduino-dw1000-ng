@@ -50,6 +50,8 @@
 
 namespace DW1000NgUtils {
 	
+	/* ###### ARDUINO SPI ######### */ 
+
 	/* SPI relative variables */
 		#if defined(ESP32) || defined(ESP8266)
 		const SPISettings  _fastSPI = SPISettings(20000000L, MSBFIRST, SPI_MODE0);
@@ -59,6 +61,14 @@ namespace DW1000NgUtils {
 		const SPISettings  _slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
 		const SPISettings* _currentSPI = &_fastSPI;
 
+
+	void SPIinit() {
+		SPI.begin();
+	}
+
+	void end() {
+		SPI.end();
+	}
 
 	void openSPI(uint8_t chipSelectPin) {
 		SPI.beginTransaction(*_currentSPI);
@@ -110,6 +120,8 @@ namespace DW1000NgUtils {
 		} */
 	}
 	
+	/* ###### FINISH ARDUINO SPI ######### */
+
 	/*
 	* Set the value of a bit in an array of bytes that are considered
 	* consecutive and stored from MSB to LSB.

@@ -69,12 +69,6 @@ namespace DW1000Ng {
 	(Re-)selects a specific DW1000 chip for communication. Used in case you switched SPI to another device.
 	*/
 	void select();
-
-	/** 
-	Tells the driver library that no communication to a DW1000 will be required anymore.
-	This basically just frees SPI and the previously used pins.
-	*/
-	void end();
 	
 	/** 
 	Enable debounce Clock, used to clock the LED blinking

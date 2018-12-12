@@ -49,6 +49,14 @@
 
 namespace DW1000NgUtils {
 
+    void SPIinit();
+    
+    /** 
+	Tells the driver library that no communication to a DW1000 will be required anymore.
+	This basically just frees SPI and the previously used pins.
+	*/
+	void end();
+
     /**
     Arduino function to open and initialise access to the SPI device.
 
