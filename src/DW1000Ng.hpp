@@ -66,11 +66,6 @@ namespace DW1000Ng {
 	void initializeNoInterrupt(uint8_t ss, uint8_t rst = 0xff);
 	
 	/** 
-	(Re-)selects a specific DW1000 chip for communication. Used in case you switched SPI to another device.
-	*/
-	void select();
-	
-	/** 
 	Enable debounce Clock, used to clock the LED blinking
 	*/
 	void enableDebounceClock();

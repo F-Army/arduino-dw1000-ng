@@ -1213,9 +1213,8 @@ namespace DW1000Ng {
 		// TODO throw error if pin is not a interrupt pin
 		if(_irq != 0xff)
 			attachInterrupt(digitalPinToInterrupt(_irq), interruptServiceRoutine, RISING);
-		select();
+		DW1000NgUtils::SPIselect();
 		// reset chip (either soft or hard)
-
 		reset();
 		
 		DW1000NgUtils::setSPIclock(SPIClock::SLOW);
@@ -1250,15 +1249,6 @@ namespace DW1000Ng {
 
 	void initializeNoInterrupt(uint8_t ss, uint8_t rst) {
 		initialize(ss, 0xff, rst);
-	}
-
-	void select() {
-		#if !defined(ESP32) && !defined(ESP8266)
-		if(_irq != 0xff)
-			SPI.usingInterrupt(digitalPinToInterrupt(_irq));
-		#endif
-		pinMode(_ss, OUTPUT);
-		digitalWrite(_ss, HIGH);
 	}
 
 	/* callback handler management. */

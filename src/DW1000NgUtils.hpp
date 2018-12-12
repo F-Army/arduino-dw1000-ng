@@ -49,6 +49,9 @@
 
 namespace DW1000NgUtils {
 
+    /** 
+	Initializes the SPI bus.
+	*/
     void SPIinit();
 
     /** 
@@ -56,6 +59,11 @@ namespace DW1000NgUtils {
 	This basically just frees SPI and the previously used pins.
 	*/
 	void SPIend();
+
+    /** 
+	(Re-)selects a specific DW1000 chip for communication. Used in case you switched SPI to another device.
+	*/
+	void SPIselect();
 
     /**
     Arduino function to open and initialise access to the SPI device.

@@ -70,6 +70,15 @@ namespace DW1000NgUtils {
 		SPI.end();
 	}
 
+	void SPIselect() {
+		#if !defined(ESP32) && !defined(ESP8266)
+		if(_irq != 0xff)
+			SPI.usingInterrupt(digitalPinToInterrupt(_irq));
+		#endif
+		pinMode(_ss, OUTPUT);
+		digitalWrite(_ss, HIGH);
+	}
+
 	void openSPI(uint8_t chipSelectPin) {
 		SPI.beginTransaction(*_currentSPI);
 		digitalWrite(chipSelectPin, LOW);
