@@ -73,9 +73,16 @@ namespace DW1000NgUtils {
     */
     void writeToSPI(uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]);
 
-    void readFromSPI();
-    
-    SPISettings* getSPIclock();
+    /**
+    Arduino function to read from the SPI.
+    Takes two separate byte buffers for write header and write data
+
+    @param [in] Header lenght
+    @param [in] Header array built before 
+    @param [in] Data lenght
+    @param [in] Data array 
+    */
+    void readFromSPI(uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]);
 
     /**
     Sets speed of SPI clock, fast or slow(20MHz or 2MHz)
@@ -84,6 +91,13 @@ namespace DW1000NgUtils {
     */
     void setSpiClock(boolean value);
 
+    /**
+    Sets speed of SPI clock, fast or slow(20MHz or 2MHz)
+
+    @param [in] 1 fast, 0 slow
+    */
+    SPISettings* getSPIclock();
+    
     /**
     Returns target bit value inside a byte array
 

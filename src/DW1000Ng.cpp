@@ -164,7 +164,7 @@ namespace DW1000Ng {
 		*		The number of bytes expected to be received.
 		*/
 		// TODO incomplete doc
-		void _readBytes(byte cmd, uint16_t offset, byte data[], uint16_t n) {
+		void _readBytes(byte cmd, uint16_t offset, byte data[], uint16_t data_size) {
 			byte header[3];
 			uint8_t headerLen = 1;
 			uint16_t i = 0;
@@ -184,13 +184,7 @@ namespace DW1000Ng {
 				}
 			}
 			DW1000NgUtils::openSPI(_ss);
-			for(i = 0; i < headerLen; i++) {
-				SPI.transfer(header[i]); // send header
-			}
-			for(i = 0; i < n; i++) {
-				data[i] = SPI.transfer(0x00); // read values
-			}
-			delayMicroseconds(5);
+			DW1000NgUtils::readFromSPI(headerLen, header, data_size, data);
 			DW1000NgUtils::closeSPI(_ss);
 		}
 
