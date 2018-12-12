@@ -1213,7 +1213,7 @@ namespace DW1000Ng {
 		// TODO throw error if pin is not a interrupt pin
 		if(_irq != 0xff)
 			attachInterrupt(digitalPinToInterrupt(_irq), interruptServiceRoutine, RISING);
-		DW1000NgUtils::SPIselect();
+		DW1000NgUtils::SPIselect(_ss, _irq);
 		// reset chip (either soft or hard)
 		reset();
 		

@@ -63,7 +63,7 @@ namespace DW1000NgUtils {
     /** 
 	(Re-)selects a specific DW1000 chip for communication. Used in case you switched SPI to another device.
 	*/
-	void SPIselect();
+	void SPIselect(uint8_t chipSelectPin, uint8_t irq);
 
     /**
     Arduino function to open and initialise access to the SPI device.
