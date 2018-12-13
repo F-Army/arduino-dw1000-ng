@@ -1438,6 +1438,8 @@ namespace DW1000Ng {
 		/* Clear AON and WakeUp configuration */
 		_writeToRegister(AON, AON_WCFG_SUB, 0x00, LEN_AON_WCFG);
 		_writeToRegister(AON, AON_CFG0_SUB, 0x00, LEN_AON_CFG0);
+		// TODO change this with uploadToAON
+		_writeToRegister(AON, AON_CTRL_SUB, 0x00, LEN_AON_CTRL);
 		_writeToRegister(AON, AON_CTRL_SUB, 0x02, LEN_AON_CTRL);
 		/* (b) Clear SOFTRESET to all zero’s */
 		_writeToRegister(PMSC, PMSC_SOFTRESET_SUB, 0x00, LEN_PMSC_SOFTRESET);
