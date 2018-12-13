@@ -138,9 +138,7 @@ namespace DW1000Ng {
 					headerLen += 2;
 				}
 			}
-			SPIporting::openSPI(_ss);
-			SPIporting::writeToSPI(headerLen, header, data_size, data);
-			SPIporting::closeSPI(_ss);
+			SPIporting::writeToSPI(_ss, headerLen, header, data_size, data);
 		}
 
 		void _writeToRegister(byte cmd, uint16_t offset, uint32_t data, uint16_t data_size) { 
@@ -182,9 +180,7 @@ namespace DW1000Ng {
 					headerLen += 2;
 				}
 			}
-			SPIporting::openSPI(_ss);
-			SPIporting::readFromSPI(headerLen, header, data_size, data);
-			SPIporting::closeSPI(_ss);
+			SPIporting::readFromSPI(_ss, headerLen, header, data_size, data);
 		}
 
 		// always 4 bytes

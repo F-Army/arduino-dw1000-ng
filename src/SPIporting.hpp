@@ -66,20 +66,6 @@ namespace SPIporting{
 	void SPIselect(uint8_t chipSelectPin, uint8_t irq);
 
     /**
-    Arduino function to open and initialise access to the SPI device.
-
-    @param [in] SPI chip selector 
-    */
-    void openSPI(uint8_t chipSelectPin);
-
-    /**
-    Arduino function to close the SPI device.
-
-    @param [in] SPI chip selector 
-    */
-    void closeSPI(uint8_t chipSelectPin);
-
-    /**
     Arduino function to write to the SPI.
     Takes two separate byte buffers for write header and write data
 
@@ -88,7 +74,7 @@ namespace SPIporting{
     @param [in] Data lenght
     @param [in] Data array 
     */
-    void writeToSPI(uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]);
+    void writeToSPI(uint8_t chipSelectPin, uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]);
 
     /**
     Arduino function to read from the SPI.
@@ -99,7 +85,7 @@ namespace SPIporting{
     @param [in] Data lenght
     @param [in] Data array 
     */
-    void readFromSPI(uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]);
+    void readFromSPI(uint8_t chipSelectPin, uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]);
 
     /**
     Sets speed of SPI clock, fast or slow(20MHz or 2MHz)

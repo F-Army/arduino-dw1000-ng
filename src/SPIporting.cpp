@@ -49,16 +49,27 @@
 #include "DW1000NgRegisters.hpp"
 
 namespace SPIporting {
+	
+	namespace {
+		/* SPI relative variables */
+		#if defined(ESP32) || defined(ESP8266)
+			const SPISettings  _fastSPI = SPISettings(20000000L, MSBFIRST, SPI_MODE0);
+		#else
+			const SPISettings  _fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
+		#endif
+		const SPISettings  _slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
+		const SPISettings* _currentSPI = &_fastSPI;
 
-/* SPI relative variables */
-	#if defined(ESP32) || defined(ESP8266)
-	const SPISettings  _fastSPI = SPISettings(20000000L, MSBFIRST, SPI_MODE0);
-	#else
-	const SPISettings  _fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
-	#endif
-	const SPISettings  _slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
-	const SPISettings* _currentSPI = &_fastSPI;
+		void _openSPI(uint8_t chipSelectPin) {
+			SPI.beginTransaction(*_currentSPI);
+			digitalWrite(chipSelectPin, LOW);
+		}
 
+    	void _closeSPI(uint8_t chipSelectPin) {
+			digitalWrite(chipSelectPin, HIGH);
+			SPI.endTransaction();
+		}
+	}
 
 	void SPIinit() {
 		SPI.begin();
@@ -70,24 +81,15 @@ namespace SPIporting {
 
 	void SPIselect(uint8_t chipSelectPin, uint8_t irq) {
 		#if !defined(ESP32) && !defined(ESP8266)
-		if(irq != 0xff)
-			SPI.usingInterrupt(digitalPinToInterrupt(irq));
+			if(irq != 0xff)
+				SPI.usingInterrupt(digitalPinToInterrupt(irq));
 		#endif
 		pinMode(chipSelectPin, OUTPUT);
 		digitalWrite(chipSelectPin, HIGH);
 	}
 
-	void openSPI(uint8_t chipSelectPin) {
-		SPI.beginTransaction(*_currentSPI);
-		digitalWrite(chipSelectPin, LOW);
-	}
-
-    void closeSPI(uint8_t chipSelectPin) {
-		digitalWrite(chipSelectPin, HIGH);
-		SPI.endTransaction();
-	}
-
-	void writeToSPI(uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]) {
+	void writeToSPI(uint8_t chipSelectPin, uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]) {
+		_openSPI(chipSelectPin);
 		for(auto i = 0; i < headerLen; i++) {
 			SPI.transfer(header[i]); // send header
 		}
@@ -95,9 +97,11 @@ namespace SPIporting {
 			SPI.transfer(data[i]); // write values
 		}
 		delayMicroseconds(5);
+		_closeSPI(chipSelectPin);
 	}
 
-    void readFromSPI(uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]){
+    void readFromSPI(uint8_t chipSelectPin, uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]){
+		_openSPI(chipSelectPin);
 		for(auto i = 0; i < headerLen; i++) {
 			SPI.transfer(header[i]); // send header
 		}
@@ -105,6 +109,7 @@ namespace SPIporting {
 			data[i] = SPI.transfer(0x00); // read values
 		}
 		delayMicroseconds(5);
+		_closeSPI(chipSelectPin);
 	}
 
 	void setSPIspeed(SPIClock speed) {
