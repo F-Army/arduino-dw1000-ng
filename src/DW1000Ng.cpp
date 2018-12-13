@@ -222,6 +222,32 @@ namespace DW1000Ng {
 				
 			_writeBytesToRegister(bitRegister, RegisterOffset+idx, &targetByte, 1);
 		}
+
+		void _enableClock(byte clock) {
+			byte pmscctrl0[LEN_PMSC_CTRL0];
+			memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
+			_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			/* SYSCLKS */
+			if(clock == SYS_AUTO_CLOCK) {
+				pmscctrl0[0] = SYS_AUTO_CLOCK;
+				pmscctrl0[1] &= 0xFE;
+			} else if(clock == SYS_XTI_CLOCK) {
+				pmscctrl0[0] &= 0xFC;
+				pmscctrl0[0] |= SYS_XTI_CLOCK;
+			} else if(clock == SYS_PLL_CLOCK) {
+				pmscctrl0[0] &= 0xFC;
+				pmscctrl0[0] |= SYS_PLL_CLOCK;
+			} else if (clock == TX_PLL_CLOCK) { /* NOT SYSCLKS but TX */
+				pmscctrl0[0] &= 0xCF;
+				pmscctrl0[0] |= TX_PLL_CLOCK;
+			} else if (clock == LDE_CLOCK) {
+				pmscctrl0[0] = SYS_XTI_CLOCK;
+				pmscctrl0[1] = 0x03;
+			} else {
+				// TODO deliver proper warning
+			}
+			_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
+		}
 		
 		/* Steps used to get Temp and Voltage */
 		void _vbatAndTempSteps() {
@@ -731,7 +757,11 @@ namespace DW1000Ng {
 		void _fsxtalt() {
 			byte fsxtalt[LEN_FS_XTALT];
 			byte buf_otp[4];
+			_enableClock(SYS_XTI_CLOCK);
+			delay(5);
 			_readBytesOTP(0x01E, buf_otp); //0x01E -> byte[0]=XTAL_Trim
+			_enableClock(SYS_AUTO_CLOCK);
+			delay(5);
 			if (buf_otp[0] == 0) {
 				// No trim value available from OTP, use midrange value of 0x10
 				DW1000NgUtils::writeValueToBytes(fsxtalt, ((0x10 & 0x1F) | 0x60), LEN_FS_XTALT);
@@ -1017,6 +1047,7 @@ namespace DW1000Ng {
 		}
 
 		void _manageLDE() {
+
 			// transfer any ldo tune values
 			byte ldoTune[LEN_OTP_RDAT];
 			_readBytesOTP(0x04, ldoTune); // TODO #define
@@ -1036,33 +1067,13 @@ namespace DW1000Ng {
 			otpctrl[0]   = 0x00;
 			otpctrl[1]   = 0x80;
 			_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
+			_enableClock(LDE_CLOCK);
+			delay(5);
 			_writeBytesToRegister(OTP_IF, OTP_CTRL_SUB, otpctrl, 2);
+			_enableClock(SYS_AUTO_CLOCK);
 			delay(5);
 			pmscctrl0[0] = 0x00;
 			pmscctrl0[1] &= 0x02;
-			_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
-		}
-
-		void _enableClock(byte clock) {
-			byte pmscctrl0[LEN_PMSC_CTRL0];
-			memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
-			_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-			/* SYSCLKS */
-			if(clock == SYS_AUTO_CLOCK) {
-				pmscctrl0[0] = SYS_AUTO_CLOCK;
-				pmscctrl0[1] &= 0xFE;
-			} else if(clock == SYS_XTI_CLOCK) {
-				pmscctrl0[0] &= 0xFC;
-				pmscctrl0[0] |= SYS_XTI_CLOCK;
-			} else if(clock == SYS_PLL_CLOCK) {
-				pmscctrl0[0] &= 0xFC;
-				pmscctrl0[0] |= SYS_PLL_CLOCK;
-			} else if (clock == TX_PLL_CLOCK) { /* NOT SYSCLKS but TX */
-				pmscctrl0[0] &= 0xCF;
-				pmscctrl0[0] |= TX_PLL_CLOCK;
-			} else {
-				// TODO deliver proper warning
-			}
 			_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
 		}
 
@@ -1608,6 +1619,7 @@ namespace DW1000Ng {
 	void getTemperatureAndBatteryVoltage(float& temp, float& vbat) {
 		// follow the procedure from section 6.4 of the User Manual
 		_vbatAndTempSteps();
+		delay(1);
 		byte sar_lvbat = 0; _readBytes(TX_CAL, 0x03, &sar_lvbat, 1);
 		byte sar_ltemp = 0; _readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
 		
