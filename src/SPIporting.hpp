@@ -39,7 +39,7 @@
  * limitations under the License.
  *
  * @file SPIporting.hpp
- * Helper functions.
+ * Arduino porting for the SPI interface.
  */
 
 #pragma once

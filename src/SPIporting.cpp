@@ -39,7 +39,7 @@
  * limitations under the License.
  *
  * @file SPIporting.cpp
- * Helper functions.
+ * Arduino porting for the SPI interface.
  */
 
 #include <Arduino.h>
