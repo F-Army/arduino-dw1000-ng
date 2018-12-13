@@ -109,7 +109,7 @@ namespace DW1000NgUtils {
 		delayMicroseconds(5);
 	}
 
-	void setSPIclock(SPIClock speed) {
+	void setSPIspeed(SPIClock speed) {
 		if(speed == SPIClock::FAST) {
 			_currentSPI = &_fastSPI;
 		 } else if(speed == SPIClock::SLOW) {

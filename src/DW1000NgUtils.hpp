@@ -106,7 +106,7 @@ namespace DW1000NgUtils {
 
     @param [in] SPIClock FAST or SLOW
     */
-    void setSPIclock(SPIClock speed);
+    void setSPIspeed(SPIClock speed);
 
     /**
     Sets speed of SPI clock, fast or slow(20MHz or 2MHz)

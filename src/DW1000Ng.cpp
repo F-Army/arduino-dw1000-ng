@@ -1216,7 +1216,7 @@ namespace DW1000Ng {
 		// reset chip (either soft or hard)
 		reset();
 		
-		DW1000NgUtils::setSPIclock(SPIClock::SLOW);
+		DW1000NgUtils::setSPIspeed(SPIClock::SLOW);
 		_enableClock(SYS_XTI_CLOCK);
 		delay(5);
 		// load LDE micro-code
@@ -1232,7 +1232,7 @@ namespace DW1000Ng {
 		_tmeas23C = buf_otp[0];
 
 		_enableClock(SYS_AUTO_CLOCK);
-		DW1000NgUtils::setSPIclock(SPIClock::FAST);
+		DW1000NgUtils::setSPIspeed(SPIClock::FAST);
 		delay(5);
 
 		_readNetworkIdAndDeviceAddress();
