@@ -45,10 +45,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "DW1000Ng.hpp"
 #include "DW1000NgUtils.hpp"
 #include "DW1000NgConstants.hpp"
 #include "DW1000NgRegisters.hpp"
-#include "DW1000Ng.hpp"
+#include "SPIporting.hpp"
 
 namespace DW1000Ng {
 	
@@ -137,9 +138,9 @@ namespace DW1000Ng {
 					headerLen += 2;
 				}
 			}
-			DW1000NgUtils::openSPI(_ss);
-			DW1000NgUtils::writeToSPI(headerLen, header, data_size, data);
-			DW1000NgUtils::closeSPI(_ss);
+			SPIporting::openSPI(_ss);
+			SPIporting::writeToSPI(headerLen, header, data_size, data);
+			SPIporting::closeSPI(_ss);
 		}
 
 		void _writeToRegister(byte cmd, uint16_t offset, uint32_t data, uint16_t data_size) { 
@@ -181,9 +182,9 @@ namespace DW1000Ng {
 					headerLen += 2;
 				}
 			}
-			DW1000NgUtils::openSPI(_ss);
-			DW1000NgUtils::readFromSPI(headerLen, header, data_size, data);
-			DW1000NgUtils::closeSPI(_ss);
+			SPIporting::openSPI(_ss);
+			SPIporting::readFromSPI(headerLen, header, data_size, data);
+			SPIporting::closeSPI(_ss);
 		}
 
 		// always 4 bytes
@@ -1206,17 +1207,17 @@ namespace DW1000Ng {
 			pinMode(_rst, INPUT);
 		}
 		// start SPI
-		DW1000NgUtils::SPIinit();
+		SPIporting::SPIinit();
 		// pin and basic member setup
 		// attach interrupt
 		// TODO throw error if pin is not a interrupt pin
 		if(_irq != 0xff)
 			attachInterrupt(digitalPinToInterrupt(_irq), interruptServiceRoutine, RISING);
-		DW1000NgUtils::SPIselect(_ss, _irq);
+		SPIporting::SPIselect(_ss, _irq);
 		// reset chip (either soft or hard)
 		reset();
 		
-		DW1000NgUtils::setSPIspeed(SPIClock::SLOW);
+		SPIporting::setSPIspeed(SPIClock::SLOW);
 		_enableClock(SYS_XTI_CLOCK);
 		delay(5);
 		// load LDE micro-code
@@ -1232,7 +1233,7 @@ namespace DW1000Ng {
 		_tmeas23C = buf_otp[0];
 
 		_enableClock(SYS_AUTO_CLOCK);
-		DW1000NgUtils::setSPIspeed(SPIClock::FAST);
+		SPIporting::setSPIspeed(SPIClock::FAST);
 		delay(5);
 
 		_readNetworkIdAndDeviceAddress();

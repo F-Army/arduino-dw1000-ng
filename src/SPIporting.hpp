@@ -38,7 +38,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @file DW1000.h
+ * @file SPIporting.hpp
  * Helper functions.
  */
 
@@ -47,64 +47,71 @@
 #include <Arduino.h>
 #include "DW1000NgConstants.hpp"
 
-namespace DW1000NgUtils {
+namespace SPIporting{
+
+    /** 
+	Initializes the SPI bus.
+	*/
+    void SPIinit();
+
+    /** 
+	Tells the driver library that no communication to a DW1000 will be required anymore.
+	This basically just frees SPI and the previously used pins.
+	*/
+	void SPIend();
+
+    /** 
+	(Re-)selects a specific DW1000 chip for communication. Used in case you switched SPI to another device.
+	*/
+	void SPIselect(uint8_t chipSelectPin, uint8_t irq);
 
     /**
-    Returns target bit value inside a byte array
+    Arduino function to open and initialise access to the SPI device.
 
-    @param [in] data the byte array
-    @param [in] n the length of the byte array
-    @param [in] bit the bit position
-
-    returns bit value (true = 1, false = 0)
+    @param [in] SPI chip selector 
     */
-    boolean getBit(byte data[], uint16_t n, uint16_t bit);
+    void openSPI(uint8_t chipSelectPin);
 
     /**
-    Sets the target bit value inside an array of bytes
+    Arduino function to close the SPI device.
 
-    @param [in] data the byte array
-    @param [in] n the length of the byte array
-    @param [in] bit the bit position
-    @param [in] val the bit value
-
+    @param [in] SPI chip selector 
     */
-    void setBit(byte data[], uint16_t n, uint16_t bit, boolean val);
+    void closeSPI(uint8_t chipSelectPin);
 
     /**
-    Writes the target value inside a byte array
+    Arduino function to write to the SPI.
+    Takes two separate byte buffers for write header and write data
 
-    @param [in] data the byte array
-    @param [in] val the value to insert
-    @param [in] n the length of the byte array
+    @param [in] Header lenght
+    @param [in] Header array built before 
+    @param [in] Data lenght
+    @param [in] Data array 
     */
-    void writeValueToBytes(byte data[], uint64_t val, uint8_t n);
-    
-    /**
-    Gets the target byte array value
-
-    @param [in] data the byte array
-    @param [in] n the length of the byte array
-
-    returns the byte array value
-    */
-    uint64_t bytesAsValue(byte data[], uint8_t n);
+    void writeToSPI(uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]);
 
     /**
-    Converts from char to 4 bits (hexadecimal)
+    Arduino function to read from the SPI.
+    Takes two separate byte buffers for write header and write data
 
-    @param [in] c the character
-
-    returns target value
+    @param [in] Header lenght
+    @param [in] Header array built before 
+    @param [in] Data lenght
+    @param [in] Data array 
     */
-    
-	uint8_t nibbleFromChar(char c);
+    void readFromSPI(uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]);
 
     /**
-    Converts the target string to eui bytes
+    Sets speed of SPI clock, fast or slow(20MHz or 2MHz)
 
-    @param [in] string The eui string (in format XX:XX:XX:XX:XX:XX:XX:XX)
-    @param [out] eui_byte The eui bytes
+    @param [in] SPIClock FAST or SLOW
     */
-	void convertToByte(char string[], byte* eui_byte);
+    void setSPIspeed(SPIClock speed);
+
+    /**
+    Sets speed of SPI clock, fast or slow(20MHz or 2MHz)
+
+    @param [out] 1 SPIClock FAST, 0 SPIClock SLOW
+    */
+    int getSPIclock();
 }
