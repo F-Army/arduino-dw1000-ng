@@ -1229,8 +1229,8 @@ namespace DW1000Ng {
 		_tmeas23C = buf_otp[0];
 
 		_enableClock(SYS_AUTO_CLOCK);
-		SPIporting::setSPIspeed(SPIClock::FAST);
 		delay(5);
+		SPIporting::setSPIspeed(SPIClock::FAST);
 
 		_readNetworkIdAndDeviceAddress();
 		_readSystemConfigurationRegister();
