@@ -62,6 +62,13 @@ namespace DW1000Ng {
 	*/
 	void initialize(uint8_t ss, uint8_t irq, uint8_t rst = 0xff);
 
+	/** 
+	Initiates and starts a sessions with a DW1000 without interrupt. If rst is not set or value 0xff, a soft resets (i.e. command
+	triggered) are used and it is assumed that no reset line is wired.
+	
+	@param[in] ss  The SPI Selection pin used to identify the specific connection
+	@param[in] rst The reset line/pin for hard resets of ICs that connect to the Arduino. Value 0xff means soft reset.
+	*/
 	void initializeNoInterrupt(uint8_t ss, uint8_t rst = 0xff);
 	
 	/** 
