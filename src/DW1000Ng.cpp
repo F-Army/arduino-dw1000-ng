@@ -1428,37 +1428,11 @@ namespace DW1000Ng {
 		_writeBytesToRegister(GPIO_CTRL, GPIO_MODE_SUB, gpiomode, LEN_GPIO_MODE);
 	}
 
-	void setSleepTime(uint16_t sleepTime) {
-		if(sleepTime != NULL && sleepTime > 0) {
-			//_enableClock(SYS_XTI_CLOCK);
-
-			DW1000Ng::_writeToRegister(AON, AON_CFG0_SUB, 0x00, 1);
-
-			/* (a) Set SLEEP_CEN (in AON_CFG1) to 0. */
-			DW1000Ng::_writeToRegister(AON, AON_CFG1_SUB, 0x00, 1);
-			/* (b) Set UPL_CFG (in AON_CTRL) to 1. */
-			_uploadConfigToAON();
-			/* (c) Program the new value of SLEEP_TIM (in AON_CFG0). */
-			DW1000Ng::_writeToRegister(AON, AON_CFG0_SUB + 2, sleepTime, 2);
-			_uploadConfigToAON();
-			/* (d) Set SLEEP_CEN to 1. */
-			DW1000Ng::_writeToRegister(AON, AON_CFG1_SUB, 0x05, 1);
-			/* (e) Set UPL_CFG to 1, to apply the new sleep time and enable the counter in the AON. */
-			_uploadConfigToAON();
-
-			//_enableClock(SYS_PLL_CLOCK);
-		} else {
-			// TODO Error handling. Value is not valid
-		}
-	}
-
 	void applySleepConfiguration(sleep_configuration_t sleep_config) {
 		byte aon_wcfg[LEN_AON_WCFG];
 		_readBytes(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
 		byte aon_cfg0[1];
 		memset(aon_cfg0, 0, 1);
-		
-		setSleepTime(sleep_config.sleepTime);
 
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_RADC_BIT, sleep_config.onWakeUpRunADC);
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_RX_BIT, sleep_config.onWakeUpReceive);
@@ -1472,9 +1446,8 @@ namespace DW1000Ng {
 
 		DW1000NgUtils::setBit(aon_cfg0, 1, WAKE_PIN_BIT, sleep_config.enableWakePIN);
 		DW1000NgUtils::setBit(aon_cfg0, 1, WAKE_SPI_BIT, sleep_config.enableWakeSPI);
+		DW1000NgUtils::setBit(aon_cfg0, 1, WAKE_CNT_BIT, false);
 		DW1000NgUtils::setBit(aon_cfg0, 1, SLEEP_EN_BIT, sleep_config.enableSLP);
-		if(sleep_config.sleepTime != NULL && sleep_config.sleepTime > 0)
-			DW1000NgUtils::setBit(aon_cfg0, 1, WAKE_CNT_BIT, true);
 		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, 1); //Deletes 3 bits of the unused LPCLKDIVA
 	}
 

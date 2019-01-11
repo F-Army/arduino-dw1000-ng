@@ -70,5 +70,4 @@ typedef struct sleep_configuration_t {
     boolean enableSLP;
     boolean enableWakePIN;
     boolean enableWakeSPI;
-    uint16_t sleepTime;     /* The sleep time count elapse value. The units depend on which timer is running. */
 } sleep_configuration_t;
