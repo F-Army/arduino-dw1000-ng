@@ -46,7 +46,7 @@ namespace SPIporting{
     /** 
 	(Re-)selects a specific DW1000 chip for communication. Used in case you switched SPI to another device.
 	*/
-	void SPIselect(uint8_t chipSelectPin, uint8_t irq);
+	void SPIselect(uint8_t slaveSelectPIN, uint8_t irq = 0xff);
 
     /**
     Arduino function to write to the SPI.
@@ -57,7 +57,7 @@ namespace SPIporting{
     @param [in] Data lenght
     @param [in] Data array 
     */
-    void writeToSPI(uint8_t chipSelectPin, uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]);
+    void writeToSPI(uint8_t slaveSelectPIN, uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]);
 
     /**
     Arduino function to read from the SPI.
@@ -68,7 +68,7 @@ namespace SPIporting{
     @param [in] Data lenght
     @param [in] Data array 
     */
-    void readFromSPI(uint8_t chipSelectPin, uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]);
+    void readFromSPI(uint8_t slaveSelectPIN, uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]);
 
     /**
     Sets speed of SPI clock, fast or slow(20MHz or 2MHz)
@@ -76,11 +76,4 @@ namespace SPIporting{
     @param [in] SPIClock FAST or SLOW
     */
     void setSPIspeed(SPIClock speed);
-
-    /**
-    Sets speed of SPI clock, fast or slow(20MHz or 2MHz)
-
-    @param [out] 1 SPIClock FAST, 0 SPIClock SLOW
-    */
-    int getSPIclock();
 }

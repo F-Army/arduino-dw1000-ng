@@ -43,7 +43,6 @@
  */
 
 #include <Arduino.h>
-#include <SPI.h>
 #include "DW1000NgUtils.hpp"
 #include "DW1000NgConstants.hpp"
 #include "DW1000NgRegisters.hpp"

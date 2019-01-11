@@ -1213,7 +1213,7 @@ namespace DW1000Ng {
 			// DW1000 data sheet v2.08 §5.6.1 page 20, the RSTn pin should not be driven high but left floating.
 			pinMode(_rst, INPUT);
 		}
-		// start SPI
+
 		SPIporting::SPIinit();
 		// pin and basic member setup
 		// attach interrupt
