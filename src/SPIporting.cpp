@@ -43,7 +43,7 @@ namespace SPIporting {
 		#if defined(ESP32) || defined(ESP8266)
 			const SPISettings _fastSPI = SPISettings(EspSPImaximumSpeed, MSBFIRST, SPI_MODE0);
 		#else
-			const SPISettings _fastSPI = SPISettings(ArduinoSPImaxumumSpeed, MSBFIRST, SPI_MODE0);
+			const SPISettings _fastSPI = SPISettings(ArduinoSPImaximumSpeed, MSBFIRST, SPI_MODE0);
 		#endif
 		const SPISettings _slowSPI = SPISettings(SPIminimumSpeed, MSBFIRST, SPI_MODE0);
 		const SPISettings* _currentSPI = &_fastSPI;
