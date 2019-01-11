@@ -21,7 +21,6 @@ end	KEYWORD2
 enableDebounceClock	KEYWORD2
 enableLedBlinking	KEYWORD2
 setGPIOMode KEYWORD2
-setSleepTime    KEYWORD2
 applySleepConfiguration KEYWORD2
 sleep   KEYWORD2
 spiWakeup   KEYWORD2
