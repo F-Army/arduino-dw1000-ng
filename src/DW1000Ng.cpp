@@ -757,11 +757,11 @@ namespace DW1000Ng {
 		void _fsxtalt() {
 			byte fsxtalt[LEN_FS_XTALT];
 			byte buf_otp[4];
-			_enableClock(SYS_XTI_CLOCK);
-			delay(5);
+			//_enableClock(SYS_XTI_CLOCK);
+			//delay(5);
 			_readBytesOTP(0x01E, buf_otp); //0x01E -> byte[0]=XTAL_Trim
-			_enableClock(SYS_AUTO_CLOCK);
-			delay(5);
+			//_enableClock(SYS_AUTO_CLOCK);
+			//delay(5);
 			if (buf_otp[0] == 0) {
 				// No trim value available from OTP, use midrange value of 0x10
 				DW1000NgUtils::writeValueToBytes(fsxtalt, ((0x10 & 0x1F) | 0x60), LEN_FS_XTALT);
