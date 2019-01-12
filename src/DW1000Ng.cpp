@@ -1446,6 +1446,8 @@ namespace DW1000Ng {
 	}
 
 	void softwareReset() {
+		SPIporting::setSPIspeed(SPIClock::SLOW);
+		
 		/* Disable sequencing and go to state "INIT" - (a) Sets SYSCLKS to 01 */
 		_disableSequencing();
 		/* Clear AON and WakeUp configuration */
@@ -1839,6 +1841,10 @@ namespace DW1000Ng {
 	}
 
 	void enableTransmitPowerSpectrumTestMode(int32_t repeat_interval) {
+		/* DW1000 clocks must be set to crystal speed so SPI rate have to be lowered and will
+      	not be increased again */
+		SPIporting::setSPIspeed(SPIClock::SLOW);
+
         _disableSequencing();
         _configureRFTransmitPowerSpectrumTestMode();
         _enableClock(SYS_PLL_CLOCK);
