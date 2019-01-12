@@ -1224,10 +1224,15 @@ namespace DW1000Ng {
 		reset();
 		
 		SPIporting::setSPIspeed(SPIClock::SLOW);
-		_enableClock(SYS_XTI_CLOCK);
+		_enableClock(SYS_XTI_CLOCK);ù
 		delay(5);
+
+		// Configure the CPLL lock detect
+		_writeBitToRegister(EXT_SYNC, EC_CTRL_SUB, LEN_EC_CTRL, PLLLDT_BIT, true);
+
 		// load LDE micro-code
 		_manageLDE();
+
 		delay(5);
 
 		// read the temp and vbat readings from OTP that were recorded during production test

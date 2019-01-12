@@ -215,6 +215,7 @@ constexpr uint16_t LEN_AGC_TUNE3 = 2;
 // EXT_SYNC (External Synchronization Control)
 constexpr uint16_t EXT_SYNC = 0x24;
 constexpr uint16_t EC_CTRL_SUB = 0x00;
+constexpr uint16_t PLLLDT_BIT = 2;
 constexpr uint16_t EC_RXTC_SUB = 0x04;
 constexpr uint16_t EC_GOLP_SUB = 0x08;
 constexpr uint16_t LEN_EC_CTRL = 4;
