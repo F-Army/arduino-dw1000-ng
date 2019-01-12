@@ -1224,7 +1224,7 @@ namespace DW1000Ng {
 		reset();
 		
 		SPIporting::setSPIspeed(SPIClock::SLOW);
-		_enableClock(SYS_XTI_CLOCK);ù
+		_enableClock(SYS_XTI_CLOCK);
 		delay(5);
 
 		// Configure the CPLL lock detect
