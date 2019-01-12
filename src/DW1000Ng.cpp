@@ -227,7 +227,6 @@ namespace DW1000Ng {
 			byte pmscctrl0[LEN_PMSC_CTRL0];
 			memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
 			_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-			/* SYSCLKS */
 			if(clock == SYS_AUTO_CLOCK) {
 				pmscctrl0[0] = SYS_AUTO_CLOCK;
 				pmscctrl0[1] &= 0xFE;
@@ -237,7 +236,7 @@ namespace DW1000Ng {
 			} else if(clock == SYS_PLL_CLOCK) {
 				pmscctrl0[0] &= 0xFC;
 				pmscctrl0[0] |= SYS_PLL_CLOCK;
-			} else if (clock == TX_PLL_CLOCK) { /* NOT SYSCLKS but TX */
+			} else if (clock == TX_PLL_CLOCK) {
 				pmscctrl0[0] &= 0xCF;
 				pmscctrl0[0] |= TX_PLL_CLOCK;
 			} else if (clock == LDE_CLOCK) {
