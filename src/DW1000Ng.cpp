@@ -750,27 +750,6 @@ namespace DW1000Ng {
 			_writeBytesToRegister(FS_CTRL, FS_PLLCFG_SUB, fspllcfg, LEN_FS_PLLCFG);
 		}
 
-		/* Crystal calibration from OTP (if available)
-		* FS_XTALT - reg:0x2B, sub-reg:0x0E
-		* OTP(one-time-programmable) memory map - table 10 */
-		void _fsxtalt() {
-			byte fsxtalt[LEN_FS_XTALT];
-			byte buf_otp[4];
-			//_enableClock(SYS_XTI_CLOCK);
-			//delay(5);
-			_readBytesOTP(0x01E, buf_otp); //0x01E -> byte[0]=XTAL_Trim
-			//_enableClock(SYS_AUTO_CLOCK);
-			//delay(5);
-			if (buf_otp[0] == 0) {
-				// No trim value available from OTP, use midrange value of 0x10
-				DW1000NgUtils::writeValueToBytes(fsxtalt, ((0x10 & 0x1F) | 0x60), LEN_FS_XTALT);
-			} else {
-				DW1000NgUtils::writeValueToBytes(fsxtalt, ((buf_otp[0] & 0x1F) | 0x60), LEN_FS_XTALT);
-			}
-			// write configuration back to chip
-			_writeBytesToRegister(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
-		}
-
 		void _tune() {
 			// these registers are going to be tuned/configured
 			_agctune1();
@@ -789,7 +768,6 @@ namespace DW1000Ng {
 			_rftxctrl();
 			if(_autoTCPGDelay) _tcpgdelaytune();
 			_fspll();
-			_fsxtalt();
 		}
 
 		void _writeNetworkIdAndDeviceAddress() {
@@ -1046,10 +1024,10 @@ namespace DW1000Ng {
 		}
 
 		void _manageLDE() {
-
 			// transfer any ldo tune values
 			byte ldoTune[LEN_OTP_RDAT];
-			_readBytesOTP(0x04, ldoTune); // TODO #define
+			uint16_t LDOTUNE_ADDRESS = 0x04;
+			_readBytesOTP(LDOTUNE_ADDRESS, ldoTune); // TODO #define
 			if(ldoTune[0] != 0) {
 				// TODO tuning available, copy over to RAM: use OTP_LDO bit
 			}
@@ -1066,14 +1044,33 @@ namespace DW1000Ng {
 			otpctrl[0]   = 0x00;
 			otpctrl[1]   = 0x80;
 			_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
+			// uCode
 			_enableClock(LDE_CLOCK);
 			delay(5);
 			_writeBytesToRegister(OTP_IF, OTP_CTRL_SUB, otpctrl, 2);
+			delay(1);
 			_enableClock(SYS_AUTO_CLOCK);
 			delay(5);
 			pmscctrl0[0] = 0x00;
 			pmscctrl0[1] &= 0x02;
 			_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
+		}
+
+		/* Crystal calibration from OTP (if available)
+		* FS_XTALT - reg:0x2B, sub-reg:0x0E
+		* OTP(one-time-programmable) memory map - table 10 */
+		void _fsxtalt() {
+			byte fsxtalt[LEN_FS_XTALT];
+			byte buf_otp[4];
+			_readBytesOTP(0x01E, buf_otp); //0x01E -> byte[0]=XTAL_Trim
+			if (buf_otp[0] == 0) {
+				// No trim value available from OTP, use midrange value of 0x10
+				DW1000NgUtils::writeValueToBytes(fsxtalt, ((0x10 & 0x1F) | 0x60), LEN_FS_XTALT);
+			} else {
+				DW1000NgUtils::writeValueToBytes(fsxtalt, ((buf_otp[0] & 0x1F) | 0x60), LEN_FS_XTALT);
+			}
+			// write configuration back to chip
+			_writeBytesToRegister(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
 		}
 
 		void _clearReceiveStatus() {
@@ -1230,10 +1227,11 @@ namespace DW1000Ng {
 		// Configure the CPLL lock detect
 		_writeBitToRegister(EXT_SYNC, EC_CTRL_SUB, LEN_EC_CTRL, PLLLDT_BIT, true);
 
+		// Configure XTAL trim
+		_fsxtalt();
+
 		// load LDE micro-code
 		_manageLDE();
-
-		delay(5);
 
 		// read the temp and vbat readings from OTP that were recorded during production test
 		// see 6.3.1 OTP memory map
