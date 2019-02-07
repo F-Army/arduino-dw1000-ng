@@ -203,7 +203,7 @@ constexpr uint16_t LEN_OTP_ADDR = 2;
 constexpr uint16_t LEN_OTP_CTRL = 2;
 constexpr uint16_t LEN_OTP_RDAT = 4;
 
-// AGC_TUNE1/2 (for re-tuning only)
+// AGC_TUNE1/2/3 (for re-tuning only)
 constexpr uint16_t AGC_TUNE = 0x23;
 constexpr uint16_t AGC_TUNE1_SUB = 0x04;
 constexpr uint16_t AGC_TUNE2_SUB = 0x0C;
@@ -211,6 +211,16 @@ constexpr uint16_t AGC_TUNE3_SUB = 0x12;
 constexpr uint16_t LEN_AGC_TUNE1 = 2;
 constexpr uint16_t LEN_AGC_TUNE2 = 4;
 constexpr uint16_t LEN_AGC_TUNE3 = 2;
+
+// EXT_SYNC (External Synchronization Control)
+constexpr uint16_t EXT_SYNC = 0x24;
+constexpr uint16_t EC_CTRL_SUB = 0x00;
+constexpr uint16_t PLLLDT_BIT = 2;
+constexpr uint16_t EC_RXTC_SUB = 0x04;
+constexpr uint16_t EC_GOLP_SUB = 0x08;
+constexpr uint16_t LEN_EC_CTRL = 4;
+constexpr uint16_t LEN_EC_RXTC = 4;
+constexpr uint16_t LEN_EC_GOLP = 4;
 
 // DRX_TUNE2 (for re-tuning only)
 constexpr uint16_t DRX_TUNE = 0x27;

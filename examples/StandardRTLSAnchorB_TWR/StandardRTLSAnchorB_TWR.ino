@@ -12,7 +12,6 @@
  * This is an example slave anchor in a RTLS using two way ranging ISO/IEC 24730-62_2013 messages
  */
 
-#include <SPI.h>
 #include <DW1000Ng.hpp>
 #include <DW1000NgUtils.hpp>
 #include <DW1000NgRanging.hpp>
@@ -109,7 +108,7 @@ void transmitRangeReport() {
 void loop() {     
         RangeAcceptResult result = DW1000NgRTLS::anchorRangeAccept(NextActivity::RANGING_CONFIRM, next_anchor);
         if(result.success) {
-            delay(3); // Tweak based on your hardware
+            delay(2); // Tweak based on your hardware
             range_self = result.range;
             transmitRangeReport();
 

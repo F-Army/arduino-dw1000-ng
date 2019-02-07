@@ -155,6 +155,7 @@ constexpr byte SYS_AUTO_CLOCK = 0x00;
 constexpr byte SYS_XTI_CLOCK  = 0x01;
 constexpr byte SYS_PLL_CLOCK  = 0x02;
 constexpr byte TX_PLL_CLOCK = 0x20;
+constexpr byte LDE_CLOCK = 0x03;
 
 /* range bias tables - APS011*/
 
@@ -230,3 +231,5 @@ enum class SFDMode {STANDARD_SFD, DECAWAVE_SFD};
 enum class TransmitMode {IMMEDIATE, DELAYED};
 
 enum class ReceiveMode {IMMEDIATE, DELAYED};
+
+enum class SPIClock {SLOW, FAST};

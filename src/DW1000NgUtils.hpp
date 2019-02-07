@@ -45,8 +45,10 @@
 #pragma once
 
 #include <Arduino.h>
+#include "DW1000NgConstants.hpp"
 
 namespace DW1000NgUtils {
+
     /**
     Returns target bit value inside a byte array
 
