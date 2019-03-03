@@ -12,7 +12,6 @@
  * This is an example tag in a RTLS using two way ranging ISO/IEC 24730-62_2013 messages
  */
 
-#include <SPI.h>
 #include <DW1000Ng.hpp>
 #include <DW1000NgUtils.hpp>
 #include <DW1000NgTime.hpp>

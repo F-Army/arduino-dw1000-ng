@@ -47,7 +47,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <Arduino.h>
-#include <SPI.h>
 #include "DW1000NgConstants.hpp"
 #include "DW1000NgConfiguration.hpp"
 #include "DW1000NgCompileOptions.hpp"
@@ -63,18 +62,14 @@ namespace DW1000Ng {
 	*/
 	void initialize(uint8_t ss, uint8_t irq, uint8_t rst = 0xff);
 
-	void initializeNoInterrupt(uint8_t ss, uint8_t rst = 0xff);
+	/** 
+	Initiates and starts a sessions with a DW1000 without interrupt. If rst is not set or value 0xff, a soft resets (i.e. command
+	triggered) are used and it is assumed that no reset line is wired.
 	
-	/** 
-	(Re-)selects a specific DW1000 chip for communication. Used in case you switched SPI to another device.
+	@param[in] ss  The SPI Selection pin used to identify the specific connection
+	@param[in] rst The reset line/pin for hard resets of ICs that connect to the Arduino. Value 0xff means soft reset.
 	*/
-	void select();
-
-	/** 
-	Tells the driver library that no communication to a DW1000 will be required anymore.
-	This basically just frees SPI and the previously used pins.
-	*/
-	void end();
+	void initializeNoInterrupt(uint8_t ss, uint8_t rst = 0xff);
 	
 	/** 
 	Enable debounce Clock, used to clock the LED blinking

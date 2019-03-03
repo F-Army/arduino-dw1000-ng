@@ -44,12 +44,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <SPI.h>
 #include <string.h>
+#include "DW1000Ng.hpp"
 #include "DW1000NgUtils.hpp"
 #include "DW1000NgConstants.hpp"
 #include "DW1000NgRegisters.hpp"
-#include "DW1000Ng.hpp"
+#include "SPIporting.hpp"
 
 namespace DW1000Ng {
 	
@@ -103,15 +103,6 @@ namespace DW1000Ng {
 		uint16_t		_antennaTxDelay = 0;
 		uint16_t		_antennaRxDelay = 0;
 
-		/* SPI relative variables */
-		#if defined(ESP32) || defined(ESP8266)
-		const SPISettings  _fastSPI = SPISettings(20000000L, MSBFIRST, SPI_MODE0);
-		#else
-		const SPISettings  _fastSPI = SPISettings(16000000L, MSBFIRST, SPI_MODE0);
-		#endif
-		const SPISettings  _slowSPI = SPISettings(2000000L, MSBFIRST, SPI_MODE0);
-		const SPISettings* _currentSPI = &_fastSPI;
-
 		/* ############################# PRIVATE METHODS ################################### */
 		/*
 		* Write bytes to the DW1000Ng. Single bytes can be written to registers via sub-addressing.
@@ -130,8 +121,7 @@ namespace DW1000Ng {
 
 		void _writeBytesToRegister(byte cmd, uint16_t offset, byte data[], uint16_t data_size) {
 			byte header[3];
-			uint8_t  headerLen = 1;
-			uint16_t  i = 0;
+			uint8_t headerLen = 1;
 			
 			// TODO proper error handling: address out of bounds
 			// build SPI header
@@ -148,17 +138,7 @@ namespace DW1000Ng {
 					headerLen += 2;
 				}
 			}
-			SPI.beginTransaction(*_currentSPI);
-			digitalWrite(_ss, LOW);
-			for(i = 0; i < headerLen; i++) {
-				SPI.transfer(header[i]); // send header
-			}
-			for(i = 0; i < data_size; i++) {
-				SPI.transfer(data[i]); // write values
-			}
-			delayMicroseconds(5);
-			digitalWrite(_ss, HIGH);
-			SPI.endTransaction();
+			SPIporting::writeToSPI(_ss, headerLen, header, data_size, data);
 		}
 
 		void _writeToRegister(byte cmd, uint16_t offset, uint32_t data, uint16_t data_size) { 
@@ -182,10 +162,9 @@ namespace DW1000Ng {
 		*		The number of bytes expected to be received.
 		*/
 		// TODO incomplete doc
-		void _readBytes(byte cmd, uint16_t offset, byte data[], uint16_t n) {
+		void _readBytes(byte cmd, uint16_t offset, byte data[], uint16_t data_size) {
 			byte header[3];
 			uint8_t headerLen = 1;
-			uint16_t i = 0;
 			
 			// build SPI header
 			if(offset == NO_SUB) {
@@ -201,17 +180,7 @@ namespace DW1000Ng {
 					headerLen += 2;
 				}
 			}
-			SPI.beginTransaction(*_currentSPI);
-			digitalWrite(_ss, LOW);
-			for(i = 0; i < headerLen; i++) {
-				SPI.transfer(header[i]); // send header
-			}
-			for(i = 0; i < n; i++) {
-				data[i] = SPI.transfer(0x00); // read values
-			}
-			delayMicroseconds(5);
-			digitalWrite(_ss, HIGH);
-			SPI.endTransaction();
+			SPIporting::readFromSPI(_ss, headerLen, header, data_size, data);
 		}
 
 		// always 4 bytes
@@ -252,6 +221,31 @@ namespace DW1000Ng {
 				RegisterOffset = 0x00;
 				
 			_writeBytesToRegister(bitRegister, RegisterOffset+idx, &targetByte, 1);
+		}
+
+		void _enableClock(byte clock) {
+			byte pmscctrl0[LEN_PMSC_CTRL0];
+			memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
+			_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			if(clock == SYS_AUTO_CLOCK) {
+				pmscctrl0[0] = SYS_AUTO_CLOCK;
+				pmscctrl0[1] &= 0xFE;
+			} else if(clock == SYS_XTI_CLOCK) {
+				pmscctrl0[0] &= 0xFC;
+				pmscctrl0[0] |= SYS_XTI_CLOCK;
+			} else if(clock == SYS_PLL_CLOCK) {
+				pmscctrl0[0] &= 0xFC;
+				pmscctrl0[0] |= SYS_PLL_CLOCK;
+			} else if (clock == TX_PLL_CLOCK) {
+				pmscctrl0[0] &= 0xCF;
+				pmscctrl0[0] |= TX_PLL_CLOCK;
+			} else if (clock == LDE_CLOCK) {
+				pmscctrl0[0] = SYS_XTI_CLOCK;
+				pmscctrl0[1] = 0x03;
+			} else {
+				// TODO deliver proper warning
+			}
+			_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
 		}
 		
 		/* Steps used to get Temp and Voltage */
@@ -756,23 +750,6 @@ namespace DW1000Ng {
 			_writeBytesToRegister(FS_CTRL, FS_PLLCFG_SUB, fspllcfg, LEN_FS_PLLCFG);
 		}
 
-		/* Crystal calibration from OTP (if available)
-		* FS_XTALT - reg:0x2B, sub-reg:0x0E
-		* OTP(one-time-programmable) memory map - table 10 */
-		void _fsxtalt() {
-			byte fsxtalt[LEN_FS_XTALT];
-			byte buf_otp[4];
-			_readBytesOTP(0x01E, buf_otp); //0x01E -> byte[0]=XTAL_Trim
-			if (buf_otp[0] == 0) {
-				// No trim value available from OTP, use midrange value of 0x10
-				DW1000NgUtils::writeValueToBytes(fsxtalt, ((0x10 & 0x1F) | 0x60), LEN_FS_XTALT);
-			} else {
-				DW1000NgUtils::writeValueToBytes(fsxtalt, ((buf_otp[0] & 0x1F) | 0x60), LEN_FS_XTALT);
-			}
-			// write configuration back to chip
-			_writeBytesToRegister(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
-		}
-
 		void _tune() {
 			// these registers are going to be tuned/configured
 			_agctune1();
@@ -791,7 +768,6 @@ namespace DW1000Ng {
 			_rftxctrl();
 			if(_autoTCPGDelay) _tcpgdelaytune();
 			_fspll();
-			_fsxtalt();
 		}
 
 		void _writeNetworkIdAndDeviceAddress() {
@@ -1050,7 +1026,8 @@ namespace DW1000Ng {
 		void _manageLDE() {
 			// transfer any ldo tune values
 			byte ldoTune[LEN_OTP_RDAT];
-			_readBytesOTP(0x04, ldoTune); // TODO #define
+			uint16_t LDOTUNE_ADDRESS = 0x04;
+			_readBytesOTP(LDOTUNE_ADDRESS, ldoTune); // TODO #define
 			if(ldoTune[0] != 0) {
 				// TODO tuning available, copy over to RAM: use OTP_LDO bit
 			}
@@ -1067,38 +1044,33 @@ namespace DW1000Ng {
 			otpctrl[0]   = 0x00;
 			otpctrl[1]   = 0x80;
 			_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
+			// uCode
+			_enableClock(LDE_CLOCK);
+			delay(5);
 			_writeBytesToRegister(OTP_IF, OTP_CTRL_SUB, otpctrl, 2);
+			delay(1);
+			_enableClock(SYS_AUTO_CLOCK);
 			delay(5);
 			pmscctrl0[0] = 0x00;
 			pmscctrl0[1] &= 0x02;
 			_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
 		}
 
-		void _enableClock(byte clock) {
-			byte pmscctrl0[LEN_PMSC_CTRL0];
-			memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
-			_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-			/* SYSCLKS */
-			if(clock == SYS_AUTO_CLOCK) {
-				_currentSPI = &_fastSPI;
-				pmscctrl0[0] = SYS_AUTO_CLOCK;
-				pmscctrl0[1] &= 0xFE;
-			} else if(clock == SYS_XTI_CLOCK) {
-				_currentSPI = &_slowSPI;
-				pmscctrl0[0] &= 0xFC;
-				pmscctrl0[0] |= SYS_XTI_CLOCK;
-			} else if(clock == SYS_PLL_CLOCK) {
-				_currentSPI = &_fastSPI;
-				pmscctrl0[0] &= 0xFC;
-				pmscctrl0[0] |= SYS_PLL_CLOCK;
-			} else if (clock == TX_PLL_CLOCK) { /* NOT SYSCLKS but TX */
-				_currentSPI = &_fastSPI;
-				pmscctrl0[0] &= 0xCF;
-				pmscctrl0[0] |= TX_PLL_CLOCK;
+		/* Crystal calibration from OTP (if available)
+		* FS_XTALT - reg:0x2B, sub-reg:0x0E
+		* OTP(one-time-programmable) memory map - table 10 */
+		void _fsxtalt() {
+			byte fsxtalt[LEN_FS_XTALT];
+			byte buf_otp[4];
+			_readBytesOTP(0x01E, buf_otp); //0x01E -> byte[0]=XTAL_Trim
+			if (buf_otp[0] == 0) {
+				// No trim value available from OTP, use midrange value of 0x10
+				DW1000NgUtils::writeValueToBytes(fsxtalt, ((0x10 & 0x1F) | 0x60), LEN_FS_XTALT);
 			} else {
-				// TODO deliver proper warning
+				DW1000NgUtils::writeValueToBytes(fsxtalt, ((buf_otp[0] & 0x1F) | 0x60), LEN_FS_XTALT);
 			}
-			_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, 2);
+			// write configuration back to chip
+			_writeBytesToRegister(FS_CTRL, FS_XTALT_SUB, fsxtalt, LEN_FS_XTALT);
 		}
 
 		void _clearReceiveStatus() {
@@ -1244,23 +1216,29 @@ namespace DW1000Ng {
 			// DW1000 data sheet v2.08 §5.6.1 page 20, the RSTn pin should not be driven high but left floating.
 			pinMode(_rst, INPUT);
 		}
-		// start SPI
-		SPI.begin();
+
+		SPIporting::SPIinit();
 		// pin and basic member setup
 		// attach interrupt
 		// TODO throw error if pin is not a interrupt pin
 		if(_irq != 0xff)
 			attachInterrupt(digitalPinToInterrupt(_irq), interruptServiceRoutine, RISING);
-		select();
+		SPIporting::SPIselect(_ss, _irq);
 		// reset chip (either soft or hard)
-
 		reset();
 		
+		SPIporting::setSPIspeed(SPIClock::SLOW);
 		_enableClock(SYS_XTI_CLOCK);
 		delay(5);
+
+		// Configure the CPLL lock detect
+		_writeBitToRegister(EXT_SYNC, EC_CTRL_SUB, LEN_EC_CTRL, PLLLDT_BIT, true);
+
+		// Configure XTAL trim
+		_fsxtalt();
+
 		// load LDE micro-code
 		_manageLDE();
-		delay(5);
 
 		// read the temp and vbat readings from OTP that were recorded during production test
 		// see 6.3.1 OTP memory map
@@ -1272,6 +1250,7 @@ namespace DW1000Ng {
 
 		_enableClock(SYS_AUTO_CLOCK);
 		delay(5);
+		SPIporting::setSPIspeed(SPIClock::FAST);
 
 		_readNetworkIdAndDeviceAddress();
 		_readSystemConfigurationRegister();
@@ -1281,23 +1260,11 @@ namespace DW1000Ng {
 
 		/* Cleared AON:CFG1(0x2C:0x0A) for proper operation of deepSleep */
 		_writeToRegister(AON, AON_CFG1_SUB, 0x00, LEN_AON_CFG1);
+		
 	}
 
 	void initializeNoInterrupt(uint8_t ss, uint8_t rst) {
 		initialize(ss, 0xff, rst);
-	}
-
-	void select() {
-		#if !defined(ESP32) && !defined(ESP8266)
-		if(_irq != 0xff)
-			SPI.usingInterrupt(digitalPinToInterrupt(_irq));
-		#endif
-		pinMode(_ss, OUTPUT);
-		digitalWrite(_ss, HIGH);
-	}
-
-	void end() {
-		SPI.end();
 	}
 
 	/* callback handler management. */
@@ -1490,11 +1457,15 @@ namespace DW1000Ng {
 	}
 
 	void softwareReset() {
+		SPIporting::setSPIspeed(SPIClock::SLOW);
+		
 		/* Disable sequencing and go to state "INIT" - (a) Sets SYSCLKS to 01 */
 		_disableSequencing();
 		/* Clear AON and WakeUp configuration */
 		_writeToRegister(AON, AON_WCFG_SUB, 0x00, LEN_AON_WCFG);
 		_writeToRegister(AON, AON_CFG0_SUB, 0x00, LEN_AON_CFG0);
+		// TODO change this with uploadToAON
+		_writeToRegister(AON, AON_CTRL_SUB, 0x00, LEN_AON_CTRL);
 		_writeToRegister(AON, AON_CTRL_SUB, 0x02, LEN_AON_CTRL);
 		/* (b) Clear SOFTRESET to all zero’s */
 		_writeToRegister(PMSC, PMSC_SOFTRESET_SUB, 0x00, LEN_PMSC_SOFTRESET);
@@ -1663,6 +1634,7 @@ namespace DW1000Ng {
 	void getTemperatureAndBatteryVoltage(float& temp, float& vbat) {
 		// follow the procedure from section 6.4 of the User Manual
 		_vbatAndTempSteps();
+		delay(1);
 		byte sar_lvbat = 0; _readBytes(TX_CAL, 0x03, &sar_lvbat, 1);
 		byte sar_ltemp = 0; _readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
 		
@@ -1880,6 +1852,10 @@ namespace DW1000Ng {
 	}
 
 	void enableTransmitPowerSpectrumTestMode(int32_t repeat_interval) {
+		/* DW1000 clocks must be set to crystal speed so SPI rate have to be lowered and will
+      	not be increased again */
+		SPIporting::setSPIspeed(SPIClock::SLOW);
+
         _disableSequencing();
         _configureRFTransmitPowerSpectrumTestMode();
         _enableClock(SYS_PLL_CLOCK);

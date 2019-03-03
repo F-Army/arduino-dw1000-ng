@@ -48,6 +48,7 @@
 #include "DW1000NgRegisters.hpp"
 
 namespace DW1000NgUtils {
+	
 	/*
 	* Set the value of a bit in an array of bytes that are considered
 	* consecutive and stored from MSB to LSB.
@@ -136,4 +137,5 @@ namespace DW1000NgUtils {
 		}
 		memcpy(bytes, eui_byte, LEN_EUI);
 	}
+	
 }
