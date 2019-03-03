@@ -1419,7 +1419,7 @@ namespace DW1000Ng {
 	}
 
 	/*Puts the device into sleep/deepSleep mode. This function also upload sleep config to AON. */
-	void sleep() {
+	void deepSleep() {
 		/* Clear the register */
 		_writeToRegister(AON, AON_CTRL_SUB, 0x00, LEN_AON_CTRL);
 		/* Write 1 in SAVE_BIT */

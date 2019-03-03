@@ -95,11 +95,11 @@ namespace DW1000Ng {
 	void applySleepConfiguration(sleep_configuration_t sleep_config);
 
 	/**
-	Enter in DeepSleep or Sleep mode. applySleepConfiguration must be called first.
+	Enter in DeepSleep. applySleepConfiguration must be called first.
 	Either spi wakeup or pin wakeup must be enabled.
-	In case of Sleep mode, you must reset proper antenna delay with setTxAntennaDelay() after wakeUp event.
+	-- In case of future implementation of Sleep mode, you must reset proper antenna delay with setTxAntennaDelay() after wakeUp event. --
 	*/
-	void sleep();
+	void deepSleep();
 
 	/**
 	Wake-up from deep sleep by toggle chip select pin
