@@ -55,14 +55,14 @@ frame_filtering_configuration_t TAG_FRAME_FILTER_CONFIG = {
 };
 
 sleep_configuration_t SLEEP_CONFIG = {
-    false,
-    false,
-    false,
-    true,
-    true,
-    true,
-    false,
-    true
+    false,  // onWakeUpRunADC   reg 0x2C:00
+    false,  // onWakeUpReceive
+    false,  // onWakeUpLoadEUI
+    true,   // onWakeUpLoadL64Param
+    true,   // preserveSleep
+    true,   // enableSLP    reg 0x2C:06
+    false,  // enableWakePIN
+    true    // enableWakeSPI
 };
 
 void setup() {
