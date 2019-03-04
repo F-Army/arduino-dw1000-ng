@@ -54,6 +54,17 @@ frame_filtering_configuration_t TAG_FRAME_FILTER_CONFIG = {
     false
 };
 
+sleep_configuration_t SLEEP_CONFIG = {
+    false,  // onWakeUpRunADC   reg 0x2C:00
+    false,  // onWakeUpReceive
+    false,  // onWakeUpLoadEUI
+    true,   // onWakeUpLoadL64Param
+    true,   // preserveSleep
+    true,   // enableSLP    reg 0x2C:06
+    false,  // enableWakePIN
+    true    // enableWakeSPI
+};
+
 void setup() {
     // DEBUG monitoring
     Serial.begin(115200);
@@ -74,6 +85,8 @@ void setup() {
     DW1000Ng::setNetworkId(RTLS_APP_ID);
 
     DW1000Ng::setAntennaDelay(16436);
+
+    DW1000Ng::applySleepConfiguration(SLEEP_CONFIG);
 
     DW1000Ng::setPreambleDetectionTimeout(15);
     DW1000Ng::setSfdDetectionTimeout(273);

@@ -87,7 +87,17 @@ namespace DW1000Ng {
 	void setGPIOMode(uint8_t msgp, uint8_t mode);
 
 	/**
-	Enable deep sleep mode
+	Applies the common sleep configuration and on-wake mode to the DW1000 for both DEEP_SLEEP and SLEEP modes.
+	ONW_LLDO_BIT and ONW_LLDE_BIT are 1 to default.
+
+	@param [in] config struct	The sleep/deepsleep configuration to apply to the DW1000
+	*/
+	void applySleepConfiguration(sleep_configuration_t sleep_config);
+
+	/**
+	Enter in DeepSleep. applySleepConfiguration must be called first.
+	Either spi wakeup or pin wakeup must be enabled.
+	-- In case of future implementation of Sleep mode, you must reset proper antenna delay with setTxAntennaDelay() after wakeUp event. --
 	*/
 	void deepSleep();
 

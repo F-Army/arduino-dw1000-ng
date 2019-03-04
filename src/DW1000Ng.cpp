@@ -1194,6 +1194,13 @@ namespace DW1000Ng {
             DW1000NgUtils::writeValueToBytes(enable_mask, 0x005FFF00, LEN_RX_CONF_SUB);
             _writeBytesToRegister(RF_CONF, RF_CONF_SUB, enable_mask, LEN_RX_CONF_SUB);
         }
+
+		void _uploadConfigToAON() {
+			/* Write 1 in UPL_CFG_BIT */
+			_writeToRegister(AON, AON_CTRL_SUB, 0x04, LEN_AON_CTRL);
+			/* Clear the register */
+			_writeToRegister(AON, AON_CTRL_SUB, 0x00, LEN_AON_CTRL);
+		}
 	}
 
 	/* ####################### PUBLIC ###################### */
@@ -1388,31 +1395,35 @@ namespace DW1000Ng {
 		_writeBytesToRegister(GPIO_CTRL, GPIO_MODE_SUB, gpiomode, LEN_GPIO_MODE);
 	}
 
-	void deepSleep() {
+	void applySleepConfiguration(sleep_configuration_t sleep_config) {
 		byte aon_wcfg[LEN_AON_WCFG];
-		memset(aon_wcfg, 0, LEN_AON_WCFG);
 		_readBytes(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
+		byte aon_cfg0[1];
+		memset(aon_cfg0, 0, 1);
+
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_RADC_BIT, sleep_config.onWakeUpRunADC);
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_RX_BIT, sleep_config.onWakeUpReceive);
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LEUI_BIT, sleep_config.onWakeUpLoadEUI);
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LDC_BIT, true);
-		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_PRES_SLEEP_BIT, false);
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_L64P_BIT, sleep_config.onWakeUpLoadL64Param);
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_PRES_SLEEP_BIT, sleep_config.preserveSleep);
 		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LLDE_BIT, true);
-		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LDD0_BIT, true);
+		DW1000NgUtils::setBit(aon_wcfg, LEN_AON_WCFG, ONW_LLDO_BIT, true);
 		_writeBytesToRegister(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
 
-		byte aon_cfg0[LEN_AON_CFG0];
-		memset(aon_cfg0, 0, LEN_AON_CFG0);
-		_readBytes(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_PIN_BIT, true);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_SPI_BIT, true);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, WAKE_CNT_BIT, false);
-		DW1000NgUtils::setBit(aon_cfg0, LEN_AON_CFG0, SLEEP_EN_BIT, true);
-		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, LEN_AON_CFG0);
+		DW1000NgUtils::setBit(aon_cfg0, 1, WAKE_PIN_BIT, sleep_config.enableWakePIN);
+		DW1000NgUtils::setBit(aon_cfg0, 1, WAKE_SPI_BIT, sleep_config.enableWakeSPI);
+		DW1000NgUtils::setBit(aon_cfg0, 1, WAKE_CNT_BIT, false);
+		DW1000NgUtils::setBit(aon_cfg0, 1, SLEEP_EN_BIT, sleep_config.enableSLP);
+		_writeBytesToRegister(AON, AON_CFG0_SUB, aon_cfg0, 1); //Deletes 3 bits of the unused LPCLKDIVA
+	}
 
-		byte aon_ctrl[LEN_AON_CTRL];
-		memset(aon_ctrl, 0, LEN_AON_CTRL);
-		_readBytes(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
-		//DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, UPL_CFG_BIT, true);
-		DW1000NgUtils::setBit(aon_ctrl, LEN_AON_CTRL, SAVE_BIT, true);
-		_writeBytesToRegister(AON, AON_CTRL_SUB, aon_ctrl, LEN_AON_CTRL);
+	/*Puts the device into sleep/deepSleep mode. This function also upload sleep config to AON. */
+	void deepSleep() {
+		/* Clear the register */
+		_writeToRegister(AON, AON_CTRL_SUB, 0x00, LEN_AON_CTRL);
+		/* Write 1 in SAVE_BIT */
+		_writeToRegister(AON, AON_CTRL_SUB, 0x02, LEN_AON_CTRL);
 	}
 
 	void spiWakeup(){

@@ -60,3 +60,14 @@ typedef struct frame_filtering_configuration_t {
     boolean allowReservedFour;
     boolean allowReservedFive;
 } frame_filtering_configuration_t;
+
+typedef struct sleep_configuration_t {
+    boolean onWakeUpRunADC;
+    boolean onWakeUpReceive;
+    boolean onWakeUpLoadEUI;
+    boolean onWakeUpLoadL64Param;
+    boolean preserveSleep;
+    boolean enableSLP;
+    boolean enableWakePIN;
+    boolean enableWakeSPI;
+} sleep_configuration_t;
