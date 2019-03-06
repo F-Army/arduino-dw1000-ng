@@ -43,8 +43,8 @@ Features
 Devices
 ------------
 ![Arduino](https://img.shields.io/badge/Arduino-done-brightgreen.svg?&style=for-the-badge)
-![ESP8266](https://img.shields.io/badge/ESP8266done-brightgreen.svg?&style=for-the-badge)
-![ESP32](https://img.shields.io/badge/ESP8266/32-Experimental-yellow.svg?&style=for-the-badge)
+![ESP8266](https://img.shields.io/badge/ESP8266-done-brightgreen.svg?&style=for-the-badge)
+![ESP32](https://img.shields.io/badge/ESP32-Experimental-yellow.svg?&style=for-the-badge)
 
 Arduino Pro Mini
 <ul>
@@ -54,6 +54,7 @@ Arduino Pro Mini
   <li>12 --> MISO</li>
   <li>13 --> CLK</li>
 </ul>
+
 NODEMCU 1.0 (esp8266)
 <ul>
   <li>D5 --> CLK</li>
