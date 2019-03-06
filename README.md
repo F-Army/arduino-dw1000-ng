@@ -43,7 +43,24 @@ Features
 Devices
 ------------
 ![Arduino](https://img.shields.io/badge/Arduino-done-brightgreen.svg?&style=for-the-badge)
-![ESP8266/32](https://img.shields.io/badge/ESP8266/32-Experimental-yellow.svg?&style=for-the-badge)
+![ESP8266](https://img.shields.io/badge/ESP8266done-brightgreen.svg?&style=for-the-badge)
+![ESP32](https://img.shields.io/badge/ESP8266/32-Experimental-yellow.svg?&style=for-the-badge)
+
+Arduino Pro Mini
+<ul>
+  <li>2 --> IRQ (if used)</li>
+  <li>10 --> CS</li>
+  <li>11 --> MOSI</li>
+  <li>12 --> MISO</li>
+  <li>13 --> CLK</li>
+</ul>
+NODEMCU 1.0 (esp8266)
+<ul>
+  <li>D5 --> CLK</li>
+  <li>D6 --> MISO</li>
+  <li>D7 --> MOSI</li>
+  <li>D8 --> CS</li>
+</ul>
 
 Installation
 ------------
@@ -61,7 +78,7 @@ Check examples folder for basic usage.
 Authors
 ------------
 <ul>
-  <li><b> Michele 'an4cr0n' Biondi </b>: https://github.com/an4cr0n</li>
+  <li><b>Michele 'an4cr0n' Biondi </b>: https://github.com/an4cr0n</li>
   <li><b>Andrea 'Sonic0' Salvatori</b>: https://github.com/Sonic0</li>
 </ul>
 
