@@ -14,7 +14,7 @@
 
 Status
 ------------
-This is actively developed.
+This is not actively developed.
 
 Differences with thotro/arduino-dw1000
 ------------
