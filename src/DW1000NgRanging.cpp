@@ -60,6 +60,8 @@ namespace DW1000NgRanging {
     }
 
     double correctRange(double range) {
+        double result = 0;
+
         Channel currentChannel = DW1000Ng::getChannel();
         double rxPower = -(static_cast<double>(DW1000Ng::getReceivePower()));
         
@@ -68,16 +70,19 @@ namespace DW1000NgRanging {
             index+=2;
         
         if (rxPower < BIAS_TABLE[0][0]) {
-            return range += BIAS_TABLE[0][index]*0.001;
+            result = range += BIAS_TABLE[0][index]*0.001;
         } else if (rxPower >= BIAS_TABLE[17][0]) {
-            return range += BIAS_TABLE[17][index]*0.001;
+            result = range += BIAS_TABLE[17][index]*0.001;
         } else {
             for(auto i=0; i < 17; i++) {
                 if (rxPower >= BIAS_TABLE[i][0] && rxPower < BIAS_TABLE[i+1][0]){
-                    return range += BIAS_TABLE[i][index]*0.001;
+                    result = range += BIAS_TABLE[i][index]*0.001;
+                    break;
                 }
             }
         }
+
+        return result;
     }
 
 }
