@@ -172,67 +172,101 @@ namespace DW1000NgRTLS {
         }
 
         DW1000Ng::setDeviceAddress(DW1000NgUtils::bytesAsValue(&init_recv[16], 2));
-        return { true, DW1000NgUtils::bytesAsValue(&init_recv[13], 2) };
+        return { true, static_cast<uint16_t>(DW1000NgUtils::bytesAsValue(&init_recv[13], 2)) };
     }
 
     static RangeResult tagFinishRange(uint16_t anchor, uint16_t replyDelayUs) {
+        RangeResult returnValue;
+
         byte target_anchor[2];
         DW1000NgUtils::writeValueToBytes(target_anchor, anchor, 2);
         DW1000NgRTLS::transmitPoll(target_anchor);
         /* Start of poll control for range */
-        if(!DW1000NgRTLS::waitForNextRangingStep()) return {false, false, 0, 0};
-        size_t cont_len = DW1000Ng::getReceivedDataLength();
-        byte cont_recv[cont_len];
-        DW1000Ng::getReceivedData(cont_recv, cont_len);
-
-        if (cont_len > 10 && cont_recv[9] == ACTIVITY_CONTROL && cont_recv[10] == RANGING_CONTINUE) {
-            /* Received Response to poll */
-            DW1000NgRTLS::transmitFinalMessage(
-                &cont_recv[7], 
-                replyDelayUs, 
-                DW1000Ng::getTransmitTimestamp(), // Poll transmit time
-                DW1000Ng::getReceiveTimestamp()  // Response to poll receive time
-            );
+        if(!DW1000NgRTLS::waitForNextRangingStep()) {
+            returnValue = {false, false, 0, 0};
         } else {
-            return {false, false, 0, 0};
-        }
 
-        if(!DW1000NgRTLS::waitForNextRangingStep()) return {false, false, 0, 0};
+            size_t cont_len = DW1000Ng::getReceivedDataLength();
+            byte cont_recv[cont_len];
+            DW1000Ng::getReceivedData(cont_recv, cont_len);
 
-        size_t act_len = DW1000Ng::getReceivedDataLength();
-        byte act_recv[act_len];
-        DW1000Ng::getReceivedData(act_recv, act_len);
+            if (cont_len > 10 && cont_recv[9] == ACTIVITY_CONTROL && cont_recv[10] == RANGING_CONTINUE) {
+                /* Received Response to poll */
+                DW1000NgRTLS::transmitFinalMessage(
+                    &cont_recv[7], 
+                    replyDelayUs, 
+                    DW1000Ng::getTransmitTimestamp(), // Poll transmit time
+                    DW1000Ng::getReceiveTimestamp()  // Response to poll receive time
+                );
 
-        if(act_len > 10 && act_recv[9] == ACTIVITY_CONTROL) {
-            if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
-                return {true, true, DW1000NgUtils::bytesAsValue(&act_recv[11], 2), 0};
-            } else if(act_len > 12 && act_recv[10] == ACTIVITY_FINISHED) {
-                return {true, false, 0, calculateNewBlinkRate(act_recv)};
+                if(!DW1000NgRTLS::waitForNextRangingStep()) {
+                    returnValue = {false, false, 0, 0};
+                } else {
+
+                    size_t act_len = DW1000Ng::getReceivedDataLength();
+                    byte act_recv[act_len];
+                    DW1000Ng::getReceivedData(act_recv, act_len);
+
+                    if(act_len > 10 && act_recv[9] == ACTIVITY_CONTROL) {
+                        if (act_len > 12 && act_recv[10] == RANGING_CONFIRM) {
+                            returnValue = {true, true, static_cast<uint16_t>(DW1000NgUtils::bytesAsValue(&act_recv[11], 2)), 0};
+                        } else if(act_len > 12 && act_recv[10] == ACTIVITY_FINISHED) {
+                            returnValue = {true, false, 0, calculateNewBlinkRate(act_recv)};
+                        }
+                    } else {
+                        returnValue = {false, false, 0, 0};
+                    }
+                }
+            } else {
+                returnValue = {false, false, 0, 0};
             }
-        } else {
-            return {false, false, 0, 0};
+            
         }
+
+        return returnValue;
     }
 
     RangeInfrastructureResult tagRangeInfrastructure(uint16_t target_anchor, uint16_t finalMessageDelay) {
+        RangeInfrastructureResult returnValue;
+
         RangeResult result = tagFinishRange(target_anchor, finalMessageDelay);
-        if(!result.success) return {false , 0};
+        byte keep_going = 1;
 
-        while(result.success && result.next) {
-            result = tagFinishRange(result.next_anchor, finalMessageDelay);
-            if(!result.success) return {false , 0};
-
-            #if defined(ESP8266)
-            yield();
-            #endif
-        }
-
-        if(result.success && result.new_blink_rate != 0) {
-            return { true, result.new_blink_rate };
+        if(!result.success) {
+            keep_going = 0;
+            returnValue = {false , 0};
         } else {
-            if(!result.success)
-                return { false , 0 };
+            while(result.success && result.next) {
+                result = tagFinishRange(result.next_anchor, finalMessageDelay);
+                if(!result.success) {
+                    keep_going = 0;
+                    returnValue = {false , 0};
+                    break;
+                }
+
+                #if defined(ESP8266)
+                if (keep_going == 1) {
+                    yield();
+                }
+                #endif
+            }
+
+            if (keep_going == 1) {
+
+                if(result.success && result.new_blink_rate != 0) {
+                    keep_going = 0;
+                    returnValue = { true, static_cast<uint16_t>(result.new_blink_rate) };
+                } else {
+                    if(!result.success) {
+                        keep_going = 0;
+                        returnValue = { false , 0 };
+                    } else {
+                        // TODO. Handle this condition?
+                    }
+                }
+            }
         }
+        return returnValue;
     }
 
     RangeInfrastructureResult tagTwrLocalize(uint16_t finalMessageDelay) {
@@ -249,55 +283,67 @@ namespace DW1000NgRTLS {
     }
 
     RangeAcceptResult anchorRangeAccept(NextActivity next, uint16_t value) {
+        RangeAcceptResult returnValue;
+
         double range;
-        if(!DW1000NgRTLS::receiveFrame()) return {false, 0};
+        if(!DW1000NgRTLS::receiveFrame()) {
+            returnValue = {false, 0};
+        } else {
 
-        size_t poll_len = DW1000Ng::getReceivedDataLength();
-        byte poll_data[poll_len];
-        DW1000Ng::getReceivedData(poll_data, poll_len);
+            size_t poll_len = DW1000Ng::getReceivedDataLength();
+            byte poll_data[poll_len];
+            DW1000Ng::getReceivedData(poll_data, poll_len);
 
-        if(poll_len > 9 && poll_data[9] == RANGING_TAG_POLL) {
-            uint64_t timePollReceived = DW1000Ng::getReceiveTimestamp();
-            DW1000NgRTLS::transmitResponseToPoll(&poll_data[7]);
-            DW1000NgRTLS::waitForTransmission();
-            uint64_t timeResponseToPoll = DW1000Ng::getTransmitTimestamp();
-            delayMicroseconds(1500);
-            if(!DW1000NgRTLS::receiveFrame()) return {false, 0};
-
-            size_t rfinal_len = DW1000Ng::getReceivedDataLength();
-            byte rfinal_data[rfinal_len];
-            DW1000Ng::getReceivedData(rfinal_data, rfinal_len);
-            if(rfinal_len > 18 && rfinal_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
-                uint64_t timeFinalMessageReceive = DW1000Ng::getReceiveTimestamp();
-
-                byte finishValue[2];
-                DW1000NgUtils::writeValueToBytes(finishValue, value, 2);
-
-                if(next == NextActivity::RANGING_CONFIRM)
-                    DW1000NgRTLS::transmitRangingConfirm(&rfinal_data[7], finishValue);
-                else
-                    DW1000NgRTLS::transmitActivityFinished(&rfinal_data[7], finishValue);
-                
+            if(poll_len > 9 && poll_data[9] == RANGING_TAG_POLL) {
+                uint64_t timePollReceived = DW1000Ng::getReceiveTimestamp();
+                DW1000NgRTLS::transmitResponseToPoll(&poll_data[7]);
                 DW1000NgRTLS::waitForTransmission();
+                uint64_t timeResponseToPoll = DW1000Ng::getTransmitTimestamp();
+                delayMicroseconds(1500);
 
-                range = DW1000NgRanging::computeRangeAsymmetric(
-                    DW1000NgUtils::bytesAsValue(rfinal_data + 10, LENGTH_TIMESTAMP), // Poll send time
-                    timePollReceived, 
-                    timeResponseToPoll, // Response to poll sent time
-                    DW1000NgUtils::bytesAsValue(rfinal_data + 14, LENGTH_TIMESTAMP), // Response to Poll Received
-                    DW1000NgUtils::bytesAsValue(rfinal_data + 18, LENGTH_TIMESTAMP), // Final Message send time
-                    timeFinalMessageReceive // Final message receive time
-                );
+                if(!DW1000NgRTLS::receiveFrame()) {
+                    returnValue = {false, 0};
+                } else {
 
-                range = DW1000NgRanging::correctRange(range);
+                    size_t rfinal_len = DW1000Ng::getReceivedDataLength();
+                    byte rfinal_data[rfinal_len];
+                    DW1000Ng::getReceivedData(rfinal_data, rfinal_len);
+                    if(rfinal_len > 18 && rfinal_data[9] == RANGING_TAG_FINAL_RESPONSE_EMBEDDED) {
+                        uint64_t timeFinalMessageReceive = DW1000Ng::getReceiveTimestamp();
 
-                /* In case of wrong read due to bad device calibration */
-                if(range <= 0) 
-                    range = 0.000001;
+                        byte finishValue[2];
+                        DW1000NgUtils::writeValueToBytes(finishValue, value, 2);
 
-                return {true, range};
+                        if(next == NextActivity::RANGING_CONFIRM) {
+                            DW1000NgRTLS::transmitRangingConfirm(&rfinal_data[7], finishValue);
+                        } else {
+                            DW1000NgRTLS::transmitActivityFinished(&rfinal_data[7], finishValue);
+                        }
+                        
+                        DW1000NgRTLS::waitForTransmission();
+
+                        range = DW1000NgRanging::computeRangeAsymmetric(
+                            DW1000NgUtils::bytesAsValue(rfinal_data + 10, LENGTH_TIMESTAMP), // Poll send time
+                            timePollReceived, 
+                            timeResponseToPoll, // Response to poll sent time
+                            DW1000NgUtils::bytesAsValue(rfinal_data + 14, LENGTH_TIMESTAMP), // Response to Poll Received
+                            DW1000NgUtils::bytesAsValue(rfinal_data + 18, LENGTH_TIMESTAMP), // Final Message send time
+                            timeFinalMessageReceive // Final message receive time
+                        );
+
+                        range = DW1000NgRanging::correctRange(range);
+
+                        /* In case of wrong read due to bad device calibration */
+                        if(range <= 0) 
+                            range = 0.000001;
+
+                        returnValue = {true, range};
+                    }
+                }
             }
         }
+
+        return returnValue;
     }
 
 }
