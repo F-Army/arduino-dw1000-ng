@@ -70,6 +70,7 @@ FemtoBeacon ESP32 LPS (ESP32-D2WD chip, HSPI peripheral)
   <li>23 --> MOSI</li>
   <li>18 --> CS (DECAWAVE)</li>
 </ul>
+
 Installation
 ------------
 **Requires c++11 support**, Arduino IDE >= 1.6.6 support c++11.
