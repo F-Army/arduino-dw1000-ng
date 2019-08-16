@@ -105,9 +105,9 @@ namespace DW1000Ng {
 
 		/* ############################# PRIVATE METHODS ################################### */
 		/*
-		* Write bytes to the DW1000Ng. Single bytes can be written to registers via sub-addressing.
+		* Write bytes to the DW1000. Single bytes can be written to registers via sub-addressing.
 		* @param cmd
-		* 		The register address (see Chapter 7 in the DW1000Ng user manual).
+		* 		The register address (see Chapter 7 in the DW1000 user manual).
 		* @param offset
 		*		The offset to select register sub-parts for writing, or 0x00 to disable
 		* 		sub-adressing.
@@ -147,8 +147,17 @@ namespace DW1000Ng {
 			_writeBytesToRegister(cmd, offset, dataBytes, data_size);
 		}
 
-		// Helper to set a single register
-		void _writeByte(byte cmd, uint16_t offset, byte data) {
+		/*
+		* Write ONLY ONE bytes to the DW1000.
+		* @param cmd
+		* 		The register address (see Chapter 7 in the DW1000 user manual).
+		* @param offset
+		*		The offset to select register sub-parts for writing, or 0x00 to disable
+		* 		sub-adressing.
+		* @param data
+		*		byte to be written.
+		*/
+		void _writeSingleByteToRegister(byte cmd, uint16_t offset, byte data) {
 			_writeBytesToRegister(cmd, offset, &data, 1);
 		}
 		
@@ -195,12 +204,12 @@ namespace DW1000Ng {
 			// set address
 			_writeBytesToRegister(OTP_IF, OTP_ADDR_SUB, addressBytes, LEN_OTP_ADDR);
 			// switch into read mode
-			_writeByte(OTP_IF, OTP_CTRL_SUB, 0x03); // OTPRDEN | OTPREAD
-			_writeByte(OTP_IF, OTP_CTRL_SUB, 0x01); // OTPRDEN
+			_writeSingleByteToRegister(OTP_IF, OTP_CTRL_SUB, 0x03); // OTPRDEN | OTPREAD
+			_writeSingleByteToRegister(OTP_IF, OTP_CTRL_SUB, 0x01); // OTPRDEN
 			// read value/block - 4 bytes
 			_readBytes(OTP_IF, OTP_RDAT_SUB, data, LEN_OTP_RDAT);
 			// end read mode
-			_writeByte(OTP_IF, OTP_CTRL_SUB, 0x00);
+			_writeSingleByteToRegister(OTP_IF, OTP_CTRL_SUB, 0x00);
 		}
 
 		void _writeBitToRegister(byte bitRegister, uint16_t RegisterOffset, uint16_t bitRegister_LEN, uint16_t selectedBit, boolean value) {
@@ -980,13 +989,13 @@ namespace DW1000Ng {
 		void _setNonStandardSFDLength() {
 			switch(_dataRate) {
 				case DataRate::RATE_6800KBPS:
-					_writeByte(USR_SFD, SFD_LENGTH_SUB, 0x08);
+					_writeSingleByteToRegister(USR_SFD, SFD_LENGTH_SUB, 0x08);
 					break;
 				case DataRate::RATE_850KBPS:
-					_writeByte(USR_SFD, SFD_LENGTH_SUB, 0x10);
+					_writeSingleByteToRegister(USR_SFD, SFD_LENGTH_SUB, 0x10);
 					break;
 				case DataRate::RATE_110KBPS:
-					_writeByte(USR_SFD, SFD_LENGTH_SUB, 0x40);
+					_writeSingleByteToRegister(USR_SFD, SFD_LENGTH_SUB, 0x40);
 					break;
 				default:
 					return; //TODO Proper error handling
