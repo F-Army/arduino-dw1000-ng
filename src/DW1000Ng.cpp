@@ -175,6 +175,41 @@ namespace DW1000Ng {
 			// Reuses the core function to write the register, but with static data_size input
 			_writeBytesToRegister(cmd, offset, &data, 1);
 		}
+
+		/*
+		* Write ONLY ONE bit, in a specific register, to the DW1000.
+		* @param bitRegister
+		* 		The register address of the selected bit (see Chapter 7 in the DW1000 user manual).
+		* @param RegisterOffset
+		*		The offset to select register sub-parts for writing, or 0x00 to disable
+		* 		sub-adressing.
+		* @param bitRegister_LEN
+		* 		The lenght of the register to be written
+		* @param selectedBit
+		* 		The position(in Int or Hex) of the bit in the register
+		*		The byte to be written.
+		* @param value
+		*		The value of the bit to set. It, obviously, can be true/false or 1/0
+		*/
+		void _writeBitToRegister(byte bitRegister, uint16_t RegisterOffset, uint16_t bitRegister_LEN, uint16_t selectedBit, boolean value) {
+			uint16_t idx;
+			uint8_t bitPosition;
+
+			idx = selectedBit/8;
+			if(idx >= bitRegister_LEN) {
+				return; // TODO proper error handling: out of bounds
+			}
+			byte targetByte; memset(&targetByte, 0, 1);
+			bitPosition = selectedBit%8;
+			_readBytes(bitRegister, RegisterOffset+idx, &targetByte, 1);
+			
+			value ? bitSet(targetByte, bitPosition) : bitClear(targetByte, bitPosition);
+
+			if(RegisterOffset == NO_SUB)
+				RegisterOffset = 0x00;
+				
+			_writeBytesToRegister(bitRegister, RegisterOffset+idx, &targetByte, 1);
+		}
 		
 		/*
 		* Read bytes from the DW1000Ng. Number of bytes depend on register length.
@@ -225,26 +260,6 @@ namespace DW1000Ng {
 			_readBytes(OTP_IF, OTP_RDAT_SUB, data, LEN_OTP_RDAT);
 			// end read mode
 			_writeSingleByteToRegister(OTP_IF, OTP_CTRL_SUB, 0x00);
-		}
-
-		void _writeBitToRegister(byte bitRegister, uint16_t RegisterOffset, uint16_t bitRegister_LEN, uint16_t selectedBit, boolean value) {
-			uint16_t idx;
-			uint8_t bitPosition;
-
-			idx = selectedBit/8;
-			if(idx >= bitRegister_LEN) {
-				return; // TODO proper error handling: out of bounds
-			}
-			byte targetByte; memset(&targetByte, 0, 1);
-			bitPosition = selectedBit%8;
-			_readBytes(bitRegister, RegisterOffset+idx, &targetByte, 1);
-			
-			value ? bitSet(targetByte, bitPosition) : bitClear(targetByte, bitPosition);
-
-			if(RegisterOffset == NO_SUB)
-				RegisterOffset = 0x00;
-				
-			_writeBytesToRegister(bitRegister, RegisterOffset+idx, &targetByte, 1);
 		}
 
 		void _enableClock(byte clock) {
