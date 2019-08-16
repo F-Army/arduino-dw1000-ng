@@ -138,6 +138,7 @@ namespace DW1000Ng {
 					headerLen += 2;
 				}
 			}
+			
 			SPIporting::writeToSPI(_ss, headerLen, header, data_size, data);
 		}
 
@@ -201,7 +202,7 @@ namespace DW1000Ng {
 			}
 			byte targetByte; memset(&targetByte, 0, 1);
 			bitPosition = selectedBit%8;
-			_readBytes(bitRegister, RegisterOffset+idx, &targetByte, 1);
+			_readBytesFromRegister(bitRegister, RegisterOffset+idx, &targetByte, 1);
 			
 			value ? bitSet(targetByte, bitPosition) : bitClear(targetByte, bitPosition);
 
@@ -219,9 +220,11 @@ namespace DW1000Ng {
 		*		The data array to be read into.
 		* @param n
 		*		The number of bytes expected to be received.
+		* @param data_size
+		*		The number of bytes to be read
 		*/
 		// TODO incomplete doc
-		void _readBytes(byte cmd, uint16_t offset, byte data[], uint16_t data_size) {
+		void _readBytesFromRegister(byte cmd, uint16_t offset, byte data[], uint16_t data_size) {
 			byte header[3];
 			uint8_t headerLen = 1;
 			
@@ -239,6 +242,7 @@ namespace DW1000Ng {
 					headerLen += 2;
 				}
 			}
+
 			SPIporting::readFromSPI(_ss, headerLen, header, data_size, data);
 		}
 
@@ -257,7 +261,7 @@ namespace DW1000Ng {
 			_writeSingleByteToRegister(OTP_IF, OTP_CTRL_SUB, 0x03); // OTPRDEN | OTPREAD
 			_writeSingleByteToRegister(OTP_IF, OTP_CTRL_SUB, 0x01); // OTPRDEN
 			// read value/block - 4 bytes
-			_readBytes(OTP_IF, OTP_RDAT_SUB, data, LEN_OTP_RDAT);
+			_readBytesFromRegister(OTP_IF, OTP_RDAT_SUB, data, LEN_OTP_RDAT);
 			// end read mode
 			_writeSingleByteToRegister(OTP_IF, OTP_CTRL_SUB, 0x00);
 		}
@@ -265,7 +269,7 @@ namespace DW1000Ng {
 		void _enableClock(byte clock) {
 			byte pmscctrl0[LEN_PMSC_CTRL0];
 			memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
-			_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			_readBytesFromRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 			if(clock == SYS_AUTO_CLOCK) {
 				pmscctrl0[0] = SYS_AUTO_CLOCK;
 				pmscctrl0[1] &= 0xFE;
@@ -1076,8 +1080,8 @@ namespace DW1000Ng {
 			byte otpctrl[LEN_OTP_CTRL];
 			memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
 			memset(otpctrl, 0, LEN_OTP_CTRL);
-			_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
-			_readBytes(OTP_IF, OTP_CTRL_SUB, otpctrl, LEN_OTP_CTRL);
+			_readBytesFromRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+			_readBytesFromRegister(OTP_IF, OTP_CTRL_SUB, otpctrl, LEN_OTP_CTRL);
 			pmscctrl0[0] = 0x01;
 			pmscctrl0[1] = 0x03;
 			otpctrl[0]   = 0x00;
@@ -1163,27 +1167,27 @@ namespace DW1000Ng {
 		/* Internal helpers to read configuration */
 
 		void _readSystemConfigurationRegister() {
-			_readBytes(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
+			_readBytesFromRegister(SYS_CFG, NO_SUB, _syscfg, LEN_SYS_CFG);
 		}
 
 		void _readSystemEventStatusRegister() {
-			_readBytes(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
+			_readBytesFromRegister(SYS_STATUS, NO_SUB, _sysstatus, LEN_SYS_STATUS);
 		}
 
 		void _readNetworkIdAndDeviceAddress() {
-			_readBytes(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
+			_readBytesFromRegister(PANADR, NO_SUB, _networkAndAddress, LEN_PANADR);
 		}
 
 		void _readSystemEventMaskRegister() {
-			_readBytes(SYS_MASK, NO_SUB, _sysmask, LEN_SYS_MASK);
+			_readBytesFromRegister(SYS_MASK, NO_SUB, _sysmask, LEN_SYS_MASK);
 		}
 
 		void _readChannelControlRegister() {
-			_readBytes(CHAN_CTRL, NO_SUB, _chanctrl, LEN_CHAN_CTRL);
+			_readBytesFromRegister(CHAN_CTRL, NO_SUB, _chanctrl, LEN_CHAN_CTRL);
 		}
 
 		void _readTransmitFrameControlRegister() {
-			_readBytes(TX_FCTRL, NO_SUB, _txfctrl, LEN_TX_FCTRL);
+			_readBytesFromRegister(TX_FCTRL, NO_SUB, _txfctrl, LEN_TX_FCTRL);
 		}
 
 		boolean _isTransmitDone() {
@@ -1409,7 +1413,7 @@ namespace DW1000Ng {
 	void enableDebounceClock() {
 		byte pmscctrl0[LEN_PMSC_CTRL0];
 		memset(pmscctrl0, 0, LEN_PMSC_CTRL0);
-		_readBytes(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
+		_readBytesFromRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
 		DW1000NgUtils::setBit(pmscctrl0, LEN_PMSC_CTRL0, GPDCE_BIT, 1);
 		DW1000NgUtils::setBit(pmscctrl0, LEN_PMSC_CTRL0, KHZCLKEN_BIT, 1);
 		_writeBytesToRegister(PMSC, PMSC_CTRL0_SUB, pmscctrl0, LEN_PMSC_CTRL0);
@@ -1419,7 +1423,7 @@ namespace DW1000Ng {
 	void enableLedBlinking() {
 		byte pmscledc[LEN_PMSC_LEDC];
 		memset(pmscledc, 0, LEN_PMSC_LEDC);
-		_readBytes(PMSC, PMSC_LEDC_SUB, pmscledc, LEN_PMSC_LEDC);
+		_readBytesFromRegister(PMSC, PMSC_LEDC_SUB, pmscledc, LEN_PMSC_LEDC);
 		DW1000NgUtils::setBit(pmscledc, LEN_PMSC_LEDC, BLNKEN, 1);
 		_writeBytesToRegister(PMSC, PMSC_LEDC_SUB, pmscledc, LEN_PMSC_LEDC);
 	}
@@ -1427,7 +1431,7 @@ namespace DW1000Ng {
 	void setGPIOMode(uint8_t msgp, uint8_t mode) {
 		byte gpiomode[LEN_GPIO_MODE];
 		memset(gpiomode, 0, LEN_GPIO_MODE);
-		_readBytes(GPIO_CTRL, GPIO_MODE_SUB, gpiomode, LEN_GPIO_MODE);
+		_readBytesFromRegister(GPIO_CTRL, GPIO_MODE_SUB, gpiomode, LEN_GPIO_MODE);
 		for (char i = 0; i < 2; i++){
 			DW1000NgUtils::setBit(gpiomode, LEN_GPIO_MODE, msgp + i, (mode >> i) & 1);
 		}
@@ -1436,7 +1440,7 @@ namespace DW1000Ng {
 
 	void applySleepConfiguration(sleep_configuration_t sleep_config) {
 		byte aon_wcfg[LEN_AON_WCFG];
-		_readBytes(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
+		_readBytesFromRegister(AON, AON_WCFG_SUB, aon_wcfg, LEN_AON_WCFG);
 		byte aon_cfg0[1];
 		memset(aon_cfg0, 0, 1);
 
@@ -1469,7 +1473,7 @@ namespace DW1000Ng {
 		byte deviceId[LEN_DEV_ID];
 		byte expectedDeviceId[LEN_DEV_ID];
 		DW1000NgUtils::writeValueToBytes(expectedDeviceId, 0xDECA0130, LEN_DEV_ID);
-		_readBytes(DEV_ID, NO_SUB, deviceId, LEN_DEV_ID);
+		_readBytesFromRegister(DEV_ID, NO_SUB, deviceId, LEN_DEV_ID);
 		if (memcmp(deviceId, expectedDeviceId, LEN_DEV_ID)) {
 			digitalWrite(_ss, LOW);
 			delay(1);
@@ -1520,21 +1524,21 @@ namespace DW1000Ng {
 
 	void getPrintableDeviceIdentifier(char msgBuffer[]) {
 		byte data[LEN_DEV_ID];
-		_readBytes(DEV_ID, NO_SUB, data, LEN_DEV_ID);
+		_readBytesFromRegister(DEV_ID, NO_SUB, data, LEN_DEV_ID);
 		sprintf(msgBuffer, "%02X - model: %d, version: %d, revision: %d",
 						(uint16_t)((data[3] << 8) | data[2]), data[1], (data[0] >> 4) & 0x0F, data[0] & 0x0F);
 	}
 
 	void getPrintableExtendedUniqueIdentifier(char msgBuffer[]) {
 		byte data[LEN_EUI];
-		_readBytes(EUI, NO_SUB, data, LEN_EUI);
+		_readBytesFromRegister(EUI, NO_SUB, data, LEN_EUI);
 		sprintf(msgBuffer, "%02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X",
 						data[7], data[6], data[5], data[4], data[3], data[2], data[1], data[0]);
 	}
 
 	void getPrintableNetworkIdAndShortAddress(char msgBuffer[]) {
 		byte data[LEN_PANADR];
-		_readBytes(PANADR, NO_SUB, data, LEN_PANADR);
+		_readBytesFromRegister(PANADR, NO_SUB, data, LEN_PANADR);
 		sprintf(msgBuffer, "PAN: %02X, Short Address: %02X",
 						(uint16_t)((data[3] << 8) | data[2]), (uint16_t)((data[1] << 8) | data[0]));
 	}
@@ -1547,8 +1551,8 @@ namespace DW1000Ng {
 		uint8_t ch;
 		byte chan_ctrl[LEN_CHAN_CTRL];
 		byte tx_fctrl[LEN_TX_FCTRL];
-		_readBytes(CHAN_CTRL, NO_SUB, chan_ctrl, LEN_CHAN_CTRL);
-		_readBytes(TX_FCTRL, NO_SUB, tx_fctrl, LEN_TX_FCTRL);
+		_readBytesFromRegister(CHAN_CTRL, NO_SUB, chan_ctrl, LEN_CHAN_CTRL);
+		_readBytesFromRegister(TX_FCTRL, NO_SUB, tx_fctrl, LEN_TX_FCTRL);
 		/* Data Rate from 0x08 bits:13-14(tx_fctrl) */
 		dr = (uint16_t)(tx_fctrl[1] >> 5 & 0x3);
 		switch(dr) {
@@ -1655,18 +1659,18 @@ namespace DW1000Ng {
 	}
 
 	void getEUI(byte eui[]) {
-		_readBytes(EUI, NO_SUB, eui, LEN_EUI);
+		_readBytesFromRegister(EUI, NO_SUB, eui, LEN_EUI);
 	}
 
 	float getTemperature() {
 		_vbatAndTempSteps();
-		byte sar_ltemp = 0; _readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
+		byte sar_ltemp = 0; _readBytesFromRegister(TX_CAL, 0x04, &sar_ltemp, 1);
 		return (sar_ltemp - _tmeas23C) * 1.14f + 23.0f;
 	}
 
 	float getBatteryVoltage() {
 		_vbatAndTempSteps();
-		byte sar_lvbat = 0; _readBytes(TX_CAL, 0x03, &sar_lvbat, 1);
+		byte sar_lvbat = 0; _readBytesFromRegister(TX_CAL, 0x03, &sar_lvbat, 1);
 		return (sar_lvbat - _vmeas3v3) / 173.0f + 3.3f;
 	}
 
@@ -1674,8 +1678,8 @@ namespace DW1000Ng {
 		// follow the procedure from section 6.4 of the User Manual
 		_vbatAndTempSteps();
 		delay(1);
-		byte sar_lvbat = 0; _readBytes(TX_CAL, 0x03, &sar_lvbat, 1);
-		byte sar_ltemp = 0; _readBytes(TX_CAL, 0x04, &sar_ltemp, 1);
+		byte sar_lvbat = 0; _readBytesFromRegister(TX_CAL, 0x03, &sar_lvbat, 1);
+		byte sar_ltemp = 0; _readBytesFromRegister(TX_CAL, 0x04, &sar_ltemp, 1);
 		
 		// calculate voltage and temperature
 		vbat = (sar_lvbat - _vmeas3v3) / 173.0f + 3.3f;
@@ -1953,7 +1957,7 @@ namespace DW1000Ng {
 
 		// 10 bits of RX frame control register
 		byte rxFrameInfo[LEN_RX_FINFO];
-		_readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
+		_readBytesFromRegister(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
 		len = ((((uint16_t)rxFrameInfo[1] << 8) | (uint16_t)rxFrameInfo[0]) & 0x03FF);
 		
 		if(_frameCheck && len > 2) {
@@ -1966,7 +1970,7 @@ namespace DW1000Ng {
 		if(n <= 0) {
 			return;
 		}
-		_readBytes(RX_BUFFER, NO_SUB, data, n);
+		_readBytesFromRegister(RX_BUFFER, NO_SUB, data, n);
 	}
 
 	void getReceivedData(String& data) {
@@ -1990,21 +1994,21 @@ namespace DW1000Ng {
 	uint64_t getTransmitTimestamp() {
 		byte data[LENGTH_TIMESTAMP];
 		memset(data, 0 , LENGTH_TIMESTAMP);
-		_readBytes(TX_TIME, TX_STAMP_SUB, data, LEN_TX_STAMP);
+		_readBytesFromRegister(TX_TIME, TX_STAMP_SUB, data, LEN_TX_STAMP);
 		return DW1000NgUtils::bytesAsValue(data, LEN_TX_STAMP);
 	}
 
 	uint64_t getReceiveTimestamp() {
 		byte data[LEN_RX_STAMP];
 		memset(data, 0, LEN_RX_STAMP);
-		_readBytes(RX_TIME, RX_STAMP_SUB, data, LEN_RX_STAMP);
+		_readBytesFromRegister(RX_TIME, RX_STAMP_SUB, data, LEN_RX_STAMP);
 		return DW1000NgUtils::bytesAsValue(data, LEN_RX_STAMP);
 	}
 
 	uint64_t getSystemTimestamp() {
 		byte data[LEN_SYS_TIME];
 		memset(data, 0, LEN_SYS_TIME);
-		_readBytes(SYS_TIME, NO_SUB, data, LEN_SYS_TIME);
+		_readBytesFromRegister(SYS_TIME, NO_SUB, data, LEN_SYS_TIME);
 		return DW1000NgUtils::bytesAsValue(data, LEN_SYS_TIME);		
 	}
 
@@ -2012,8 +2016,8 @@ namespace DW1000Ng {
 		byte         noiseBytes[LEN_STD_NOISE];
 		byte         fpAmpl2Bytes[LEN_FP_AMPL2];
 		uint16_t     noise, f2;
-		_readBytes(RX_FQUAL, STD_NOISE_SUB, noiseBytes, LEN_STD_NOISE);
-		_readBytes(RX_FQUAL, FP_AMPL2_SUB, fpAmpl2Bytes, LEN_FP_AMPL2);
+		_readBytesFromRegister(RX_FQUAL, STD_NOISE_SUB, noiseBytes, LEN_STD_NOISE);
+		_readBytesFromRegister(RX_FQUAL, FP_AMPL2_SUB, fpAmpl2Bytes, LEN_FP_AMPL2);
 		noise = (uint16_t)noiseBytes[0] | ((uint16_t)noiseBytes[1] << 8);
 		f2    = (uint16_t)fpAmpl2Bytes[0] | ((uint16_t)fpAmpl2Bytes[1] << 8);
 		return (float)f2/noise;
@@ -2026,10 +2030,10 @@ namespace DW1000Ng {
 		byte         rxFrameInfo[LEN_RX_FINFO];
 		uint16_t     f1, f2, f3, N;
 		float        A, corrFac;
-		_readBytes(RX_TIME, FP_AMPL1_SUB, fpAmpl1Bytes, LEN_FP_AMPL1);
-		_readBytes(RX_FQUAL, FP_AMPL2_SUB, fpAmpl2Bytes, LEN_FP_AMPL2);
-		_readBytes(RX_FQUAL, FP_AMPL3_SUB, fpAmpl3Bytes, LEN_FP_AMPL3);
-		_readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
+		_readBytesFromRegister(RX_TIME, FP_AMPL1_SUB, fpAmpl1Bytes, LEN_FP_AMPL1);
+		_readBytesFromRegister(RX_FQUAL, FP_AMPL2_SUB, fpAmpl2Bytes, LEN_FP_AMPL2);
+		_readBytesFromRegister(RX_FQUAL, FP_AMPL3_SUB, fpAmpl3Bytes, LEN_FP_AMPL3);
+		_readBytesFromRegister(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
 		f1 = (uint16_t)fpAmpl1Bytes[0] | ((uint16_t)fpAmpl1Bytes[1] << 8);
 		f2 = (uint16_t)fpAmpl2Bytes[0] | ((uint16_t)fpAmpl2Bytes[1] << 8);
 		f3 = (uint16_t)fpAmpl3Bytes[0] | ((uint16_t)fpAmpl3Bytes[1] << 8);
@@ -2058,8 +2062,8 @@ namespace DW1000Ng {
 		uint32_t twoPower17 = 131072;
 		uint16_t C, N;
 		float    A, corrFac;
-		_readBytes(RX_FQUAL, CIR_PWR_SUB, cirPwrBytes, LEN_CIR_PWR);
-		_readBytes(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
+		_readBytesFromRegister(RX_FQUAL, CIR_PWR_SUB, cirPwrBytes, LEN_CIR_PWR);
+		_readBytesFromRegister(RX_FINFO, NO_SUB, rxFrameInfo, LEN_RX_FINFO);
 		C = (uint16_t)cirPwrBytes[0] | ((uint16_t)cirPwrBytes[1] << 8);
 		N = (((uint16_t)rxFrameInfo[2] >> 4) & 0xFF) | ((uint16_t)rxFrameInfo[3] << 4);
 
@@ -2108,7 +2112,7 @@ namespace DW1000Ng {
     void getPrettyBytes(byte cmd, uint16_t offset, char msgBuffer[], uint16_t n) {
         uint16_t i, j, b;
         byte* readBuf = (byte*)malloc(n);
-        _readBytes(cmd, offset, readBuf, n);
+        _readBytesFromRegister(cmd, offset, readBuf, n);
         b     = sprintf(msgBuffer, "Reg: 0x%02x, bytes: %d\nB: 7 6 5 4 3 2 1 0\n", cmd, n);  // TODO - tpye
         for(i = 0; i < n; i++) {
             byte curByte = readBuf[i];
