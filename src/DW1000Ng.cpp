@@ -141,9 +141,23 @@ namespace DW1000Ng {
 			SPIporting::writeToSPI(_ss, headerLen, header, data_size, data);
 		}
 
-		void _writeToRegister(byte cmd, uint16_t offset, uint32_t data, uint16_t data_size) { 
+		/*
+		* Write Value in Hex or Int format to the DW1000. Single Value can be written to registers via sub-addressing.
+		* @param cmd
+		* 		The register address (see Chapter 7 in the DW1000 user manual).
+		* @param offset
+		*		The offset to select register sub-parts for writing, or 0x00 to disable
+		* 		sub-adressing.
+		* @param data
+		*		The data Value to be written.
+		* @param data_size
+		*		The number of bytes to be written
+		*/
+		void _writeValueToRegister(byte cmd, uint16_t offset, uint32_t data, uint16_t data_size) { 
 			byte dataBytes[data_size];
+			// Converts input Value in Byte and writes it inside the Array
 			DW1000NgUtils::writeValueToBytes(dataBytes, data, data_size);
+			// Reuses the core function to write the register
 			_writeBytesToRegister(cmd, offset, dataBytes, data_size);
 		}
 
@@ -158,6 +172,7 @@ namespace DW1000Ng {
 		*		byte to be written.
 		*/
 		void _writeSingleByteToRegister(byte cmd, uint16_t offset, byte data) {
+			// Reuses the core function to write the register, but with static data_size input
 			_writeBytesToRegister(cmd, offset, &data, 1);
 		}
 		
@@ -1125,9 +1140,9 @@ namespace DW1000Ng {
 
 		void _resetReceiver() {
 			/* Set to 0 only bit 28 */
-			_writeToRegister(PMSC, PMSC_SOFTRESET_SUB, 0xE0, LEN_PMSC_SOFTRESET);
+			_writeValueToRegister(PMSC, PMSC_SOFTRESET_SUB, 0xE0, LEN_PMSC_SOFTRESET);
 			/* Set SOFTRESET to all ones */
-			_writeToRegister(PMSC, PMSC_SOFTRESET_SUB, 0xF0, LEN_PMSC_SOFTRESET);
+			_writeValueToRegister(PMSC, PMSC_SOFTRESET_SUB, 0xF0, LEN_PMSC_SOFTRESET);
 		}
 
 		/* Internal helpers to read configuration */
@@ -1206,9 +1221,9 @@ namespace DW1000Ng {
 
 		void _uploadConfigToAON() {
 			/* Write 1 in UPL_CFG_BIT */
-			_writeToRegister(AON, AON_CTRL_SUB, 0x04, LEN_AON_CTRL);
+			_writeValueToRegister(AON, AON_CTRL_SUB, 0x04, LEN_AON_CTRL);
 			/* Clear the register */
-			_writeToRegister(AON, AON_CTRL_SUB, 0x00, LEN_AON_CTRL);
+			_writeValueToRegister(AON, AON_CTRL_SUB, 0x00, LEN_AON_CTRL);
 		}
 	}
 
@@ -1268,7 +1283,7 @@ namespace DW1000Ng {
 		_readSystemEventMaskRegister();
 
 		/* Cleared AON:CFG1(0x2C:0x0A) for proper operation of deepSleep */
-		_writeToRegister(AON, AON_CFG1_SUB, 0x00, LEN_AON_CFG1);
+		_writeValueToRegister(AON, AON_CFG1_SUB, 0x00, LEN_AON_CFG1);
 		
 	}
 
@@ -1430,9 +1445,9 @@ namespace DW1000Ng {
 	/*Puts the device into sleep/deepSleep mode. This function also upload sleep config to AON. */
 	void deepSleep() {
 		/* Clear the register */
-		_writeToRegister(AON, AON_CTRL_SUB, 0x00, LEN_AON_CTRL);
+		_writeValueToRegister(AON, AON_CTRL_SUB, 0x00, LEN_AON_CTRL);
 		/* Write 1 in SAVE_BIT */
-		_writeToRegister(AON, AON_CTRL_SUB, 0x02, LEN_AON_CTRL);
+		_writeValueToRegister(AON, AON_CTRL_SUB, 0x02, LEN_AON_CTRL);
 	}
 
 	void spiWakeup(){
@@ -1471,16 +1486,16 @@ namespace DW1000Ng {
 		/* Disable sequencing and go to state "INIT" - (a) Sets SYSCLKS to 01 */
 		_disableSequencing();
 		/* Clear AON and WakeUp configuration */
-		_writeToRegister(AON, AON_WCFG_SUB, 0x00, LEN_AON_WCFG);
-		_writeToRegister(AON, AON_CFG0_SUB, 0x00, LEN_AON_CFG0);
+		_writeValueToRegister(AON, AON_WCFG_SUB, 0x00, LEN_AON_WCFG);
+		_writeValueToRegister(AON, AON_CFG0_SUB, 0x00, LEN_AON_CFG0);
 		// TODO change this with uploadToAON
-		_writeToRegister(AON, AON_CTRL_SUB, 0x00, LEN_AON_CTRL);
-		_writeToRegister(AON, AON_CTRL_SUB, 0x02, LEN_AON_CTRL);
+		_writeValueToRegister(AON, AON_CTRL_SUB, 0x00, LEN_AON_CTRL);
+		_writeValueToRegister(AON, AON_CTRL_SUB, 0x02, LEN_AON_CTRL);
 		/* (b) Clear SOFTRESET to all zero’s */
-		_writeToRegister(PMSC, PMSC_SOFTRESET_SUB, 0x00, LEN_PMSC_SOFTRESET);
+		_writeValueToRegister(PMSC, PMSC_SOFTRESET_SUB, 0x00, LEN_PMSC_SOFTRESET);
 		delay(1);
 		/* (c) Set SOFTRESET to all ones */
-		_writeToRegister(PMSC, PMSC_SOFTRESET_SUB, 0xF0, LEN_PMSC_SOFTRESET);
+		_writeValueToRegister(PMSC, PMSC_SOFTRESET_SUB, 0xF0, LEN_PMSC_SOFTRESET);
 	}
 
 	/* ###########################################################################
