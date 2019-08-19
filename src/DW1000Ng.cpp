@@ -156,9 +156,7 @@ namespace DW1000Ng {
 		*/
 		void _writeValueToRegister(byte cmd, uint16_t offset, uint32_t data, uint16_t data_size) { 
 			byte dataBytes[data_size];
-			// Converts input Value in Byte and writes it inside the Array
 			DW1000NgUtils::writeValueToBytes(dataBytes, data, data_size);
-			// Reuses the core function to write the register
 			_writeBytesToRegister(cmd, offset, dataBytes, data_size);
 		}
 
@@ -173,8 +171,7 @@ namespace DW1000Ng {
 		*		byte to be written.
 		*/
 		void _writeSingleByteToRegister(byte cmd, uint16_t offset, byte data) {
-			// Reuses the core function to write the register, but with static data_size input
-			_writeBytesToRegister(cmd, offset, &data, 1);
+			_writeBytesToRegister(cmd, offset, &data, 1); // 1 as data_size because writes a single byte
 		}
 
 		/*
