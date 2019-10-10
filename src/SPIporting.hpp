@@ -66,7 +66,7 @@ namespace SPIporting{
     @param [in] Header lenght
     @param [in] Header array built before 
     @param [in] Data lenght
-    @param [in] Data array 
+    @param [out] Data array 
     */
     void readFromSPI(uint8_t slaveSelectPIN, uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]);
 

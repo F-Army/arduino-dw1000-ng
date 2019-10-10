@@ -104,21 +104,21 @@ namespace DW1000Ng {
 		uint16_t		_antennaRxDelay = 0;
 
 		/* ############################# PRIVATE METHODS ################################### */
+		
 		/*
 		* Write bytes to the DW1000. Single bytes can be written to registers via sub-addressing.
-		* @param cmd
+		* @param[in] cmd
 		* 		The register address (see Chapter 7 in the DW1000 user manual).
-		* @param offset
+		* @param[in] offset
 		*		The offset to select register sub-parts for writing, or 0x00 to disable
 		* 		sub-adressing.
-		* @param data
+		* @param[in] data
 		*		The data array to be written.
-		* @param data_size
+		* @param[in] data_size
 		*		The number of bytes to be written (take care not to go out of bounds of
 		* 		the register).
 		*/
 		// TODO offset really bigger than byte?
-
 		void _writeBytesToRegister(byte cmd, uint16_t offset, byte data[], uint16_t data_size) {
 			byte header[3];
 			uint8_t headerLen = 1;
@@ -144,14 +144,14 @@ namespace DW1000Ng {
 
 		/*
 		* Write Value in Hex or Int format to the DW1000. Single Value can be written to registers via sub-addressing.
-		* @param cmd
+		* @param[in] cmd
 		* 		The register address (see Chapter 7 in the DW1000 user manual).
-		* @param offset
+		* @param[in] offset
 		*		The offset to select register sub-parts for writing, or 0x00 to disable
 		* 		sub-adressing.
-		* @param data
+		* @param[in] data
 		*		The data Value to be written.
-		* @param data_size
+		* @param[in] data_size
 		*		The number of bytes to be written
 		*/
 		void _writeValueToRegister(byte cmd, uint16_t offset, uint32_t data, uint16_t data_size) { 
@@ -162,30 +162,29 @@ namespace DW1000Ng {
 
 		/*
 		* Write ONLY ONE bytes to the DW1000.
-		* @param cmd
+		* @param[in] cmd
 		* 		The register address (see Chapter 7 in the DW1000 user manual).
-		* @param offset
+		* @param[in] offset
 		*		The offset to select register sub-parts for writing, or 0x00 to disable
 		* 		sub-adressing.
-		* @param data
-		*		byte to be written.
+		* @param[in] data
+		*		The Byte to be written.
 		*/
 		void _writeSingleByteToRegister(byte cmd, uint16_t offset, byte data) {
 			_writeBytesToRegister(cmd, offset, &data, 1); // 1 as data_size because writes a single byte
 		}
 		
 		/*
-		* Read bytes from the DW1000Ng. Number of bytes depend on register length.
-		* @param cmd
+		* Read bytes from the DW1000. Number of bytes depend on register length.
+		* @param[in] cmd
 		* 		The register address (see Chapter 7 in the DW1000Ng user manual).
-		* @param data
-		*		The data array to be read into.
-		* @param n
+		* @param[in] offset
 		*		The number of bytes expected to be received.
-		* @param data_size
-		*		The number of bytes to be read
+		* @param[out] data
+		*		The data array to be read into.
+		* @param[in] data_size 
+		*		The number of bytes to be read. example-> 2 Bytes = 2 as input
 		*/
-		// TODO incomplete doc
 		void _readBytesFromRegister(byte cmd, uint16_t offset, byte data[], uint16_t data_size) {
 			byte header[3];
 			uint8_t headerLen = 1;
@@ -210,17 +209,15 @@ namespace DW1000Ng {
 
 		/*
 		* Write ONLY ONE bit, in a specific register, to the DW1000.
-		* @param bitRegister
+		* @param[in] bitRegister
 		* 		The register address of the selected bit (see Chapter 7 in the DW1000 user manual).
-		* @param RegisterOffset
-		*		The offset to select register sub-parts for writing, or 0x00 to disable
-		* 		sub-adressing.
-		* @param bitRegister_LEN
+		* @param[in] RegisterOffset
+		*		The offset to select register sub-parts for writing, or 0x00 to disable sub-adressing.
+		* @param[in] bitRegister_LEN
 		* 		The lenght of the register to be written
-		* @param selectedBit
+		* @param[in] selectedBit
 		* 		The position(in Int or Hex) of the bit in the register
-		*		The byte to be written.
-		* @param value
+		* @param[in] value
 		*		The value of the bit to set. It, obviously, can be true/false or 1/0
 		*/
 		void _writeBitToRegister(byte bitRegister, uint16_t RegisterOffset, uint16_t bitRegister_LEN, uint16_t selectedBit, boolean value) {
