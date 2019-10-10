@@ -173,6 +173,40 @@ namespace DW1000Ng {
 		void _writeSingleByteToRegister(byte cmd, uint16_t offset, byte data) {
 			_writeBytesToRegister(cmd, offset, &data, 1); // 1 as data_size because writes a single byte
 		}
+		
+		/*
+		* Read bytes from the DW1000Ng. Number of bytes depend on register length.
+		* @param cmd
+		* 		The register address (see Chapter 7 in the DW1000Ng user manual).
+		* @param data
+		*		The data array to be read into.
+		* @param n
+		*		The number of bytes expected to be received.
+		* @param data_size
+		*		The number of bytes to be read
+		*/
+		// TODO incomplete doc
+		void _readBytesFromRegister(byte cmd, uint16_t offset, byte data[], uint16_t data_size) {
+			byte header[3];
+			uint8_t headerLen = 1;
+			
+			// build SPI header
+			if(offset == NO_SUB) {
+				header[0] = READ | cmd;
+			} else {
+				header[0] = READ_SUB | cmd;
+				if(offset < 128) {
+					header[1] = (byte)offset;
+					headerLen++;
+				} else {
+					header[1] = RW_SUB_EXT | (byte)offset;
+					header[2] = (byte)(offset >> 7);
+					headerLen += 2;
+				}
+			}
+
+			SPIporting::readFromSPI(_ss, headerLen, header, data_size, data);
+		}
 
 		/*
 		* Write ONLY ONE bit, in a specific register, to the DW1000.
@@ -207,40 +241,6 @@ namespace DW1000Ng {
 				RegisterOffset = 0x00;
 				
 			_writeBytesToRegister(bitRegister, RegisterOffset+idx, &targetByte, 1);
-		}
-		
-		/*
-		* Read bytes from the DW1000Ng. Number of bytes depend on register length.
-		* @param cmd
-		* 		The register address (see Chapter 7 in the DW1000Ng user manual).
-		* @param data
-		*		The data array to be read into.
-		* @param n
-		*		The number of bytes expected to be received.
-		* @param data_size
-		*		The number of bytes to be read
-		*/
-		// TODO incomplete doc
-		void _readBytesFromRegister(byte cmd, uint16_t offset, byte data[], uint16_t data_size) {
-			byte header[3];
-			uint8_t headerLen = 1;
-			
-			// build SPI header
-			if(offset == NO_SUB) {
-				header[0] = READ | cmd;
-			} else {
-				header[0] = READ_SUB | cmd;
-				if(offset < 128) {
-					header[1] = (byte)offset;
-					headerLen++;
-				} else {
-					header[1] = RW_SUB_EXT | (byte)offset;
-					header[2] = (byte)(offset >> 7);
-					headerLen += 2;
-				}
-			}
-
-			SPIporting::readFromSPI(_ss, headerLen, header, data_size, data);
 		}
 
 		// always 4 bytes
