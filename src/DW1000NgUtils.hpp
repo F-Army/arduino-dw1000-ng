@@ -72,7 +72,7 @@ namespace DW1000NgUtils {
     void setBit(byte data[], uint16_t n, uint16_t bit, boolean val);
 
     /**
-    Writes the target value inside a byte array
+    Writes the target value inside a given byte array.
 
     @param [in] data the byte array
     @param [in] val the value to insert
