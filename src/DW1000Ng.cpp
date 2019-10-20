@@ -50,6 +50,7 @@
 #include "DW1000NgConstants.hpp"
 #include "DW1000NgRegisters.hpp"
 #include "SPIporting.hpp"
+#include "DW1000NgErrHandler.hpp"
 
 namespace DW1000Ng {
 	
@@ -1255,6 +1256,8 @@ namespace DW1000Ng {
 		}
 
 		SPIporting::SPIinit();
+		DW1000NgErrHandler Err(0);
+		Err.catchErr(DW1000NgStatus::FRAME_LENGTH_EXCEEDED_ERROR, "ciao")
 		// pin and basic member setup
 		// attach interrupt
 		// TODO throw error if pin is not a interrupt pin
