@@ -27,6 +27,9 @@ const uint8_t PIN_SS = SS; // spi select pin
 const uint8_t PIN_RST = 9;
 #endif
 
+// Extended Unique Identifier register. 64-bit device identifier. Register file: 0x01
+char EUI[] = "AA:BB:CC:DD:EE:FF:00:00";
+
 volatile uint32_t blink_rate = 200;
 
 device_configuration_t DEFAULT_CONFIG = {
@@ -80,7 +83,7 @@ void setup() {
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
     DW1000Ng::enableFrameFiltering(TAG_FRAME_FILTER_CONFIG);
     
-    DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
+    DW1000Ng::setEUI(EUI);
 
     DW1000Ng::setNetworkId(RTLS_APP_ID);
 
@@ -109,7 +112,7 @@ void loop() {
     DW1000Ng::deepSleep();
     delay(blink_rate);
     DW1000Ng::spiWakeup();
-    DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:00");
+    DW1000Ng::setEUI(EUI);
 
     RangeInfrastructureResult res = DW1000NgRTLS::tagTwrLocalize(1500);
     if(res.success)

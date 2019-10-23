@@ -30,6 +30,8 @@ const uint8_t PIN_RST = 9;
 const uint8_t PIN_SS = SS; // spi select pin
 #endif
 
+// Extended Unique Identifier register. 64-bit device identifier. Register file: 0x01
+char EUI[] = "AA:BB:CC:DD:EE:FF:00:01";
 
 Position position_self = {0,0};
 Position position_B = {3,0};
@@ -88,7 +90,7 @@ void setup() {
     DW1000Ng::applyConfiguration(DEFAULT_CONFIG);
     DW1000Ng::enableFrameFiltering(ANCHOR_FRAME_FILTER_CONFIG);
     
-    DW1000Ng::setEUI("AA:BB:CC:DD:EE:FF:00:01");
+    DW1000Ng::setEUI(EUI);
 
     DW1000Ng::setPreambleDetectionTimeout(64);
     DW1000Ng::setSfdDetectionTimeout(273);
