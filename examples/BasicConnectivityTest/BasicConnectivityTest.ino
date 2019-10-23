@@ -47,7 +47,6 @@
  *  - make real check of connection (e.g. change some values on DW1000Ng and verify)
  */
 
-#include <SPI.h>
 #include <DW1000Ng.hpp>
 
 // connection pins
