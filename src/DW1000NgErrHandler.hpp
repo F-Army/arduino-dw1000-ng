@@ -35,8 +35,8 @@ enum class DW1000NgStatus {
 class DW1000NgErrHandler 
 {
 private:
-    int _lastState;
-    int _state;
+    DW1000NgStatus _lastState;
+    DW1000NgStatus _state;
 
 public:
     /**
@@ -55,4 +55,4 @@ public:
     DW1000NgStatus getState();
 };
 
-extern DW1000NgErrHandler ErrHandler
+extern DW1000NgErrHandler ErrHandler;

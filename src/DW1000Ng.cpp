@@ -1256,8 +1256,10 @@ namespace DW1000Ng {
 		}
 
 		SPIporting::SPIinit();
+		
 		DW1000NgErrHandler Err(0);
-		Err.catchErr(DW1000NgStatus::FRAME_LENGTH_EXCEEDED_ERROR, "ciao")
+		char* x = (char*) malloc(strlen("OK")+1); // +1 for the terminator
+		Err.catchErr(DW1000NgStatus::NO_ERROR, strcpy(x, "OK"));
 		// pin and basic member setup
 		// attach interrupt
 		// TODO throw error if pin is not a interrupt pin
@@ -2132,4 +2134,4 @@ namespace DW1000Ng {
         free(readBuf);
     }
 	#endif
-}
+};

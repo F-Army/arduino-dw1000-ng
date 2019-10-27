@@ -23,6 +23,7 @@
 */
 
 #include <Arduino.h>
+#include <string.h>
 #include "DW1000NgErrHandler.hpp"
 #include "ArduinoLog.h"
 
@@ -39,25 +40,25 @@ DW1000NgErrHandler::~DW1000NgErrHandler()
 
 void DW1000NgErrHandler::catchErr(DW1000NgStatus status, char msg[])
 {
-    if ( status == 0)
-    {   
-        Log.notice (F(" Log as Notice  with hexadecimal values: %s " CR ), msg );
+    if ( status == DW1000NgStatus::CONFIGURATION_ERROR)
+    {
+        Log.notice (F(" Log as Notice %d  with hexadecimal values: %s " CR ), status, msg );
     }
     else
     {
-        Log.fatal (F(" Log as Fatal   with string value from Flash: %s " CR ) , "value" );
+        Log.fatal (F(" Log as Fatal %d  with string value from Flash: %s " CR ) , status, msg );
     }
 
     _lastState = status;
     _state = status;
 }
 
-DW1000NgStatus getLastState()
+DW1000NgStatus DW1000NgErrHandler::getLastState()
 {
-    
+    return _lastState;
 }
 
-DW1000NgStatus getState()
+DW1000NgStatus DW1000NgErrHandler::getState()
 {
-
+    return _state;
 }
