@@ -32,27 +32,16 @@ enum class DW1000NgStatus {
     FRAME_LENGTH_EXCEEDED_ERROR
 };
 
-class DW1000NgErrHandler 
-{
-private:
-    DW1000NgStatus _lastState;
-    DW1000NgStatus _state;
+namespace DW1000NgErrHandler {
 
-public:
-    /**
-	 * default Constructor
-	 */
-    DW1000NgErrHandler(int level);
-    /**
-	 * default Destructor
-	 */
-    ~DW1000NgErrHandler();
+    DW1000NgStatus _errState;
+    Print* _logOutput;
     
-    void catchErr(DW1000NgStatus status, char msg[]);
-
-    DW1000NgStatus getLastState();
+    static void logErr(DW1000NgStatus status, char msg[], Print* logOutput);
 
     DW1000NgStatus getState();
-};
 
-extern DW1000NgErrHandler ErrHandler;
+    void setState(DW1000NgStatus status);
+
+    void setOutput(Print *logOutput);
+};

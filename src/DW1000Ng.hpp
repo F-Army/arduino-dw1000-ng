@@ -69,7 +69,7 @@ namespace DW1000Ng {
 	@param[in] ss  The SPI Selection pin used to identify the specific connection
 	@param[in] rst The reset line/pin for hard resets of ICs that connect to the Arduino. Value 0xff means soft reset.
 	*/
-	void initializeNoInterrupt(uint8_t ss, uint8_t rst = 0xff);
+	void initializeNoInterrupt(uint8_t ss, uint8_t rst = 0xff, Print* logOutput = NULL);
 	
 	/** 
 	Enable debounce Clock, used to clock the LED blinking

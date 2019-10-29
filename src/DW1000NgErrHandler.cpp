@@ -27,38 +27,40 @@
 #include "DW1000NgErrHandler.hpp"
 #include "ArduinoLog.h"
 
-DW1000NgErrHandler::DW1000NgErrHandler(int level)
-{
-    Serial.begin(115200);
-    // Initialize with log level and log output. 
-    Log.begin(level, &Serial, true);
-}
+namespace DW1000NgErrHandler {
 
-DW1000NgErrHandler::~DW1000NgErrHandler()
-{
-}
-
-void DW1000NgErrHandler::catchErr(DW1000NgStatus status, char msg[])
-{
-    if ( status == DW1000NgStatus::CONFIGURATION_ERROR)
-    {
-        Log.notice (F(" Log as Notice %d  with hexadecimal values: %s " CR ), status, msg );
-    }
-    else
-    {
-        Log.fatal (F(" Log as Fatal %d  with string value from Flash: %s " CR ) , status, msg );
+    DW1000NgStatus getState() {
+        return _errState;
     }
 
-    _lastState = status;
-    _state = status;
+    void setState(DW1000NgStatus status) {
+        _errState = status;
+    }
+
+    void setOutput(Print* logOutput) {
+        _logOutput = logOutput;
+    }
+
+    void logErr(DW1000NgStatus status, char msg[], Print* logOutput) {
+    
+    setOutput(logOutput);
+    setState(status);
+    
+    #if defined(ARDUINO)
+        // Initialize with log level and log output.
+        Log.begin(LOG_LEVEL_VERBOSE, &logOutput, true);
+
+        if ( status == DW1000NgStatus::CONFIGURATION_ERROR) {
+            Log.notice (F(" Log as Notice %d  with hexadecimal values: %s " CR ), getState(), msg );
+        }
+        else
+        {
+            Log.fatal (F(" Log as Fatal %d  with string value from Flash: %s " CR ) , getState(), msg );
+        }
+    #else
+        // TO-DO altre classi per 
+    #endif
+
 }
 
-DW1000NgStatus DW1000NgErrHandler::getLastState()
-{
-    return _lastState;
-}
-
-DW1000NgStatus DW1000NgErrHandler::getState()
-{
-    return _state;
-}
+};
