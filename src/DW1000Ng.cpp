@@ -104,8 +104,6 @@ namespace DW1000Ng {
 		uint16_t		_antennaTxDelay = 0;
 		uint16_t		_antennaRxDelay = 0;
 
-		Print*			_logOutput = NULL;
-
 		/* ############################# PRIVATE METHODS ################################### */
 		
 		/*
@@ -1245,8 +1243,12 @@ namespace DW1000Ng {
 
 	/* ####################### PUBLIC ###################### */
 
-	void initialize(uint8_t ss, uint8_t irq, uint8_t rst) {
-		// generous initial init/wake-up-idle delay
+	void initialize(uint8_t ss, uint8_t irq, uint8_t rst, Print* logOutput) {
+		DW1000NgErrHandler::setOutput(logOutput);
+		#if DW1000NG_LOGGING
+			DW1000NgErrHandler::logErr(DW1000NgMsgType::NOTICE, "Starting Inizialize");
+		#endif
+		// See 2.4 Power On Reset (POR). generous initial init/wake-up-idle delay
 		delay(5);
 		_ss = ss;
 		_irq = irq;
@@ -1258,11 +1260,7 @@ namespace DW1000Ng {
 		}
 
 		SPIporting::SPIinit();
-		
-		#if DW1000NG_DEBUG
-			char* x = (char*) malloc(strlen("OK")+1); // +1 for the terminator
-			DW1000NgErrHandler.logErr(DW1000NgStatus::NO_ERROR, strcpy(x, "OK"), _logOutput);
-		#endif
+	
 		// pin and basic member setup
 		// attach interrupt
 		// TODO throw error if pin is not a interrupt pin
@@ -1309,8 +1307,7 @@ namespace DW1000Ng {
 	}
 
 	void initializeNoInterrupt(uint8_t ss, uint8_t rst, Print* logOutput) {
-		initialize(ss, 0xff, rst);
-		_logOutput = logOutput;
+		initialize(ss, 0xff, rst, logOutput);
 	}
 
 	/* callback handler management. */

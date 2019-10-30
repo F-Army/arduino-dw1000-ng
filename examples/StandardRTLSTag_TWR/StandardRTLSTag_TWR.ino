@@ -71,9 +71,9 @@ void setup() {
     Serial.println(F("### DW1000Ng-arduino-ranging-tag ###"));
     // initialize the driver
     #if defined(ESP8266)
-    DW1000Ng::initializeNoInterrupt(PIN_SS);
+    DW1000Ng::initializeNoInterrupt(PIN_SS, 0xff, &Serial);
     #else
-    DW1000Ng::initializeNoInterrupt(PIN_SS, PIN_RST);
+    DW1000Ng::initializeNoInterrupt(PIN_SS, PIN_RST, &Serial);
     #endif
     Serial.println("DW1000Ng initialized ...");
     // general configuration

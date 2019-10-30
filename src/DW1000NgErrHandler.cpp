@@ -29,36 +29,51 @@
 
 namespace DW1000NgErrHandler {
 
-    DW1000NgStatus getState() {
-        return _errState;
+    DW1000NgMsgType _msgType;
+    Print* _logOutput;
+
+    DW1000NgMsgType getMsgType() {
+        return _msgType;
     }
 
-    void setState(DW1000NgStatus status) {
-        _errState = status;
+    void setMsgType(DW1000NgMsgType msgType) {
+        _msgType = msgType;
     }
 
     void setOutput(Print* logOutput) {
         _logOutput = logOutput;
     }
 
-    void logErr(DW1000NgStatus status, char msg[], Print* logOutput) {
+    Print* getOutput() {
+        return _logOutput;
+    }
+
+    void logErr(DW1000NgMsgType msgType, const char msg[]) {
     
-    setOutput(logOutput);
-    setState(status);
+    setMsgType(msgType);
     
     #if defined(ARDUINO)
         // Initialize with log level and log output.
-        Log.begin(LOG_LEVEL_VERBOSE, &logOutput, true);
+        Log.begin(LOG_LEVEL_VERBOSE, getOutput(), true);
 
-        if ( status == DW1000NgStatus::CONFIGURATION_ERROR) {
-            Log.notice (F(" Log as Notice %d  with hexadecimal values: %s " CR ), getState(), msg );
-        }
-        else
-        {
-            Log.fatal (F(" Log as Fatal %d  with string value from Flash: %s " CR ) , getState(), msg );
+        switch (msgType) {
+            case DW1000NgMsgType::NOTICE:
+                Log.notice (F(" Message Type: %d - %s " CR"\r" ), getMsgType(), msg );
+                break;
+            case DW1000NgMsgType::WARNING:
+                Log.warning (F(" Message Type: %d - %s " CR ), getMsgType(), msg );
+                break;
+            case DW1000NgMsgType::ERROR:
+                Log.error (F(" Message Type: %d - %s " CR ), getMsgType(), msg );
+                break;
+            case DW1000NgMsgType::FATAL:
+                Log.fatal (F(" Message Type: %d - %s " CR ), getMsgType(), msg );
+                break;
+            default:
+                break;
         }
     #else
-        // TO-DO altre classi per 
+            // NON ARDUINO IMPLEMENTATION
     #endif
 
 }

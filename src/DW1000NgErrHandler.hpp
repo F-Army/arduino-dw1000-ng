@@ -24,24 +24,23 @@
 
 #pragma once
 
-enum class DW1000NgStatus {
-    NO_ERROR,
-    INPUT_ERROR,
-    INTERNAL_ERROR,
-    CONFIGURATION_ERROR,
-    FRAME_LENGTH_EXCEEDED_ERROR
+enum class DW1000NgMsgType {
+    NOTICE,
+    WARNING,
+    ERROR,
+    FATAL
 };
 
 namespace DW1000NgErrHandler {
-
-    DW1000NgStatus _errState;
-    Print* _logOutput;
     
-    static void logErr(DW1000NgStatus status, char msg[], Print* logOutput);
-
-    DW1000NgStatus getState();
-
-    void setState(DW1000NgStatus status);
-
     void setOutput(Print *logOutput);
+
+    Print* getOutput();
+    
+    void logErr(DW1000NgMsgType msgType, const char msg[]);
+    
+    void setMsgType(DW1000NgMsgType msgType);
+
+    DW1000NgMsgType getMsgType();
+
 };

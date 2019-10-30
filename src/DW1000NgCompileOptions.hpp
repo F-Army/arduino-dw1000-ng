@@ -55,7 +55,11 @@
  * 
 */
 #define DW1000NG_DEBUG false
-
+/**
+ * Adds logging functionalities
+ * 
+*/
+#define DW1000NG_LOGGING true
 /**
  * Optimizes code for the DWM1000 Module
  */
