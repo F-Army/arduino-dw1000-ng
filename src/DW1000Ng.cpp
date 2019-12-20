@@ -63,6 +63,10 @@ namespace DW1000Ng {
 		uint8_t _irq = 0xff;
 		uint8_t _rst = 0xff;
 
+#if defined(ESP32) || defined(ESP8266)
+		volatile bool intFlag = false;
+#endif
+
 		/* IRQ callbacks */
 		void (* _handleSent)(void)                      = nullptr;
 		void (* _handleError)(void)                     = nullptr;
@@ -1329,6 +1333,51 @@ namespace DW1000Ng {
 		_handleReceiveTimestampAvailable = handleReceiveTimestampAvailable;
 	}
 
+#if defined(ESP32) || defined(ESP8266)
+	void workqueue() {
+		if (!intFlag)
+			return;
+
+		intFlag = false;		
+
+		// read current status and handle via callbacks
+		_readSystemEventStatusRegister();
+		if(_isClockProblem() /* TODO and others */ && _handleError != 0) {
+			(*_handleError)();
+		}
+		if(_isTransmitDone()) {
+			_clearTransmitStatus();
+			if(_handleSent != nullptr)
+				(*_handleSent)();
+		}
+		if(_isReceiveTimestampAvailable()) {
+			_clearReceiveTimestampAvailableStatus();
+			if(_handleReceiveTimestampAvailable != nullptr)
+				(*_handleReceiveTimestampAvailable)();
+		}
+		if(_isReceiveFailed()) {
+			_clearReceiveFailedStatus();
+			forceTRxOff();
+			_resetReceiver();
+			if(_handleReceiveFailed != nullptr)
+				(*_handleReceiveFailed)();
+		} else if(_isReceiveTimeout()) {
+			_clearReceiveTimeoutStatus();
+			forceTRxOff();
+			_resetReceiver();
+			if(_handleReceiveTimeout != nullptr)
+				(*_handleReceiveTimeout)();
+		} else if(_isReceiveDone()) {
+			_clearReceiveStatus();
+			if(_handleReceived != nullptr)
+				(*_handleReceived)();
+		}
+	}
+
+	void interruptServiceRoutine() {
+		intFlag = true;
+	}
+#else //Arduino
 	void interruptServiceRoutine() {
 		// read current status and handle via callbacks
 		_readSystemEventStatusRegister();
@@ -1363,6 +1412,7 @@ namespace DW1000Ng {
 				(*_handleReceived)();
 		}
 	}
+#endif
 
 	boolean isTransmitDone(){
 		_readSystemEventStatusRegister();
