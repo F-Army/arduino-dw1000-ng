@@ -63,12 +63,12 @@ NODEMCU 1.0 (esp8266)
   <li>D8 --> CS</li>
 </ul>
 
-FemtoBeacon ESP32 LPS (ESP32-D2WD chip, HSPI peripheral)
+FemtoBeacon ESP32 LPS (ESP32-PICO-D4 chip, HSPI peripheral)
 <ul>
-  <li>18 --> CLK</li>
-  <li>19 --> MISO</li>
-  <li>23 --> MOSI</li>
-  <li>18 --> CS (DECAWAVE)</li>
+  <li>GPIO 14 --> CLK</li>
+  <li>GPIO 12 --> MISO</li>
+  <li>GPIO 13 --> MOSI</li>
+  <li>GPIO 18 --> CS (DECAWAVE)</li>
 </ul>
 
 Installation
