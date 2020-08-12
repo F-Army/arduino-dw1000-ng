@@ -390,6 +390,10 @@ namespace DW1000Ng {
 	By default this is attached to the interrupt pin callback
 	*/
 	void interruptServiceRoutine();
+#ifdef ESP32
+	void handlerDispatcher(void *);
+	unsigned long long getNumInterrupts(void);
+#endif
 	
 	boolean isTransmitDone();
 
