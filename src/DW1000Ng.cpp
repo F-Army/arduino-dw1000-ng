@@ -1328,6 +1328,19 @@ namespace DW1000Ng {
 		initialize(ss, 0xff, rst);
 	}
 
+	void shutDown(void) {
+		if (_irq != 0xff) {
+			detachInterrupt(digitalPinToInterrupt(_irq));
+		}
+		forceTRxOff();
+#ifdef ESP32
+		if (_handlerDispatcherTask != NULL) {
+			vTaskDelete(_handlerDispatcherTask);
+			_handlerDispatcherTask = NULL;
+		}
+#endif
+	}
+
 	/* callback handler management. */
 	void attachErrorHandler(void (* handleError)(void)) {
 		_handleError = handleError;
