@@ -44,32 +44,10 @@ Devices
 ------------
 ![Arduino](https://img.shields.io/badge/Arduino-done-brightgreen.svg?&style=for-the-badge)
 ![ESP8266](https://img.shields.io/badge/ESP8266-done-brightgreen.svg?&style=for-the-badge)
-![ESP32](https://img.shields.io/badge/ESP32-Experimental-yellow.svg?&style=for-the-badge)
+![ESP32](https://img.shields.io/badge/ESP32-test-yellow.svg?&style=for-the-badge)
+![STM32-BluePill](https://img.shields.io/badge/STM32_BluePill-Experimental-yellow.svg?&style=for-the-badge)
 
-Arduino Pro Mini
-<ul>
-  <li>2 --> IRQ (if used)</li>
-  <li>10 --> CS</li>
-  <li>11 --> MOSI</li>
-  <li>12 --> MISO</li>
-  <li>13 --> CLK</li>
-</ul>
-
-NODEMCU 1.0 (esp8266)
-<ul>
-  <li>D5 --> CLK</li>
-  <li>D6 --> MISO</li>
-  <li>D7 --> MOSI</li>
-  <li>D8 --> CS</li>
-</ul>
-
-FemtoBeacon ESP32 LPS (ESP32-PICO-D4 chip, HSPI peripheral)
-<ul>
-  <li>GPIO 14 --> CLK</li>
-  <li>GPIO 12 --> MISO</li>
-  <li>GPIO 13 --> MOSI</li>
-  <li>GPIO 18 --> CS (DECAWAVE)</li>
-</ul>
+Specific tested devices, whit related pinout, are inside the [Wiki](https://github.com/F-Army/arduino-dw1000-ng/wiki/Tested-hardware-boards).
 
 Installation
 ------------
@@ -83,6 +61,8 @@ Installation
 Usage
 -----
 Check examples folder for basic usage.
+
+The [Decawave documentation](https://github.com/F-Army/arduino-dw1000-ng/wiki/Decawave's-documentation) helps a lot in understanding this project, especially if you want to go deeper.
 
 Authors
 ------------
