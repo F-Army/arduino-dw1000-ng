@@ -47,7 +47,6 @@
  *  
  */
 
-#include <SPI.h>
 #include <DW1000Ng.hpp>
 
 #if defined(ESP8266)

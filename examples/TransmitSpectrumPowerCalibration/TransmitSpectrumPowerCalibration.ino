@@ -6,7 +6,6 @@
    CONDITIONS OF ANY KIND, either express or implied.
 */
 
-#include <SPI.h>
 #include <DW1000Ng.hpp>
 
 // connection pins

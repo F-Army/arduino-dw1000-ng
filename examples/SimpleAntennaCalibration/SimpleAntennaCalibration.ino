@@ -52,7 +52,6 @@
  *  - move strings to flash (less RAM consumption)
  */
 
-#include <SPI.h>
 #include <DW1000Ng.hpp>
 #include <DW1000NgUtils.hpp>
 #include <DW1000NgRanging.hpp>
