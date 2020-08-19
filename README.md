@@ -45,7 +45,7 @@ Devices
 ![Arduino](https://img.shields.io/badge/Arduino-done-brightgreen.svg?&style=for-the-badge)
 ![ESP8266](https://img.shields.io/badge/ESP8266-done-brightgreen.svg?&style=for-the-badge)
 ![ESP32](https://img.shields.io/badge/ESP32-test-yellow.svg?&style=for-the-badge)
-![STM32-BluPill](https://img.shields.io/badge/STM32_BluePill-Experimental-yellow.svg?&style=for-the-badge)
+![STM32-BluePill](https://img.shields.io/badge/STM32_BluePill-Experimental-yellow.svg?&style=for-the-badge)
 
 Specific tested devices, whit related pinout, are inside the [Wiki](https://github.com/F-Army/arduino-dw1000-ng/wiki/Tested-hardware-boards).
 
