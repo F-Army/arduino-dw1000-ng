@@ -48,6 +48,10 @@ namespace DW1000NgRanging {
 
         int64_t dividend = round1 * round2 - reply1 * reply2;
         uint64_t divisor = round1 + round2 + reply1 + reply2;
+
+        /* Work around a bug in the GCC shipped with the ESP32 IDF for Arduino
+           that fails to preserve sign on int64_t division and would therefore
+           hide measurement inconsistencies elsewhere in the design.  */
         bool isNegative = false;
         if (dividend < 0) {
             isNegative = true;
@@ -55,6 +59,8 @@ namespace DW1000NgRanging {
         }
 
         int64_t tof_uwb = dividend / divisor;
+
+        /* Reapply preserved sign */
         if (isNegative) tof_uwb = -tof_uwb;
 
         double distance = tof_uwb * DISTANCE_OF_RADIO;
