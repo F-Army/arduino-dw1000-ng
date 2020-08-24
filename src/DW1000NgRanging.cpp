@@ -46,16 +46,16 @@ namespace DW1000NgRanging {
         uint64_t round2 = timeRangeReceived - timePollAckSent;
         uint64_t reply2 = timeRangeSent - timePollAckReceived;
 
-        int64_t numerador = round1 * round2 - reply1 * reply2;
-        uint64_t denominador = round1 + round2 + reply1 + reply2;
-        bool n = false;
-        if (numerador < 0) {
-            n = true;
-            numerador = -numerador;
+        int64_t dividend = round1 * round2 - reply1 * reply2;
+        uint64_t divisor = round1 + round2 + reply1 + reply2;
+        bool isNegative = false;
+        if (dividend < 0) {
+            isNegative = true;
+            dividend = -dividend;
         }
 
-        int64_t tof_uwb = numerador / denominador;
-        if (n) tof_uwb = -tof_uwb;
+        int64_t tof_uwb = dividend / divisor;
+        if (isNegative) tof_uwb = -tof_uwb;
 
         double distance = tof_uwb * DISTANCE_OF_RADIO;
 
