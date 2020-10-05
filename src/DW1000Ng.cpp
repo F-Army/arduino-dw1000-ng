@@ -45,6 +45,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <EEPROM.h>
 #include "DW1000Ng.hpp"
 #include "DW1000NgUtils.hpp"
 #include "DW1000NgConstants.hpp"
@@ -1707,6 +1708,28 @@ namespace DW1000Ng {
 		_antennaTxDelay = value;
 		_antennaRxDelay = value;
 		_writeAntennaDelayRegisters();
+	}
+	void setAndSaveAntennaDelay(uint16_t delay, uint8_t eeAddress) {
+		EEPROM.begin(64);
+		EEPROM.put(eeAddress, delay);
+		EEPROM.end();
+		setAntennaDelay(delay);
+	}
+
+	uint16_t getSavedAntennaDelay(uint8_t eeAddress) {
+		EEPROM.begin(64);
+		uint16_t delay;
+		EEPROM.get(eeAddress, delay);
+		EEPROM.end();
+		return delay;
+	}
+
+	uint16_t setAntennaDelayFromEEPROM(uint8_t eeAddress) {
+		EEPROM.begin(64);
+		uint16_t delay;
+		EEPROM.get(eeAddress, delay);
+		setAntennaDelay(delay);
+		EEPROM.end();
 	}
 
 	void setTxAntennaDelay(uint16_t value) {
