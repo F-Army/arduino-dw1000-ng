@@ -1725,11 +1725,8 @@ namespace DW1000Ng {
 	}
 
 	uint16_t setAntennaDelayFromEEPROM(uint8_t eeAddress) {
-		EEPROM.begin(64);
-		uint16_t delay;
-		EEPROM.get(eeAddress, delay);
+		uint16_t delay = getSavedAntennaDelay(eeAddress);
 		setAntennaDelay(delay);
-		EEPROM.end();
 	}
 
 	void setTxAntennaDelay(uint16_t value) {
