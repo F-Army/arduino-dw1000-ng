@@ -314,7 +314,31 @@ namespace DW1000Ng {
 	@param [in] value the delay in UWB time
 	*/
 	void setAntennaDelay(uint16_t value);
-	
+
+	/**
+	Sets both tx and rx antenna delay value, and saves it in the EEPROM for future use
+
+	@param [in] value the delay in UWB time
+	@param [in] the EEPROM offset at which the delay is saved
+	*/
+	void setAndSaveAntennaDelay(uint16_t delay, uint8_t eeAddress = 0);
+
+	/**
+	Gets the saved antenna delay value from EEPROM
+
+	returns the value of the delay saved in the EEPROM in UWB time
+
+	@param [in] the EEPROM offset at which the delay is saved
+	*/
+	uint16_t getSavedAntennaDelay(uint8_t eeAddress = 0);
+
+	/**
+	Sets the saved antenna delay value from EEPROM as the configured delay
+
+	@param [in] the EEPROM offset at which the delay is saved
+	*/
+	uint16_t setAntennaDelayFromEEPROM(uint8_t eeAddress = 0);
+
 	/**
 	Sets the tx antenna delay value
 
