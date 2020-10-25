@@ -1711,16 +1711,15 @@ namespace DW1000Ng {
 		_antennaRxDelay = value;
 		_writeAntennaDelayRegisters();
 	}
+
 	#if defined(__AVR__)
 		void setAndSaveAntennaDelay(uint16_t delay, uint8_t eeAddress) {
-			EEPROM.begin(64);
 			EEPROM.put(eeAddress, delay);
 			EEPROM.end();
 			setAntennaDelay(delay);
 		}
 
 		uint16_t getSavedAntennaDelay(uint8_t eeAddress) {
-			EEPROM.begin(64);
 			uint16_t delay;
 			EEPROM.get(eeAddress, delay);
 			EEPROM.end();
@@ -1732,6 +1731,7 @@ namespace DW1000Ng {
 			setAntennaDelay(delay);
 		}
 	#endif
+
 	void setTxAntennaDelay(uint16_t value) {
 		_antennaTxDelay = value;
 		_writeAntennaDelayRegisters();	
