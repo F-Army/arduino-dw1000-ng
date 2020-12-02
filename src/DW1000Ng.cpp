@@ -1245,7 +1245,7 @@ namespace DW1000Ng {
 
 	/* ####################### PUBLIC ###################### */
 
-	void initialize(uint8_t ss, uint8_t irq, uint8_t rst) {
+	void initialize(uint8_t ss, uint8_t irq, uint8_t rst, SPIClass&spi) {
 		// generous initial init/wake-up-idle delay
 		delay(5);
 		_ss = ss;
@@ -1257,7 +1257,7 @@ namespace DW1000Ng {
 			pinMode(_rst, INPUT);
 		}
 
-		SPIporting::SPIinit();
+		SPIporting::SPIinit(spi);
 		// pin and basic member setup
 		// attach interrupt
 		// TODO throw error if pin is not a interrupt pin

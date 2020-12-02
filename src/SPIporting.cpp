@@ -31,6 +31,9 @@
 #include "DW1000NgConstants.hpp"
 #include "DW1000NgRegisters.hpp"
 
+    
+static SPIClass *_spi;
+
 namespace SPIporting {
 	
 	namespace {
@@ -49,28 +52,29 @@ namespace SPIporting {
 		const SPISettings* _currentSPI = &_fastSPI;
 
 		void _openSPI(uint8_t slaveSelectPIN) {
-			SPI.beginTransaction(*_currentSPI);
+			_spi->beginTransaction(*_currentSPI);
 			digitalWrite(slaveSelectPIN, LOW);
 		}
 
     	void _closeSPI(uint8_t slaveSelectPIN) {
 			digitalWrite(slaveSelectPIN, HIGH);
-			SPI.endTransaction();
+			_spi->endTransaction();
 		}
 	}
 
-	void SPIinit() {
-		SPI.begin();
+	void SPIinit(SPIClass &spi) {
+		_spi = &spi;
+		_spi->begin();
 	}
 
 	void SPIend() {
-		SPI.end();
+		_spi->end();
 	}
 
 	void SPIselect(uint8_t slaveSelectPIN, uint8_t irq) {
 		#if !defined(ESP32) && !defined(ESP8266)
 			if(irq != 0xff)
-				SPI.usingInterrupt(digitalPinToInterrupt(irq));
+				_spi->usingInterrupt(digitalPinToInterrupt(irq));
 		#endif
 		pinMode(slaveSelectPIN, OUTPUT);
 		digitalWrite(slaveSelectPIN, HIGH);
@@ -79,10 +83,10 @@ namespace SPIporting {
 	void writeToSPI(uint8_t slaveSelectPIN, uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]) {
 		_openSPI(slaveSelectPIN);
 		for(auto i = 0; i < headerLen; i++) {
-			SPI.transfer(header[i]); // send header
+			_spi->transfer(header[i]); // send header
 		}
 		for(auto i = 0; i < dataLen; i++) {
-			SPI.transfer(data[i]); // write values
+			_spi->transfer(data[i]); // write values
 		}
 		delayMicroseconds(5);
 		_closeSPI(slaveSelectPIN);
@@ -91,10 +95,10 @@ namespace SPIporting {
     void readFromSPI(uint8_t slaveSelectPIN, uint8_t headerLen, byte header[], uint16_t dataLen, byte data[]){
 		_openSPI(slaveSelectPIN);
 		for(auto i = 0; i < headerLen; i++) {
-			SPI.transfer(header[i]); // send header
+			_spi->transfer(header[i]); // send header
 		}
 		for(auto i = 0; i < dataLen; i++) {
-			data[i] = SPI.transfer(0x00); // read values
+			data[i] = _spi->transfer(0x00); // read values
 		}
 		delayMicroseconds(5);
 		_closeSPI(slaveSelectPIN);

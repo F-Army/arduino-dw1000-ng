@@ -29,13 +29,14 @@
 
 #include <Arduino.h>
 #include "DW1000NgConstants.hpp"
+#include <SPI.h>
 
 namespace SPIporting{
 
     /** 
 	Initializes the SPI bus.
 	*/
-    void SPIinit();
+    void SPIinit(SPIClass &spi = SPI);
 
     /** 
 	Tells the driver library that no communication to a DW1000 will be required anymore.
@@ -76,4 +77,5 @@ namespace SPIporting{
     @param [in] SPIClock FAST or SLOW
     */
     void setSPIspeed(SPIClock speed);
+
 }
