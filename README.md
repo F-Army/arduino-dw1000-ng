@@ -14,7 +14,7 @@
 
 Status
 ------------
-This is not actively developed.
+This is not actively developed. We are very glad for the pull requests. However, we need help testing the code on as many devices as possible.
 
 Differences with thotro/arduino-dw1000
 ------------
