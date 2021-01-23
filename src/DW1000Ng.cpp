@@ -758,7 +758,7 @@ namespace DW1000Ng {
 			} else if(_channel == Channel::CHANNEL_4) {
 				DW1000NgUtils::writeValueToBytes(tcpgdelay, 0x95, LEN_TC_PGDELAY);
 			} else if(_channel == Channel::CHANNEL_5) {
-				DW1000NgUtils::writeValueToBytes(tcpgdelay, 0xC0, LEN_TC_PGDELAY);
+				DW1000NgUtils::writeValueToBytes(tcpgdelay, 0xB5, LEN_TC_PGDELAY);
 			} else if(_channel == Channel::CHANNEL_7) {
 				DW1000NgUtils::writeValueToBytes(tcpgdelay, 0x93, LEN_TC_PGDELAY);
 			} else {
