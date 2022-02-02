@@ -1332,7 +1332,7 @@ namespace DW1000Ng {
 		_handleReceiveTimestampAvailable = handleReceiveTimestampAvailable;
 	}
 
-	void interruptServiceRoutine() {
+	void ICACHE_RAM_ATTR interruptServiceRoutine() {
 		// read current status and handle via callbacks
 		_readSystemEventStatusRegister();
 		if(_isClockProblem() /* TODO and others */ && _handleError != 0) {
