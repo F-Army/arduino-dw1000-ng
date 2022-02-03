@@ -1332,8 +1332,11 @@ namespace DW1000Ng {
 		_handleReceiveTimestampAvailable = handleReceiveTimestampAvailable;
 	}
 
+#if defined(ESP8266)
+	void ICACHE_RAM_ATTR interruptServiceRoutine() {
+#else
 	void interruptServiceRoutine() {
-		// read current status and handle via callbacks
+#endif		// read current status and handle via callbacks
 		_readSystemEventStatusRegister();
 		if(_isClockProblem() /* TODO and others */ && _handleError != 0) {
 			(*_handleError)();
