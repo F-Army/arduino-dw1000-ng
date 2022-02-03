@@ -26,7 +26,7 @@ const uint8_t PIN_SS = SS; // spi select pin
 #endif
 
 // Extended Unique Identifier register. 64-bit device identifier. Register file: 0x01
-char EUI[] = "AA:BB:CC:DD:EE:FF:00:02";
+const char EUI[] = "AA:BB:CC:DD:EE:FF:00:02";
 
 byte main_anchor_address[] = {0x01, 0x00};
 
