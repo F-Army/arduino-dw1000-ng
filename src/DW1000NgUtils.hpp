@@ -106,5 +106,5 @@ namespace DW1000NgUtils {
     @param [in] string The eui string (in format XX:XX:XX:XX:XX:XX:XX:XX)
     @param [out] eui_byte The eui bytes
     */
-	void convertToByte(char string[], byte* eui_byte);
+	void convertToByte(const char string[], byte* eui_byte);
 }

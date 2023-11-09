@@ -155,7 +155,7 @@ namespace DW1000Ng {
 
 	@param[in] eui A string containing the eui in its normal notation using columns.
 	*/
-	void setEUI(char eui[]);
+	void setEUI(const char eui[]);
 
 	/**
 	Sets the device Extended Unique Identifier.

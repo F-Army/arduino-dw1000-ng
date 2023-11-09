@@ -129,7 +129,7 @@ namespace DW1000NgUtils {
 		return 255;
 	}
 
-	void convertToByte(char string[], byte* bytes) {
+	void convertToByte(const char string[], byte* bytes) {
 		byte eui_byte[LEN_EUI];
 		// we fill it with the char array under the form of "AA:FF:1C:...."
 		for(uint16_t i = 0; i < LEN_EUI; i++) {
