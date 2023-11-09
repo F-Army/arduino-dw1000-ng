@@ -14,7 +14,7 @@
 
 Status
 ------------
-:warning: We are archiving the repo as we can't support it anymore and we are not currently working with dw1000 hardware, feel free to create your own fork if you intend to support the project, we will be happy to add a link on this project.
+:warning: We are archiving the repo as we can't support it anymore and we are not currently working with dw1000 hardware, feel free to create your own fork if you intend to support the project, we will be happy to add a link on this project. Thank you everyone for the support you gave this project it was truly appreciated.
 
 Differences with thotro/arduino-dw1000
 ------------
